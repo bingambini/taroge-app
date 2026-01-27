@@ -10,7 +10,7 @@
         :root { --bg: #f2f2f7; --black: #1c1c1e; --accent: #ff6b6b; --gray: #8e8e93; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow: hidden; height: 100vh; }
 
-        .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 150px; box-sizing: border-box; }
+        .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 180px; box-sizing: border-box; }
         .view.active { display: block; }
 
         .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: white; position: sticky; top: 0; z-index: 10; border-radius: 0 0 20px 20px; }
@@ -48,6 +48,10 @@
         .opt-grid { display: flex; gap: 10px; padding: 10px 0; overflow-x: auto; scrollbar-width: none; }
         .opt-btn { min-width: 65px; padding: 12px; border: 2px solid #eee; border-radius: 15px; text-align: center; font-weight: 700; transition: 0.2s; cursor: pointer; }
         .opt-btn.selected { background: var(--black); color: white; border-color: var(--black); }
+
+        /* Counter Styles for Cart */
+        .qty-box { display: flex; align-items: center; gap: 12px; background: #f2f2f7; padding: 5px 10px; border-radius: 12px; margin-top: 8px; width: fit-content; }
+        .qty-btn { width: 28px; height: 28px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; }
 
         .footer-action { padding: 20px 20px 40px; background: white; border-top: 1px solid #eee; }
         .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 17px; font-weight: 800; cursor: pointer; }
@@ -116,16 +120,11 @@
 
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv';
         
-        // კალათის წმენდა ძველი "undefined" შეცდომებისგან
-        let cartRaw = localStorage.getItem('taro_cart');
         let cart = [];
-        if(cartRaw) {
-            try {
-                let parsed = JSON.parse(cartRaw);
-                // ვტოვებთ მხოლოდ იმ ნივთებს, რომლებსაც აქვთ სწორი რაოდენობა
-                cart = parsed.filter(i => i.count && typeof i.count === 'number');
-            } catch(e) { cart = []; }
-        }
+        try {
+            let cartRaw = localStorage.getItem('taro_cart');
+            cart = cartRaw ? JSON.parse(cartRaw).filter(i => i.count > 0) : [];
+        } catch(e) { cart = []; }
         
         let currentP = null, selColor = "", selSize = "";
 
@@ -217,28 +216,40 @@
 
         function addToCart() {
             const existing = cart.find(i => i.name === currentP.name && i.selColor === selColor && i.selSize === selSize);
-            if (existing) {
-                existing.count = (existing.count || 0) + 1;
-            } else {
-                cart.push({...currentP, selColor, selSize, count: 1});
-            }
+            if (existing) existing.count += 1;
+            else cart.push({...currentP, selColor, selSize, count: 1});
             
-            localStorage.setItem('taro_cart', JSON.stringify(cart));
+            saveCart();
             updateBadge(); closeDetails();
             tg.HapticFeedback.notificationOccurred('success');
         }
 
+        function saveCart() {
+            localStorage.setItem('taro_cart', JSON.stringify(cart));
+        }
+
         function updateBadge() {
-            const total = cart.reduce((s, i) => s + (i.count || 0), 0);
+            const total = cart.reduce((s, i) => s + i.count, 0);
             const b = document.getElementById('cart-badge');
             b.innerText = total;
             b.style.display = total > 0 ? 'block' : 'none';
         }
 
+        // New Quantity Control Functions
+        function changeQty(idx, delta) {
+            cart[idx].count += delta;
+            if(cart[idx].count <= 0) cart.splice(idx, 1);
+            saveCart();
+            renderCart();
+            updateBadge();
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
         function removeItem(idx) {
             cart.splice(idx, 1);
-            localStorage.setItem('taro_cart', JSON.stringify(cart));
-            renderCart(); updateBadge();
+            saveCart();
+            renderCart();
+            updateBadge();
         }
 
         function renderCart() {
@@ -251,21 +262,26 @@
             }
             document.getElementById('cart-footer').style.display = 'block';
             cart.forEach((item, i) => {
-                const count = item.count || 1;
                 const d = document.createElement('div');
                 d.innerHTML = `<div style="display:flex; align-items:center; gap:12px; background:white; margin:10px; padding:15px; border-radius:18px;">
-                    <img src="${item.img}" style="width:55px; height:55px; object-fit:contain; border-radius:10px;">
+                    <img src="${item.img}" style="width:65px; height:65px; object-fit:contain; border-radius:10px;">
                     <div style="flex:1;">
-                        <b style="font-size:14px;">${item.name}</b><br>
+                        <b style="font-size:15px;">${item.name}</b><br>
                         <small style="color:gray;">${item.selColor} / ${item.selSize}</small><br>
-                        <b>${count} x ${item.price}₾</b>
+                        <div class="qty-box">
+                            <div class="qty-btn" onclick="changeQty(${i}, -1)">-</div>
+                            <span style="font-weight:900;">${item.count}</span>
+                            <div class="qty-btn" onclick="changeQty(${i}, 1)">+</div>
+                        </div>
                     </div>
-                    <div onclick="removeItem(${i})" style="color:var(--accent); padding:10px; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></div>
+                    <div style="text-align:right;">
+                        <div style="font-weight:900; margin-bottom:10px;">${item.price * item.count}₾</div>
+                        <div onclick="removeItem(${i})" style="color:var(--accent); font-size:14px;"><i class="fa-solid fa-trash-can"></i></div>
+                    </div>
                 </div>`;
                 list.appendChild(d);
             });
-            const totalSum = cart.reduce((s,i) => s + (i.price * (i.count || 1)), 0);
-            document.getElementById('total-price').innerText = totalSum + '₾';
+            document.getElementById('total-price').innerText = cart.reduce((s,i) => s+(i.price*i.count), 0) + '₾';
         }
 
         init();
