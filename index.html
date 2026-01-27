@@ -1,36 +1,91 @@
-const PRODUCTS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv'; 
-const DESIGN_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=2144703770&output=csv';
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>თარო - Premium Shop</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --bg: #ffffff; --text: #1a1a1a; --accent: #ff6b6b; --secondary: #f8f9fa; --gray: #8e8e93; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; }
+        .nav-header { padding: 20px; font-size: 24px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+        .brand span { color: var(--accent); }
+        
+        .featured-banner {
+            margin: 0 20px 30px;
+            background: linear-gradient(135deg, #2c2c2e 0%, #000000 100%);
+            border-radius: 30px;
+            padding: 25px;
+            position: relative;
+            color: white;
+            overflow: hidden;
+            height: 160px;
+            display: flex;
+            align-items: center;
+        }
+        .banner-img { position: absolute; right: -15px; bottom: 5px; width: 55%; transform: rotate(-10deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
+        .banner-content { position: relative; z-index: 2; width: 55%; }
 
-async function loadStore() {
-    try {
-        // ბანერის ჩატვირთვა Design ტაბიდან
-        const dRes = await fetch(DESIGN_CSV);
-        const dData = await dRes.text();
-        const designRows = dData.split('\n');
-        // ვიღებთ B1 უჯრას (მეორე სვეტი პირველ ხაზზე სათაურის გარეშე)
-        const bannerUrl = designRows[1].split(',')[1].trim();
-        document.getElementById('main-banner-img').src = bannerUrl;
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
+        .product-card { background: var(--secondary); border-radius: 25px; padding: 15px; text-align: left; }
+        .prod-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 18px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
 
-        // პროდუქტების ჩატვირთვა Products ტაბიდან
-        const pRes = await fetch(PRODUCTS_CSV);
-        const pData = await pRes.text();
-        const productRows = pData.split('\n').slice(1);
-        const grid = document.getElementById('product-grid');
-        grid.innerHTML = '';
+    <div class="nav-header">
+        <div class="brand">თარო<span>.</span></div>
+        <div style="background: #2c2c2e; color:white; width: 40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-bag-shopping"></i></div>
+    </div>
 
-        productRows.forEach(row => {
-            const columns = row.split(',');
-            if(columns.length >= 3) {
-                const [name, price, photo] = columns;
-                grid.innerHTML += `
-                    <div class="product-card" onclick="buyItem('${name}', '${price}')">
-                        <img src="${photo.trim()}" class="prod-img" onerror="this.src='https://via.placeholder.com/150'">
-                        <div style="font-weight:700;">${name}</div>
-                        <div style="color:var(--accent); font-weight:800;">${price}₾</div>
-                    </div>`;
-            }
-        });
-    } catch (e) {
-        console.error("ჩატვირთვის შეცდომა:", e);
-    }
-}
+    <div class="featured-banner">
+        <div class="banner-content">
+            <div style="color: var(--accent); font-weight: 700; margin-bottom: 5px; font-size: 14px;">New Collection</div>
+            <div style="font-size: 18px; font-weight: 800; line-height: 1.2;">საუკეთესო ხარისხის ბოტასები</div>
+        </div>
+        <img id="main-banner-img" src="" class="banner-img">
+    </div>
+
+    <div style="padding: 0 20px 15px; font-weight: 800; font-size: 20px;">პროდუქცია</div>
+    <div class="product-grid" id="product-grid"></div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // შენი CSV ლინკები
+        const PRODUCTS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv'; 
+        const DESIGN_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=2144703770&output=csv';
+
+        async function loadStore() {
+            try {
+                // 1. დიზაინის ჩატვირთვა
+                const dRes = await fetch(DESIGN_CSV);
+                const dData = await dRes.text();
+                const bannerUrl = dData.split('\n')[1].split(',')[1].trim();
+                document.getElementById('main-banner-img').src = bannerUrl;
+
+                // 2. პროდუქტების ჩატვირთვა
+                const pRes = await fetch(PRODUCTS_CSV);
+                const pData = await pRes.text();
+                const rows = pData.split('\n').slice(1);
+                const grid = document.getElementById('product-grid');
+
+                rows.forEach(row => {
+                    const cols = row.split(',');
+                    if(cols.length >= 3) {
+                        grid.innerHTML += `
+                            <div class="product-card" onclick="tg.MainButton.setText('შეკვეთა: ${cols[0]}').show()">
+                                <img src="${cols[2].trim()}" class="prod-img">
+                                <div style="font-weight:700; font-size:14px;">${cols[0]}</div>
+                                <div style="color:var(--accent); font-weight:800; margin-top:5px;">${cols[1]}₾</div>
+                            </div>`;
+                    }
+                });
+            } catch (e) { console.error("Error:", e); }
+        }
+        loadStore();
+    </script>
+</body>
+</html>
