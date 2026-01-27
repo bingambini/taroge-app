@@ -3,68 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Taro Shop</title>
+    <title>Taro Premium Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --bg: #f2f2f7; --black: #1c1c1e; --accent: #ff6b6b; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; }
+        :root { --bg: #f2f2f7; --black: #1c1c1e; --accent: #ff6b6b; --gray: #8e8e93; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
-        /* მთავარი გვერდის კონტეინერი */
-        #main-view { padding-bottom: 110px; }
+        /* Main View */
+        #main-view { padding-bottom: 110px; display: block; }
 
-        .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 0 0 20px 20px; }
-        .logo { font-size: 22px; font-weight: 900; }
+        .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 0 0 25px 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .logo { font-size: 24px; font-weight: 900; letter-spacing: -1px; }
+        .logo span { color: var(--accent); }
 
         /* Banner */
         .banner { 
-            margin: 15px; background: var(--black); border-radius: 30px; padding: 25px; 
-            position: relative; color: white; min-height: 140px; display: flex; align-items: center; overflow: hidden;
+            margin: 15px; background: var(--black); border-radius: 35px; padding: 25px; 
+            position: relative; color: white; min-height: 150px; display: flex; align-items: center; overflow: hidden; cursor: pointer;
         }
-        .banner-img { position: absolute; right: -10px; bottom: 5px; width: 55%; transform: rotate(-15deg); }
+        .banner-info { position: relative; z-index: 2; width: 60%; }
+        .banner-img { position: absolute; right: -15px; bottom: 5px; width: 60%; transform: rotate(-15deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
 
         /* Grid */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
-        .card { background: white; border-radius: 20px; padding: 12px; text-align: left; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
+        .card { background: white; border-radius: 25px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s; }
+        .card:active { transform: scale(0.96); }
         .card-img { width: 100%; aspect-ratio: 1; object-fit: contain; }
 
         /* TAB BAR - ქვედა ნავიგაცია */
         .tab-bar-container {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            padding: 20px; background: transparent; pointer-events: none; z-index: 999;
+            position: fixed; bottom: 25px; left: 20px; right: 20px;
+            z-index: 1000; pointer-events: none;
         }
         .tab-bar { 
-            background: var(--black); height: 65px; border-radius: 25px; 
+            background: var(--black); height: 70px; border-radius: 30px; 
             display: flex; justify-content: space-around; align-items: center; 
-            pointer-events: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            pointer-events: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        .tab-item { color: white; opacity: 0.4; font-size: 20px; }
+        .tab-item { color: white; opacity: 0.4; font-size: 22px; cursor: pointer; transition: 0.3s; }
         .tab-item.active { opacity: 1; }
 
-        /* DETAILS PAGE - მთლიან ეკრანზე */
+        /* DETAILS PAGE */
         #details { 
             position: fixed; top: 0; left: 100%; width: 100%; height: 100%; 
-            background: white; z-index: 2000; transition: 0.3s ease-out; 
+            background: white; z-index: 2000; transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1); 
             overflow-y: auto; display: flex; flex-direction: column;
         }
         #details.active { left: 0; }
-
+        
         .det-header { position: relative; background: #f8f9fb; height: 350px; display: flex; align-items: center; justify-content: center; border-radius: 0 0 40px 40px; }
-        .back-btn { position: absolute; top: 20px; left: 20px; background: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-
-        /* ყიდვის პანელი დეტალების გვერდზე */
-        .det-footer { 
-            margin-top: auto; background: white; padding: 20px 20px 40px; 
-            border-top: 1px solid #eee; display: flex; align-items: center; justify-content: space-between;
-        }
-        .buy-btn-large { 
-            background: var(--black); color: white; padding: 18px 40px; border-radius: 20px; 
-            font-size: 18px; font-weight: 800; border: none; flex-grow: 1; margin-left: 20px;
-        }
+        .back-btn { position: absolute; top: 20px; left: 20px; z-index: 2100; background: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
         /* Selectors */
-        .opt-btn { border: 1px solid #eee; padding: 12px 20px; border-radius: 12px; font-weight: 600; margin-right: 8px; display: inline-block; cursor: pointer; }
+        .opt-grid { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0; scrollbar-width: none; }
+        .opt-btn { min-width: 60px; height: 50px; border: 2px solid #efeff4; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; transition: 0.2s; }
         .opt-btn.active { background: var(--black); color: white; border-color: var(--black); }
+
+        /* BUY PANEL */
+        .det-footer { 
+            position: sticky; bottom: 0; background: white; padding: 20px 20px 40px; 
+            border-top: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; gap: 15px;
+        }
+        .det-price { font-size: 26px; font-weight: 900; color: var(--black); }
+        .buy-btn-main { 
+            flex-grow: 1; background: var(--black); color: white; border: none; 
+            padding: 20px; border-radius: 22px; font-size: 18px; font-weight: 800; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -72,14 +77,14 @@
     <div id="main-view">
         <div class="header">
             <div class="logo">თარო<span>.</span></div>
-            <i class="fa-solid fa-shopping-bag"></i>
+            <i class="fa-solid fa-shopping-bag" style="font-size: 22px;"></i>
         </div>
 
         <div class="banner" id="top-banner">
-            <div style="z-index:2; position:relative;">
-                <div style="font-size:12px; opacity:0.6;">NEW COLLECTION</div>
-                <div id="b-name" style="font-size:22px; font-weight:800; margin:5px 0;">...</div>
-                <div id="b-price" style="font-size:20px; font-weight:700; color:var(--accent);"></div>
+            <div class="banner-info">
+                <div style="font-size: 11px; opacity: 0.6; letter-spacing: 1px;">NEW COLLECTION</div>
+                <div id="b-name" style="font-size: 24px; font-weight: 900; margin: 5px 0;">...</div>
+                <div id="b-price" style="font-size: 20px; font-weight: 700; color: var(--accent);"></div>
             </div>
             <img id="b-img" src="" class="banner-img">
         </div>
@@ -89,7 +94,7 @@
         <div class="tab-bar-container" id="main-tabs">
             <div class="tab-bar">
                 <div class="tab-item active"><i class="fa-solid fa-house"></i></div>
-                <div class="tab-item"><i class="fa-solid fa-search"></i></div>
+                <div class="tab-item"><i class="fa-solid fa-magnifying-glass"></i></div>
                 <div class="tab-item"><i class="fa-solid fa-heart"></i></div>
                 <div class="tab-item"><i class="fa-solid fa-user"></i></div>
             </div>
@@ -98,31 +103,38 @@
 
     <div id="details">
         <div class="det-header">
-            <div class="back-btn" onclick="closeDetails()"><i class="fa-solid fa-arrow-left"></i></div>
-            <img id="det-img" src="" style="width:70%; transform:rotate(-10deg);">
+            <div class="back-btn" onclick="closeDetails()"><i class="fa-solid fa-chevron-left"></i></div>
+            <img id="det-img" src="" style="width:75%; transform:rotate(-10deg);">
         </div>
         
-        <div style="padding: 25px;">
-            <h1 id="det-name" style="margin:0; font-size:28px;"></h1>
+        <div style="padding: 25px; flex-grow: 1;">
+            <h1 id="det-name" style="margin:0; font-size:32px; font-weight:900;"></h1>
             
-            <p style="font-weight:700; margin-top:20px;">აირჩიე ფერი</p>
-            <div id="color-opts"></div>
+            <div id="color-sec">
+                <p style="font-weight:700; margin: 25px 0 10px;">აირჩიე ფერი</p>
+                <div class="opt-grid" id="color-opts"></div>
+            </div>
 
-            <p style="font-weight:700; margin-top:20px;">აირჩიე ზომა</p>
-            <div id="size-opts"></div>
+            <div id="size-sec">
+                <p style="font-weight:700; margin: 25px 0 10px;">აირჩიე ზომა</p>
+                <div class="opt-grid" id="size-opts"></div>
+            </div>
 
-            <p style="font-weight:700; margin-top:20px;">აღწერა</p>
-            <p id="det-desc" style="color:#666; line-height:1.5;"></p>
+            <p style="font-weight:700; margin: 25px 0 10px;">აღწერა</p>
+            <p id="det-desc" style="color:var(--gray); font-size:15px; line-height:1.6; margin-bottom: 30px;"></p>
         </div>
 
         <div class="det-footer">
-            <div id="det-price-val" style="font-size:24px; font-weight:800;"></div>
-            <button class="buy-btn-large" onclick="sendOrder()">ყიდვა</button>
+            <div id="det-price-val" class="det-price"></div>
+            <button class="buy-btn-main" onclick="sendOrder()">ყიდვა</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv';
         
         let currentProduct = null;
@@ -130,71 +142,89 @@
         let selectedSize = "";
 
         async function init() {
-            const res = await fetch(CSV_URL + '&t=' + Date.now());
-            const text = await res.text();
-            const rows = text.split('\n').slice(1);
-            const grid = document.getElementById('main-grid');
-            grid.innerHTML = '';
+            // მენიუს ჩვენება პირველივე წამიდან
+            document.getElementById('main-tabs').style.display = 'block';
+            
+            try {
+                const res = await fetch(CSV_URL + '&t=' + Date.now());
+                const text = await res.text();
+                const rows = text.split('\n').slice(1);
+                const grid = document.getElementById('main-grid');
+                grid.innerHTML = '';
 
-            rows.forEach(row => {
-                const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                if(c.length < 3) return;
-                const p = {
-                    name: c[0].replace(/"/g, ''), price: c[1].replace(/"/g, ''),
-                    img: c[2].replace(/"/g, '').split(',')[0],
-                    desc: c[3].replace(/"/g, ''), top: c[4].toLowerCase().includes('top'),
-                    sizes: c[5] ? c[5].replace(/"/g, '').split(',') : [],
-                    colors: c[6] ? c[6].replace(/"/g, '').split(',') : []
-                };
+                rows.forEach(row => {
+                    const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if(c.length < 3) return;
+                    const p = {
+                        name: c[0].replace(/"/g, ''), price: c[1].replace(/"/g, ''),
+                        img: c[2].replace(/"/g, '').split(',')[0],
+                        desc: c[3].replace(/"/g, ''), top: c[4].toLowerCase().includes('top'),
+                        sizes: c[5] ? c[5].replace(/"/g, '').split(',') : [],
+                        colors: c[6] ? c[6].replace(/"/g, '').split(',') : []
+                    };
 
-                if(p.top) {
-                    document.getElementById('b-name').innerText = p.name;
-                    document.getElementById('b-price').innerText = p.price + '₾';
-                    document.getElementById('b-img').src = p.img;
-                    document.getElementById('top-banner').onclick = () => openDetails(p);
-                }
+                    if(p.top) {
+                        document.getElementById('b-name').innerText = p.name;
+                        document.getElementById('b-price').innerText = p.price + '₾';
+                        document.getElementById('b-img').src = p.img;
+                        document.getElementById('top-banner').onclick = () => openDetails(p);
+                    }
 
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `<img src="${p.img}" class="card-img"><h3>${p.name}</h3><p style="color:var(--accent); font-weight:800;">${p.price}₾</p>`;
-                card.onclick = () => openDetails(p);
-                grid.appendChild(card);
-            });
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `<img src="${p.img}" class="card-img"><h3>${p.name}</h3><p style="color:var(--accent); font-weight:800;">${p.price}₾</p>`;
+                    card.onclick = () => openDetails(p);
+                    grid.appendChild(card);
+                });
+            } catch (e) { console.error(e); }
         }
 
         function openDetails(p) {
             currentProduct = p;
+            selectedColor = ""; selectedSize = "";
+            
             document.getElementById('det-name').innerText = p.name;
             document.getElementById('det-img').src = p.img;
             document.getElementById('det-desc').innerText = p.desc;
             document.getElementById('det-price-val').innerText = p.price + '₾';
             
-            renderOptions('color-opts', p.colors, 'color');
-            renderOptions('size-opts', p.sizes, 'size');
+            renderOptions('color-opts', p.colors, 'color', 'color-sec');
+            renderOptions('size-opts', p.sizes, 'size', 'size-sec');
             
             document.getElementById('details').classList.add('active');
-            document.getElementById('main-tabs').style.display = 'none';
+            document.getElementById('main-tabs').style.visibility = 'hidden'; // მენიუს დამალვა
+            tg.HapticFeedback.impactOccurred('medium');
         }
 
         function closeDetails() {
             document.getElementById('details').classList.remove('active');
-            document.getElementById('main-tabs').style.display = 'block';
+            document.getElementById('main-tabs').style.visibility = 'visible'; // მენიუს დაბრუნება
         }
 
-        function renderOptions(containerId, list, type) {
+        function renderOptions(containerId, list, type, secId) {
             const cont = document.getElementById(containerId);
-            cont.innerHTML = list.map(val => `<div class="opt-btn" onclick="setSelection(this, '${type}', '${val}')">${val}</div>`).join('');
+            document.getElementById(secId).style.display = list.length ? 'block' : 'none';
+            cont.innerHTML = list.map(val => `<div class="opt-btn" onclick="setSelection(this, '${type}', '${val}')">${val.trim()}</div>`).join('');
         }
 
         function setSelection(el, type, val) {
             el.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
             if(type === 'color') selectedColor = val; else selectedSize = val;
+            tg.HapticFeedback.selectionChanged();
         }
 
         function sendOrder() {
-            const data = { product: currentProduct.name, color: selectedColor, size: selectedSize };
-            tg.sendData(JSON.stringify(data));
+            if((currentProduct.colors.length && !selectedColor) || (currentProduct.sizes.length && !selectedSize)) {
+                tg.showAlert("გთხოვთ აირჩიოთ ყველა პარამეტრი!");
+                return;
+            }
+            tg.sendData(JSON.stringify({
+                product: currentProduct.name,
+                price: currentProduct.price,
+                color: selectedColor,
+                size: selectedSize
+            }));
         }
 
         init();
