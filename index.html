@@ -10,8 +10,8 @@
         :root { --bg: #f2f2f7; --black: #1c1c1e; --accent: #ff6b6b; --gray: #8e8e93; --light-gray: #efeff4; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
-        /* Views Visibility */
-        .view { display: none; padding-bottom: 120px; }
+        /* Views */
+        .view { display: none; padding-bottom: 120px; min-height: 100vh; }
         .view.active { display: block; }
 
         /* Header */
@@ -26,77 +26,72 @@
         .banner-info { position: relative; z-index: 2; width: 60%; }
         .banner-img { position: absolute; right: -15px; bottom: 5px; width: 60%; transform: rotate(-15deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
 
-        /* Grid & Cards */
+        /* Grid */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
         .card { background: white; border-radius: 25px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); cursor: pointer; transition: 0.2s; }
         .card:active { transform: scale(0.96); }
         .card-img { width: 100%; aspect-ratio: 1; object-fit: contain; }
-
-        /* Cart Badge */
-        .badge { position: absolute; top: -8px; right: -12px; background: var(--accent); color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 10px; border: 2px solid var(--black); display: none; }
 
         /* Tab Bar */
         .tab-bar-container { position: fixed; bottom: 25px; left: 20px; right: 20px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 70px; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .tab-item { color: white; opacity: 0.4; font-size: 22px; cursor: pointer; position: relative; transition: 0.3s; }
         .tab-item.active { opacity: 1; }
+        .badge { position: absolute; top: -8px; right: -12px; background: var(--accent); color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 10px; border: 2px solid var(--black); display: none; }
 
-        /* Cart Items */
-        .cart-item { background: white; margin: 15px; padding: 15px; border-radius: 20px; display: flex; align-items: center; gap: 15px; }
-        .cart-item img { width: 65px; height: 65px; border-radius: 12px; object-fit: cover; }
-        .cart-item-info { flex-grow: 1; }
-        .remove-btn { color: #ff3b30; padding: 10px; font-size: 18px; }
-
-        /* Details Page */
+        /* Details Overlay */
         #details { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; background: white; z-index: 2000; transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
         #details.active { left: 0; }
         .det-header { background: #f8f9fb; height: 350px; display: flex; align-items: center; justify-content: center; border-radius: 0 0 40px 40px; position: relative; }
-        .back-btn { position: absolute; top: 20px; left: 20px; background: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-
-        /* Buy & Cart Buttons */
-        .btn-action { width: 100%; padding: 20px; border-radius: 22px; font-size: 17px; font-weight: 800; border: none; transition: 0.3s; cursor: pointer; }
-        .btn-inactive { background: #f0f0f0; color: #a0a0a0; pointer-events: none; }
-        .btn-active { background: var(--black); color: white; pointer-events: auto; }
+        .back-btn { position: absolute; top: 20px; left: 20px; background: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 2100; }
 
         /* Options */
         .opt-grid { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0; scrollbar-width: none; }
         .opt-btn { min-width: 55px; padding: 0 15px; height: 48px; border: 2px solid var(--light-gray); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; }
         .opt-btn.active { background: var(--black); color: white; border-color: var(--black); }
+
+        /* Cart Items */
+        .cart-item { background: white; margin: 15px; padding: 15px; border-radius: 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .cart-item img { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; }
+        .cart-item-info { flex-grow: 1; }
+        .qty-ctrl { display: flex; align-items: center; gap: 10px; background: var(--light-gray); padding: 5px 10px; border-radius: 12px; }
+        .qty-btn { border: none; background: none; font-size: 18px; font-weight: bold; width: 25px; cursor: pointer; }
+
+        /* Footer Buttons */
+        .footer-action { position: fixed; bottom: 0; left: 0; width: 100%; padding: 20px 20px 40px; background: white; border-top: 1px solid #eee; box-sizing: border-box; z-index: 100; }
+        .cart-footer { bottom: 105px; border-radius: 30px 30px 0 0; }
+        .btn-main { width: 100%; padding: 18px; border-radius: 20px; font-size: 17px; font-weight: 800; border: none; transition: 0.3s; cursor: pointer; }
+        .btn-inactive { background: #f0f0f0; color: #a0a0a0; pointer-events: none; }
+        .btn-active { background: var(--black); color: white; pointer-events: auto; }
     </style>
 </head>
 <body>
 
     <div id="main-view" class="view active">
-        <div class="header">
-            <div class="logo">თარო<span>.</span></div>
-            <i class="fa-solid fa-shopping-bag" style="font-size: 22px;"></i>
-        </div>
-
+        <div class="header"><div class="logo">თარო<span>.</span></div><i class="fa-solid fa-shopping-bag" style="font-size: 22px;"></i></div>
         <div class="banner" id="top-banner">
             <div class="banner-info">
-                <div style="font-size: 11px; opacity: 0.6; letter-spacing: 1px;">TOP SELECTION</div>
-                <div id="b-name" style="font-size: 22px; font-weight: 900; margin: 5px 0;">იტვირთება...</div>
+                <div style="font-size: 11px; opacity: 0.6;">NEW COLLECTION</div>
+                <div id="b-name" style="font-size: 22px; font-weight: 900; margin: 5px 0;">...</div>
                 <div id="b-price" style="font-size: 19px; font-weight: 700; color: var(--accent);"></div>
             </div>
             <img id="b-img" src="" class="banner-img">
         </div>
-
         <div class="grid" id="main-grid"></div>
     </div>
 
     <div id="cart-view" class="view">
         <div class="header"><div class="logo">კალათა</div></div>
         <div id="cart-items-list" style="margin-top: 10px;"></div>
-        <div id="cart-empty" style="text-align:center; padding: 80px 20px; color: var(--gray); display: none;">
+        <div id="cart-empty" style="text-align:center; padding: 100px 20px; color: var(--gray); display: none;">
             <i class="fa-solid fa-cart-shopping" style="font-size: 50px; opacity: 0.2; margin-bottom: 20px;"></i>
-            <p style="font-weight: 600;">კალათა ცარიელია</p>
+            <p>კალათა ცარიელია</p>
         </div>
-
-        <div id="cart-footer" style="position: fixed; bottom: 105px; left: 0; width: 100%; padding: 20px; background: white; border-top: 1px solid #eee; display: none; box-sizing: border-box;">
+        <div id="cart-footer" class="footer-action cart-footer" style="display: none;">
             <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:20px; font-weight:900;">
                 <span>ჯამი:</span><span id="total-price">0₾</span>
             </div>
-            <button class="btn-action btn-active" onclick="checkout()">შეკვეთის გაფორმება</button>
+            <button class="btn-main btn-active" onclick="checkout()">შეკვეთის გაფორმება</button>
         </div>
     </div>
 
@@ -111,8 +106,8 @@
             <div id="size-sec"><p style="font-weight:700; margin: 25px 0 10px;">აირჩიე ზომა</p><div class="opt-grid" id="size-opts"></div></div>
             <p style="font-weight:700; margin: 25px 0 10px;">აღწერა</p><p id="det-desc" style="color:var(--gray); font-size:15px; line-height:1.6;"></p>
         </div>
-        <div style="position: fixed; bottom: 0; left: 0; width: 100%; padding: 20px; background: white; border-top: 1px solid #eee; box-sizing: border-box;">
-            <button class="btn-action btn-inactive" id="add-to-cart-btn" onclick="addToCart()">აირჩიე პარამეტრები</button>
+        <div class="footer-action">
+            <button class="btn-main btn-inactive" id="add-to-cart-btn" onclick="addToCart()">აირჩიე პარამეტრები</button>
         </div>
     </div>
 
@@ -153,14 +148,12 @@
                         sizes: c[5] ? c[5].replace(/"/g, '').split(',') : [],
                         colors: c[6] ? c[6].replace(/"/g, '').split(',') : []
                     };
-
                     if(p.top) {
                         document.getElementById('b-name').innerText = p.name;
                         document.getElementById('b-price').innerText = p.price + '₾';
                         document.getElementById('b-img').src = p.img;
                         document.getElementById('top-banner').onclick = () => openDetails(p);
                     }
-
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.innerHTML = `<img src="${p.img}" class="card-img"><h3>${p.name}</h3><p style="color:var(--accent); font-weight:800;">${p.price}₾</p>`;
@@ -212,21 +205,14 @@
 
         function updateUI() {
             const btn = document.getElementById('add-to-cart-btn');
-            const colorNeeded = currentP.colors.length > 0;
-            const sizeNeeded = currentP.sizes.length > 0;
-            const ready = (!colorNeeded || selColor) && (!sizeNeeded || selSize);
-
-            if (ready) {
-                btn.className = "btn-action btn-active";
-                btn.innerText = "კალათაში დამატება";
-            } else {
-                btn.className = "btn-action btn-inactive";
-                btn.innerText = !selColor && colorNeeded ? "აირჩიე ფერი" : "აირჩიე ზომა";
-            }
+            const colorN = currentP.colors.length > 0, sizeN = currentP.sizes.length > 0;
+            const ready = (!colorN || selColor) && (!sizeN || selSize);
+            btn.className = ready ? "btn-main btn-active" : "btn-main btn-inactive";
+            btn.innerText = ready ? "კალათაში დამატება" : (!selColor && colorN ? "აირჩიე ფერი" : "აირჩიე ზომა");
         }
 
         function addToCart() {
-            cart.push({ ...currentP, selColor, selSize, cartId: Date.now() });
+            cart.push({ ...currentP, selColor, selSize, count: 1, cartId: Date.now() });
             localStorage.setItem('taro_cart', JSON.stringify(cart));
             updateBadge();
             closeDetails();
@@ -234,57 +220,60 @@
         }
 
         function updateBadge() {
+            const totalItems = cart.reduce((sum, i) => sum + (i.count || 1), 0);
             const b = document.getElementById('cart-badge');
-            b.innerText = cart.length;
-            b.style.display = cart.length > 0 ? 'block' : 'none';
+            b.innerText = totalItems;
+            b.style.display = totalItems > 0 ? 'block' : 'none';
         }
 
         function renderCart() {
             const list = document.getElementById('cart-items-list');
-            const empty = document.getElementById('cart-empty');
             const footer = document.getElementById('cart-footer');
             list.innerHTML = '';
-            
-            if(cart.length === 0) {
-                empty.style.display = 'block';
-                footer.style.display = 'none';
-                return;
+            if(!cart.length) { 
+                document.getElementById('cart-empty').style.display = 'block'; 
+                footer.style.display = 'none'; return; 
             }
-
-            empty.style.display = 'none';
+            document.getElementById('cart-empty').style.display = 'none';
             footer.style.display = 'block';
             let total = 0;
-
-            cart.forEach(item => {
-                total += item.price;
+            cart.forEach((item, idx) => {
+                total += item.price * item.count;
                 const div = document.createElement('div');
                 div.className = 'cart-item';
                 div.innerHTML = `
                     <img src="${item.img}">
                     <div class="cart-item-info">
-                        <div style="font-weight:800; font-size:15px;">${item.name}</div>
-                        <div style="font-size:12px; color:var(--gray); margin: 3px 0;">${item.selColor} / ${item.selSize}</div>
-                        <div style="font-weight:900; color:var(--black);">${item.price}₾</div>
+                        <div style="font-weight:800; font-size:14px;">${item.name}</div>
+                        <div style="font-size:11px; color:var(--gray);">${item.selColor} / ${item.selSize}</div>
+                        <div style="font-weight:900;">${item.price}₾</div>
                     </div>
-                    <i class="fa-solid fa-trash-can remove-btn" onclick="removeFromCart(${item.cartId})"></i>
+                    <div class="qty-ctrl">
+                        <button class="qty-btn" onclick="changeQty(${idx}, -1)">-</button>
+                        <span style="font-weight:800;">${item.count}</span>
+                        <button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button>
+                    </div>
                 `;
                 list.appendChild(div);
             });
             document.getElementById('total-price').innerText = total + '₾';
         }
 
-        function removeFromCart(id) {
-            cart = cart.filter(i => i.cartId !== id);
+        function changeQty(idx, delta) {
+            cart[idx].count += delta;
+            if(cart[idx].count <= 0) cart.splice(idx, 1);
             localStorage.setItem('taro_cart', JSON.stringify(cart));
-            updateBadge();
-            renderCart();
-            tg.HapticFeedback.impactOccurred('medium');
+            renderCart(); updateBadge();
+            tg.HapticFeedback.impactOccurred('light');
         }
 
         function checkout() {
-            tg.sendData(JSON.stringify({ order: cart, total: document.getElementById('total-price').innerText }));
-            localStorage.removeItem('taro_cart');
-            tg.close();
+            tg.showConfirm("დავადასტუროთ შეკვეთა?", (ok) => {
+                if(ok) {
+                    tg.sendData(JSON.stringify({ order: cart, total: document.getElementById('total-price').innerText }));
+                    localStorage.removeItem('taro_cart'); tg.close();
+                }
+            });
         }
 
         init();
