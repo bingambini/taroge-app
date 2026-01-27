@@ -8,39 +8,40 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --bg: #ffffff; --text: #1a1a1a; --accent: #ff6b6b; --secondary: #f8f9fa; --gray: #8e8e93; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 30px; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 30px; overflow-x: hidden; }
         
-        /* Header & Banner */
         .nav-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
         .brand { font-size: 26px; font-weight: 900; }
         .brand span { color: var(--accent); }
+        
         .featured-banner {
             margin: 0 20px 30px; background: linear-gradient(135deg, #1c1c1e 0%, #000000 100%);
             border-radius: 35px; padding: 25px; position: relative; color: white; overflow: hidden; height: 180px; display: flex; align-items: center;
         }
         .banner-img { position: absolute; right: -10px; bottom: 10px; width: 65%; transform: rotate(-15deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6)); display: none; }
         
-        /* Grid */
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
         .product-card { background: var(--secondary); border-radius: 25px; padding: 12px; transition: 0.2s; cursor: pointer; }
         .prod-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 20px; margin-bottom: 10px; }
-        .prod-name { font-size: 14px; font-weight: 700; }
+        .prod-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
         .prod-price { font-size: 16px; font-weight: 800; color: var(--accent); }
 
-        /* Product Page (Modal) */
+        /* Product Page UI */
         #product-page {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; z-index: 1000; display: none; overflow-y: auto;
-            transition: 0.3s ease-in-out;
+            position: fixed; top: 0; left: 100%; width: 100%; height: 100%;
+            background: white; z-index: 1000; overflow-y: auto;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .close-btn { position: absolute; top: 20px; left: 20px; font-size: 24px; z-index: 10; background: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .page-img-container { width: 100%; background: var(--secondary); display: flex; justify-content: center; padding: 40px 0; border-radius: 0 0 40px 40px; }
-        .page-img { width: 80%; transform: rotate(-10deg); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15)); }
-        .page-content { padding: 30px 20px; }
-        .page-title { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
-        .page-price { font-size: 24px; font-weight: 800; color: var(--accent); margin-bottom: 20px; }
-        .page-desc { color: var(--gray); line-height: 1.6; margin-bottom: 30px; }
-        .buy-btn { background: var(--text); color: white; width: 100%; padding: 18px; border-radius: 20px; font-size: 18px; font-weight: 700; border: none; }
+        #product-page.active { left: 0; }
+        
+        .close-btn { position: absolute; top: 20px; left: 20px; font-size: 20px; z-index: 10; background: white; width: 45px; height: 45px; border-radius: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 20px rgba(0,0,0,0.08); }
+        .page-img-container { width: 100%; background: var(--secondary); display: flex; justify-content: center; padding: 50px 0; border-radius: 0 0 50px 50px; }
+        .page-img { width: 85%; transform: rotate(-10deg); filter: drop-shadow(0 25px 40px rgba(0,0,0,0.12)); }
+        .page-content { padding: 30px 25px; }
+        .page-title { font-size: 30px; font-weight: 900; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .page-price { font-size: 24px; font-weight: 800; color: var(--accent); margin-bottom: 25px; }
+        .page-desc { color: var(--gray); line-height: 1.7; font-size: 15px; margin-bottom: 35px; min-height: 100px; }
+        .buy-btn { background: #1a1a1a; color: white; width: 100%; padding: 20px; border-radius: 22px; font-size: 18px; font-weight: 700; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
     </style>
 </head>
 <body>
@@ -48,7 +49,7 @@
     <div id="main-view">
         <div class="nav-header">
             <div class="brand">თარო<span>.</span></div>
-            <div style="background:#2c2c2e; color:white; padding:12px; border-radius:15px;"><i class="fa-solid fa-bag-shopping"></i></div>
+            <div style="background:#2c2c2e; color:white; width:45px; height:45px; border-radius:15px; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-bag-shopping"></i></div>
         </div>
 
         <div class="featured-banner">
@@ -64,15 +65,15 @@
     </div>
 
     <div id="product-page">
-        <div class="close-btn" onclick="closeProduct()"><i class="fa-solid fa-arrow-left"></i></div>
+        <div class="close-btn" onclick="closeProduct()"><i class="fa-solid fa-chevron-left"></i></div>
         <div class="page-img-container">
             <img id="details-img" src="" class="page-img">
         </div>
         <div class="page-content">
             <div id="details-title" class="page-title"></div>
             <div id="details-price" class="page-price"></div>
-            <div class="page-desc">ეს არის უმაღლესი ხარისხის მოდელი, რომელიც გამოირჩევა გამძლეობით და თანამედროვე დიზაინით. იდეალურია ყოველდღიური მოხმარებისთვის.</div>
-            <button class="buy-btn" id="buy-button">ყიდვა</button>
+            <div id="details-desc" class="page-desc"></div>
+            <button class="buy-btn" id="buy-button">შეკვეთის გაფორმება</button>
         </div>
     </div>
 
@@ -83,19 +84,21 @@
         const PRODUCTS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv'; 
         const DESIGN_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=2144703770&output=csv';
 
+        const clean = (str) => str ? str.replace(/^"|"$/g, '').trim() : '';
+
         async function init() {
             try {
-                // ბანერის ჩატვირთვა
+                // Banner
                 const dRes = await fetch(DESIGN_CSV + '&t=' + Date.now());
                 const dData = await dRes.text();
                 const bannerLine = dData.split('\n').find(row => row.includes('http'));
                 if (bannerLine) {
-                    const url = bannerLine.split(',')[1].replace(/"/g, "").trim();
+                    const url = clean(bannerLine.split(',')[1]);
                     document.getElementById('main-banner-img').src = url;
                     document.getElementById('main-banner-img').style.display = 'block';
                 }
 
-                // პროდუქტების ჩატვირთვა
+                // Products
                 const pRes = await fetch(PRODUCTS_CSV + '&t=' + Date.now());
                 const pData = await pRes.text();
                 const pLines = pData.split('\n').slice(1);
@@ -105,9 +108,11 @@
                 pLines.forEach(line => {
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if (cols.length >= 3) {
-                        const name = cols[0].replace(/"/g, "").trim();
-                        const price = cols[1].replace(/"/g, "").trim();
-                        const photo = cols[2].replace(/"/g, "").trim();
+                        const name = clean(cols[0]);
+                        const price = clean(cols[1]);
+                        const photo = clean(cols[2]);
+                        const desc = clean(cols[3]) || "აღწერა მალე დაემატება...";
+
                         if (name && photo.includes('http')) {
                             const card = document.createElement('div');
                             card.className = 'product-card';
@@ -116,7 +121,7 @@
                                 <div class="prod-name">${name}</div>
                                 <div class="prod-price">${price}₾</div>
                             `;
-                            card.onclick = () => openProduct(name, price, photo);
+                            card.onclick = () => openProduct(name, price, photo, desc);
                             grid.appendChild(card);
                         }
                     }
@@ -124,22 +129,25 @@
             } catch (e) { console.error(e); }
         }
 
-        function openProduct(name, price, photo) {
+        function openProduct(name, price, photo, desc) {
+            tg.HapticFeedback.impactOccurred('medium');
             document.getElementById('details-title').innerText = name;
             document.getElementById('details-price').innerText = price + '₾';
+            document.getElementById('details-desc').innerText = desc;
             document.getElementById('details-img').src = photo;
-            document.getElementById('product-page').style.display = 'block';
-            document.getElementById('main-view').style.display = 'none';
+            
+            const page = document.getElementById('product-page');
+            page.classList.add('active');
             
             document.getElementById('buy-button').onclick = () => {
+                tg.HapticFeedback.notificationOccurred('success');
                 tg.sendData(JSON.stringify({product: name, price: price}));
                 tg.close();
             };
         }
 
         function closeProduct() {
-            document.getElementById('product-page').style.display = 'none';
-            document.getElementById('main-view').style.display = 'block';
+            document.getElementById('product-page').classList.remove('active');
         }
 
         init();
