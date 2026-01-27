@@ -10,15 +10,12 @@
         :root { --bg: #f2f2f7; --black: #1c1c1e; --accent: #ff6b6b; --gray: #8e8e93; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow: hidden; height: 100vh; }
 
-        /* კონტეინერები */
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 150px; box-sizing: border-box; }
         .view.active { display: block; }
 
-        /* Header */
         .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: white; position: sticky; top: 0; z-index: 10; border-radius: 0 0 20px 20px; }
         .logo { font-size: 24px; font-weight: 900; }
 
-        /* Banner */
         .banner { 
             margin: 15px; background: var(--black); border-radius: 30px; padding: 25px; 
             position: relative; color: white; min-height: 160px; display: none; align-items: center; 
@@ -27,25 +24,21 @@
         .banner-info { position: relative; z-index: 2; width: 60%; }
         .banner-img { position: absolute; right: -15px; bottom: 0; width: 60%; transform: rotate(-10deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
 
-        /* Grid */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: white; border-radius: 20px; padding: 15px; cursor: pointer; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
 
-        /* Tab Bar */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 65px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; font-size: 20px; cursor: pointer; position: relative; padding: 10px; }
         .tab-item.active { opacity: 1; }
         
-        /* Badge (კალათის ციფრი) */
         .badge { 
             position: absolute; top: -5px; right: -5px; background: var(--accent); 
             color: white; font-size: 11px; font-weight: 800; padding: 2px 7px; 
             border-radius: 10px; border: 2px solid var(--black); display: none;
         }
 
-        /* Details Overlay */
         #details { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; display: none; flex-direction: column; }
         #details.active { display: flex; }
         .det-content { flex: 1; overflow-y: auto; }
@@ -56,7 +49,6 @@
         .opt-btn { min-width: 65px; padding: 12px; border: 2px solid #eee; border-radius: 15px; text-align: center; font-weight: 700; transition: 0.2s; cursor: pointer; }
         .opt-btn.selected { background: var(--black); color: white; border-color: var(--black); }
 
-        /* Footer Buttons */
         .footer-action { padding: 20px 20px 40px; background: white; border-top: 1px solid #eee; }
         .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 17px; font-weight: 800; cursor: pointer; }
         .btn-inactive { background: #f0f0f0; color: #aaa; }
@@ -67,7 +59,6 @@
 
     <div id="main-view" class="view active">
         <div class="header"><div class="logo">თარო</div><i class="fa-solid fa-shopping-bag"></i></div>
-        
         <div id="top-banner" class="banner">
             <div class="banner-info">
                 <div style="font-size: 10px; opacity: 0.7; letter-spacing: 1px;">TOP SELECTION</div>
@@ -76,7 +67,6 @@
             </div>
             <img id="b-img" src="" class="banner-img">
         </div>
-
         <div id="main-grid" class="grid"></div>
     </div>
 
@@ -87,7 +77,7 @@
             <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:900; font-size:20px;">
                 <span>ჯამი:</span><span id="total-price">0₾</span>
             </div>
-            <button class="btn-main btn-active" onclick="checkout()">შეკვეთის გაფორმება</button>
+            <button class="btn-main btn-active" onclick="tg.showAlert('შეკვეთა მიღებულია!')">შეკვეთის გაფორმება</button>
         </div>
     </div>
 
@@ -125,7 +115,18 @@
         tg.ready(); tg.expand();
 
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv';
-        let cart = JSON.parse(localStorage.getItem('taro_cart')) || [];
+        
+        // კალათის წმენდა ძველი "undefined" შეცდომებისგან
+        let cartRaw = localStorage.getItem('taro_cart');
+        let cart = [];
+        if(cartRaw) {
+            try {
+                let parsed = JSON.parse(cartRaw);
+                // ვტოვებთ მხოლოდ იმ ნივთებს, რომლებსაც აქვთ სწორი რაოდენობა
+                cart = parsed.filter(i => i.count && typeof i.count === 'number');
+            } catch(e) { cart = []; }
+        }
+        
         let currentP = null, selColor = "", selSize = "";
 
         async function init() {
@@ -216,8 +217,11 @@
 
         function addToCart() {
             const existing = cart.find(i => i.name === currentP.name && i.selColor === selColor && i.selSize === selSize);
-            if (existing) existing.count += 1;
-            else cart.push({...currentP, selColor, selSize, count: 1});
+            if (existing) {
+                existing.count = (existing.count || 0) + 1;
+            } else {
+                cart.push({...currentP, selColor, selSize, count: 1});
+            }
             
             localStorage.setItem('taro_cart', JSON.stringify(cart));
             updateBadge(); closeDetails();
@@ -225,7 +229,7 @@
         }
 
         function updateBadge() {
-            const total = cart.reduce((s, i) => s + i.count, 0);
+            const total = cart.reduce((s, i) => s + (i.count || 0), 0);
             const b = document.getElementById('cart-badge');
             b.innerText = total;
             b.style.display = total > 0 ? 'block' : 'none';
@@ -247,15 +251,21 @@
             }
             document.getElementById('cart-footer').style.display = 'block';
             cart.forEach((item, i) => {
+                const count = item.count || 1;
                 const d = document.createElement('div');
                 d.innerHTML = `<div style="display:flex; align-items:center; gap:12px; background:white; margin:10px; padding:15px; border-radius:18px;">
                     <img src="${item.img}" style="width:55px; height:55px; object-fit:contain; border-radius:10px;">
-                    <div style="flex:1;"><b style="font-size:14px;">${item.name}</b><br><small style="color:gray;">${item.selColor} / ${item.selSize}</small><br><b>${item.count} x ${item.price}₾</b></div>
-                    <div onclick="removeItem(${i})" style="color:var(--accent); padding:10px;"><i class="fa-solid fa-trash-can"></i></div>
+                    <div style="flex:1;">
+                        <b style="font-size:14px;">${item.name}</b><br>
+                        <small style="color:gray;">${item.selColor} / ${item.selSize}</small><br>
+                        <b>${count} x ${item.price}₾</b>
+                    </div>
+                    <div onclick="removeItem(${i})" style="color:var(--accent); padding:10px; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></div>
                 </div>`;
                 list.appendChild(d);
             });
-            document.getElementById('total-price').innerText = cart.reduce((s,i) => s+(i.price*i.count), 0) + '₾';
+            const totalSum = cart.reduce((s,i) => s + (i.price * (i.count || 1)), 0);
+            document.getElementById('total-price').innerText = totalSum + '₾';
         }
 
         init();
