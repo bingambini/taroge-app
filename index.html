@@ -9,22 +9,33 @@
     <style>
         :root { --bg: #ffffff; --text: #1a1a1a; --accent: #ff6b6b; --secondary: #f8f9fa; --gray: #8e8e93; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 30px; overflow-x: hidden; }
+        
+        /* Header */
         .nav-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
         .brand { font-size: 26px; font-weight: 900; }
         .brand span { color: var(--accent); }
+        
+        /* Dynamic Banner */
         .featured-banner {
             margin: 0 20px 30px; background: linear-gradient(135deg, #1c1c1e 0%, #000000 100%);
-            border-radius: 35px; padding: 25px; position: relative; color: white; overflow: hidden; min-height: 160px; display: flex; align-items: center;
+            border-radius: 35px; padding: 25px; position: relative; color: white; overflow: hidden; min-height: 180px; display: flex; align-items: center;
         }
-        .banner-content { position: relative; z-index: 2; width: 60%; }
-        .banner-img { position: absolute; right: -5px; bottom: 5px; width: 60%; transform: rotate(-15deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); display: none; }
+        .banner-content { position: relative; z-index: 2; width: 55%; }
+        .banner-img { position: absolute; right: -10px; bottom: 10px; width: 65%; transform: rotate(-15deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6)); object-fit: contain; display: none; }
+        
+        /* Grid */
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
         .product-card { background: var(--secondary); border-radius: 25px; padding: 12px; cursor: pointer; }
-        .prod-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 20px; margin-bottom: 8px; }
-        #product-page { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; background: white; z-index: 1000; transition: 0.3s; overflow-y: auto; }
+        .prod-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 20px; margin-bottom: 10px; }
+        .prod-name { font-size: 15px; font-weight: 700; }
+        .prod-price { font-size: 16px; font-weight: 800; color: var(--accent); }
+
+        /* Full Product Page */
+        #product-page { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; background: white; z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
         #product-page.active { left: 0; }
-        .close-btn { position: absolute; top: 20px; left: 20px; background: white; width: 45px; height: 45px; border-radius: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 10; }
-        .buy-btn { background: #1a1a1a; color: white; width: 100%; padding: 20px; border-radius: 20px; font-size: 18px; font-weight: 700; border: none; }
+        .close-btn { position: absolute; top: 20px; left: 20px; background: white; width: 45px; height: 45px; border-radius: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.08); z-index: 10; }
+        .detail-img-box { background: var(--secondary); padding: 50px 0; display: flex; justify-content: center; border-radius: 0 0 50px 50px; }
+        .buy-btn { background: #1a1a1a; color: white; width: 100%; padding: 20px; border-radius: 22px; font-size: 18px; font-weight: 700; border: none; margin-top: 25px; }
     </style>
 </head>
 <body>
@@ -37,10 +48,10 @@
 
         <div class="featured-banner">
             <div class="banner-content">
-                <div id="banner-small" style="color:var(--accent); font-weight:700; font-size:12px; text-transform:uppercase;">...</div>
-                <div id="banner-main" style="font-size:20px; font-weight:800; line-height:1.2; margin-top:5px;">იტვირთება...</div>
+                <div id="b-small" style="color:var(--accent); font-weight:700; font-size:12px; text-transform:uppercase;">...</div>
+                <div id="b-main" style="font-size:22px; font-weight:800; line-height:1.2; margin-top:5px;">იტვირთება...</div>
             </div>
-            <img id="banner-photo" src="" class="banner-img">
+            <img id="b-img" src="" class="banner-img">
         </div>
 
         <div style="padding: 0 20px 15px; font-weight: 800; font-size: 22px;">პროდუქცია</div>
@@ -49,14 +60,14 @@
 
     <div id="product-page">
         <div class="close-btn" onclick="closeProduct()"><i class="fa-solid fa-chevron-left"></i></div>
-        <div style="background:var(--secondary); padding:50px 0; display:flex; justify-content:center; border-radius:0 0 40px 40px;">
-            <img id="details-img" src="" style="width:80%; transform:rotate(-10deg); filter:drop-shadow(0 20px 30px rgba(0,0,0,0.1));">
+        <div class="detail-img-box">
+            <img id="details-img" src="" style="width:85%; transform:rotate(-10deg); filter:drop-shadow(0 25px 40px rgba(0,0,0,0.12));">
         </div>
-        <div style="padding:30px 20px;">
-            <div id="details-title" style="font-size:28px; font-weight:900;"></div>
-            <div id="details-price" style="font-size:24px; font-weight:800; color:var(--accent); margin:10px 0 20px;"></div>
-            <div id="details-desc" style="color:var(--gray); line-height:1.6; margin-bottom:30px;"></div>
-            <button class="buy-btn" id="buy-button">შეკვეთის გაფორმება</button>
+        <div style="padding:30px 25px;">
+            <div id="details-title" style="font-size:30px; font-weight:900;"></div>
+            <div id="details-price" style="font-size:24px; font-weight:800; color:var(--accent); margin-top:5px;"></div>
+            <div id="details-desc" style="color:var(--gray); line-height:1.7; margin-top:20px; font-size:15px;"></div>
+            <button class="buy-btn" id="buy-btn">შეკვეთის გაფორმება</button>
         </div>
     </div>
 
@@ -64,64 +75,69 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const PRODUCTS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv'; 
-        const DESIGN_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=2144703770&output=csv';
+        const PRODUCTS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv'; 
+        const DESIGN_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=2144703770&output=csv';
 
-        async function init() {
+        // ტექსტის გასუფთავება ზედმეტი ბრჭყალებისგან
+        const fix = (s) => s ? s.replace(/^"|"$/g, '').trim() : '';
+
+        async function startApp() {
             try {
-                // 1. დიზაინის ჩატვირთვა - უფრო მარტივი ლოგიკით
-                const dRes = await fetch(DESIGN_CSV + '&t=' + Date.now());
-                const dText = await dRes.text();
-                const dRows = dText.split('\n');
+                // 1. დიზაინის ჩატვირთვა
+                const dRes = await fetch(DESIGN_URL + '&t=' + Date.now());
+                const dRows = (await dRes.text()).split('\n');
                 
-                // ვეძებთ პირდაპირ ინდექსებით, რადგან შენს შიტში თანმიმდევრობა ვიცით
-                if (dRows[0]) document.getElementById('banner-small').innerText = dRows[0].split(',')[1].replace(/"/g, "").trim();
-                if (dRows[1]) document.getElementById('banner-main').innerText = dRows[1].split(',')[1].replace(/"/g, "").trim();
-                if (dRows[2]) {
-                    const imgUrl = dRows[2].split(',')[1].replace(/"/g, "").trim();
-                    const imgTag = document.getElementById('banner-photo');
-                    imgTag.src = imgUrl;
-                    imgTag.onload = () => imgTag.style.display = 'block';
+                // ვკითხულობთ პირდაპირ ხაზებს: 0=Small, 1=Main, 2=Photo
+                if(dRows[0]) document.getElementById('b-small').innerText = fix(dRows[0].split(',')[1]);
+                if(dRows[1]) document.getElementById('b-main').innerText = fix(dRows[1].split(',')[1]);
+                if(dRows[2]) {
+                    const imgUrl = fix(dRows[2].split(',')[1]);
+                    const img = document.getElementById('b-img');
+                    img.src = imgUrl;
+                    img.onload = () => img.style.display = 'block';
                 }
 
                 // 2. პროდუქტების ჩატვირთვა
-                const pRes = await fetch(PRODUCTS_CSV + '&t=' + Date.now());
-                const pText = await pRes.text();
-                const pLines = pText.split('\n').slice(1);
+                const pRes = await fetch(PRODUCTS_URL + '&t=' + Date.now());
+                const pLines = (await pRes.text()).split('\n').slice(1);
                 const grid = document.getElementById('product-grid');
                 grid.innerHTML = '';
 
                 pLines.forEach(line => {
-                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if (cols.length >= 3) {
-                        const name = cols[0].replace(/"/g, "").trim();
-                        const price = cols[1].replace(/"/g, "").trim();
-                        const photo = cols[2].replace(/"/g, "").trim();
-                        const desc = cols[3] ? cols[3].replace(/"/g, "").trim() : "საუკეთესო ხარისხის ბოტასი თქვენი ყოველდღიურობისთვის.";
-
-                        if (name && photo.includes('http')) {
+                    const c = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if (c.length >= 3) {
+                        const name = fix(c[0]), price = fix(c[1]), photo = fix(c[2]), desc = fix(c[3]);
+                        if (name && photo.startsWith('http')) {
                             const card = document.createElement('div');
                             card.className = 'product-card';
-                            card.innerHTML = `<img src="${photo}" class="prod-img"><b>${name}</b><div style="color:var(--accent)">${price}₾</div>`;
+                            card.innerHTML = `<img src="${photo}" class="prod-img"><div class="prod-name">${name}</div><div class="prod-price">${price}₾</div>`;
                             card.onclick = () => openProduct(name, price, photo, desc);
                             grid.appendChild(card);
                         }
                     }
                 });
-            } catch (e) { console.error(e); }
+            } catch (err) { console.log(err); }
         }
 
-        function openProduct(n, p, img, d) {
-            document.getElementById('details-title').innerText = n;
-            document.getElementById('details-price').innerText = p + '₾';
-            document.getElementById('details-desc').innerText = d;
+        function openProduct(name, price, img, desc) {
+            tg.HapticFeedback.impactOccurred('medium');
+            document.getElementById('details-title').innerText = name;
+            document.getElementById('details-price').innerText = price + '₾';
+            document.getElementById('details-desc').innerText = desc || "აღწერა მალე დაემატება...";
             document.getElementById('details-img').src = img;
             document.getElementById('product-page').classList.add('active');
+            
+            document.getElementById('buy-btn').onclick = () => {
+                tg.sendData(JSON.stringify({item: name, price: price}));
+                tg.close();
+            };
         }
 
-        function closeProduct() { document.getElementById('product-page').classList.remove('active'); }
+        function closeProduct() {
+            document.getElementById('product-page').classList.remove('active');
+        }
 
-        init();
+        startApp();
     </script>
 </body>
 </html>
