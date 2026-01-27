@@ -8,54 +8,58 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --bg: #f2f2f7; --black: #1c1c1e; --accent: #ff6b6b; --gray: #8e8e93; --light-gray: #efeff4; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        
+        /* ეკრანის ზოგადი პარამეტრები */
+        html, body { height: 100%; margin: 0; padding: 0; background: var(--bg); font-family: -apple-system, sans-serif; overflow: hidden; }
 
-        .view { display: none; padding-bottom: 150px; min-height: 100vh; }
+        /* კონტეინერი, რომელიც სქროლავს */
+        .view { 
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            overflow-y: auto; padding-bottom: 100px; /* მენიუს ადგილი */
+            display: none; -webkit-overflow-scrolling: touch;
+        }
         .view.active { display: block; }
 
-        .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 0 0 25px 25px; }
+        .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 0 0 25px 25px; position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 24px; font-weight: 900; letter-spacing: -1px; }
 
         .banner { 
-            margin: 15px; background: var(--black); border-radius: 35px; padding: 25px; 
-            position: relative; color: white; min-height: 150px; display: flex; align-items: center; overflow: hidden; cursor: pointer;
+            margin: 15px; background: var(--black); border-radius: 30px; padding: 25px; 
+            position: relative; color: white; min-height: 140px; display: flex; align-items: center; overflow: hidden;
         }
-        .banner-info { position: relative; z-index: 2; width: 60%; }
-        .banner-img { position: absolute; right: -15px; bottom: 5px; width: 60%; transform: rotate(-15deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
+        .banner-img { position: absolute; right: -10px; bottom: 0; width: 55%; transform: rotate(-10deg); }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .card { background: white; border-radius: 25px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); cursor: pointer; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
+        .card { background: white; border-radius: 20px; padding: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .card-img { width: 100%; aspect-ratio: 1; object-fit: contain; }
 
-        /* TAB BAR - FORCED VISIBILITY */
+        /* FIXED TAB BAR - Desktop Friendly */
         .tab-bar-container { 
-            position: fixed !important; 
-            bottom: 25px !important; 
-            left: 20px !important; 
-            right: 20px !important; 
-            z-index: 9999 !important; 
-            display: block !important;
-            visibility: visible !important;
+            position: fixed; bottom: 15px; left: 15px; right: 15px; 
+            z-index: 9999; height: 65px;
         }
-        .tab-bar { background: var(--black); height: 70px; border-radius: 30px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .tab-item { color: white; opacity: 0.4; font-size: 22px; cursor: pointer; position: relative; padding: 10px 20px; }
+        .tab-bar { 
+            background: var(--black); height: 100%; border-radius: 25px; 
+            display: flex; justify-content: space-around; align-items: center; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4); 
+        }
+        .tab-item { color: white; opacity: 0.4; font-size: 20px; cursor: pointer; position: relative; padding: 10px 25px; }
         .tab-item.active { opacity: 1; }
-        .badge { position: absolute; top: 5px; right: 5px; background: var(--accent); color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 10px; border: 2px solid var(--black); }
+        .badge { position: absolute; top: 5px; right: 15px; background: var(--accent); color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 10px; border: 2px solid var(--black); }
 
-        /* DETAILS */
-        #details { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; background: white; z-index: 10000; transition: 0.3s ease-out; overflow-y: auto; }
-        #details.active { left: 0; }
-        .det-header { background: #f8f9fb; height: 320px; display: flex; align-items: center; justify-content: center; border-radius: 0 0 40px 40px; position: relative; }
-        .back-btn { position: absolute; top: 20px; left: 20px; background: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        /* DETAILS OVERLAY - გაუმჯობესებული დამალვა */
+        #details { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: white; z-index: 10000; transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto;
+        }
+        #details.active { transform: translateY(0); }
 
-        /* OPTIONS */
-        .opt-grid { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0; scrollbar-width: none; }
-        .opt-btn { min-width: 55px; padding: 0 15px; height: 48px; border: 2px solid var(--light-gray); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; }
-        .opt-btn.active { background: var(--black); color: white; border-color: var(--black); }
-
-        /* FOOTER ACTIONS */
-        .footer-action { position: fixed; bottom: 0; left: 0; width: 100%; padding: 20px 20px 40px; background: white; border-top: 1px solid #eee; box-sizing: border-box; }
-        .btn-main { width: 100%; padding: 18px; border-radius: 20px; font-size: 17px; font-weight: 800; border: none; cursor: pointer; }
+        .footer-action { 
+            position: sticky; bottom: 0; width: 100%; padding: 15px 20px 30px; 
+            background: white; border-top: 1px solid #eee; box-sizing: border-box; 
+        }
+        .btn-main { width: 100%; padding: 16px; border-radius: 18px; font-size: 16px; font-weight: 800; border: none; cursor: pointer; }
         .btn-inactive { background: #f0f0f0; color: #a0a0a0; pointer-events: none; }
         .btn-active { background: var(--black); color: white; }
     </style>
@@ -65,10 +69,10 @@
     <div id="main-view" class="view active">
         <div class="header"><div class="logo">თარო<span>.</span></div><i class="fa-solid fa-shopping-bag"></i></div>
         <div class="banner" id="top-banner">
-            <div class="banner-info">
-                <div style="font-size: 11px; opacity: 0.6;">TOP SELECTION</div>
-                <div id="b-name" style="font-size: 22px; font-weight: 900;">...</div>
-                <div id="b-price" style="font-size: 19px; font-weight: 700; color: var(--accent);"></div>
+            <div class="banner-info" style="position:relative; z-index:2;">
+                <div style="font-size: 10px; opacity: 0.6;">TOP SELECTION</div>
+                <div id="b-name" style="font-size: 20px; font-weight: 900;">...</div>
+                <div id="b-price" style="font-size: 18px; font-weight: 700; color: var(--accent);"></div>
             </div>
             <img id="b-img" src="" class="banner-img">
         </div>
@@ -77,13 +81,13 @@
 
     <div id="cart-view" class="view">
         <div class="header"><div class="logo">კალათა</div></div>
-        <div id="cart-items-list" style="padding-top: 10px;"></div>
-        <div id="cart-empty" style="text-align:center; padding: 100px 20px; color: var(--gray); display: none;">
-            <i class="fa-solid fa-cart-shopping" style="font-size: 50px; opacity: 0.2;"></i>
+        <div id="cart-items-list"></div>
+        <div id="cart-empty" style="text-align:center; padding: 60px 20px; color: var(--gray); display: none;">
+            <i class="fa-solid fa-cart-shopping" style="font-size: 40px; opacity: 0.1;"></i>
             <p>კალათა ცარიელია</p>
         </div>
-        <div id="cart-footer" class="footer-action" style="bottom: 105px; border-radius: 30px 30px 0 0; display: none; z-index: 9998;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:20px; font-weight:900;">
+        <div id="cart-footer" class="footer-action" style="display: none; margin-bottom: 80px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:18px; font-weight:900;">
                 <span>ჯამი:</span><span id="total-price">0₾</span>
             </div>
             <button class="btn-main btn-active" onclick="checkout()">შეკვეთის გაფორმება</button>
@@ -91,22 +95,22 @@
     </div>
 
     <div id="details">
-        <div class="det-header">
-            <div class="back-btn" onclick="closeDetails()"><i class="fa-solid fa-chevron-left"></i></div>
-            <img id="det-img" src="" style="width:70%; transform:rotate(-10deg);">
+        <div style="padding: 20px; background: #f8f9fb; text-align: center; position: relative;">
+            <div onclick="closeDetails()" style="position:absolute; left:20px; top:20px; background:white; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,0.1);"><i class="fa-solid fa-xmark"></i></div>
+            <img id="det-img" src="" style="width:70%; margin: 20px 0;">
         </div>
-        <div style="padding: 25px; padding-bottom: 140px;">
-            <h1 id="det-name" style="margin:0; font-size:28px; font-weight:900;"></h1>
-            <div id="color-sec"><p style="font-weight:700; margin: 20px 0 10px;">ფერი</p><div id="color-opts" class="opt-grid"></div></div>
-            <div id="size-sec"><p style="font-weight:700; margin: 20px 0 10px;">ზომა</p><div id="size-opts" class="opt-grid"></div></div>
-            <p id="det-desc" style="color:var(--gray); margin-top:20px; line-height:1.6;"></p>
+        <div style="padding: 20px;">
+            <h1 id="det-name" style="margin:0; font-size:24px; font-weight:900;"></h1>
+            <div id="color-sec"><p style="font-weight:700; margin: 15px 0 10px;">ფერი</p><div id="color-opts" style="display:flex; gap:10px; overflow-x:auto;"></div></div>
+            <div id="size-sec"><p style="font-weight:700; margin: 15px 0 10px;">ზომა</p><div id="size-opts" style="display:flex; gap:10px; overflow-x:auto;"></div></div>
+            <p id="det-desc" style="color:var(--gray); font-size:14px; line-height:1.5; margin-top:15px;"></p>
         </div>
-        <div class="footer-action" style="z-index: 10001;">
+        <div class="footer-action">
             <button id="add-to-cart-btn" class="btn-main btn-inactive" onclick="addToCart()">აირჩიე პარამეტრები</button>
         </div>
     </div>
 
-    <div class="tab-bar-container" id="main-tabs">
+    <div class="tab-bar-container" id="tab-container">
         <div class="tab-bar">
             <div class="tab-item active" onclick="switchView('main', this)"><i class="fa-solid fa-house"></i></div>
             <div class="tab-item" onclick="switchView('cart', this)">
@@ -132,7 +136,6 @@
                 const rows = (await res.text()).split('\n').slice(1);
                 const grid = document.getElementById('main-grid');
                 grid.innerHTML = '';
-
                 rows.forEach(row => {
                     const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if(c.length < 3) return;
@@ -151,27 +154,19 @@
                     }
                     const card = document.createElement('div');
                     card.className = 'card';
-                    card.innerHTML = `<img src="${p.img}" class="card-img"><h3>${p.name}</h3><p style="color:var(--accent); font-weight:800;">${p.price}₾</p>`;
+                    card.innerHTML = `<img src="${p.img}" class="card-img"><div style="font-weight:700; font-size:14px; margin-top:8px;">${p.name}</div><div style="color:var(--accent); font-weight:800;">${p.price}₾</div>`;
                     card.onclick = () => openDetails(p);
                     grid.appendChild(card);
                 });
             } catch (e) { console.error(e); }
         }
 
-        function switchView(viewName, el) {
+        function switchView(id, el) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            
-            document.getElementById(viewName + '-view').classList.add('active');
+            document.getElementById(id + '-view').classList.add('active');
             el.classList.add('active');
-            
-            // გარანტირებული ჩვენება
-            const tabs = document.getElementById('main-tabs');
-            tabs.style.display = 'block';
-            tabs.style.opacity = '1';
-            tabs.style.visibility = 'visible';
-
-            if(viewName === 'cart') renderCart();
+            if(id === 'cart') renderCart();
             tg.HapticFeedback.selectionChanged();
         }
 
@@ -184,30 +179,26 @@
             renderOptions('size-opts', p.sizes, 'size', 'size-sec');
             updateUI();
             document.getElementById('details').classList.add('active');
-            document.getElementById('main-tabs').style.display = 'none';
+            document.getElementById('tab-container').style.display = 'none';
         }
 
         function closeDetails() {
             document.getElementById('details').classList.remove('active');
-            document.getElementById('main-tabs').style.display = 'block';
+            document.getElementById('tab-container').style.display = 'block';
         }
 
-        function renderOptions(contId, list, type, secId) {
-            const cont = document.getElementById(contId);
-            const section = document.getElementById(secId);
-            if(!list || list.length === 0 || list[0].trim() === "") {
-                section.style.display = 'none'; return;
-            }
-            section.style.display = 'block';
-            cont.innerHTML = list.map(v => `<div class="opt-btn" onclick="setOpt(this, '${type}', '${v}')">${v}</div>`).join('');
+        function renderOptions(id, list, type, sec) {
+            const cont = document.getElementById(id);
+            if(!list || list[0].trim() === "") { document.getElementById(sec).style.display = 'none'; return; }
+            document.getElementById(sec).style.display = 'block';
+            cont.innerHTML = list.map(v => `<div class="opt" onclick="setOpt(this, '${type}', '${v}')" style="min-width:50px; padding:10px; border:2px solid #eee; border-radius:12px; text-align:center; font-weight:700; cursor:pointer;">${v}</div>`).join('');
         }
 
         function setOpt(el, type, val) {
-            el.parentElement.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
+            el.parentElement.querySelectorAll('div').forEach(d => { d.style.borderColor = '#eee'; d.style.background = 'none'; d.style.color = 'black'; });
+            el.style.borderColor = 'var(--black)'; el.style.background = 'var(--black)'; el.style.color = 'white';
             if(type === 'color') selColor = val; else selSize = val;
             updateUI();
-            tg.HapticFeedback.selectionChanged();
         }
 
         function updateUI() {
@@ -216,70 +207,40 @@
             const sN = currentP.sizes.length > 0 && currentP.sizes[0].trim() !== "";
             const ready = (!cN || selColor) && (!sN || selSize);
             btn.className = ready ? "btn-main btn-active" : "btn-main btn-inactive";
-            btn.innerText = ready ? "კალათაში დამატება" : (cN && !selColor ? "აირჩიე ფერი" : "აირჩიე ზომა");
+            btn.innerText = ready ? "კალათაში დამატება" : "აირჩიე პარამეტრები";
         }
 
         function addToCart() {
-            cart.push({ ...currentP, selColor, selSize, count: 1, cartId: Date.now() });
+            cart.push({ ...currentP, selColor, selSize, count: 1 });
             localStorage.setItem('taro_cart', JSON.stringify(cart));
-            updateBadge();
-            closeDetails();
+            updateBadge(); closeDetails();
             tg.HapticFeedback.notificationOccurred('success');
         }
 
         function updateBadge() {
             const count = cart.reduce((s, i) => s + i.count, 0);
             const b = document.getElementById('cart-badge');
-            b.innerText = count;
-            b.style.display = count > 0 ? 'block' : 'none';
+            b.innerText = count; b.style.display = count > 0 ? 'block' : 'none';
         }
 
         function renderCart() {
             const list = document.getElementById('cart-items-list');
             const footer = document.getElementById('cart-footer');
-            const empty = document.getElementById('cart-empty');
             list.innerHTML = '';
-            if(!cart.length) { empty.style.display = 'block'; footer.style.display = 'none'; return; }
-            empty.style.display = 'none'; footer.style.display = 'block';
+            if(!cart.length) { document.getElementById('cart-empty').style.display = 'block'; footer.style.display = 'none'; return; }
+            document.getElementById('cart-empty').style.display = 'none'; footer.style.display = 'block';
             let total = 0;
             cart.forEach((item, idx) => {
                 total += item.price * item.count;
-                const div = document.createElement('div');
-                div.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:12px; background:white; margin:10px 15px; padding:12px; border-radius:18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-                        <img src="${item.img}" style="width:60px; height:60px; border-radius:10px; object-fit:cover;">
-                        <div style="flex-grow:1;">
-                            <div style="font-weight:800; font-size:14px;">${item.name}</div>
-                            <div style="font-size:11px; color:var(--gray);">${item.selColor} ${item.selSize}</div>
-                            <div style="font-weight:900;">${item.price}₾</div>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:8px; background:var(--light-gray); padding:5px 10px; border-radius:10px;">
-                            <button onclick="changeQty(${idx}, -1)" style="border:none; background:none; font-weight:bold; width:20px;">-</button>
-                            <span style="font-weight:800;">${item.count}</span>
-                            <button onclick="changeQty(${idx}, 1)" style="border:none; background:none; font-weight:bold; width:20px;">+</button>
-                        </div>
-                    </div>
-                `;
-                list.appendChild(div);
+                const d = document.createElement('div');
+                d.innerHTML = `<div style="display:flex; align-items:center; gap:12px; background:white; margin:10px; padding:12px; border-radius:15px;">
+                    <img src="${item.img}" style="width:50px; height:50px; object-fit:contain;">
+                    <div style="flex:1;"><div style="font-weight:800; font-size:14px;">${item.name}</div><div style="font-size:12px; color:gray;">${item.selColor} ${item.selSize}</div></div>
+                    <div style="font-weight:900;">${item.price}₾</div>
+                </div>`;
+                list.appendChild(d);
             });
             document.getElementById('total-price').innerText = total + '₾';
-        }
-
-        function changeQty(idx, d) {
-            cart[idx].count += d;
-            if(cart[idx].count <= 0) cart.splice(idx, 1);
-            localStorage.setItem('taro_cart', JSON.stringify(cart));
-            renderCart(); updateBadge();
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        function checkout() {
-            tg.showConfirm("გავაფორმოთ შეკვეთა?", (ok) => {
-                if(ok) {
-                    tg.sendData(JSON.stringify({ order: cart, total: document.getElementById('total-price').innerText }));
-                    localStorage.removeItem('taro_cart'); tg.close();
-                }
-            });
         }
 
         init();
