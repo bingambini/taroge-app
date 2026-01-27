@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Taro Store</title>
+    <title>Taro Premium Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -15,6 +15,18 @@
 
         .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: white; position: sticky; top: 0; z-index: 10; }
         .logo { font-size: 24px; font-weight: 900; }
+
+        /* BANNER STYLES */
+        .banner { 
+            margin: 15px; background: var(--black); border-radius: 30px; padding: 25px; 
+            position: relative; color: white; min-height: 160px; display: flex; align-items: center; 
+            overflow: hidden; cursor: pointer;
+        }
+        .banner-info { position: relative; z-index: 2; width: 60%; }
+        .banner-img { 
+            position: absolute; right: -15px; bottom: 0; width: 60%; 
+            transform: rotate(-10deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); 
+        }
 
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: white; border-radius: 20px; padding: 15px; cursor: pointer; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
@@ -37,15 +49,25 @@
         .opt-btn.selected { background: var(--black); color: white; border-color: var(--black); }
 
         .footer-action { padding: 20px 20px 40px; background: white; border-top: 1px solid #eee; }
-        .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 17px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 17px; font-weight: 800; cursor: pointer; }
         .btn-inactive { background: #f0f0f0; color: #aaa; }
-        .btn-active { background: var(--black); color: white; transform: scale(1.02); }
+        .btn-active { background: var(--black); color: white; }
     </style>
 </head>
 <body>
 
     <div id="main-view" class="view active">
         <div class="header"><div class="logo">თარო</div><i class="fa-solid fa-shopping-bag"></i></div>
+        
+        <div id="top-banner" class="banner" style="display: none;">
+            <div class="banner-info">
+                <div style="font-size: 10px; opacity: 0.7; letter-spacing: 1px;">TOP SELECTION</div>
+                <div id="b-name" style="font-size: 22px; font-weight: 900; margin: 5px 0;"></div>
+                <div id="b-price" style="font-size: 18px; font-weight: 700; color: var(--accent);"></div>
+            </div>
+            <img id="b-img" src="" class="banner-img">
+        </div>
+
         <div id="main-grid" class="grid"></div>
     </div>
 
@@ -68,14 +90,8 @@
             </div>
             <div style="padding: 25px;">
                 <h1 id="det-name" style="margin:0; font-size:28px; font-weight:900;"></h1>
-                <div id="color-sec">
-                    <p style="font-weight:700; margin-top:25px; margin-bottom:10px;">ფერი</p>
-                    <div id="color-opts" class="opt-grid"></div>
-                </div>
-                <div id="size-sec">
-                    <p style="font-weight:700; margin-top:25px; margin-bottom:10px;">ზომა</p>
-                    <div id="size-opts" class="opt-grid"></div>
-                </div>
+                <div id="color-sec"><p style="font-weight:700; margin-top:25px; margin-bottom:10px;">ფერი</p><div id="color-opts" class="opt-grid"></div></div>
+                <div id="size-sec"><p style="font-weight:700; margin-top:25px; margin-bottom:10px;">ზომა</p><div id="size-opts" class="opt-grid"></div></div>
                 <p id="det-desc" style="color:var(--gray); margin-top:20px; line-height:1.6; font-size:15px;"></p>
             </div>
         </div>
@@ -87,10 +103,7 @@
     <div class="tab-bar-container" id="menu-bar">
         <div class="tab-bar">
             <div class="tab-item active" onclick="switchView('main', this)"><i class="fa-solid fa-house"></i></div>
-            <div class="tab-item" onclick="switchView('cart', this)">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <div id="cart-badge" class="badge" style="display:none;">0</div>
-            </div>
+            <div class="tab-item" onclick="switchView('cart', this)"><i class="fa-solid fa-cart-shopping"></i><div id="cart-badge" class="badge" style="display:none;">0</div></div>
             <div class="tab-item" onclick="tg.showAlert('მალე დაემატება')"><i class="fa-solid fa-user"></i></div>
         </div>
     </div>
@@ -110,6 +123,7 @@
                 const rows = (await res.text()).split('\n').slice(1);
                 const grid = document.getElementById('main-grid');
                 grid.innerHTML = '';
+                
                 rows.forEach(row => {
                     const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if(c.length < 3) return;
@@ -117,9 +131,21 @@
                         name: c[0].replace(/"/g, ''), price: parseInt(c[1]),
                         img: c[2].replace(/"/g, '').split(',')[0],
                         desc: c[3].replace(/"/g, ''),
+                        top: c[4] && c[4].toLowerCase().includes('top'),
                         sizes: c[5] ? c[5].replace(/"/g, '').split(',') : [],
                         colors: c[6] ? c[6].replace(/"/g, '').split(',') : []
                     };
+
+                    // ბანერის ლოგიკა
+                    if(p.top) {
+                        const b = document.getElementById('top-banner');
+                        b.style.display = 'flex';
+                        document.getElementById('b-name').innerText = p.name;
+                        document.getElementById('b-price').innerText = p.price + '₾';
+                        document.getElementById('b-img').src = p.img;
+                        b.onclick = () => openDetails(p);
+                    }
+
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.innerHTML = `<img src="${p.img}"><h3>${p.name}</h3><p style="color:var(--accent); font-weight:800;">${p.price}₾</p>`;
@@ -135,7 +161,6 @@
             document.getElementById(id + '-view').classList.add('active');
             el.classList.add('active');
             if(id === 'cart') renderCart();
-            tg.HapticFeedback.selectionChanged();
         }
 
         function openDetails(p) {
@@ -167,7 +192,6 @@
             el.classList.add('selected');
             if(type === 'color') selColor = val; else selSize = val;
             updateUI();
-            tg.HapticFeedback.selectionChanged();
         }
 
         function updateUI() {
@@ -176,14 +200,11 @@
             const hasSizes = currentP.sizes.length > 0 && currentP.sizes[0].trim() !== "";
 
             if (hasColors && !selColor) {
-                btn.innerText = "აირჩიე ფერი";
-                btn.className = "btn-main btn-inactive";
+                btn.innerText = "აირჩიე ფერი"; btn.className = "btn-main btn-inactive";
             } else if (hasSizes && !selSize) {
-                btn.innerText = "აირჩიე ზომა";
-                btn.className = "btn-main btn-inactive";
+                btn.innerText = "აირჩიე ზომა"; btn.className = "btn-main btn-inactive";
             } else {
-                btn.innerText = "კალათაში დამატება";
-                btn.className = "btn-main btn-active";
+                btn.innerText = "კალათაში დამატება"; btn.className = "btn-main btn-active";
             }
         }
 
@@ -204,9 +225,9 @@
             const list = document.getElementById('cart-items-list');
             list.innerHTML = cart.map((item, i) => `
                 <div style="display:flex; align-items:center; gap:15px; background:white; margin:10px; padding:15px; border-radius:15px;">
-                    <img src="${item.img}" style="width:55px; aspect-ratio:1; object-fit:contain;">
-                    <div style="flex:1;"><b style="font-size:15px;">${item.name}</b><br><small style="color:gray;">${item.selColor} / ${item.selSize}</small></div>
-                    <b style="font-size:16px;">${item.price}₾</b>
+                    <img src="${item.img}" style="width:55px;">
+                    <div style="flex:1;"><b>${item.name}</b><br><small>${item.selColor} / ${item.selSize}</small></div>
+                    <b>${item.price}₾</b>
                 </div>
             `).join('');
             document.getElementById('cart-footer').style.display = cart.length ? 'block' : 'none';
