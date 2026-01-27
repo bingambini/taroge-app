@@ -7,182 +7,153 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --bg: #ffffff; --text: #1a1a1a; --accent: #ff6b6b; --secondary: #f8f9fa; --gray: #8e8e93; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 30px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        :root { --bg: #f4f4f7; --text: #1a1a1a; --accent: #ff6b6b; --card: #ffffff; --gray: #9b9b9b; }
         
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; overflow-x: hidden; }
+
         /* Header */
-        .nav-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .brand { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
-        .brand span { color: var(--accent); }
-        .cart-icon { background: #2c2c2e; color: white; width: 45px; height: 45px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .header { padding: 25px 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 0 0 30px 30px; }
+        .logo { font-size: 24px; font-weight: 800; letter-spacing: -1px; }
+        .logo span { color: var(--accent); }
+        .top-icons { display: flex; gap: 10px; background: #2c2c2e; padding: 8px 15px; border-radius: 20px; color: white; }
 
         /* Banner */
-        .featured-banner {
-            margin: 0 20px 30px; background: linear-gradient(135deg, #1c1c1e 0%, #000000 100%);
-            border-radius: 35px; padding: 25px; position: relative; color: white; overflow: hidden; min-height: 180px; 
-            display: flex; align-items: center; transition: 0.3s;
+        .banner {
+            margin: 20px; background: #1c1c1e; border-radius: 35px; padding: 25px; 
+            position: relative; color: white; min-height: 200px; display: flex; align-items: center;
         }
-        .banner-content { position: relative; z-index: 2; width: 55%; }
-        .banner-img { position: absolute; right: -10px; bottom: 10px; width: 65%; transform: rotate(-15deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6)); object-fit: contain; }
+        .banner-info { width: 55%; z-index: 2; }
+        .banner-img { position: absolute; right: -15px; bottom: 10px; width: 70%; transform: rotate(-15deg); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5)); }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 25px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; }
+        .tab-item { font-weight: 700; font-size: 18px; color: var(--gray); white-space: nowrap; }
+        .tab-item.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
 
         /* Grid */
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
-        .product-card { background: var(--secondary); border-radius: 25px; padding: 12px; cursor: pointer; transition: 0.2s; border: 1px solid rgba(0,0,0,0.02); }
-        .product-card:active { transform: scale(0.96); }
-        .prod-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 20px; margin-bottom: 10px; }
-        .prod-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-        .prod-price { font-size: 16px; font-weight: 800; color: var(--accent); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; }
+        .card { background: var(--card); border-radius: 30px; padding: 15px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.03); }
+        .card-img { width: 100%; aspect-ratio: 1; object-fit: contain; margin-bottom: 15px; }
+        .card-name { font-size: 14px; font-weight: 600; color: var(--gray); }
+        .card-price { font-size: 18px; font-weight: 800; margin-top: 5px; }
+        .wish-icon { position: absolute; top: 15px; right: 15px; color: var(--accent); font-size: 18px; }
 
-        /* Full Screen Details */
-        #product-page { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; background: white; z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
-        #product-page.active { left: 0; }
-        .close-btn { position: absolute; top: 20px; left: 20px; background: white; width: 45px; height: 45px; border-radius: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.08); z-index: 10; cursor: pointer; }
-        .detail-img-box { background: var(--secondary); padding: 50px 0; display: flex; justify-content: center; border-radius: 0 0 50px 50px; }
-        .buy-btn { background: #1a1a1a; color: white; width: 100%; padding: 20px; border-radius: 22px; font-size: 18px; font-weight: 700; border: none; margin-top: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); cursor: pointer; }
+        /* Navbar */
+        .nav {
+            position: fixed; bottom: 25px; left: 20px; right: 20px; 
+            background: #1c1c1e; border-radius: 30px; height: 70px;
+            display: flex; justify-content: space-around; align-items: center; z-index: 1000;
+        }
+        .nav-btn { color: #555; font-size: 22px; cursor: pointer; transition: 0.3s; }
+        .nav-btn.active { color: white; }
+
+        /* Details Overlay */
+        #details { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; background: white; z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
+        #details.active { left: 0; }
+        .close-circle { position: absolute; top: 20px; left: 20px; width: 45px; height: 45px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; }
     </style>
 </head>
 <body>
 
-    <div id="main-view">
-        <div class="nav-header">
-            <div class="brand">თარო<span>.</span></div>
-            <div class="cart-icon"><i class="fa-solid fa-bag-shopping"></i></div>
-        </div>
-
-        <div class="featured-banner" id="banner-box">
-            <div class="banner-content">
-                <div id="b-label" style="color:var(--accent); font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:1px;">დღის შეთავაზება</div>
-                <div id="b-title" style="font-size:22px; font-weight:800; line-height:1.2; margin-top:5px;">იტვირთება...</div>
-                <div id="b-price" style="font-size:18px; margin-top:8px; font-weight:600;"></div>
-            </div>
-            <img id="b-img" src="" class="banner-img" style="display:none;">
-        </div>
-
-        <div style="padding: 0 20px 15px; font-weight: 800; font-size: 22px;">კოლექცია</div>
-        <div class="product-grid" id="product-grid"></div>
+    <div class="header">
+        <div class="logo">თარო<span>.</span></div>
+        <div class="top-icons"><i class="fa-solid fa-border-all"></i> | <i class="fa-solid fa-bag-shopping"></i></div>
     </div>
 
-    <div id="product-page">
-        <div class="close-btn" onclick="closeProduct()"><i class="fa-solid fa-chevron-left"></i></div>
-        <div class="detail-img-box">
-            <img id="details-img" src="" style="width:85%; transform:rotate(-10deg); filter:drop-shadow(0 25px 40px rgba(0,0,0,0.12));">
+    <div class="banner" id="banner">
+        <div class="banner-info">
+            <div style="font-size: 12px; opacity: 0.7;">New Collection</div>
+            <div id="b-name" style="font-size: 22px; font-weight: 800; margin: 5px 0;">იტვირთება...</div>
+            <div id="b-price" style="font-size: 20px; font-weight: 700;"></div>
         </div>
-        <div style="padding:30px 25px;">
-            <div id="details-title" style="font-size:30px; font-weight:900;"></div>
-            <div id="details-price" style="font-size:24px; font-weight:800; color:var(--accent); margin-top:5px;"></div>
-            <div id="details-desc" style="color:var(--gray); line-height:1.7; margin-top:20px; font-size:15px;"></div>
-            <button class="buy-btn" id="buy-action">შეკვეთის გაფორმება</button>
+        <img id="b-img" src="" class="banner-img">
+    </div>
+
+    <div class="tabs">
+        <div class="tab-item active">Shoes <br> <small>305 item</small></div>
+        <div class="tab-item">Tops <br> <small>241 item</small></div>
+        <div class="tab-item">Pants <br> <small>130 item</small></div>
+    </div>
+
+    <div class="grid" id="product-grid"></div>
+
+    <div class="nav">
+        <div class="nav-btn active"><i class="fa-solid fa-house-chimney"></i></div>
+        <div class="nav-btn"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <div class="nav-btn"><i class="fa-regular fa-heart"></i></div>
+        <div class="nav-btn"><i class="fa-regular fa-user"></i></div>
+    </div>
+
+    <div id="details">
+        <div class="close-circle" onclick="closeDetails()"><i class="fa-solid fa-xmark"></i></div>
+        <div style="background: #f8f8f8; padding: 60px 20px; text-align: center; border-radius: 0 0 50px 50px;">
+            <img id="det-img" src="" style="width: 80%; transform: rotate(-10deg);">
+        </div>
+        <div style="padding: 30px 25px;">
+            <div id="det-name" style="font-size: 28px; font-weight: 900;"></div>
+            <div id="det-price" style="font-size: 24px; font-weight: 800; color: var(--accent); margin-top: 5px;"></div>
+            <p id="det-desc" style="color: var(--gray); line-height: 1.6; margin-top: 20px;"></p>
+            <button onclick="tg.close()" style="width: 100%; padding: 20px; background: #1a1a1a; color: white; border: none; border-radius: 20px; font-size: 18px; font-weight: 700; margin-top: 30px;">ყიდვა</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.enableClosingConfirmation();
 
-        // შენი Products შიტის CSV ლინკი
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv';
+        const URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv';
 
-        const fixText = (s) => s ? s.replace(/^"|"$/g, '').trim() : '';
+        async function load() {
+            const res = await fetch(URL + '&t=' + Date.now());
+            const text = await res.text();
+            const rows = text.split('\n').slice(1);
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
 
-        async function initStore() {
-            try {
-                const response = await fetch(CSV_URL + '&t=' + Date.now());
-                const csvData = await response.text();
-                const rows = csvData.split('\n').slice(1);
+            rows.forEach(row => {
+                const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                if(c.length < 3) return;
                 
-                const grid = document.getElementById('product-grid');
-                grid.innerHTML = '';
+                const p = {
+                    name: c[0].replace(/"/g, '').trim(),
+                    price: c[1].replace(/"/g, '').trim(),
+                    img: c[2].replace(/"/g, '').trim(),
+                    desc: c[3] ? c[3].replace(/"/g, '').trim() : '',
+                    top: c[4] ? c[4].toLowerCase().includes('top') : false
+                };
 
-                let topProduct = null;
-                const items = [];
-
-                rows.forEach(row => {
-                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if (cols.length >= 3) {
-                        const product = {
-                            name: fixText(cols[0]),
-                            price: fixText(cols[1]),
-                            photo: fixText(cols[2]),
-                            desc: fixText(cols[3]),
-                            status: fixText(cols[4])
-                        };
-
-                        if (product.name && product.photo.startsWith('http')) {
-                            items.push(product);
-                            // ვამოწმებთ არის თუ არა "Top" სტატუსი
-                            if (product.status.toLowerCase() === 'top') {
-                                topProduct = product;
-                            }
-                        }
-                    }
-                });
-
-                // ბანერის ლოგიკა
-                const bTitle = document.getElementById('b-title');
-                const bPrice = document.getElementById('b-price');
-                const bImg = document.getElementById('b-img');
-                const bBox = document.getElementById('banner-box');
-                const bLabel = document.getElementById('b-label');
-
-                if (topProduct) {
-                    bTitle.innerText = topProduct.name;
-                    bPrice.innerText = topProduct.price + '₾';
-                    bImg.src = topProduct.photo;
-                    bImg.style.display = 'block';
-                    bLabel.style.display = 'block';
-                    bBox.style.background = 'linear-gradient(135deg, #1c1c1e 0%, #000000 100%)';
-                    bBox.onclick = () => openProduct(topProduct);
-                } else {
-                    bTitle.innerText = "არ არის აქტიური შეთავაზებები";
-                    bPrice.innerText = "";
-                    bImg.style.display = 'none';
-                    bLabel.style.display = 'none';
-                    bBox.style.background = '#2c2c2e';
-                    bBox.onclick = null;
+                if(p.top) {
+                    document.getElementById('b-name').innerText = p.name;
+                    document.getElementById('b-price').innerText = '$' + p.price;
+                    document.getElementById('b-img').src = p.img;
+                    document.getElementById('banner').onclick = () => openDetails(p);
                 }
 
-                // პროდუქტების გრიდი
-                items.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-                    card.innerHTML = `
-                        <img src="${item.photo}" class="prod-img">
-                        <div class="prod-name">${item.name}</div>
-                        <div class="prod-price">${item.price}₾</div>
-                    `;
-                    card.onclick = () => openProduct(item);
-                    grid.appendChild(card);
-                });
-
-            } catch (err) {
-                console.error("Error loading store:", err);
-            }
+                const el = document.createElement('div');
+                el.className = 'card';
+                el.innerHTML = `
+                    <i class="fa-regular fa-bookmark wish-icon"></i>
+                    <img src="${p.img}" class="card-img">
+                    <div class="card-name">${p.name}</div>
+                    <div class="card-price">$${p.price}</div>
+                `;
+                el.onclick = () => openDetails(p);
+                grid.appendChild(el);
+            });
         }
 
-        function openProduct(product) {
+        function openDetails(p) {
             tg.HapticFeedback.impactOccurred('medium');
-            document.getElementById('details-title').innerText = product.name;
-            document.getElementById('details-price').innerText = product.price + '₾';
-            document.getElementById('details-desc').innerText = product.desc || "საუკეთესო ხარისხის პროდუქცია თქვენი სტილისთვის.";
-            document.getElementById('details-img').src = product.photo;
-            document.getElementById('product-page').classList.add('active');
-            
-            document.getElementById('buy-action').onclick = () => {
-                tg.sendData(JSON.stringify({
-                    item: product.name,
-                    price: product.price,
-                    action: 'order'
-                }));
-                tg.close();
-            };
+            document.getElementById('det-name').innerText = p.name;
+            document.getElementById('det-price').innerText = '$' + p.price;
+            document.getElementById('det-img').src = p.img;
+            document.getElementById('det-desc').innerText = p.desc || "საუკეთესო ხარისხის ბოტასი თქვენი კოლექციისთვის.";
+            document.getElementById('details').classList.add('active');
         }
 
-        function closeProduct() {
-            document.getElementById('product-page').classList.remove('active');
-        }
+        function closeDetails() { document.getElementById('details').classList.remove('active'); }
 
-        initStore();
+        load();
     </script>
 </body>
 </html>
