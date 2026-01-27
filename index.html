@@ -3,107 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>თარო - Premium Shop</title>
+    <title>თარო Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { 
-            --bg: #ffffff; 
-            --text: #1a1a1a; 
-            --accent: #ff6b6b; 
-            --secondary: #f8f9fa; 
-            --gray: #8e8e93; 
-        }
-
-        body { 
-            font-family: -apple-system, system-ui, sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
-            margin: 0; 
-            padding-bottom: 50px; 
-            -webkit-user-select: none;
-        }
-
-        /* Header */
-        .nav-header { 
-            padding: 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .brand { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
+        :root { --bg: #ffffff; --text: #1a1a1a; --accent: #ff6b6b; --secondary: #f8f9fa; --gray: #8e8e93; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; }
+        .nav-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-size: 26px; font-weight: 900; }
         .brand span { color: var(--accent); }
-        .cart-icon { 
-            background: #2c2c2e; 
-            color: white; 
-            width: 45px; 
-            height: 45px; 
-            border-radius: 14px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 18px;
-        }
-
-        /* Banner */
         .featured-banner {
-            margin: 0 20px 30px;
-            background: linear-gradient(135deg, #2c2c2e 0%, #000000 100%);
-            border-radius: 30px;
-            padding: 25px;
-            position: relative;
-            color: white;
-            overflow: hidden;
-            height: 170px;
-            display: flex;
-            align-items: center;
+            margin: 0 20px 30px; background: linear-gradient(135deg, #2c2c2e 0%, #000000 100%);
+            border-radius: 30px; padding: 25px; position: relative; color: white; overflow: hidden; height: 160px; display: flex; align-items: center;
         }
-        .banner-content { position: relative; z-index: 2; width: 55%; }
-        .banner-img { 
-            position: absolute; 
-            right: -15px; 
-            bottom: 5px; 
-            width: 60%; 
-            transform: rotate(-10deg); 
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); 
-            transition: 0.3s;
-        }
-
-        /* Grid */
-        .section-title { padding: 0 20px 15px; font-weight: 800; font-size: 22px; }
-        .product-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            padding: 0 20px; 
-        }
-        .product-card { 
-            background: var(--secondary); 
-            border-radius: 25px; 
-            padding: 15px; 
-            transition: 0.2s;
-            border: 1px solid rgba(0,0,0,0.02);
-        }
-        .product-card:active { transform: scale(0.96); }
-        .prod-img { 
-            width: 100%; 
-            aspect-ratio: 1/1; 
-            object-fit: cover; 
-            border-radius: 20px; 
-            margin-bottom: 12px; 
-        }
-        .prod-title { font-size: 14px; font-weight: 600; color: var(--gray); margin-bottom: 4px; }
-        .prod-price { font-size: 18px; font-weight: 800; color: var(--text); }
-
-        #loader { text-align: center; padding: 40px; color: var(--gray); font-weight: 600; }
+        .banner-img { position: absolute; right: -10px; bottom: 5px; width: 55%; transform: rotate(-10deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
+        .product-card { background: var(--secondary); border-radius: 25px; padding: 15px; }
+        .prod-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 20px; margin-bottom: 10px; }
+        #loader { text-align: center; padding: 30px; color: var(--gray); font-weight: bold; }
     </style>
 </head>
 <body>
-
     <div class="nav-header">
         <div class="brand">თარო<span>.</span></div>
-        <div class="cart-icon"><i class="fa-solid fa-bag-shopping"></i></div>
+        <div style="background:#2c2c2e; color:white; padding:10px; border-radius:12px;"><i class="fa-solid fa-bag-shopping"></i></div>
     </div>
 
     <div class="featured-banner">
-        <div class="banner-content">
+        <div style="position:relative; z-index:2; width:55%;">
+            <div style="color:var(--accent); font-weight:700; font-size:12px; text-transform:uppercase;">New Collection</div>
+            <div style="font-size:18px; font-weight:800; line-height:1.2;">საუკეთესო ხარისხის ბოტასები</div>
+        </div>
+        <img id="main-banner-img" src="" class="banner-img">
+    </div>
+
+    <div style="padding: 0 20px 15px; font-weight: 800; font-size: 20px;">პროდუქცია</div>
+    <div id="loader">იტვირთება მონაცემები...</div>
+    <div class="product-grid" id="product-grid"></div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const PRODUCTS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv'; 
+        const DESIGN_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=2144703770&output=csv';
+
+        // ფუნქცია მონაცემების გასუფთავებისთვის
+        function parseCSV(text) {
+            return text.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim()));
+        }
+
+        async function loadStore() {
+            try {
+                // 1. ბანერის ჩატვირთვა
+                const dRes = await fetch(DESIGN_CSV + '&cache=' + Date.now());
+                const dRows = parseCSV(await dRes.text());
+                if (dRows[1] && dRows[1][1]) document.getElementById('main-banner-img').src = dRows[1][1];
+
+                // 2. პროდუქტების ჩატვირთვა
+                const pRes = await fetch(PRODUCTS_CSV + '&cache=' + Date.now());
+                const pRows = parseCSV(await pRes.text()).slice(1);
+                const grid = document.getElementById('product-grid');
+                grid.innerHTML = '';
+                document.getElementById('loader').style.display = 'none';
+
+                pRows.forEach(cols => {
+                    if(cols.length >= 3 && cols[0] !== "") {
+                        grid.innerHTML += `
+                            <div class="product-card" onclick="tg.MainButton.setText('შეკვეთა: ${cols[0]}').show()">
+                                <img src="${cols[2]}" class="prod-img" onerror="this.src='https://via.placeholder.com/150'">
+                                <div style="font-weight:700; font-size:14px; margin-bottom:5px;">${cols[0]}</div>
+                                <div style="color:var(--accent); font-weight:800;">${cols[1]}₾</div>
+                            </div>`;
+                    }
+                });
+            } catch (e) {
+                document.getElementById('loader').innerText = "შეცდომა ჩატვირთვისას";
+            }
+        }
+        loadStore();
+    </script>
+</body>
+</html>
