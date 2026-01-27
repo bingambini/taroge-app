@@ -3,157 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Taro Store</title>
+    <title>Taro Premium Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --bg: #f4f4f7; --text: #1a1a1a; --accent: #ff6b6b; --card: #ffffff; --gray: #9b9b9b; }
-        
+        :root { --bg: #f4f4f7; --text: #1a1a1a; --accent: #ff6b6b; --card: #ffffff; --black: #1c1c1e; --gray: #9b9b9b; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; overflow-x: hidden; }
 
-        /* Header */
+        /* Header & Logo */
         .header { padding: 25px 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 0 0 30px 30px; }
-        .logo { font-size: 24px; font-weight: 800; letter-spacing: -1px; }
+        .logo { font-size: 24px; font-weight: 900; }
         .logo span { color: var(--accent); }
-        .top-icons { display: flex; gap: 10px; background: #2c2c2e; padding: 8px 15px; border-radius: 20px; color: white; }
+        .top-btns { display: flex; gap: 10px; background: var(--black); padding: 8px 15px; border-radius: 20px; color: white; }
 
         /* Banner */
-        .banner {
-            margin: 20px; background: #1c1c1e; border-radius: 35px; padding: 25px; 
-            position: relative; color: white; min-height: 200px; display: flex; align-items: center;
-        }
-        .banner-info { width: 55%; z-index: 2; }
-        .banner-img { position: absolute; right: -15px; bottom: 10px; width: 70%; transform: rotate(-15deg); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5)); }
-
-        /* Tabs */
-        .tabs { display: flex; gap: 25px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; }
-        .tab-item { font-weight: 700; font-size: 18px; color: var(--gray); white-space: nowrap; }
-        .tab-item.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
+        .banner { margin: 20px; background: var(--black); border-radius: 35px; padding: 25px; position: relative; color: white; min-height: 180px; display: flex; align-items: center; }
+        .banner-img { position: absolute; right: -10px; bottom: 10px; width: 60%; transform: rotate(-15deg); filter: drop-shadow(0 15px 25px rgba(0,0,0,0.5)); }
 
         /* Grid */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; }
-        .card { background: var(--card); border-radius: 30px; padding: 15px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.03); }
-        .card-img { width: 100%; aspect-ratio: 1; object-fit: contain; margin-bottom: 15px; }
-        .card-name { font-size: 14px; font-weight: 600; color: var(--gray); }
-        .card-price { font-size: 18px; font-weight: 800; margin-top: 5px; }
-        .wish-icon { position: absolute; top: 15px; right: 15px; color: var(--accent); font-size: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
+        .card { background: white; border-radius: 25px; padding: 15px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        .card-img { width: 100%; aspect-ratio: 1; object-fit: contain; }
 
-        /* Navbar */
-        .nav {
-            position: fixed; bottom: 25px; left: 20px; right: 20px; 
-            background: #1c1c1e; border-radius: 30px; height: 70px;
-            display: flex; justify-content: space-around; align-items: center; z-index: 1000;
-        }
-        .nav-btn { color: #555; font-size: 22px; cursor: pointer; transition: 0.3s; }
-        .nav-btn.active { color: white; }
+        /* --- DETAILED PAGE & SLIDER --- */
+        #details { position: fixed; top: 100%; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; transition: 0.4s cubic-bezier(0.1, 0.7, 0.1, 1); overflow-y: auto; }
+        #details.active { top: 0; }
 
-        /* Details Overlay */
-        #details { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; background: white; z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
-        #details.active { left: 0; }
-        .close-circle { position: absolute; top: 20px; left: 20px; width: 45px; height: 45px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .slider-container { background: #f8f9fb; width: 100%; height: 350px; position: relative; display: flex; align-items: center; border-radius: 0 0 50px 50px; overflow: hidden; }
+        .slider-track { display: flex; transition: 0.5s ease-in-out; width: 100%; height: 100%; }
+        .slide { min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 40px; box-sizing: border-box; }
+        .slide img { width: 90%; transform: rotate(-10deg); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.1)); }
+        
+        .dots { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: center; gap: 8px; }
+        .dot { width: 8px; height: 8px; background: #ddd; border-radius: 50%; transition: 0.3s; }
+        .dot.active { background: var(--accent); width: 20px; border-radius: 10px; }
+
+        .det-content { padding: 30px 25px; }
+        .size-grid { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+        .size-btn { min-width: 50px; height: 50px; border: 2px solid #eee; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .size-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+        .price-bar { position: sticky; bottom: 0; background: white; padding: 20px 25px; border-top: 1px solid #eee; display: flex; align-items: center; gap: 20px; }
+        .buy-btn { flex: 1; background: var(--black); color: white; padding: 18px; border-radius: 20px; border: none; font-size: 18px; font-weight: 700; }
+
+        /* Navigation */
+        .nav { position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--black); border-radius: 25px; height: 65px; display: flex; justify-content: space-around; align-items: center; }
+        .nav i { color: #555; font-size: 20px; }
+        .nav i.active { color: white; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="logo">თარო<span>.</span></div>
-        <div class="top-icons"><i class="fa-solid fa-border-all"></i> | <i class="fa-solid fa-bag-shopping"></i></div>
+        <div class="top-btns"><i class="fa-solid fa-border-all"></i> | <i class="fa-solid fa-bag-shopping"></i></div>
     </div>
 
-    <div class="banner" id="banner">
-        <div class="banner-info">
-            <div style="font-size: 12px; opacity: 0.7;">New Collection</div>
-            <div id="b-name" style="font-size: 22px; font-weight: 800; margin: 5px 0;">იტვირთება...</div>
-            <div id="b-price" style="font-size: 20px; font-weight: 700;"></div>
+    <div class="banner" id="banner-box">
+        <div style="width:55%; z-index:2;">
+            <div style="font-size:11px; opacity:0.7; text-transform:uppercase;">New Collection</div>
+            <div id="b-name" style="font-size:20px; font-weight:800; margin:5px 0;">...</div>
+            <div id="b-price" style="font-size:18px; font-weight:700; color:var(--accent);"></div>
         </div>
         <img id="b-img" src="" class="banner-img">
     </div>
 
-    <div class="tabs">
-        <div class="tab-item active">Shoes <br> <small>305 item</small></div>
-        <div class="tab-item">Tops <br> <small>241 item</small></div>
-        <div class="tab-item">Pants <br> <small>130 item</small></div>
-    </div>
-
-    <div class="grid" id="product-grid"></div>
+    <div class="grid" id="main-grid"></div>
 
     <div class="nav">
-        <div class="nav-btn active"><i class="fa-solid fa-house-chimney"></i></div>
-        <div class="nav-btn"><i class="fa-solid fa-magnifying-glass"></i></div>
-        <div class="nav-btn"><i class="fa-regular fa-heart"></i></div>
-        <div class="nav-btn"><i class="fa-regular fa-user"></i></div>
+        <i class="fa-solid fa-house-chimney active"></i>
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <i class="fa-regular fa-heart"></i>
+        <i class="fa-regular fa-user"></i>
     </div>
 
     <div id="details">
-        <div class="close-circle" onclick="closeDetails()"><i class="fa-solid fa-xmark"></i></div>
-        <div style="background: #f8f8f8; padding: 60px 20px; text-align: center; border-radius: 0 0 50px 50px;">
-            <img id="det-img" src="" style="width: 80%; transform: rotate(-10deg);">
+        <div style="position:absolute; top:20px; left:20px; z-index:100; background:white; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 5px 10px rgba(0,0,0,0.1);" onclick="closeDetails()">
+            <i class="fa-solid fa-chevron-left"></i>
         </div>
-        <div style="padding: 30px 25px;">
-            <div id="det-name" style="font-size: 28px; font-weight: 900;"></div>
-            <div id="det-price" style="font-size: 24px; font-weight: 800; color: var(--accent); margin-top: 5px;"></div>
-            <p id="det-desc" style="color: var(--gray); line-height: 1.6; margin-top: 20px;"></p>
-            <button onclick="tg.close()" style="width: 100%; padding: 20px; background: #1a1a1a; color: white; border: none; border-radius: 20px; font-size: 18px; font-weight: 700; margin-top: 30px;">ყიდვა</button>
+
+        <div class="slider-container">
+            <div class="slider-track" id="slider-track" ontouchstart="handleTouchStart(event)" ontouchmove="handleTouchMove(event)"></div>
+            <div class="dots" id="dots"></div>
+        </div>
+
+        <div class="det-content">
+            <div id="det-name" style="font-size:26px; font-weight:900;"></div>
+            <div style="font-size:14px; color:var(--gray); margin-top:5px;">პრემიუმ ხარისხის ბოტასი</div>
+            
+            <div style="font-weight:700; margin-top:25px;">აირჩიე ზომა</div>
+            <div class="size-grid">
+                <div class="size-btn" onclick="setS(this)">39</div>
+                <div class="size-btn active" onclick="setS(this)">40</div>
+                <div class="size-btn" onclick="setS(this)">41</div>
+                <div class="size-btn" onclick="setS(this)">42</div>
+                <div class="size-btn" onclick="setS(this)">43</div>
+            </div>
+
+            <div style="font-weight:700; margin-top:20px;">აღწერა</div>
+            <p id="det-desc" style="color:var(--gray); line-height:1.6; font-size:14px;"></p>
+        </div>
+
+        <div class="price-bar">
+            <div id="det-price" style="font-size:22px; font-weight:900;"></div>
+            <button class="buy-btn" onclick="buy()">ყიდვა</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        const CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv';
 
-        const URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv';
+        let currentProduct = null;
+        let slideIndex = 0;
 
-        async function load() {
-            const res = await fetch(URL + '&t=' + Date.now());
-            const text = await res.text();
-            const rows = text.split('\n').slice(1);
-            const grid = document.getElementById('product-grid');
+        async function init() {
+            const r = await fetch(CSV + '&t=' + Date.now());
+            const t = await r.text();
+            const rows = t.split('\n').slice(1);
+            const grid = document.getElementById('main-grid');
             grid.innerHTML = '';
 
             rows.forEach(row => {
                 const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 if(c.length < 3) return;
-                
-                const p = {
-                    name: c[0].replace(/"/g, '').trim(),
-                    price: c[1].replace(/"/g, '').trim(),
-                    img: c[2].replace(/"/g, '').trim(),
-                    desc: c[3] ? c[3].replace(/"/g, '').trim() : '',
-                    top: c[4] ? c[4].toLowerCase().includes('top') : false
-                };
+                const imgs = c[2].replace(/"/g, '').split(',').map(s => s.trim());
+                const p = { name: c[0].replace(/"/g, ''), price: c[1].replace(/"/g, ''), images: imgs, desc: c[3]?.replace(/"/g, ''), top: c[4]?.toLowerCase().includes('top') };
 
                 if(p.top) {
                     document.getElementById('b-name').innerText = p.name;
-                    document.getElementById('b-price').innerText = '$' + p.price;
-                    document.getElementById('b-img').src = p.img;
-                    document.getElementById('banner').onclick = () => openDetails(p);
+                    document.getElementById('b-price').innerText = p.price + '₾';
+                    document.getElementById('b-img').src = p.images[0];
+                    document.getElementById('banner-box').onclick = () => openDetails(p);
                 }
 
-                const el = document.createElement('div');
-                el.className = 'card';
-                el.innerHTML = `
-                    <i class="fa-regular fa-bookmark wish-icon"></i>
-                    <img src="${p.img}" class="card-img">
-                    <div class="card-name">${p.name}</div>
-                    <div class="card-price">$${p.price}</div>
-                `;
-                el.onclick = () => openDetails(p);
-                grid.appendChild(el);
+                const d = document.createElement('div');
+                d.className = 'card';
+                d.innerHTML = `<img src="${p.images[0]}" class="card-img"><div style="font-weight:700;margin-top:10px;">${p.name}</div><div style="color:var(--accent);font-weight:800;">${p.price}₾</div>`;
+                d.onclick = () => openDetails(p);
+                grid.appendChild(d);
             });
         }
 
         function openDetails(p) {
-            tg.HapticFeedback.impactOccurred('medium');
+            currentProduct = p;
+            slideIndex = 0;
             document.getElementById('det-name').innerText = p.name;
-            document.getElementById('det-price').innerText = '$' + p.price;
-            document.getElementById('det-img').src = p.img;
-            document.getElementById('det-desc').innerText = p.desc || "საუკეთესო ხარისხის ბოტასი თქვენი კოლექციისთვის.";
+            document.getElementById('det-price').innerText = p.price + '₾';
+            document.getElementById('det-desc').innerText = p.desc || "საუკეთესო ხარისხის მოდელი.";
+            
+            const track = document.getElementById('slider-track');
+            const dots = document.getElementById('dots');
+            track.innerHTML = ''; dots.innerHTML = '';
+
+            p.images.forEach((img, i) => {
+                track.innerHTML += `<div class="slide"><img src="${img}"></div>`;
+                dots.innerHTML += `<div class="dot ${i===0?'active':''}"></div>`;
+            });
+
+            updateSlider();
             document.getElementById('details').classList.add('active');
         }
 
-        function closeDetails() { document.getElementById('details').classList.remove('active'); }
+        function updateSlider() {
+            document.getElementById('slider-track').style.transform = `translateX(-${slideIndex * 100}%)`;
+            document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === slideIndex));
+        }
 
-        load();
+        // Touch Control for Slider
+        let xDown = null;
+        function handleTouchStart(evt) { xDown = evt.touches[0].clientX; }
+        function handleTouchMove(evt) {
+            if (!xDown) return;
+            let xUp = evt.touches[0].clientX;
+            let xDiff = xDown - xUp;
+            if (Math.abs(xDiff) > 50) {
+                if (xDiff > 0 && slideIndex < currentProduct.images.length - 1) slideIndex++;
+                else if (xDiff < 0 && slideIndex > 0) slideIndex--;
+                updateSlider();
+                xDown = null;
+            }
+        }
+
+        function setS(el) {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            tg.HapticFeedback.selectionChanged();
+        }
+
+        function closeDetails() { document.getElementById('details').classList.remove('active'); }
+        
+        function buy() {
+            const size = document.querySelector('.size-btn.active').innerText;
+            tg.sendData(JSON.stringify({product: currentProduct.name, size: size}));
+            tg.close();
+        }
+
+        init();
     </script>
 </body>
 </html>
