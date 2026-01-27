@@ -7,35 +7,31 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --bg: #f4f4f7; --text: #1a1a1a; --accent: #ff6b6b; --card: #ffffff; --black: #1c1c1e; --gray: #9b9b9b; }
+        :root { --bg: #f4f4f7; --text: #1a1a1a; --accent: #ff6b6b; --black: #1c1c1e; --gray: #9b9b9b; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; overflow-x: hidden; }
 
+        /* Header & Cards */
         .header { padding: 25px 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 0 0 30px 30px; }
         .logo { font-size: 24px; font-weight: 900; }
-        .logo span { color: var(--accent); }
-
-        .banner { margin: 20px; background: var(--black); border-radius: 35px; padding: 25px; position: relative; color: white; min-height: 160px; display: flex; align-items: center; }
-        .banner-img { position: absolute; right: -10px; bottom: 10px; width: 60%; transform: rotate(-15deg); filter: drop-shadow(0 15px 25px rgba(0,0,0,0.5)); }
-
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
         .card { background: white; border-radius: 25px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); cursor: pointer; }
         .card-img { width: 100%; aspect-ratio: 1; object-fit: contain; }
 
-        /* DETAILS PAGE */
+        /* DETAILS PAGE & SLIDER */
         #details { position: fixed; top: 100%; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; transition: 0.4s cubic-bezier(0.1, 0.7, 0.1, 1); overflow-y: auto; }
         #details.active { top: 0; }
 
-        .slider-container { background: #f8f9fb; width: 100%; height: 320px; position: relative; display: flex; align-items: center; border-radius: 0 0 50px 50px; overflow: hidden; }
+        .slider-container { background: #f8f9fb; width: 100%; height: 320px; position: relative; overflow: hidden; display: flex; align-items: center; border-radius: 0 0 50px 50px; }
         .slider-track { display: flex; transition: 0.5s ease; width: 100%; height: 100%; }
         .slide { min-width: 100%; display: flex; justify-content: center; align-items: center; padding: 30px; box-sizing: border-box; }
-        .slide img { width: 85%; transform: rotate(-10deg); }
+        .slide img { width: 85%; transform: rotate(-10deg); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.1)); }
 
         .det-content { padding: 25px; }
         .section-title { font-weight: 700; margin: 20px 0 10px; font-size: 15px; }
 
-        /* Selectors */
-        .selector-grid { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-        .btn-opt { min-width: 50px; height: 45px; border: 2px solid #eee; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; transition: 0.2s; padding: 0 10px; }
+        /* Selection Buttons */
+        .selector-grid { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+        .btn-opt { min-width: 55px; height: 48px; border: 2px solid #eee; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; transition: 0.2s; padding: 0 12px; white-space: nowrap; }
         .btn-opt.active { background: var(--black); color: white; border-color: var(--black); }
 
         .price-bar { position: sticky; bottom: 0; background: white; padding: 20px 25px; border-top: 1px solid #eee; display: flex; align-items: center; gap: 20px; }
@@ -44,17 +40,7 @@
 </head>
 <body>
 
-    <div class="header">
-        <div class="logo">თარო<span>.</span></div>
-    </div>
-
-    <div class="banner" id="banner-box">
-        <div style="width:55%; z-index:2;">
-            <div id="b-name" style="font-size:20px; font-weight:800; margin-bottom:5px;">იტვირთება...</div>
-            <div id="b-price" style="font-size:18px; font-weight:700; color:var(--accent);"></div>
-        </div>
-        <img id="b-img" src="" class="banner-img">
-    </div>
+    <div class="header"><div class="logo">თარო<span>.</span></div></div>
 
     <div class="grid" id="main-grid"></div>
 
@@ -70,11 +56,15 @@
         <div class="det-content">
             <div id="det-name" style="font-size:26px; font-weight:900;"></div>
             
-            <div class="section-title">აირჩიე ფერი</div>
-            <div class="selector-grid" id="color-grid"></div>
+            <div id="color-section">
+                <div class="section-title">აირჩიე ფერი</div>
+                <div class="selector-grid" id="color-grid"></div>
+            </div>
 
-            <div class="section-title">აირჩიე ზომა</div>
-            <div class="selector-grid" id="size-grid"></div>
+            <div id="size-section">
+                <div class="section-title">აირჩიე ზომა</div>
+                <div class="selector-grid" id="size-grid"></div>
+            </div>
 
             <div class="section-title">აღწერა</div>
             <p id="det-desc" style="color:var(--gray); line-height:1.6; font-size:14px;"></p>
@@ -92,7 +82,8 @@
 
         let currentP = null, sIdx = 0, selSize = "", selColor = "";
 
-        const fix = (s) => s ? s.replace(/^"|"$/g, '').trim() : '';
+        // ტექსტის გასუფთავება ზედმეტი ბრჭყალებისგან
+        const fix = (s) => s ? s.replace(/["]+/g, '').trim() : '';
 
         async function init() {
             const r = await fetch(CSV + '&t=' + Date.now());
@@ -107,17 +98,10 @@
                 const p = {
                     name: fix(c[0]), price: fix(c[1]),
                     imgs: fix(c[2]).split(',').map(s => s.trim()),
-                    desc: fix(c[3]), top: fix(c[4]).toLowerCase().includes('top'),
+                    desc: fix(c[3]), 
                     sizes: fix(c[5]) ? fix(c[5]).split(',').map(s => s.trim()) : [],
                     colors: fix(c[6]) ? fix(c[6]).split(',').map(s => s.trim()) : []
                 };
-
-                if(p.top) {
-                    document.getElementById('b-name').innerText = p.name;
-                    document.getElementById('b-price').innerText = p.price + '₾';
-                    document.getElementById('b-img').src = p.imgs[0];
-                    document.getElementById('banner-box').onclick = () => openDetails(p);
-                }
 
                 const d = document.createElement('div');
                 d.className = 'card';
@@ -131,31 +115,37 @@
             currentP = p; sIdx = 0; selSize = ""; selColor = "";
             document.getElementById('det-name').innerText = p.name;
             document.getElementById('det-price').innerText = p.price + '₾';
-            document.getElementById('det-desc').innerText = p.desc || "პრემიუმ ხარისხი.";
+            document.getElementById('det-desc').innerText = p.desc || "პრემიუმ ხარისხის პროდუქცია.";
             
-            // Slider
+            // Slider setup
             const track = document.getElementById('slider-track');
             track.innerHTML = p.imgs.map(img => `<div class="slide"><img src="${img}"></div>`).join('');
             track.style.transform = `translateX(0)`;
 
-            // Selectors
-            setupSelector('size-grid', p.sizes, (val) => selSize = val);
-            setupSelector('color-grid', p.colors, (val) => selColor = val);
+            // Selectors setup
+            renderOpts('color-grid', p.colors, (v) => selColor = v, 'color-section');
+            renderOpts('size-grid', p.sizes, (v) => selSize = v, 'size-section');
 
             document.getElementById('details').classList.add('active');
         }
 
-        function setupSelector(id, list, callback) {
+        function renderOpts(id, list, cb, sectionId) {
             const container = document.getElementById(id);
-            container.innerHTML = list.length ? list.map(item => `<div class="btn-opt" onclick="selectOpt(this, '${id}', '${item}')">${item}</div>`).join('') : '<small>არ არის</small>';
-            function selectOpt(el, gid, val) {
-                document.querySelectorAll(`#${gid} .btn-opt`).forEach(b => b.classList.remove('active'));
-                el.classList.add('active');
-                callback(val);
-                tg.HapticFeedback.selectionChanged();
-            }
-            window.selectOpt = selectOpt;
+            const section = document.getElementById(sectionId);
+            if (!list.length) { section.style.display = 'none'; return; }
+            section.style.display = 'block';
+            container.innerHTML = list.map(val => `<div class="btn-opt" onclick="activateBtn(this, '${id}', '${val}', ${JSON.stringify(cb)})">${val}</div>`).join('');
         }
+
+        // გლობალური ფუნქცია ღილაკების აქტივაციისთვის
+        window.activateBtn = (el, gridId, val, cb) => {
+            document.querySelectorAll(`#${gridId} .btn-opt`).forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            // ვინაიდან JSON.stringify-მ შეიძლება ფუნქცია დააზიანოს, პირდაპირ მივმართავთ ლოგიკას
+            if(gridId === 'color-grid') selColor = val;
+            if(gridId === 'size-grid') selSize = val;
+            tg.HapticFeedback.selectionChanged();
+        };
 
         function closeDetails() { document.getElementById('details').classList.remove('active'); }
 
@@ -175,9 +165,14 @@
 
         function buy() {
             if ((currentP.sizes.length && !selSize) || (currentP.colors.length && !selColor)) {
-                tg.showAlert("გთხოვთ აირჩიოთ ფერი და ზომა!"); return;
+                tg.showAlert("გთხოვთ აირჩიოთ ყველა პარამეტრი!"); return;
             }
-            tg.sendData(JSON.stringify({product: currentP.name, size: selSize, color: selColor}));
+            tg.sendData(JSON.stringify({
+                product: currentP.name, 
+                size: selSize, 
+                color: selColor,
+                price: currentP.price
+            }));
             tg.close();
         }
 
