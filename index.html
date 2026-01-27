@@ -8,37 +8,42 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --bg: #ffffff; --text: #1a1a1a; --accent: #ff6b6b; --secondary: #f8f9fa; --gray: #8e8e93; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 30px; }
+        
         .nav-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
         .brand { font-size: 26px; font-weight: 900; }
         .brand span { color: var(--accent); }
+        .cart-btn { background: #2c2c2e; color: white; padding: 12px; border-radius: 15px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+
         .featured-banner {
-            margin: 0 20px 30px; background: linear-gradient(135deg, #2c2c2e 0%, #000000 100%);
-            border-radius: 30px; padding: 25px; position: relative; color: white; overflow: hidden; height: 160px; display: flex; align-items: center;
+            margin: 0 20px 30px; background: linear-gradient(135deg, #1c1c1e 0%, #000000 100%);
+            border-radius: 35px; padding: 25px; position: relative; color: white; overflow: hidden; height: 160px; display: flex; align-items: center;
         }
-        .banner-img { position: absolute; right: -10px; bottom: 5px; width: 55%; transform: rotate(-10deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
+        .banner-img { position: absolute; right: -15px; bottom: 5px; width: 60%; transform: rotate(-10deg); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6)); }
+        
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
-        .product-card { background: var(--secondary); border-radius: 25px; padding: 15px; }
+        .product-card { background: var(--secondary); border-radius: 25px; padding: 12px; transition: 0.2s; border: 1px solid rgba(0,0,0,0.03); }
+        .product-card:active { transform: scale(0.95); }
         .prod-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 20px; margin-bottom: 10px; }
-        #loader { text-align: center; padding: 30px; color: var(--gray); font-weight: bold; }
+        .prod-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+        .prod-price { font-size: 16px; font-weight: 800; color: var(--accent); }
     </style>
 </head>
 <body>
     <div class="nav-header">
         <div class="brand">თარო<span>.</span></div>
-        <div style="background:#2c2c2e; color:white; padding:10px; border-radius:12px;"><i class="fa-solid fa-bag-shopping"></i></div>
+        <div class="cart-btn"><i class="fa-solid fa-bag-shopping"></i></div>
     </div>
 
     <div class="featured-banner">
         <div style="position:relative; z-index:2; width:55%;">
-            <div style="color:var(--accent); font-weight:700; font-size:12px; text-transform:uppercase;">New Collection</div>
-            <div style="font-size:18px; font-weight:800; line-height:1.2;">საუკეთესო ხარისხის ბოტასები</div>
+            <div style="color:var(--accent); font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:1px;">New Collection</div>
+            <div style="font-size:18px; font-weight:800; line-height:1.2; margin-top:5px;">საუკეთესო ხარისხის ბოტასები</div>
         </div>
-        <img id="main-banner-img" src="" class="banner-img">
+        <img id="main-banner-img" src="" class="banner-img" style="display: none;">
     </div>
 
     <div style="padding: 0 20px 15px; font-weight: 800; font-size: 20px;">პროდუქცია</div>
-    <div id="loader">იტვირთება მონაცემები...</div>
     <div class="product-grid" id="product-grid"></div>
 
     <script>
@@ -48,40 +53,45 @@
         const PRODUCTS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=0&output=csv'; 
         const DESIGN_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?gid=2144703770&output=csv';
 
-        // ფუნქცია მონაცემების გასუფთავებისთვის
-        function parseCSV(text) {
-            return text.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim()));
-        }
-
-        async function loadStore() {
+        async function loadData() {
             try {
-                // 1. ბანერის ჩატვირთვა
-                const dRes = await fetch(DESIGN_CSV + '&cache=' + Date.now());
-                const dRows = parseCSV(await dRes.text());
-                if (dRows[1] && dRows[1][1]) document.getElementById('main-banner-img').src = dRows[1][1];
+                // ბანერის ჩატვირთვა
+                const dRes = await fetch(DESIGN_CSV + '&t=' + Date.now());
+                const dLines = (await dRes.text()).split('\n');
+                // ვეძებთ პირველ უჯრას, რომელიც იწყება http-ით
+                const bannerLine = dLines.find(l => l.includes('http'));
+                if (bannerLine) {
+                    const url = bannerLine.split(',').find(c => c.includes('http')).replace(/"/g, "").trim();
+                    const img = document.getElementById('main-banner-img');
+                    img.src = url;
+                    img.style.display = 'block';
+                }
 
-                // 2. პროდუქტების ჩატვირთვა
-                const pRes = await fetch(PRODUCTS_CSV + '&cache=' + Date.now());
-                const pRows = parseCSV(await pRes.text()).slice(1);
+                // პროდუქტების ჩატვირთვა
+                const pRes = await fetch(PRODUCTS_CSV + '&t=' + Date.now());
+                const pLines = (await pRes.text()).split('\n').slice(1);
                 const grid = document.getElementById('product-grid');
                 grid.innerHTML = '';
-                document.getElementById('loader').style.display = 'none';
 
-                pRows.forEach(cols => {
-                    if(cols.length >= 3 && cols[0] !== "") {
-                        grid.innerHTML += `
-                            <div class="product-card" onclick="tg.MainButton.setText('შეკვეთა: ${cols[0]}').show()">
-                                <img src="${cols[2]}" class="prod-img" onerror="this.src='https://via.placeholder.com/150'">
-                                <div style="font-weight:700; font-size:14px; margin-bottom:5px;">${cols[0]}</div>
-                                <div style="color:var(--accent); font-weight:800;">${cols[1]}₾</div>
-                            </div>`;
+                pLines.forEach(line => {
+                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if (cols.length >= 3) {
+                        const name = cols[0].replace(/"/g, "").trim();
+                        const price = cols[1].replace(/"/g, "").trim();
+                        const photo = cols[2].replace(/"/g, "").trim();
+                        if (name && photo) {
+                            grid.innerHTML += `
+                                <div class="product-card" onclick="tg.MainButton.setText('შეკვეთა: ${name}').show()">
+                                    <img src="${photo}" class="prod-img">
+                                    <div class="prod-name">${name}</div>
+                                    <div class="prod-price">${price}₾</div>
+                                </div>`;
+                        }
                     }
                 });
-            } catch (e) {
-                document.getElementById('loader').innerText = "შეცდომა ჩატვირთვისას";
-            }
+            } catch (e) { console.error(e); }
         }
-        loadStore();
+        loadData();
     </script>
 </body>
 </html>
