@@ -3,158 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>თარო - Premium Store</title>
+    <title>თარო - Smart Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --accent: #ff6b6b;
-            --secondary-bg: #f8f9fa;
-            --gray: #8e8e93;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 0;
-            padding-bottom: 30px;
-        }
-
-        /* Header Area */
-        .nav-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-        }
-        .brand { font-size: 22px; font-weight: 800; letter-spacing: -1px; }
-        .header-icons { display: flex; gap: 15px; }
-        .icon-btn { background: #2c2c2e; color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .badge { position: absolute; top: -5px; right: -5px; background: var(--accent); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
-
-        /* Search Bar */
-        .search-container { padding: 0 20px; margin-bottom: 25px; }
-        .search-bar { background: var(--secondary-bg); border-radius: 15px; padding: 12px 15px; display: flex; align-items: center; gap: 10px; color: var(--gray); }
+        :root { --bg: #ffffff; --text: #1a1a1a; --accent: #ff6b6b; --secondary: #f8f9fa; --gray: #8e8e93; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; }
+        
+        .nav-header { display: flex; justify-content: space-between; padding: 20px; align-items: center; }
+        .brand { font-size: 24px; font-weight: 800; color: var(--text); }
+        .brand span { color: var(--accent); }
+        
+        .search-container { padding: 0 20px; margin-bottom: 20px; }
+        .search-bar { background: var(--secondary); border-radius: 15px; padding: 12px; display: flex; align-items: center; gap: 10px; color: var(--gray); }
         .search-bar input { border: none; background: none; outline: none; width: 100%; font-size: 16px; }
 
-        /* Featured Banner */
-        .featured-banner {
-            margin: 0 20px 30px;
-            background: linear-gradient(135deg, #2c2c2e 0%, #000000 100%);
-            border-radius: 30px;
-            padding: 25px;
-            position: relative;
-            color: white;
-            overflow: hidden;
-            height: 180px;
-        }
-        .banner-content { width: 60%; position: relative; z-index: 2; }
-        .banner-label { font-size: 18px; font-weight: 700; margin-bottom: 10px; display: block; }
-        .banner-price { font-size: 24px; font-weight: 800; color: #fff; }
-        .banner-img { position: absolute; right: -10px; bottom: 0; width: 55%; z-index: 1; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
-
-        /* Categories */
-        .section-title { padding: 0 20px; font-size: 20px; font-weight: 800; margin-bottom: 15px; display: flex; align-items: baseline; gap: 8px; }
-        .section-title span { color: var(--gray); font-size: 14px; font-weight: 400; }
-        .categories { display: flex; gap: 20px; overflow-x: auto; padding: 0 20px 25px; scrollbar-width: none; }
-        .cat-item { text-align: left; min-width: 80px; }
-        .cat-name { font-weight: 700; font-size: 18px; color: var(--accent); }
-        .cat-count { font-size: 12px; color: var(--gray); margin-top: 4px; }
-
-        /* Product Grid */
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
-        .product-card { background: var(--secondary-bg); border-radius: 25px; padding: 15px; position: relative; }
-        .wishlist-btn { position: absolute; top: 15px; right: 15px; color: var(--accent); background: white; width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .prod-img { width: 100%; margin-bottom: 10px; }
-        .rating { font-size: 12px; color: var(--gray); display: flex; align-items: center; gap: 4px; margin-bottom: 5px; }
-        .rating i { color: #ffcc00; font-size: 10px; }
-        .prod-title { font-size: 14px; font-weight: 600; color: var(--gray); margin-bottom: 5px; }
-        .prod-price { font-size: 18px; font-weight: 800; }
+        .product-card { background: var(--secondary); border-radius: 25px; padding: 15px; transition: 0.2s; }
+        .product-card:active { transform: scale(0.96); }
+        .prod-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 18px; margin-bottom: 10px; }
+        .prod-title { font-size: 14px; font-weight: 600; color: var(--gray); margin-bottom: 4px; }
+        .prod-price { font-size: 18px; font-weight: 800; color: var(--text); }
+        
+        #loader { text-align: center; padding: 50px; font-weight: bold; color: var(--gray); }
     </style>
 </head>
 <body>
 
     <div class="nav-header">
         <div class="brand">თარო<span>.</span></div>
-        <div class="header-icons">
-            <div class="icon-btn"><i class="fa-solid fa-grip-vertical"></i></div>
-            <div class="icon-btn">
-                <i class="fa-solid fa-bag-shopping"></i>
-                <span class="badge" id="cart-count">0</span>
-            </div>
-        </div>
+        <div style="background: #2c2c2e; color:white; padding: 10px; border-radius: 12px;"><i class="fa-solid fa-bag-shopping"></i></div>
     </div>
 
     <div class="search-container">
-        <div class="search-bar">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="მოძებნე ბრენდი ან ნივთი...">
-        </div>
+        <div class="search-bar"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="მოძებნე თარო..."></div>
     </div>
 
-    <div class="featured-banner">
-        <div class="banner-content">
-            <span style="color: var(--gray); font-size: 14px;">ახალი კოლექცია</span>
-            <span class="banner-label">სკანდინავიური თარო "ელბა"</span>
-            <span class="banner-price">290.00₾</span>
-        </div>
-        <img src="https://www.ikea.com/ge/ka/images/products/kallax-shelving-unit-white__0644757_pe702720_s5.jpg" class="banner-img" alt="Furniture">
-    </div>
-
-    <div class="section-title">კატეგორიები</div>
-    <div class="categories">
-        <div class="cat-item">
-            <div class="cat-name">ავეჯი</div>
-            <div class="cat-count">305 ნივთი</div>
-        </div>
-        <div class="cat-item">
-            <div class="cat-name" style="color: var(--gray);">დეკორი</div>
-            <div class="cat-count">241 ნივთი</div>
-        </div>
-        <div class="cat-item">
-            <div class="cat-name" style="color: var(--gray);">წიგნები</div>
-            <div class="cat-count">130 ნივთი</div>
-        </div>
-    </div>
-
-    <div class="product-grid">
-        <div class="product-card" onclick="addToCart('კედლის თარო', 120)">
-            <div class="wishlist-btn"><i class="fa-regular fa-bookmark"></i></div>
-            <img src="https://www.ikea.com/ge/ka/images/products/lack-wall-shelf-white__0641154_pe699971_s5.jpg" class="prod-img">
-            <div class="rating"><i class="fa-solid fa-star"></i> 4.8</div>
-            <div class="prod-title">LACK მოდელი</div>
-            <div class="prod-price">120.00₾</div>
-        </div>
-
-        <div class="product-card" onclick="addToCart('წიგნის კარადა', 450)">
-            <div class="wishlist-btn"><i class="fa-regular fa-bookmark"></i></div>
-            <img src="https://www.ikea.com/ge/ka/images/products/billy-bookcase-white__0625599_pe692386_s5.jpg" class="prod-img">
-            <div class="rating"><i class="fa-solid fa-star"></i> 4.9</div>
-            <div class="prod-title">BILLY კლასიკა</div>
-            <div class="prod-price">450.00₾</div>
-        </div>
-    </div>
+    <div id="loader">იტვირთება მაღაზია...</div>
+    <div class="product-grid" id="grid"></div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let count = 0;
-        function addToCart(name, price) {
-            count++;
-            document.getElementById('cart-count').innerText = count;
+        // !!! აქ ჩასვი შენი Google Sheets-ის CSV ლინკი !!!
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?output=csv'; 
+
+        async function initStore() {
+            try {
+                const response = await fetch(SHEET_CSV_URL);
+                const data = await response.text();
+                const rows = data.split('\n').slice(1); // გამოვტოვოთ სათაურები
+                
+                const grid = document.getElementById('grid');
+                document.getElementById('loader').style.display = 'none';
+                grid.innerHTML = '';
+
+                rows.forEach(row => {
+                    // ვყოფთ მძიმეებით (CSV ფორმატი)
+                    const columns = row.split(',');
+                    if (columns.length >= 3) {
+                        const name = columns[0].trim();
+                        const price = columns[1].trim();
+                        const photo = columns[2].trim();
+                        const rating = columns[3] ? columns[3].trim() : '5.0';
+
+                        grid.innerHTML += `
+                            <div class="product-card" onclick="buyItem('${name}', '${price}')">
+                                <img src="${photo}" class="prod-img" onerror="this.src='https://via.placeholder.com/150'">
+                                <div style="font-size:12px; color:#ffcc00; margin-bottom:5px;"><i class="fa-solid fa-star"></i> ${rating}</div>
+                                <div class="prod-title">${name}</div>
+                                <div class="prod-price">${price}₾</div>
+                            </div>
+                        `;
+                    }
+                });
+            } catch (error) {
+                document.getElementById('loader').innerText = 'შეცდომა მონაცემების ჩატვირთვისას.';
+            }
+        }
+
+        function buyItem(name, price) {
             tg.HapticFeedback.impactOccurred('medium');
-            
             tg.MainButton.setText(`შეკვეთა: ${name} (${price}₾)`);
             tg.MainButton.show();
             tg.MainButton.onClick(() => {
-                tg.sendData(JSON.stringify({product: name, price: price}));
+                tg.sendData(JSON.stringify({item: name, price: price}));
             });
         }
+
+        initStore();
     </script>
 </body>
 </html>
