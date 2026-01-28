@@ -12,17 +12,27 @@
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 140px; box-sizing: border-box; }
         .view.active { display: block; }
         
-        /* Header */
-        .header { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; background: var(--white); position: sticky; top: 0; z-index: 100; min-height: 60px; }
-        .shop-logo { height: 35px; width: auto; object-fit: contain; }
+        /* Compact Header - Updated height to match tab-bar */
+        .header { 
+            padding: 0 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-start; /* Search icon removed, align left */
+            background: var(--white); 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            height: 65px; /* Smaller height */
+        }
+        .shop-logo { height: 30px; width: auto; object-fit: contain; }
 
-        /* Banner */
+        /* Main Banner */
         .main-banner { margin: 12px; height: 180px; border-radius: 25px; overflow: hidden; position: relative; background: #000; display: none; cursor: pointer; }
         .main-banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
         .banner-text { position: absolute; bottom: 20px; left: 20px; color: white; }
         .banner-text h2 { margin: 0; font-size: 24px; font-weight: 900; }
 
-        /* Grid - Clean Version */
+        /* Grid */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: var(--white); border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
@@ -61,8 +71,7 @@
                 <img id="shop-logo-img" class="shop-logo" style="display:none;">
                 <div id="shop-name-text" style="font-weight:900; font-size:18px;"></div>
             </div>
-            <i class="fa-solid fa-magnifying-glass" style="font-size:20px;"></i>
-        </div>
+            </div>
         
         <div class="main-banner" id="hero-banner">
             <img id="h-img">
@@ -76,7 +85,7 @@
     </div>
 
     <div id="category-view" class="view">
-        <div class="header" style="justify-content:center;"><div style="font-weight:900;">კატალოგი</div></div>
+        <div class="header" style="justify-content:center; height:65px;"><div style="font-weight:900;">კატალოგი</div></div>
         <div id="cat-list">
             <div class="cat-card" onclick="filterByCategory('Jackets')">
                 <div class="cat-info"><h2>Jackets</h2></div>
@@ -90,7 +99,7 @@
     </div>
 
     <div id="cart-view" class="view">
-        <div class="header" style="justify-content:center;"><div style="font-weight:900;">კალათა</div></div>
+        <div class="header" style="justify-content:center; height:65px;"><div style="font-weight:900;">კალათა</div></div>
         <div id="cart-list-container"></div>
         <div id="cart-footer" style="display:none;">
             <div class="promo-section">
