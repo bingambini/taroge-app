@@ -131,6 +131,7 @@
             <div class="promo-box" style="margin:10px 0;"><input type="text" id="order-city" placeholder="ქალაქი"></div>
             <div class="promo-box" style="margin:10px 0;"><input type="text" id="order-addr" placeholder="ზუსტი მისამართი"></div>
             <div class="promo-box" style="margin:10px 0;"><input type="tel" id="order-phone" placeholder="ტელეფონი"></div>
+            <div class="promo-box" style="margin:10px 0; background: #eee;"><input type="text" id="order-id-display" readonly style="color: #555; font-weight: bold;"></div>
             <div id="order-summary" style="background:#f2f2f7; padding:15px; border-radius:20px; margin:20px 0;"></div>
             <button class="btn-main" style="margin:0; width:100%;" onclick="processOrder()">დადასტურება</button>
         </div>
@@ -285,9 +286,13 @@
 
         function openCheckout() {
             orderID = Math.floor(100000 + Math.random() * 900000);
+            // გამოვიტანოთ ნომერი გრაფაში
+            document.getElementById('order-id-display').value = "შეკვეთის ნომერი: " + orderID;
+            
             let sub = cart.reduce((a, b) => a + (b.price * b.qty), 0);
             let d = activeDisc.type === 'percent' ? (sub * activeDisc.val / 100) : activeDisc.val;
-            document.getElementById('order-summary').innerHTML = `ჯამი გადასახდელად: <b>${(sub-d).toFixed(0)}₾</b>`;
+            // ტექსტის შეცვლა
+            document.getElementById('order-summary').innerHTML = `გადასახდელი თანხა: <b>${(sub-d).toFixed(0)}₾</b>`;
             document.getElementById('checkout-overlay').style.display = 'flex';
         }
 
