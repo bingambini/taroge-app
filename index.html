@@ -12,35 +12,36 @@
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 140px; box-sizing: border-box; }
         .view.active { display: block; }
         
-        /* Header & Logo */
+        /* Header */
         .header { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; background: var(--white); position: sticky; top: 0; z-index: 100; min-height: 60px; }
-        .shop-logo { height: 35px; width: auto; object-fit: contain; border-radius: 5px; }
+        .shop-logo { height: 35px; width: auto; object-fit: contain; }
 
-        /* Main Banner */
+        /* Banner */
         .main-banner { margin: 12px; height: 180px; border-radius: 25px; overflow: hidden; position: relative; background: #000; display: none; cursor: pointer; }
         .main-banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-        .banner-text { position: absolute; bottom: 20px; left: 20px; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .banner-text { position: absolute; bottom: 20px; left: 20px; color: white; }
         .banner-text h2 { margin: 0; font-size: 24px; font-weight: 900; }
 
-        /* Grid & Cards */
+        /* Grid - Clean Version */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: var(--white); border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card img { width: 100%; aspect-ratio: 1; object-fit: contain; margin-bottom: 10px; }
-        .card h3 { margin: 5px 0; font-size: 14px; color: var(--black); }
+        .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+        .card h3 { margin: 10px 0 5px; font-size: 15px; font-weight: 800; color: var(--black); }
+        .card b { font-size: 14px; color: var(--black); }
 
-        /* Category List */
-        .cat-card { background: var(--white); border-radius: 25px; padding: 20px; margin: 15px; display: flex; align-items: center; justify-content: space-between; position: relative; min-height: 120px; overflow: hidden; cursor: pointer; }
+        /* Categories */
+        .cat-card { background: var(--white); border-radius: 25px; padding: 20px; margin: 15px; display: flex; align-items: center; justify-content: space-between; position: relative; min-height: 120px; overflow: hidden; }
         .cat-info h2 { margin: 0; font-size: 20px; font-weight: 900; }
         .cat-img { width: 40%; position: absolute; right: 0; bottom: 0; object-fit: contain; }
 
-        /* Cart UI */
-        .cart-item { background: white; border-radius: 20px; padding: 15px; margin: 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        /* Cart & Promo */
+        .cart-item { background: white; border-radius: 20px; padding: 15px; margin: 10px; display: flex; align-items: center; gap: 15px; }
         .cart-item img { width: 60px; height: 60px; object-fit: contain; }
         .promo-section { padding: 15px; display: flex; gap: 10px; }
-        .promo-input { flex: 1; padding: 15px; border-radius: 15px; border: 1px solid #e5e5ea; outline: none; font-size: 16px; }
+        .promo-input { flex: 1; padding: 15px; border-radius: 15px; border: 1px solid #e5e5ea; font-size: 16px; outline: none; }
         .promo-btn { padding: 0 20px; background: var(--black); color: white; border-radius: 15px; border: none; font-weight: 700; cursor: pointer; }
 
-        /* Tab Bar (Georgian Labels) */
+        /* Tab Bar - GEORGIAN */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; text-align: center; flex: 1; cursor: pointer; position: relative; }
@@ -58,7 +59,7 @@
         <div class="header">
             <div style="display:flex; align-items:center; gap:10px;">
                 <img id="shop-logo-img" class="shop-logo" style="display:none;">
-                <div id="shop-name-text" style="font-weight:900; font-size:18px;">Svaqi Store</div>
+                <div id="shop-name-text" style="font-weight:900; font-size:18px;"></div>
             </div>
             <i class="fa-solid fa-magnifying-glass" style="font-size:20px;"></i>
         </div>
@@ -99,7 +100,7 @@
             <div style="padding:20px; display:flex; justify-content:space-between; font-size:22px; font-weight:900;">
                 <span>ჯამი:</span><span id="cart-total">0₾</span>
             </div>
-            <button class="btn-main" onclick="tg.showAlert('შეკვეთა მიღებულია!')">შეკვეთის გაფორმება</button>
+            <button class="btn-main" onclick="tg.showAlert('მონაცემების შევსების გვერდი მალე ჩაირთვება!')">შეკვეთის გაფორმება</button>
         </div>
     </div>
 
@@ -134,7 +135,7 @@
 
         async function init() {
             try {
-                // 1. Load Design (Logo & Name)
+                // 1. Load Design
                 const dRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=856847150&output=csv&t=${Date.now()}`);
                 const dRows = (await dRes.text()).split('\n');
                 if(dRows[1]) {
@@ -176,8 +177,8 @@
                 if(!p.name) return;
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.innerHTML = `<img src="${p.img}"><h3>${p.name}</h3><b>${p.price}₾</b><br>
-                <button onclick="addToCart('${p.name}')" style="margin-top:8px; border:none; background:#f2f2f7; padding:8px 12px; border-radius:12px; font-weight:700;">+ დამატება</button>`;
+                card.innerHTML = `<img src="${p.img}"><h3>${p.name}</h3><b>${p.price}₾</b>`;
+                card.onclick = () => addToCart(p.name);
                 grid.appendChild(card);
             });
 
@@ -186,6 +187,7 @@
                 document.getElementById('hero-banner').style.display = 'block';
                 document.getElementById('h-img').src = top.img;
                 document.getElementById('h-price').innerText = top.price + '₾';
+                document.getElementById('hero-banner').onclick = () => addToCart(top.name);
             }
         }
 
@@ -193,7 +195,7 @@
             const p = allProducts.find(x => x.name === name);
             cart.push({...p});
             updateCart();
-            tg.HapticFeedback.impactOccurred('medium');
+            tg.HapticFeedback.impactOccurred('light');
         }
 
         function updateCart() {
@@ -206,7 +208,7 @@
                 <div class="cart-item">
                     <img src="${item.img}">
                     <div style="flex:1"><b>${item.name}</b><br><span style="color:var(--gray)">${item.price}₾</span></div>
-                    <i class="fa-solid fa-trash" onclick="removeFromCart(${idx})" style="color:#ff3b30"></i>
+                    <i class="fa-solid fa-trash" onclick="event.stopPropagation(); removeFromCart(${idx})" style="color:#ff3b30; padding:10px;"></i>
                 </div>`;
             });
 
@@ -230,7 +232,7 @@
                 let subtotal = cart.reduce((a, b) => a + b.price, 0);
                 activeDiscount = found.type === 'percent' ? (subtotal * found.val / 100) : found.val;
                 updateCart();
-                tg.showAlert("პრომო კოდი წარმატებით გააქტიურდა!");
+                tg.showAlert("პრომო კოდი გააქტიურდა!");
             } else {
                 tg.showAlert("პრომო კოდი არასწორია!");
             }
