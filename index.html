@@ -12,24 +12,21 @@
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 140px; box-sizing: border-box; }
         .view.active { display: block; }
 
-        /* Header & Banner */
         .header { padding: 15px 20px; display: flex; align-items: center; background: var(--white); position: sticky; top: 0; z-index: 100; }
         .shop-logo { height: 40px; width: auto; border-radius: 8px; }
         .shop-name { font-size: 22px; font-weight: 900; margin-left: 10px; color: var(--black); }
         
-        /* Grid & Cards */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
         .card { background: var(--white); border-radius: 30px; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); cursor: pointer; }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
         .card h3 { margin: 10px 0 5px; font-size: 15px; font-weight: 800; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Checkout & Overlays */
         .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
         .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: #f2f2f7; display: flex; align-items: center; justify-content: center; z-index: 2100; }
-        input { width: calc(100% - 40px); padding: 18px; margin: 8px 20px; border-radius: 15px; border: 1.5px solid #eee; font-size: 16px; box-sizing: border-box; outline: none; }
+        
+        input { width: calc(100% - 40px); padding: 18px; margin: 8px 20px; border-radius: 20px; border: 1.5px solid #f0f0f5; font-size: 16px; box-sizing: border-box; background: #f9f9fb; outline: none; }
         .btn-main { width: calc(100% - 40px); margin: 0 20px 30px; padding: 22px; border-radius: 25px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; }
 
-        /* Navigation */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 28px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; font-size: 22px; flex: 1; text-align: center; }
@@ -48,7 +45,7 @@
 
     <div id="cart-view" class="view">
         <div style="padding:40px 25px 10px; font-size:28px; font-weight:900;">კალათა</div>
-        <div id="cart-list" style="padding: 0 20px;"></div>
+        <div id="cart-list" style="padding: 10px 20px;"></div>
         <div id="cart-footer" style="display:none;">
             <div style="padding: 20px; font-size: 22px; font-weight: 900;">ჯამი: <span id="cart-total">0₾</span></div>
             <button class="btn-main" onclick="openCheckout()">შეკვეთის გაფორმება</button>
@@ -58,12 +55,12 @@
     <div id="checkout-overlay" class="overlay">
         <div class="close-btn" onclick="closeOverlay('checkout-overlay')"><i class="fa-solid fa-xmark"></i></div>
         <div style="padding:70px 0 25px;">
-            <h2 style="padding-left: 20px;">შეკვეთა</h2>
+            <h2 style="padding-left: 20px;">მონაცემები</h2>
             <input type="text" id="order-cust" placeholder="სახელი გვარი">
             <input type="text" id="order-city" placeholder="ქალაქი">
-            <input type="text" id="order-addr" placeholder="ზუსტი მისამართი">
+            <input type="text" id="order-addr" placeholder="მისამართი">
             <input type="tel" id="order-phone" placeholder="ტელეფონი">
-            <div id="order-summary-box" style="padding: 20px; font-weight: 800; font-size: 18px;"></div>
+            <div id="order-sum-box" style="padding: 20px; font-weight: 800; font-size: 18px;"></div>
             <button class="btn-main" onclick="sendOrder()">დადასტურება</button>
         </div>
     </div>
@@ -80,13 +77,12 @@
         tg.expand();
 
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxWM1O24seJWraFO5O-3TYBnrVXXBBkfX-XhRiBXDc4aMetGvLcDMwkIkKokQWgqCutkQ/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcvhwgTgqT-kvOfGpQCX8OGIuSsBE8hkatL-LusJIlsk88wAHuJfGbqpyDZQTtpcQb/exec';
         
         let products = [], cart = [];
 
         async function init() {
             try {
-                // დიზაინი
                 const dRes = await fetch(`https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=856847150`);
                 const dText = await dRes.text();
                 const dRows = dText.split('\n').slice(1).map(r => r.split(',').map(c => c.replace(/^"|"$/g, '')));
@@ -95,7 +91,6 @@
                     if(dRows[0][1]) { document.getElementById('logo-img').src = dRows[0][1]; document.getElementById('logo-img').style.display = 'block'; }
                 }
 
-                // პროდუქტები
                 const pRes = await fetch(`https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=0`);
                 const pText = await pRes.text();
                 products = pText.split('\n').slice(1).map(line => {
@@ -103,7 +98,7 @@
                     return { name: c[0], price: parseFloat(c[1]), img: c[2]?.split(',')[0] };
                 });
                 renderHome();
-            } catch(e) { console.error("Error loading data", e); }
+            } catch(e) { console.error(e); }
         }
 
         function renderHome() {
@@ -128,14 +123,14 @@
             let total = 0;
             list.innerHTML = cart.map(item => {
                 total += item.price;
-                return `<div style="padding: 15px; border-bottom: 1px solid #eee;">${item.name} - <b>${item.price}₾</b></div>`;
+                return `<div style="padding: 10px 0; border-bottom: 1px solid #eee;">${item.name} - <b>${item.price}₾</b></div>`;
             }).join('');
             document.getElementById('cart-total').innerText = total + "₾";
             document.getElementById('cart-footer').style.display = cart.length ? 'block' : 'none';
         }
 
         function openCheckout() {
-            document.getElementById('order-summary-box').innerText = "ჯამი გადასახდელად: " + document.getElementById('cart-total').innerText;
+            document.getElementById('order-sum-box').innerText = "ჯამი გადასახდელად: " + document.getElementById('cart-total').innerText;
             document.getElementById('checkout-overlay').style.display = 'flex';
         }
 
@@ -147,7 +142,6 @@
 
             if(!customer || !phone) { tg.showAlert("შეავსეთ სახელი და ტელეფონი!"); return; }
 
-            // 6-ნიშნა უნიკალური ID
             const orderID = Math.floor(100000 + Math.random() * 900000);
             const items = cart.map(i => i.name).join(', ');
             const total = document.getElementById('cart-total').innerText;
@@ -158,18 +152,15 @@
                         await fetch(SCRIPT_URL, {
                             method: 'POST',
                             mode: 'no-cors',
-                            body: JSON.stringify({ 
-                                customer, city, address, phone, items, total, orderID 
-                            })
+                            body: JSON.stringify({ customer, city, address, phone, items, total, orderID })
                         });
 
-                        // შეტყობინება მომხმარებელს
-                        tg.showAlert(`✅ შეკვეთა გაიგზავნა!\n\nნომერი: ${orderID}\n\nგადარიცხვისას დანიშნულებაში ჩაწერეთ მხოლოდ ეს ნომერი.\n\nIBAN: GE00TB0000000000000000`);
+                        tg.showAlert(`✅ შეკვეთა გაიგზავნა!\n\nშეკვეთის ნომერი: ${orderID}\n\nგადარიცხვისას დანიშნულებაში ჩაწერეთ მხოლოდ ეს ნომერი.\n\nIBAN: GE00TB0000000000000000`);
                         
                         cart = []; updateCart();
                         closeOverlay('checkout-overlay');
                         switchView('home', 0);
-                    } catch(e) { tg.showAlert("შეცდომაა გაგზავნისას."); }
+                    } catch(e) { tg.showAlert("შეცდომაა."); }
                 }
             });
         }
