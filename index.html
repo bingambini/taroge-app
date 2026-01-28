@@ -33,11 +33,11 @@
         .qty-btn { border: none; background: none; font-size: 18px; font-weight: 900; cursor: pointer; color: var(--black); padding: 0 5px; }
         
         /* Form Styles */
-        .input-group { margin-bottom: 15px; padding: 0 20px; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 14px; }
-        .input-group input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #e5e5ea; box-sizing: border-box; font-size: 16px; outline: none; }
+        .input-group { margin-bottom: 12px; padding: 0 20px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 13px; color: var(--gray); }
+        .input-group input { width: 100%; padding: 14px; border-radius: 15px; border: 1px solid #e5e5ea; box-sizing: border-box; font-size: 16px; outline: none; background: #f9f9f9; }
 
-        /* Overlays (Details & Checkout) */
+        /* Overlays */
         .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
@@ -53,7 +53,8 @@
         .tab-item i { font-size: 22px; display: block; margin-bottom: 4px; }
         .tab-item span { font-size: 11px; display: block; }
         .cart-badge { position: absolute; top: -8px; right: 20%; background: var(--accent); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--black); }
-        .btn-main { width: calc(100% - 40px); margin: 0 20px; padding: 18px; border-radius: 20px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; }
+        .btn-main { width: calc(100% - 40px); margin: 0 20px; padding: 18px; border-radius: 20px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-main:active { transform: scale(0.98); opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -72,11 +73,8 @@
     <div id="category-view" class="view">
         <div class="header" style="justify-content:center;"><div style="font-weight:900;">კატალოგი</div></div>
         <div id="cat-list">
-            <div class="cat-card" onclick="filterByCategory('Jackets')" style="background:white; border-radius:25px; padding:20px; margin:15px; display:flex; position:relative; overflow:hidden;">
-                <h2>Jackets</h2><img src="https://i.ibb.co/LzfNqK7/jackets.png" style="width:40%; position:absolute; right:0; bottom:0;">
-            </div>
-            <div class="cat-card" onclick="filterByCategory('Shoes')" style="background:white; border-radius:25px; padding:20px; margin:15px; display:flex; position:relative; overflow:hidden;">
-                <h2>Shoes</h2><img src="https://i.ibb.co/mSR4P8T/shoes.png" style="width:40%; position:absolute; right:0; bottom:0;">
+            <div class="cat-card" style="background:white; border-radius:25px; padding:20px; margin:15px; display:flex; position:relative; overflow:hidden;">
+                <h2>ფეხსაცმელი</h2><img src="https://i.ibb.co/mSR4P8T/shoes.png" style="width:40%; position:absolute; right:0; bottom:0;">
             </div>
         </div>
     </div>
@@ -114,10 +112,11 @@
         <div style="padding:60px 20px 20px; text-align:center;"><h2 style="font-weight:900;">შეკვეთის მონაცემები</h2></div>
         <div style="flex:1; overflow-y:auto;">
             <div class="input-group"><label>სახელი და გვარი</label><input type="text" id="f-name" placeholder="მაგ: გიორგი ბერიძე"></div>
-            <div class="input-group"><label>ტელეფონის ნომერი</label><input type="tel" id="f-phone" placeholder="მაგ: 599 00 00 00"></div>
-            <div class="input-group"><label>მისამართი</label><input type="text" id="f-address" placeholder="მაგ: თბილისი, ჭავჭავაძის 1"></div>
+            <div class="input-group"><label>ქალაქი</label><input type="text" id="f-city" placeholder="მაგ: თბილისი"></div>
+            <div class="input-group"><label>მისამართი</label><input type="text" id="f-address" placeholder="მაგ: ჭავჭავაძის 1, ბინა 5"></div>
+            <div class="input-group"><label>ტელეფონი</label><input type="tel" id="f-phone" placeholder="მაგ: 599 00 00 00"></div>
         </div>
-        <div style="padding:20px; padding-bottom:40px;"><button class="btn-main" onclick="sendOrder()">შეკვეთის გაგზავნა</button></div>
+        <div style="padding:20px; padding-bottom:40px;"><button class="btn-main" id="order-submit-btn" onclick="sendOrder()">შეკვეთის გაგზავნა</button></div>
     </div>
 
     <div class="tab-bar-container">
@@ -131,10 +130,10 @@
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
-        let allProducts = [], cart = [], promos = [], currentP = null, selSize = '', selColor = '', activeDiscount = 0;
+        let allProducts = [], cart = [], currentP = null, selSize = '', selColor = '', appliedPromoCode = "";
         
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_S2EisE604pBq6K26F7rF029F7yS5R_6O690196200-o7301/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwoYEYaB2i09z-_VREsO3ADeVatiePHQipmX3juWVeSaRNvj-3UoVtwaEeMm-q5x93k7w/exec';
 
         async function init() {
             try {
@@ -157,7 +156,6 @@
                         status: c[4]?.replace(/"/g,'').trim(),
                         sizes: c[5]?.replace(/"/g,'').split(',') || [],
                         colors: c[6]?.replace(/"/g,'').split(',') || [],
-                        category: c[7]?.trim() || 'Other'
                     };
                 });
                 renderProducts(allProducts);
@@ -222,15 +220,15 @@
                 subtotal += (item.price * item.qty); totalQty += item.qty;
                 container.innerHTML += `<div class="cart-item"><img src="${item.img}"><div style="flex:1"><b>${item.name}</b><br><small>${item.sSize} ${item.sColor}</small><br><b>${item.price}₾</b></div><div class="qty-controls"><button class="qty-btn" onclick="changeQty(${idx},-1)">-</button><b>${item.qty}</b><button class="qty-btn" onclick="changeQty(${idx},1)">+</button></div><i class="fa-solid fa-trash" onclick="cart.splice(${idx},1);updateCart();" style="color:#ff3b30;margin-left:10px;"></i></div>`;
             });
-            document.getElementById('cart-total').innerText = (subtotal - activeDiscount) + '₾';
+            document.getElementById('cart-total').innerText = subtotal + '₾';
             document.getElementById('cart-footer').style.display = cart.length ? 'block' : 'none';
             document.querySelectorAll('.badge-val').forEach(b => { b.innerText = totalQty; b.style.display = totalQty ? 'flex' : 'none'; });
         }
 
         function changeQty(idx, d) { cart[idx].qty += d; if(cart[idx].qty < 1) cart.splice(idx,1); updateCart(); }
-
         function openCheckout() { document.getElementById('checkout-overlay').style.display = 'flex'; }
         function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
+        
         function switchView(id, tabIndex) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id + '-view').classList.add('active');
@@ -239,29 +237,33 @@
         }
 
         function sendOrder() {
-            const name = document.getElementById('f-name').value;
-            const phone = document.getElementById('f-phone').value;
-            const address = document.getElementById('f-address').value;
-            if(!name || !phone || !address) return tg.showAlert("გთხოვთ შეავსოთ ყველა ველი!");
-
-            const itemsStr = cart.map(i => `${i.name} (${i.sSize}/${i.sColor}) x${i.qty}`).join(', ');
-            const totalStr = document.getElementById('cart-total').innerText;
-
+            const btn = document.getElementById('order-submit-btn');
             const data = {
-                name: name, phone: phone, address: address,
-                items: itemsStr, total: totalStr,
-                user_id: tg.initDataUnsafe?.user?.id || 'N/A',
-                username: tg.initDataUnsafe?.user?.username || 'N/A'
+                customer: document.getElementById('f-name').value,
+                city: document.getElementById('f-city').value,
+                address: document.getElementById('f-address').value,
+                phone: document.getElementById('f-phone').value,
+                items: cart.map(i => `${i.name} (${i.sSize}/${i.sColor}) x${i.qty}`).join(', '),
+                total: document.getElementById('cart-total').innerText,
+                promo: document.getElementById('promo-input').value || "None"
             };
+
+            if(!data.customer || !data.city || !data.address || !data.phone) return tg.showAlert("შეავსეთ ყველა ველი!");
+
+            btn.disabled = true; btn.innerText = "იგზავნება...";
 
             fetch(SCRIPT_URL, {
                 method: 'POST', mode: 'no-cors',
                 cache: 'no-cache', body: JSON.stringify(data)
             }).then(() => {
-                tg.showAlert("შეკვეთა წარმატებით გაიგზავნა!");
+                tg.showAlert("მადლობა! შეკვეთა წარმატებით ჩაიწერა.");
                 cart = []; updateCart(); closeOverlay('checkout-overlay');
                 switchView('main', 0);
-            }).catch(() => tg.showAlert("შეცდომა. სცადეთ მოგვიანებით."));
+                btn.disabled = false; btn.innerText = "შეკვეთის გაგზავნა";
+            }).catch(() => {
+                tg.showAlert("შეცდომა გაგზავნისას.");
+                btn.disabled = false; btn.innerText = "შეკვეთის გაგზავნა";
+            });
         }
 
         init();
