@@ -12,10 +12,10 @@
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 140px; box-sizing: border-box; }
         .view.active { display: block; }
 
+        /* Header & Banner */
         .header { padding: 15px 20px; display: flex; align-items: center; background: var(--white); position: sticky; top: 0; z-index: 100; }
         .shop-logo { height: 40px; width: auto; border-radius: 8px; }
         .shop-name { font-size: 22px; font-weight: 900; margin-left: 10px; color: var(--black); }
-
         .banner-wrapper { padding: 20px; }
         .hero-banner { background: #232a32; height: 180px; border-radius: 40px; position: relative; display: flex; align-items: center; padding: 25px; box-sizing: border-box; cursor: pointer; }
         .banner-info { width: 55%; z-index: 2; }
@@ -23,16 +23,23 @@
         .banner-info .price { color: white; font-size: 24px; font-weight: 900; display: block; margin-top: 5px; }
         .floating-img { position: absolute; right: -10px; top: -30px; width: 220px; z-index: 3; transform: rotate(-15deg); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)); }
 
+        /* Grid & Cards */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
         .card { background: var(--white); border-radius: 30px; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); cursor: pointer; }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
-        .card h3 { margin: 10px 0 5px; font-size: 16px; font-weight: 800; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card h3 { margin: 10px 0 5px; font-size: 15px; font-weight: 800; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        /* Catalog Categories */
+        .cat-scroll { display: flex; gap: 10px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; background: var(--bg); position: sticky; top: 0; z-index: 10; }
+        .cat-scroll::-webkit-scrollbar { display: none; }
+        .cat-pill { padding: 10px 20px; background: var(--white); border-radius: 20px; font-weight: 700; font-size: 14px; white-space: nowrap; cursor: pointer; border: 1.5px solid transparent; transition: 0.2s; }
+        .cat-pill.active { background: var(--black); color: white; }
+
+        /* Overlays & Components */
         .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
         #det-slider { width: 100%; height: 320px; margin-top: 40px; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
         #det-slider img { width: 100%; height: 100%; object-fit: contain; scroll-snap-align: start; flex-shrink: 0; }
         .details-content { padding: 25px; flex: 1; border-radius: 40px 40px 0 0; margin-top: -30px; background: white; z-index: 5; }
-        
         .chip-container { display: flex; gap: 10px; margin: 10px 0 20px; overflow-x: auto; scrollbar-width: none; }
         .chip { padding: 12px 18px; border: 2px solid #f0f0f5; border-radius: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .chip.selected { background: var(--black); color: white; border-color: var(--black); }
@@ -45,6 +52,7 @@
         .promo-box input { flex: 1; border: none; outline: none; background: transparent; font-weight: 600; padding: 5px 10px; font-size: 16px; width: 100%; }
         .promo-box button { background: var(--black); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-weight: 700; }
 
+        /* Navigation */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 28px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; font-size: 22px; flex: 1; text-align: center; position: relative; }
@@ -73,11 +81,13 @@
                 <img id="b-img" class="floating-img">
             </div>
         </div>
+        <div style="padding:0 20px; font-weight:900; font-size:18px;">ახალი კოლექცია</div>
         <div id="products-grid" class="grid"></div>
     </div>
 
     <div id="catalog-view" class="view">
-        <div style="padding:40px 25px 10px; font-size:28px; font-weight:900;">კატალოგი</div>
+        <div style="padding:40px 25px 5px; font-size:28px; font-weight:900;">კატალოგი</div>
+        <div id="category-list" class="cat-scroll"></div>
         <div id="catalog-grid" class="grid"></div>
     </div>
 
@@ -128,12 +138,11 @@
         <div class="close-btn" onclick="closeOverlay('checkout-overlay')"><i class="fa-solid fa-xmark"></i></div>
         <div style="padding:70px 25px 25px;">
             <h2 style="margin-bottom:5px;">შეკვეთა</h2>
-            <p style="color:var(--gray); margin-bottom:20px;">მიუთითეთ მონაცემები მიწოდებისთვის</p>
             <div class="promo-box" style="margin:10px 0;"><input type="text" id="order-cust" placeholder="სახელი გვარი"></div>
             <div class="promo-box" style="margin:10px 0;"><input type="text" id="order-city" placeholder="ქალაქი"></div>
             <div class="promo-box" style="margin:10px 0;"><input type="text" id="order-addr" placeholder="ზუსტი მისამართი"></div>
             <div class="promo-box" style="margin:10px 0;"><input type="tel" id="order-phone" placeholder="ტელეფონი"></div>
-            <div id="order-summary" style="background:#f2f2f7; padding:15px; border-radius:20px; margin:20px 0; font-size:14px;"></div>
+            <div id="order-summary" style="background:#f2f2f7; padding:15px; border-radius:20px; margin:20px 0;"></div>
             <button class="btn-main" style="margin:0; width:100%;" onclick="sendOrder()">დადასტურება</button>
         </div>
     </div>
@@ -158,32 +167,36 @@
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwoYEYaB2i09z-_VREsO3ADeVatiePHQipmX3juWVeSaRNvj-3UoVtwaEeMm-q5x93k7w/exec';
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
 
-        let products = [], promos = [], cart = [];
+        let products = [], promos = [], cart = [], categories = [];
         let currentP = null, selCol = null, selSiz = null, activeDisc = { type: 'none', val: 0 };
 
         async function init() {
             try {
+                // Load Design
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 if(dRows[0]) {
                     document.getElementById('shop-name').innerText = dRows[0][0];
-                    if(dRows[0][1]) {
-                        const logo = document.getElementById('logo-img');
-                        logo.src = dRows[0][1]; logo.style.display = 'block';
-                    }
+                    if(dRows[0][1]) { document.getElementById('logo-img').src = dRows[0][1]; document.getElementById('logo-img').style.display = 'block'; }
                 }
+
+                // Load Promos
                 const prRes = await fetch(BASE + '651180774');
                 const prRows = parseCSV(await prRes.text());
                 promos = prRows.map(r => ({ code: r[0]?.toUpperCase(), type: r[1]?.toLowerCase(), val: parseFloat(r[2]) || 0 }));
 
+                // Load Products (Column H is Category index 7)
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
                     name: r[0], price: parseFloat(r[1]), imgs: r[2]?.split(','),
-                    status: r[4] || "", sizes: r[5]?.split(','), colors: r[6]?.split(',')
+                    status: r[4] || "", sizes: r[5]?.split(','), colors: r[6]?.split(','),
+                    category: r[7]?.trim() || "სხვა"
                 }));
+
+                categories = ["ყველა", ...new Set(products.map(p => p.category))];
                 renderHome();
-                renderCatalog();
+                renderCatalog("ყველა");
             } catch(e) { console.error(e); }
         }
 
@@ -204,7 +217,6 @@
                 document.getElementById('banner-btn').onclick = () => openDetails(top);
             }
             products.slice(0, 6).forEach(p => {
-                if(!p.name) return;
                 const div = document.createElement('div'); div.className = 'card';
                 div.innerHTML = `<img src="${p.imgs[0]?.trim()}"><h3>${p.name}</h3><b>${p.price}₾</b>`;
                 div.onclick = () => openDetails(p);
@@ -212,10 +224,16 @@
             });
         }
 
-        function renderCatalog() {
+        function renderCatalog(filter) {
+            // Render category bubbles
+            const catBox = document.getElementById('category-list');
+            catBox.innerHTML = categories.map(c => `<div class="cat-pill ${c === filter ? 'active' : ''}" onclick="renderCatalog('${c}')">${c}</div>`).join('');
+
+            // Render filtered products
             const grid = document.getElementById('catalog-grid'); grid.innerHTML = '';
-            products.forEach(p => {
-                if(!p.name) return;
+            const filtered = filter === "ყველა" ? products : products.filter(p => p.category === filter);
+            
+            filtered.forEach(p => {
                 const div = document.createElement('div'); div.className = 'card';
                 div.innerHTML = `<img src="${p.imgs[0]?.trim()}"><h3>${p.name}</h3><b>${p.price}₾</b>`;
                 div.onclick = () => openDetails(p);
@@ -225,9 +243,7 @@
 
         function openDetails(p) {
             currentP = p; selCol = null; selSiz = null;
-            const addBtn = document.getElementById('add-btn');
-            addBtn.disabled = true; // ყოველთვის გათიშულია გახსნისას
-            
+            document.getElementById('add-btn').disabled = true;
             document.getElementById('det-slider').innerHTML = p.imgs.map(i => `<img src="${i.trim()}">`).join('');
             document.getElementById('det-title').innerText = p.name;
             document.getElementById('det-price').innerText = p.price + "₾";
@@ -239,34 +255,14 @@
         function selectChip(el, type, val) {
             el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
             el.classList.add('selected');
-            
-            if(type === 'c') selCol = val; 
-            if(type === 's') selSiz = val;
-            
-            // ვალიდაცია: თუ ორივე არჩეულია, ღილაკი გააქტიურდეს
-            const addBtn = document.getElementById('add-btn');
-            if (selCol && selSiz) {
-                addBtn.disabled = false;
-            } else {
-                addBtn.disabled = true;
-            }
-        }
-
-        function loadProfile() {
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                document.getElementById('u-name').innerText = `${user.first_name || ""} ${user.last_name || ""}`.trim();
-                document.getElementById('u-username').innerText = user.username ? "@" + user.username : "ID: " + user.id;
-                if (user.photo_url) document.getElementById('u-photo').src = user.photo_url;
-            }
+            if(type === 'c') selCol = val; else selSiz = val;
+            document.getElementById('add-btn').disabled = !(selCol && selSiz);
         }
 
         function addToCart() {
-            if (!selCol || !selSiz) return;
             const match = cart.find(i => i.name === currentP.name && i.col === selCol && i.siz === selSiz);
             if(match) match.qty++; else cart.push({...currentP, col: selCol, siz: selSiz, qty: 1});
-            updateCart(); 
-            closeOverlay('details-overlay');
+            updateCart(); closeOverlay('details-overlay');
             tg.HapticFeedback.notificationOccurred('success');
         }
 
@@ -310,7 +306,7 @@
         function openCheckout() {
             let sub = cart.reduce((a, b) => a + (b.price * b.qty), 0);
             let d = activeDisc.type === 'percent' ? (sub * activeDisc.val / 100) : activeDisc.val;
-            document.getElementById('order-summary').innerHTML = `ჯამი: <b>${(sub-d).toFixed(0)}₾</b> (ფასდაკლება: ${d.toFixed(0)}₾)`;
+            document.getElementById('order-summary').innerHTML = `ჯამი გადასახდელად: <b>${(sub-d).toFixed(0)}₾</b>`;
             document.getElementById('checkout-overlay').style.display = 'flex';
         }
 
@@ -319,11 +315,7 @@
             const city = document.getElementById('order-city').value.trim();
             const address = document.getElementById('order-addr').value.trim();
             const phone = document.getElementById('order-phone').value.trim();
-
-            if (!customer || !city || !address || !phone) {
-                tg.showAlert("შეავსეთ ყველა ველი!");
-                return;
-            }
+            if (!customer || !city || !address || !phone) { tg.showAlert("შეავსეთ ველები!"); return; }
 
             const itemsText = cart.map(i => `${i.name} (${i.col}/${i.siz}) x${i.qty}`).join(', ');
             const total = document.getElementById('cart-total').innerText;
@@ -337,12 +329,21 @@
                             mode: 'no-cors',
                             body: JSON.stringify({ customer, city, address, phone, items: itemsText, promo, total })
                         });
-                        tg.showAlert("✅ შეკვეთა წარმატებით გაიგზავნა!");
+                        tg.showAlert("✅ შეკვეთა გაიგზავნა!");
                         cart = []; activeDisc = { type: 'none', val: 0 }; updateCart();
                         closeOverlay('checkout-overlay'); switchView('home', 0);
-                    } catch (e) { tg.showAlert("შეცდომა გაგზავნისას."); }
+                    } catch (e) { tg.showAlert("შეცდომა."); }
                 }
             });
+        }
+
+        function loadProfile() {
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                document.getElementById('u-name').innerText = `${user.first_name || ""} ${user.last_name || ""}`.trim();
+                document.getElementById('u-username').innerText = user.username ? "@" + user.username : "ID: " + user.id;
+                if (user.photo_url) document.getElementById('u-photo').src = user.photo_url;
+            }
         }
 
         function switchView(v, i) {
