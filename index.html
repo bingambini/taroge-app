@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Taro Premium Store</title>
+    <title>Store App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -13,40 +13,43 @@
         .view.active { display: block; }
 
         /* Header */
-        .header { padding: 15px 20px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; background: var(--white); position: sticky; top: 0; z-index: 100; min-height: 60px; }
-        .shop-name { font-size: 18px; font-weight: 900; text-transform: uppercase; display: flex; align-items: center; }
-        .shop-logo { height: 40px; width: auto; object-fit: contain; }
+        .header { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; background: var(--white); position: sticky; top: 0; z-index: 100; min-height: 60px; }
+        .shop-info { display: flex; align-items: center; gap: 10px; }
+        .shop-name { font-size: 18px; font-weight: 900; text-transform: uppercase; }
+        .shop-logo { height: 35px; width: auto; object-fit: contain; }
 
         /* Badge */
         .cart-badge { position: absolute; top: -8px; right: -10px; background: var(--accent); color: white; font-size: 10px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--white); }
 
-        /* Grid & Cards */
+        /* Grid */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
-        .card { background: var(--white); border-radius: 25px; padding: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .card { background: var(--white); border-radius: 25px; padding: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
         .card h3 { font-size: 15px; margin: 10px 0 5px; font-weight: 800; }
 
-        /* Cart & Promo */
-        .cart-item { background: var(--white); margin: 12px; padding: 15px; border-radius: 20px; display: flex; align-items: center; gap: 15px; }
+        /* Cart Items */
+        .cart-item { background: var(--white); margin: 12px; padding: 15px; border-radius: 20px; display: flex; align-items: center; gap: 15px; position: relative; }
         .cart-item img { width: 70px; height: 70px; border-radius: 12px; object-fit: contain; background: #f8f9fb; }
         .qty-control { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
-        .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid #eee; background: white; display: flex; align-items: center; justify-content: center; font-weight: 800; }
-        
+        .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid #eee; background: white; display: flex; align-items: center; justify-content: center; font-weight: 800; cursor: pointer; }
+        .delete-btn { position: absolute; right: 15px; top: 15px; color: var(--error); cursor: pointer; }
+
+        /* Promo & Form */
         .promo-box { padding: 15px; margin: 15px 12px; background: var(--white); border-radius: 18px; display: flex; gap: 10px; border: 1px dashed #ccc; transition: 0.3s; }
-        .promo-box.success { border: 2px solid var(--success) !important; background: #f2fff5 !important; }
-        .promo-box.error { border: 2px solid var(--error) !important; background: #fff2f2 !important; }
+        .promo-box.success { border: 2px solid var(--success); background: #f2fff5; }
+        .promo-box.error { border: 2px solid var(--error); background: #fff2f2; }
         .promo-box input { flex: 1; border: none; outline: none; font-size: 14px; font-weight: 600; text-transform: uppercase; background: transparent; }
-
-        /* Checkout Form */
+        
         .checkout-form { padding: 20px; background: var(--white); margin: 12px; border-radius: 20px; display: none; }
-        .checkout-form input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 12px; border: 1px solid #eee; box-sizing: border-box; font-size: 14px; }
+        .checkout-form input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 12px; border: 1px solid #eee; box-sizing: border-box; font-size: 14px; outline: none; }
 
-        /* Buttons & Nav */
+        /* Buttons & Chips */
         .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 17px; font-weight: 800; background: var(--black); color: white; cursor: pointer; }
-        .btn-main:disabled { background: #e5e5ea; color: #8e8e93; }
+        .btn-main:disabled { background: #e5e5ea; color: #8e8e93; cursor: not-allowed; }
         .chip { padding: 10px 18px; border-radius: 12px; background: #f2f2f7; font-weight: 700; font-size: 14px; cursor: pointer; }
         .chip.selected { background: var(--black); color: white; }
-        
+
+        /* Navigation */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 65px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; font-size: 22px; position: relative; cursor: pointer; }
@@ -57,9 +60,11 @@
 
     <div id="main-view" class="view active">
         <div class="header">
-            <div id="shop-name-display" class="shop-name">...</div>
-            <img id="shop-logo-display" src="" class="shop-logo" style="display:none;">
-            <div style="position: relative; justify-self: end;" onclick="switchView('cart', document.querySelectorAll('.tab-item')[1])">
+            <div class="shop-info">
+                <img id="shop-logo-display" src="" class="shop-logo" style="display:none;">
+                <div id="shop-name-display" class="shop-name">...</div>
+            </div>
+            <div style="position: relative;" onclick="switchView('cart', document.querySelectorAll('.tab-item')[1])">
                 <i class="fa-solid fa-cart-shopping" style="font-size:22px;"></i>
                 <span class="cart-badge">0</span>
             </div>
@@ -68,20 +73,23 @@
     </div>
 
     <div id="cart-view" class="view">
-        <div class="header"><div></div><div class="shop-name">კალათა</div><div></div></div>
+        <div class="header" style="justify-content: center;"><div class="shop-name">კალათა</div></div>
         <div id="cart-items-list"></div>
+        
         <div id="promo-container" style="display:none;">
             <div class="promo-box">
                 <input type="text" id="promo-input" placeholder="პრომო კოდი">
-                <button onclick="applyPromo()" style="background:var(--black); color:white; border:none; padding:8px 15px; border-radius:10px;">გამოყენება</button>
+                <button onclick="applyPromo()" style="background:var(--black); color:white; border:none; padding:8px 15px; border-radius:10px; cursor:pointer;">გამოყენება</button>
             </div>
         </div>
+
         <div id="checkout-section" class="checkout-form">
             <h3 style="margin-top:0;">საკონტაქტო ინფორმაცია</h3>
             <input type="text" id="cust-name" placeholder="სახელი და გვარი">
             <input type="tel" id="cust-phone" placeholder="ტელეფონის ნომერი">
             <input type="text" id="cust-addr" placeholder="მისამართი">
         </div>
+
         <div id="cart-footer" style="display:none; padding: 20px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:900; font-size:20px;">
                 <span>ჯამი:</span><span id="total-price">0₾</span>
@@ -93,7 +101,7 @@
 
     <div id="details-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; display: none; flex-direction: column;">
         <div style="background: #f8f9fb; padding: 50px 20px 30px; text-align: center; position: relative; border-radius: 0 0 40px 40px;">
-            <div onclick="document.getElementById('details-overlay').style.display='none'" style="width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: 20px; left: 20px;"><i class="fa-solid fa-xmark"></i></div>
+            <div onclick="document.getElementById('details-overlay').style.display='none'" style="width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: 20px; left: 20px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></div>
             <img id="det-img" src="" style="width: 80%; max-height: 230px; object-fit: contain;">
         </div>
         <div style="padding:25px; flex:1; overflow-y:auto;">
@@ -117,47 +125,62 @@
         const tg = window.Telegram.WebApp;
         tg.ready(); tg.expand();
 
-        let cart = []; let currentP = null; let selectedSize = ''; let selectedColor = ''; let discount = 0; let isCheckoutPhase = false;
+        let cart = [];
+        let currentP = null;
+        let selectedSize = '';
+        let selectedColor = '';
+        let discount = 0;
+        let isCheckoutPhase = false;
 
+        // შენი ზუსტი ID-ები
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
-        const DESIGN_CSV = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=1866388484&output=csv`; // Design ტაბი
-        const PRODUCTS_CSV = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=0&output=csv`; // Products ტაბი
+        const DESIGN_GID = '856847150';
+        const PRODUCTS_GID = '0';
+
+        const DESIGN_CSV = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${DESIGN_GID}&output=csv`;
+        const PRODUCTS_CSV = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${PRODUCTS_GID}&output=csv`;
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3BwX_7rQmSeVcR2M6i7Uq1bROkcxLMuh8dFvd0CjOGlb616jV9Ub2GcJ1ywF6AADMKg/exec';
 
         async function init() {
             try {
-                // 1. ტვირთავს დიზაინს
+                // 1. დიზაინის ჩატვირთვა
                 const desRes = await fetch(DESIGN_CSV + '&t=' + Date.now());
                 const desText = await desRes.text();
                 const desRows = desText.split('\n').slice(1);
                 if(desRows.length > 0) {
                     const cols = desRows[0].split(',');
-                    const name = cols[0]?.replace(/"/g, '');
-                    const logo = cols[1]?.replace(/"/g, '').trim();
-                    document.getElementById('shop-name-display').innerText = name || 'TARO';
-                    if(logo) {
+                    const shopName = cols[0]?.replace(/"/g, '').trim();
+                    const logoUrl = cols[1]?.replace(/"/g, '').trim();
+                    if(shopName) document.getElementById('shop-name-display').innerText = shopName;
+                    if(logoUrl) {
                         const logoImg = document.getElementById('shop-logo-display');
-                        logoImg.src = logo; logoImg.style.display = 'block';
+                        logoImg.src = logoUrl; logoImg.style.display = 'block';
                     }
                 }
 
-                // 2. ტვირთავს პროდუქტებს
+                // 2. პროდუქტების ჩატვირთვა
                 const prodRes = await fetch(PRODUCTS_CSV + '&t=' + Date.now());
                 const prodText = await prodRes.text();
                 const prodRows = prodText.split('\n').slice(1);
                 const grid = document.getElementById('main-grid');
+                grid.innerHTML = '';
                 prodRows.forEach(row => {
                     const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if(c.length < 3) return;
-                    const p = { name: c[0].replace(/"/g, ''), price: parseInt(c[1]), img: c[2].replace(/"/g, '').split(',')[0], sizes: c[5]?.replace(/"/g, '').split(','), colors: c[6]?.replace(/"/g, '').split(',') };
+                    const p = { 
+                        name: c[0].replace(/"/g, ''), 
+                        price: parseInt(c[1]), 
+                        img: c[2].replace(/"/g, '').split(',')[0], 
+                        sizes: c[5]?.replace(/"/g, '').split(','), 
+                        colors: c[6]?.replace(/"/g, '').split(',') 
+                    };
                     const card = document.createElement('div'); card.className = 'card';
                     card.innerHTML = `<img src="${p.img}"><h3>${p.name}</h3><b>${p.price}₾</b>`;
                     card.onclick = () => openDetails(p); grid.appendChild(card);
                 });
-            } catch (e) { console.error("Loading error:", e); }
+            } catch (e) { console.error("Error:", e); }
         }
 
-        // --- დანარჩენი ფუნქციები (openDetails, addToCart, applyPromo, sendOrder და ა.შ.) უცვლელია ---
         function openDetails(p) {
             currentP = p; selectedSize = ''; selectedColor = '';
             document.getElementById('det-name').innerText = p.name;
@@ -166,6 +189,7 @@
             renderChips('size-chips', p.sizes, 'size'); renderChips('color-chips', p.colors, 'color');
             updateBtn(); document.getElementById('details-overlay').style.display = 'flex';
         }
+
         function renderChips(id, vals, type) {
             const c = document.getElementById(id); c.innerHTML = '';
             if(!vals) return;
@@ -180,69 +204,95 @@
                 c.appendChild(ch);
             });
         }
+
         function updateBtn() {
             const b = document.getElementById('add-to-cart-btn');
             if(!selectedSize) { b.innerText="აირჩიეთ ზომა"; b.disabled=true; }
             else if(!selectedColor) { b.innerText="აირჩიეთ ფერი"; b.disabled=true; }
             else { b.disabled=false; b.innerText="კალათაში დამატება"; }
         }
+
         function addToCart() {
             const ex = cart.find(i => i.name === currentP.name && i.size === selectedSize && i.color === selectedColor);
             if(ex) ex.qty++; else cart.push({ ...currentP, size: selectedSize, color: selectedColor, qty: 1 });
             updateUI(); document.getElementById('details-overlay').style.display = 'none';
             tg.HapticFeedback.notificationOccurred('success');
         }
+
         function updateUI() {
             const count = cart.reduce((a, b) => a + b.qty, 0);
             document.querySelectorAll('.cart-badge').forEach(b => { b.innerText = count; b.style.display = count > 0 ? 'flex' : 'none'; });
             renderCart();
         }
+
         function renderCart() {
             const list = document.getElementById('cart-items-list'); const footer = document.getElementById('cart-footer');
             const promo = document.getElementById('promo-container'); const empty = document.getElementById('empty-msg');
+            
             if(cart.length === 0) { list.innerHTML=''; footer.style.display='none'; promo.style.display='none'; empty.style.display='block'; isCheckoutPhase=false; return; }
+            
             empty.style.display='none'; footer.style.display='block'; promo.style.display = isCheckoutPhase ? 'none' : 'block';
             list.innerHTML = ''; let sub = 0;
             cart.forEach((item, index) => {
                 sub += (item.price * item.qty);
                 const div = document.createElement('div'); div.className = 'cart-item';
-                div.innerHTML = `<img src="${item.img}"><div class="cart-item-info"><h4>${item.name}</h4><p>${item.size} / ${item.color}</p><b>${item.price}₾</b>
+                div.innerHTML = `<img src="${item.img}"><div><h4>${item.name}</h4><p>${item.size} / ${item.color}</p><b>${item.price}₾</b>
                 <div class="qty-control"><div class="qty-btn" onclick="changeQty(${index},-1)">-</div><span>${item.qty}</span><div class="qty-btn" onclick="changeQty(${index},1)">+</div></div></div>
-                <i class="fa-solid fa-trash-can" style="color:var(--accent)" onclick="changeQty(${index},-999)"></i>`;
+                <i class="fa-solid fa-trash-can delete-btn" onclick="changeQty(${index},-999)"></i>`;
                 list.appendChild(div);
             });
             document.getElementById('total-price').innerText = Math.round(sub - (sub * discount)) + '₾';
         }
+
         function changeQty(i, a) { cart[i].qty += a; if(cart[i].qty <= 0) cart.splice(i, 1); updateUI(); }
+
         function applyPromo() {
             const pb = document.querySelector('.promo-box'); const val = document.getElementById('promo-input').value.toUpperCase().trim();
             if (val === 'TARO10') { discount = 0.10; pb.classList.add('success'); pb.classList.remove('error'); }
             else { discount = 0; pb.classList.add('error'); pb.classList.remove('success'); setTimeout(() => pb.classList.remove('error'), 2000); }
             updateUI();
         }
+
         function handleCheckout() {
             if(!isCheckoutPhase) {
                 isCheckoutPhase = true; document.getElementById('checkout-section').style.display = 'block';
                 document.getElementById('final-btn').innerText = 'დადასტურება'; renderCart();
             } else { sendOrder(); }
         }
+
         async function sendOrder() {
             const name = document.getElementById('cust-name').value;
             const phone = document.getElementById('cust-phone').value;
             const addr = document.getElementById('cust-addr').value;
             if(!name || !phone || !addr) { tg.showAlert('შეავსეთ ყველა ველი!'); return; }
-            const order = { customer: name, phone: phone, address: addr, total: document.getElementById('total-price').innerText, items: cart.map(i => `${i.name} (${i.size}/${i.color}) x${i.qty}`).join(', ') };
+
+            const btn = document.getElementById('final-btn');
+            btn.disabled = true; btn.innerText = "იგზავნება...";
+
+            const order = { 
+                customer: name, 
+                phone: phone, 
+                address: addr, 
+                total: document.getElementById('total-price').innerText, 
+                items: cart.map(i => `${i.name} (${i.size}/${i.color}) x${i.qty}`).join(', ') 
+            };
+
             try {
                 await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(order) });
-                tg.showAlert('შეკვეთა გაიგზავნა!'); cart = []; updateUI(); switchView('main', document.querySelectorAll('.tab-item')[0]);
-            } catch (e) { tg.showAlert('შეცდომა'); }
+                tg.showAlert('შეკვეთა წარმატებით გაიგზავნა!');
+                cart = []; updateUI(); switchView('main', document.querySelectorAll('.tab-item')[0]);
+                document.getElementById('checkout-section').style.display = 'none';
+            } catch (e) { tg.showAlert('შეცდომა გაგზავნისას'); }
+            finally { btn.disabled = false; btn.innerText = "დადასტურება"; }
         }
+
         function switchView(id, el) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id+'-view').classList.add('active');
             document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
         }
+
         init();
     </script>
 </body>
