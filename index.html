@@ -11,8 +11,6 @@
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 140px; box-sizing: border-box; }
         .view.active { display: block; }
-
-        /* Header & Banner */
         .header { padding: 15px 20px; display: flex; align-items: center; background: var(--white); position: sticky; top: 0; z-index: 100; }
         .shop-logo { height: 40px; width: auto; border-radius: 8px; }
         .shop-name { font-size: 22px; font-weight: 900; margin-left: 10px; color: var(--black); }
@@ -22,20 +20,14 @@
         .banner-info h2 { color: var(--red); margin: 0; font-size: 20px; font-weight: 900; }
         .banner-info .price { color: white; font-size: 24px; font-weight: 900; display: block; margin-top: 5px; }
         .floating-img { position: absolute; right: -10px; top: -30px; width: 220px; z-index: 3; transform: rotate(-15deg); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)); }
-
-        /* Grid & Cards */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
         .card { background: var(--white); border-radius: 30px; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); cursor: pointer; }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
         .card h3 { margin: 10px 0 5px; font-size: 15px; font-weight: 800; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* Catalog Categories */
         .cat-scroll { display: flex; gap: 10px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; background: var(--bg); position: sticky; top: 0; z-index: 10; }
         .cat-scroll::-webkit-scrollbar { display: none; }
         .cat-pill { padding: 10px 20px; background: var(--white); border-radius: 20px; font-weight: 700; font-size: 14px; white-space: nowrap; cursor: pointer; border: 1.5px solid transparent; transition: 0.2s; }
         .cat-pill.active { background: var(--black); color: white; }
-
-        /* Overlays & Components */
         .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
         #det-slider { width: 100%; height: 320px; margin-top: 40px; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
         #det-slider img { width: 100%; height: 100%; object-fit: contain; scroll-snap-align: start; flex-shrink: 0; }
@@ -43,26 +35,19 @@
         .chip-container { display: flex; gap: 10px; margin: 10px 0 20px; overflow-x: auto; scrollbar-width: none; }
         .chip { padding: 12px 18px; border: 2px solid #f0f0f5; border-radius: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .chip.selected { background: var(--black); color: white; border-color: var(--black); }
-
         .cart-item { background: white; border-radius: 25px; padding: 15px; margin: 10px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
         .qty-ctrl { display: flex; align-items: center; gap: 10px; background: #f2f2f7; padding: 5px 12px; border-radius: 15px; font-weight: 800; }
         .qty-ctrl span { cursor: pointer; padding: 0 5px; font-size: 18px; }
-
         .promo-box { display: flex; gap: 10px; margin: 20px; background: #f2f2f7; padding: 10px; border-radius: 20px; }
         .promo-box input { flex: 1; border: none; outline: none; background: transparent; font-weight: 600; padding: 5px 10px; font-size: 16px; width: 100%; }
         .promo-box button { background: var(--black); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-weight: 700; }
-
-        /* Pay Card Design */
         .pay-card { background: #f2f2f7; border-radius: 25px; padding: 20px; margin: 15px 0; border: 1px solid #e5e5ea; }
         .copy-row { background: white; padding: 12px 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border: 1px solid #ddd; }
-
-        /* Navigation */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 28px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; font-size: 22px; flex: 1; text-align: center; position: relative; }
         .tab-item.active { opacity: 1; }
         .cart-badge { position: absolute; top: -5px; right: 28%; background: var(--red); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--black); font-weight: 900; }
-
         .btn-main { width: calc(100% - 40px); margin: 0 20px 30px; padding: 22px; border-radius: 25px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; }
         .btn-main:disabled { background: #e5e5ea; color: #a1a1a6; cursor: not-allowed; }
         .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: #f2f2f7; display: flex; align-items: center; justify-content: center; z-index: 2100; }
@@ -168,7 +153,7 @@
         tg.expand();
 
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwoYEYaB2i09z-_VREsO3ADeVatiePHQipmX3juWVeSaRNvj-3UoVtwaEeMm-q5x93k7w/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzIhnr5_YRzr5M0xzYbfRCx_pHqk0gH3NEta1N97xICGHntvpxJuI3GIOxCC_eS_Snqg/exec';
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
 
         let products = [], promos = [], cart = [], categories = [];
@@ -176,20 +161,15 @@
 
         async function init() {
             try {
-                // Load Design
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 if(dRows[0]) {
                     document.getElementById('shop-name').innerText = dRows[0][0];
                     if(dRows[0][1]) { document.getElementById('logo-img').src = dRows[0][1]; document.getElementById('logo-img').style.display = 'block'; }
                 }
-
-                // Load Promos
                 const prRes = await fetch(BASE + '651180774');
                 const prRows = parseCSV(await prRes.text());
                 promos = prRows.map(r => ({ code: r[0]?.toUpperCase(), type: r[1]?.toLowerCase(), val: parseFloat(r[2]) || 0 }));
-
-                // Load Products
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
@@ -197,7 +177,6 @@
                     status: r[4] || "", sizes: r[5]?.split(','), colors: r[6]?.split(','),
                     category: r[7]?.trim() || "სხვა"
                 }));
-
                 categories = ["ყველა", ...new Set(products.map(p => p.category))];
                 renderHome();
                 renderCatalog("ყველა");
@@ -328,13 +307,11 @@
             const itemsText = cart.map(i => `${i.name} (${i.col}/${i.siz}) x${i.qty}`).join(', ');
             const total = document.getElementById('cart-total').innerText;
 
-            // გადასვლა გადახდის ეკრანზე
             document.getElementById('checkout-main-content').innerHTML = `
                 <div style="text-align:center;">
                     <i class="fa-solid fa-circle-check" style="font-size:60px; color:var(--green); margin-bottom:15px;"></i>
                     <h2>თითქმის მზადაა!</h2>
                     <p style="color:var(--gray);">შეკვეთის ნომერი: <b style="color:var(--black);">${orderID}</b></p>
-                    
                     <div class="pay-card">
                         <small style="color:var(--red); font-weight:800;">⚠️ აუცილებელი პირობა:</small>
                         <p style="font-size:13px; margin:10px 0;">გადარიცხვისას დანიშნულებაში ჩაწერეთ მხოლოდ ეს ნომერი:</p>
@@ -348,18 +325,17 @@
                             <i class="fa-regular fa-copy" style="color:var(--green);" onclick="copyTxt('copy-iban')"></i>
                         </div>
                     </div>
-                    
-                    <button class="btn-main" style="width:100%; margin:10px 0; background:var(--green);" onclick="finalizeOrder('${customer}','${city}','${address}','${phone}','${itemsText}','${total}')">დავადასტურე გადახდა</button>
+                    <button class="btn-main" style="width:100%; margin:10px 0; background:var(--green);" onclick="finalizeOrder('${customer}','${city}','${address}','${phone}','${itemsText}','${total}', '${orderID}')">დავადასტურე გადახდა</button>
                 </div>
             `;
         }
 
-        async function finalizeOrder(customer, city, address, phone, itemsText, total) {
+        async function finalizeOrder(customer, city, address, phone, itemsText, total, finalID) {
             try {
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    body: JSON.stringify({ customer, city, address, phone, items: itemsText, total, orderID })
+                    body: JSON.stringify({ customer, city, address, phone, items: itemsText, total, orderID: finalID })
                 });
                 tg.showAlert("✅ შეკვეთა მიღებულია! მალე დაგიკავშირდებით.");
                 cart = []; activeDisc = { type: 'none', val: 0 }; updateCart();
