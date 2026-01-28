@@ -20,13 +20,13 @@
         .main-banner { margin: 12px; height: 180px; border-radius: 25px; overflow: hidden; position: relative; background: #000; display: none; cursor: pointer; }
         .main-banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
         .banner-text { position: absolute; bottom: 20px; left: 20px; color: white; }
-        .banner-text h2 { margin: 0; font-size: 24px; font-weight: 900; }
+        .banner-text h2 { margin: 0; font-size: 24px; font-weight: 900; text-transform: uppercase; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: var(--white); border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
         .card h3 { margin: 10px 0 5px; font-size: 15px; font-weight: 800; color: var(--black); }
 
-        /* Cart Styles with +/- */
+        /* Cart Styles */
         .cart-item { background: white; border-radius: 20px; padding: 15px; margin: 10px; display: flex; align-items: center; gap: 15px; position: relative; }
         .cart-item img { width: 60px; height: 60px; object-fit: contain; }
         .qty-controls { display: flex; align-items: center; gap: 12px; background: #f2f2f7; padding: 5px 10px; border-radius: 12px; }
@@ -54,7 +54,6 @@
         .tab-item span { font-size: 11px; display: block; }
         .cart-badge { position: absolute; top: -8px; right: 20%; background: var(--accent); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--black); }
         .btn-main { width: calc(100% - 40px); margin: 0 20px; padding: 18px; border-radius: 20px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; transition: 0.2s; }
-        .btn-main:active { transform: scale(0.98); opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -65,18 +64,18 @@
             <div id="shop-name-text" style="font-weight:900; font-size:18px; margin-left:10px;"></div>
         </div>
         <div class="main-banner" id="hero-banner">
-            <img id="h-img"><div class="banner-text"><h2>TOP PICK</h2><b id="h-price"></b></div>
+            <img id="h-img">
+            <div class="banner-text">
+                <h2 id="h-status-text">TOP PICK</h2>
+                <b id="h-price"></b>
+            </div>
         </div>
         <div id="products-grid" class="grid"></div>
     </div>
 
     <div id="category-view" class="view">
         <div class="header" style="justify-content:center;"><div style="font-weight:900;">კატალოგი</div></div>
-        <div id="cat-list">
-            <div class="cat-card" style="background:white; border-radius:25px; padding:20px; margin:15px; display:flex; position:relative; overflow:hidden;">
-                <h2>ფეხსაცმელი</h2><img src="https://i.ibb.co/mSR4P8T/shoes.png" style="width:40%; position:absolute; right:0; bottom:0;">
-            </div>
-        </div>
+        <div id="cat-list"></div>
     </div>
 
     <div id="cart-view" class="view">
@@ -130,13 +129,14 @@
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
-        let allProducts = [], cart = [], currentP = null, selSize = '', selColor = '', appliedPromoCode = "";
+        let allProducts = [], cart = [], currentP = null, selSize = '', selColor = '';
         
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwoYEYaB2i09z-_VREsO3ADeVatiePHQipmX3juWVeSaRNvj-3UoVtwaEeMm-q5x93k7w/exec';
 
         async function init() {
             try {
+                // მაღაზიის ინფორმაცია
                 const dRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=856847150&output=csv&t=${Date.now()}`);
                 const dRows = (await dRes.text()).split('\n');
                 if(dRows[1]) {
@@ -145,6 +145,7 @@
                     if(d[1]) { document.getElementById('shop-logo-img').src = d[1].replace(/"/g,'').trim(); document.getElementById('shop-logo-img').style.display = 'block'; }
                 }
 
+                // პროდუქტების წამოღება
                 const pRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=0&output=csv&t=${Date.now()}`);
                 allProducts = (await pRes.text()).split('\n').slice(1).map(row => {
                     const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
@@ -153,9 +154,9 @@
                         price: parseFloat(c[1]),
                         img: c[2]?.replace(/"/g,'').split(',')[0].trim(),
                         desc: c[3]?.replace(/"/g,'').trim(),
-                        status: c[4]?.replace(/"/g,'').trim(),
+                        status: c[4]?.replace(/"/g,'').trim(), // აქ გვაქვს "Top: დღის შეთავაზება"
                         sizes: c[5]?.replace(/"/g,'').split(',') || [],
-                        colors: c[6]?.replace(/"/g,'').split(',') || [],
+                        colors: c[6]?.replace(/"/g,'').split(',') || []
                     };
                 });
                 renderProducts(allProducts);
@@ -164,6 +165,24 @@
 
         function renderProducts(list) {
             const grid = document.getElementById('products-grid'); grid.innerHTML = '';
+            
+            // ბანერის ლოგიკა (შესწორებული)
+            const topItem = list.find(p => p.status && p.status.toLowerCase().startsWith('top:'));
+            if(topItem) {
+                const banner = document.getElementById('hero-banner');
+                const bannerTitle = document.getElementById('h-status-text');
+                
+                banner.style.display = 'block';
+                document.getElementById('h-img').src = topItem.img;
+                document.getElementById('h-price').innerText = topItem.price + '₾';
+                
+                // გამოაქვს ტექსტი რაც წერია "Top:"-ის მერე
+                const statusText = topItem.status.split(':')[1]?.trim() || "TOP PICK";
+                bannerTitle.innerText = statusText;
+                
+                banner.onclick = () => openDetails(topItem);
+            }
+
             list.forEach(p => {
                 if(!p.name) return;
                 const card = document.createElement('div'); card.className = 'card';
@@ -171,14 +190,9 @@
                 card.onclick = () => openDetails(p);
                 grid.appendChild(card);
             });
-            const top = list.find(p => p.status?.toLowerCase().includes('top'));
-            if(top) {
-                const hb = document.getElementById('hero-banner'); hb.style.display = 'block';
-                document.getElementById('h-img').src = top.img; document.getElementById('h-price').innerText = top.price + '₾';
-                hb.onclick = () => openDetails(top);
-            }
         }
 
+        // დანარჩენი დამხმარე ფუნქციები (openDetails, confirmAddToCart, updateCart, sendOrder და ა.შ.) უცვლელია...
         function openDetails(p) {
             currentP = p; selSize = ''; selColor = '';
             document.getElementById('det-name').innerText = p.name;
@@ -228,7 +242,6 @@
         function changeQty(idx, d) { cart[idx].qty += d; if(cart[idx].qty < 1) cart.splice(idx,1); updateCart(); }
         function openCheckout() { document.getElementById('checkout-overlay').style.display = 'flex'; }
         function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
-        
         function switchView(id, tabIndex) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id + '-view').classList.add('active');
@@ -247,16 +260,13 @@
                 total: document.getElementById('cart-total').innerText,
                 promo: document.getElementById('promo-input').value || "None"
             };
-
             if(!data.customer || !data.city || !data.address || !data.phone) return tg.showAlert("შეავსეთ ყველა ველი!");
-
             btn.disabled = true; btn.innerText = "იგზავნება...";
-
             fetch(SCRIPT_URL, {
                 method: 'POST', mode: 'no-cors',
                 cache: 'no-cache', body: JSON.stringify(data)
             }).then(() => {
-                tg.showAlert("მადლობა! შეკვეთა წარმატებით ჩაიწერა.");
+                tg.showAlert("შეკვეთა წარმატებით გაიგზავნა!");
                 cart = []; updateCart(); closeOverlay('checkout-overlay');
                 switchView('main', 0);
                 btn.disabled = false; btn.innerText = "შეკვეთის გაგზავნა";
