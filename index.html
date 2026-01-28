@@ -42,6 +42,9 @@
 
         /* Cart */
         .cart-item { background: white; border-radius: 25px; padding: 15px; margin: 10px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+        .qty-ctrl { display: flex; align-items: center; gap: 10px; background: #f2f2f7; padding: 5px 12px; border-radius: 15px; font-weight: 800; }
+        .qty-ctrl span { cursor: pointer; padding: 0 5px; font-size: 18px; }
+
         .promo-box { display: flex; gap: 10px; margin: 20px; background: #f2f2f7; padding: 10px; border-radius: 20px; }
         .promo-box input { flex: 1; border: none; outline: none; background: transparent; font-weight: 600; padding-left: 10px; }
         .promo-box button { background: var(--black); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-weight: 700; }
@@ -208,9 +211,19 @@
         }
 
         function addToCart() {
-            cart.push({...currentP, col: selCol, siz: selSiz, qty: 1});
+            const match = cart.find(i => i.name === currentP.name && i.col === selCol && i.siz === selSiz);
+            if(match) match.qty++; else cart.push({...currentP, col: selCol, siz: selSiz, qty: 1});
             updateCart(); closeOverlay();
             tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        function changeQty(idx, delta) {
+            cart[idx].qty += delta;
+            if (cart[idx].qty <= 0) {
+                cart.splice(idx, 1);
+            }
+            updateCart();
+            tg.HapticFeedback.impactOccurred('light');
         }
 
         function applyPromo() {
@@ -228,16 +241,39 @@
 
         function updateCart() {
             const list = document.getElementById('cart-list'); list.innerHTML = '';
-            let total = 0;
+            let subtotal = 0;
+            
             cart.forEach((item, i) => {
-                total += item.price * item.qty;
-                list.innerHTML += `<div class="cart-item"><img src="${item.imgs[0].trim()}" style="width:50px;"><div style="flex:1;"><b>${item.name}</b><br><small>${item.col}/${item.siz}</small></div><b>${item.price}₾</b><div onclick="cart.splice(${i},1);updateCart()" style="color:red;padding:10px;"><i class="fa-solid fa-trash"></i></div></div>`;
+                subtotal += item.price * item.qty;
+                list.innerHTML += `
+                    <div class="cart-item">
+                        <img src="${item.imgs[0].trim()}" style="width:65px; height:65px; object-fit:contain;">
+                        <div style="flex:1;">
+                            <b style="font-size:16px;">${item.name}</b><br>
+                            <small style="color:var(--gray);">${item.col} / ${item.siz}</small><br>
+                            <b>${item.price}₾</b>
+                        </div>
+                        <div class="qty-ctrl">
+                            <span onclick="changeQty(${i},-1)">-</span>
+                            <b>${item.qty}</b>
+                            <span onclick="changeQty(${i},1)">+</span>
+                        </div>
+                    </div>`;
             });
-            let disc = activeDisc.type === 'percent' ? (total * activeDisc.val / 100) : activeDisc.val;
-            document.getElementById('cart-total').innerText = Math.max(0, total - disc).toFixed(0) + "₾";
-            document.getElementById('promo-label').innerText = `-${disc.toFixed(0)}₾`;
-            document.getElementById('promo-label').style.display = disc > 0 ? 'block' : 'none';
-            document.getElementById('cart-badge').innerText = cart.length;
+
+            let discVal = activeDisc.type === 'percent' ? (subtotal * activeDisc.val / 100) : activeDisc.val;
+            const final = Math.max(0, subtotal - discVal);
+            
+            document.getElementById('cart-total').innerText = final.toFixed(0) + "₾";
+            const pLabel = document.getElementById('promo-label');
+            if(activeDisc.type !== 'none' && subtotal > 0) {
+                pLabel.innerText = `-${discVal.toFixed(0)}₾`;
+                pLabel.style.display = 'block';
+            } else { 
+                pLabel.style.display = 'none'; 
+            }
+
+            document.getElementById('cart-badge').innerText = cart.reduce((acc, item) => acc + item.qty, 0);
             document.getElementById('cart-badge').style.display = cart.length ? 'flex' : 'none';
             document.getElementById('cart-empty').style.display = cart.length ? 'none' : 'block';
             document.getElementById('cart-footer').style.display = cart.length ? 'block' : 'none';
