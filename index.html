@@ -32,14 +32,20 @@
         .qty-controls { display: flex; align-items: center; gap: 12px; background: #f2f2f7; padding: 5px 10px; border-radius: 12px; }
         .qty-btn { border: none; background: none; font-size: 18px; font-weight: 900; cursor: pointer; color: var(--black); padding: 0 5px; }
         
-        /* Details & Tab Bar */
-        #details-overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
+        /* Form Styles */
+        .input-group { margin-bottom: 15px; padding: 0 20px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 14px; }
+        .input-group input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #e5e5ea; box-sizing: border-box; font-size: 16px; outline: none; }
+
+        /* Overlays (Details & Checkout) */
+        .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
         .chip { padding: 10px 15px; border-radius: 12px; background: #f2f2f7; font-weight: 700; cursor: pointer; font-size: 13px; }
         .chip.selected { background: var(--black); color: white; }
-        .close-det { position: absolute; top: 20px; left: 20px; z-index: 10; font-size: 24px; cursor: pointer; }
+        .close-overlay { position: absolute; top: 20px; left: 20px; z-index: 10; font-size: 24px; cursor: pointer; }
         
+        /* Tab Bar */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; text-align: center; flex: 1; cursor: pointer; position: relative; }
@@ -86,12 +92,12 @@
             <div style="padding:20px; display:flex; justify-content:space-between; font-size:22px; font-weight:900;">
                 <span>ჯამი:</span><span id="cart-total">0₾</span>
             </div>
-            <button class="btn-main" onclick="tg.showAlert('შეკვეთა მუშავდება!')">შეკვეთის გაფორმება</button>
+            <button class="btn-main" onclick="openCheckout()">შეკვეთის გაფორმება</button>
         </div>
     </div>
 
-    <div id="details-overlay">
-        <i class="fa-solid fa-xmark close-det" onclick="closeDetails()"></i>
+    <div id="details-overlay" class="overlay">
+        <i class="fa-solid fa-xmark close-overlay" onclick="closeOverlay('details-overlay')"></i>
         <div style="padding:40px 20px; text-align:center;"><img id="det-img" style="width:100%; max-height:250px; object-fit:contain;"></div>
         <div style="padding:25px; flex:1; overflow-y:auto;">
             <h1 id="det-name" style="margin:0; font-size:24px; font-weight:900;"></h1>
@@ -103,19 +109,32 @@
         <div style="padding:20px; padding-bottom:40px;"><button class="btn-main" onclick="confirmAddToCart()">კალათაში დამატება</button></div>
     </div>
 
+    <div id="checkout-overlay" class="overlay">
+        <i class="fa-solid fa-xmark close-overlay" onclick="closeOverlay('checkout-overlay')"></i>
+        <div style="padding:60px 20px 20px; text-align:center;"><h2 style="font-weight:900;">შეკვეთის მონაცემები</h2></div>
+        <div style="flex:1; overflow-y:auto;">
+            <div class="input-group"><label>სახელი და გვარი</label><input type="text" id="f-name" placeholder="მაგ: გიორგი ბერიძე"></div>
+            <div class="input-group"><label>ტელეფონის ნომერი</label><input type="tel" id="f-phone" placeholder="მაგ: 599 00 00 00"></div>
+            <div class="input-group"><label>მისამართი</label><input type="text" id="f-address" placeholder="მაგ: თბილისი, ჭავჭავაძის 1"></div>
+        </div>
+        <div style="padding:20px; padding-bottom:40px;"><button class="btn-main" onclick="sendOrder()">შეკვეთის გაგზავნა</button></div>
+    </div>
+
     <div class="tab-bar-container">
         <div class="tab-bar">
             <div class="tab-item active" onclick="switchView('main', 0)"><i class="fa-solid fa-house"></i><span>მთავარი</span></div>
             <div class="tab-item" onclick="switchView('category', 1)"><i class="fa-solid fa-table-cells-large"></i><span>კატალოგი</span></div>
             <div class="tab-item" onclick="switchView('cart', 2)"><i class="fa-solid fa-cart-shopping"></i><span class="cart-badge badge-val" style="display:none;">0</span><span>კალათა</span></div>
-            <div class="tab-item" onclick="tg.showAlert('პროფილი მალე!')"><i class="fa-solid fa-user"></i><span>პროფილი</span></div>
+            <div class="tab-item" onclick="tg.showAlert('მალე!')"><i class="fa-solid fa-user"></i><span>პროფილი</span></div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
         let allProducts = [], cart = [], promos = [], currentP = null, selSize = '', selColor = '', activeDiscount = 0;
+        
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_S2EisE604pBq6K26F7rF029F7yS5R_6O690196200-o7301/exec';
 
         async function init() {
             try {
@@ -189,54 +208,29 @@
 
         function confirmAddToCart() {
             if(currentP.sizes[0] !== "" && !selSize) return tg.showAlert("აირჩიეთ ზომა");
-            // Check if item with same size/color already in cart
             const existing = cart.find(i => i.name === currentP.name && i.sSize === selSize && i.sColor === selColor);
             if(existing) { existing.qty++; } 
             else { cart.push({ ...currentP, sSize: selSize, sColor: selColor, qty: 1 }); }
-            updateCart(); closeDetails();
+            updateCart(); closeOverlay('details-overlay');
             tg.HapticFeedback.notificationOccurred('success');
         }
 
         function updateCart() {
             const container = document.getElementById('cart-list-container'); container.innerHTML = '';
-            let subtotal = 0;
-            let totalQty = 0;
-
+            let subtotal = 0, totalQty = 0;
             cart.forEach((item, idx) => {
-                subtotal += (item.price * item.qty);
-                totalQty += item.qty;
-                container.innerHTML += `
-                    <div class="cart-item">
-                        <img src="${item.img}">
-                        <div style="flex:1">
-                            <b>${item.name}</b><br>
-                            <small>${item.sSize} ${item.sColor}</small><br>
-                            <b>${item.price}₾</b>
-                        </div>
-                        <div class="qty-controls">
-                            <button class="qty-btn" onclick="changeQty(${idx}, -1)">-</button>
-                            <span style="font-weight:bold">${item.qty}</span>
-                            <button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button>
-                        </div>
-                        <i class="fa-solid fa-trash" onclick="cart.splice(${idx},1);updateCart();" style="color:#ff3b30; margin-left:10px;"></i>
-                    </div>`;
+                subtotal += (item.price * item.qty); totalQty += item.qty;
+                container.innerHTML += `<div class="cart-item"><img src="${item.img}"><div style="flex:1"><b>${item.name}</b><br><small>${item.sSize} ${item.sColor}</small><br><b>${item.price}₾</b></div><div class="qty-controls"><button class="qty-btn" onclick="changeQty(${idx},-1)">-</button><b>${item.qty}</b><button class="qty-btn" onclick="changeQty(${idx},1)">+</button></div><i class="fa-solid fa-trash" onclick="cart.splice(${idx},1);updateCart();" style="color:#ff3b30;margin-left:10px;"></i></div>`;
             });
-
             document.getElementById('cart-total').innerText = (subtotal - activeDiscount) + '₾';
             document.getElementById('cart-footer').style.display = cart.length ? 'block' : 'none';
-            document.querySelectorAll('.badge-val').forEach(b => { 
-                b.innerText = totalQty; 
-                b.style.display = totalQty ? 'flex' : 'none'; 
-            });
+            document.querySelectorAll('.badge-val').forEach(b => { b.innerText = totalQty; b.style.display = totalQty ? 'flex' : 'none'; });
         }
 
-        function changeQty(idx, delta) {
-            cart[idx].qty += delta;
-            if(cart[idx].qty < 1) cart.splice(idx, 1);
-            updateCart();
-            tg.HapticFeedback.impactOccurred('light');
-        }
+        function changeQty(idx, d) { cart[idx].qty += d; if(cart[idx].qty < 1) cart.splice(idx,1); updateCart(); }
 
+        function openCheckout() { document.getElementById('checkout-overlay').style.display = 'flex'; }
+        function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
         function switchView(id, tabIndex) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id + '-view').classList.add('active');
@@ -244,7 +238,32 @@
             document.querySelectorAll('.tab-item')[tabIndex].classList.add('active');
         }
 
-        function closeDetails() { document.getElementById('details-overlay').style.display = 'none'; }
+        function sendOrder() {
+            const name = document.getElementById('f-name').value;
+            const phone = document.getElementById('f-phone').value;
+            const address = document.getElementById('f-address').value;
+            if(!name || !phone || !address) return tg.showAlert("გთხოვთ შეავსოთ ყველა ველი!");
+
+            const itemsStr = cart.map(i => `${i.name} (${i.sSize}/${i.sColor}) x${i.qty}`).join(', ');
+            const totalStr = document.getElementById('cart-total').innerText;
+
+            const data = {
+                name: name, phone: phone, address: address,
+                items: itemsStr, total: totalStr,
+                user_id: tg.initDataUnsafe?.user?.id || 'N/A',
+                username: tg.initDataUnsafe?.user?.username || 'N/A'
+            };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST', mode: 'no-cors',
+                cache: 'no-cache', body: JSON.stringify(data)
+            }).then(() => {
+                tg.showAlert("შეკვეთა წარმატებით გაიგზავნა!");
+                cart = []; updateCart(); closeOverlay('checkout-overlay');
+                switchView('main', 0);
+            }).catch(() => tg.showAlert("შეცდომა. სცადეთ მოგვიანებით."));
+        }
+
         init();
     </script>
 </body>
