@@ -7,7 +7,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --bg: #f2f2f7; --black: #1c1c1e; --accent: #ff6b6b; --gray: #8e8e93; --white: #ffffff; --green: #4cd964; }
+        :root { --bg: #f2f2f7; --black: #1c1c1e; --accent: #ff6b6b; --gray: #8e8e93; --white: #ffffff; --green: #4cd964; --red: #ff3b30; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow: hidden; height: 100vh; }
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 180px; box-sizing: border-box; }
         .view.active { display: block; }
@@ -27,11 +27,11 @@
         #details-overlay { position: fixed; inset: 0; background: white; z-index: 2000; display: none; flex-direction: column; }
         .input-group { margin-bottom: 15px; padding: 0 20px; }
         .input-group label { display: block; font-size: 11px; font-weight: 800; color: var(--gray); margin-bottom: 6px; text-transform: uppercase; }
-        .input-group input { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #e5e5ea; font-size: 16px; box-sizing: border-box; outline: none; }
+        .input-group input { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #e5e5ea; font-size: 16px; box-sizing: border-box; outline: none; transition: 0.3s; }
         
-        .promo-box { display: flex; gap: 10px; padding: 0 20px; margin-bottom: 20px; }
-        .promo-box input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #e5e5ea; outline: none; }
-        .promo-box button { padding: 12px 20px; border-radius: 12px; border: none; background: var(--black); color: white; font-weight: 700; }
+        .promo-box { display: flex; gap: 10px; padding: 0 20px; margin: 15px 0; }
+        .promo-box input { flex: 1; padding: 14px; border-radius: 15px; border: 2px solid #e5e5ea; outline: none; font-size: 15px; transition: 0.3s; }
+        .promo-box button { padding: 0 25px; border-radius: 15px; border: none; background: var(--black); color: white; font-weight: 800; cursor: pointer; }
 
         .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 20px; }
         .chip { padding: 12px 18px; border-radius: 12px; background: #f2f2f7; font-weight: 700; cursor: pointer; }
@@ -57,7 +57,7 @@
         <div class="header">
             <div style="display:flex; align-items:center; gap:10px;">
                 <img id="shop-logo-img" class="shop-logo" style="display:none;">
-                <div id="shop-name-text" style="font-weight:900; font-size:18px;">...</div>
+                <div id="shop-name-text" style="font-weight:900; font-size:18px;">სვაკი</div>
             </div>
             <div onclick="switchView('cart', 1)" style="position:relative; cursor:pointer;">
                 <i class="fa-solid fa-cart-shopping" style="font-size:22px;"></i>
@@ -90,19 +90,14 @@
         <div class="header" style="justify-content:center;"><div style="font-weight:900;">კალათა</div></div>
         <div id="cart-list"></div>
         <div id="cart-empty" style="text-align:center; padding:50px; color:var(--gray); font-weight:700;">კალათა ცარიელია</div>
-        
         <div id="cart-footer" style="display:none;">
             <div class="promo-box">
-                <input type="text" id="promo-input" placeholder="პრომო კოდი">
+                <input type="text" id="promo-input" placeholder="პრომო კოდი" oninput="this.style.borderColor='#e5e5ea'">
                 <button onclick="applyPromo()">OK</button>
             </div>
             <div style="padding:0 20px 20px;">
-                <div style="display:flex; justify-content:space-between; font-size:20px; font-weight:900; margin-bottom:5px;">
-                    <span>ჯამი:</span><span id="cart-total">0₾</span>
-                </div>
-                <div id="discount-row" style="display:none; justify-content:space-between; color:var(--green); font-weight:800; margin-bottom:15px;">
-                    <span>ფასდაკლება:</span><span id="discount-val">0₾</span>
-                </div>
+                <div style="display:flex; justify-content:space-between; font-size:20px; font-weight:900; margin-bottom:5px;"><span>ჯამი:</span><span id="cart-total">0₾</span></div>
+                <div id="discount-row" style="display:none; justify-content:space-between; color:var(--green); font-weight:800; margin-bottom:15px;"><span>ფასდაკლება:</span><span id="discount-val">0₾</span></div>
                 <button class="btn-main" onclick="switchView('checkout', null)">შეკვეთის გაფორმება</button>
             </div>
         </div>
@@ -135,28 +130,23 @@
 
         async function init() {
             try {
-                // Load Design
                 const dRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=856847150&output=csv&t=${Date.now()}`);
                 const dText = await dRes.text();
                 const d = dText.split('\n')[1].split(',');
                 document.getElementById('shop-name-text').innerText = d[0].replace(/"/g,'');
                 if(d[1]) { document.getElementById('shop-logo-img').src = d[1].replace(/"/g,'').trim(); document.getElementById('shop-logo-img').style.display = 'block'; }
 
-                // Load Products
                 const pRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=0&output=csv&t=${Date.now()}`);
                 const pText = await pRes.text();
                 const rows = pText.split('\n').slice(1);
-                const grid = document.getElementById('products-grid');
-                grid.innerHTML = '';
+                const grid = document.getElementById('products-grid'); grid.innerHTML = '';
                 rows.forEach(row => {
                     const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if(c.length < 7) return;
                     const p = { name: c[0].replace(/"/g,'').trim(), price: c[1].trim(), img: c[2].replace(/"/g,'').split(',')[0].trim(), status: c[4].replace(/"/g,'').trim(), sizes: c[5].replace(/"/g,'').split(','), colors: c[6].replace(/"/g,'').split(',') };
                     if(p.status.toLowerCase().includes('top')) {
                         const b = document.getElementById('hero-banner');
-                        document.getElementById('h-img').src = p.img;
-                        document.getElementById('h-title').innerText = p.name;
-                        document.getElementById('h-price').innerText = p.price + '₾';
+                        document.getElementById('h-img').src = p.img; document.getElementById('h-title').innerText = p.name; document.getElementById('h-price').innerText = p.price + '₾';
                         b.style.display = 'block'; b.onclick = () => openDetails(p);
                     }
                     const card = document.createElement('div'); card.className = 'card';
@@ -168,11 +158,8 @@
 
         function openDetails(p) {
             currentP = p; selSize = ''; selColor = '';
-            document.getElementById('det-name').innerText = p.name;
-            document.getElementById('det-price').innerText = p.price + '₾';
-            document.getElementById('det-img').src = p.img;
-            renderChips('size-chips', p.sizes, 'size');
-            renderChips('color-chips', p.colors, 'color');
+            document.getElementById('det-name').innerText = p.name; document.getElementById('det-price').innerText = p.price + '₾'; document.getElementById('det-img').src = p.img;
+            renderChips('size-chips', p.sizes, 'size'); renderChips('color-chips', p.colors, 'color');
             updateAddBtn(); document.getElementById('details-overlay').style.display = 'flex';
         }
 
@@ -187,10 +174,8 @@
         }
 
         function updateAddBtn() {
-            const btn = document.getElementById('add-btn');
-            const isReady = selSize && selColor;
-            btn.disabled = !isReady;
-            btn.innerText = isReady ? "კალათაში დამატება" : "აირჩიეთ პარამეტრები";
+            const btn = document.getElementById('add-btn'); const isReady = selSize && selColor;
+            btn.disabled = !isReady; btn.innerText = isReady ? "კალათაში დამატება" : "აირჩიეთ პარამეტრები";
         }
 
         function addToCart() {
@@ -207,31 +192,55 @@
                 subtotal += (parseInt(item.price) * item.qty); count += item.qty;
                 list.innerHTML += `<div class="cart-item">
                     <img src="${item.img}"><div style="flex:1"><b>${item.name}</b><br><small style="color:var(--gray)">${item.size} / ${item.color}</small></div>
-                    <div class="qty-ctrl" style="gap:10px; padding:5px 12px;"><span onclick="updCartQty(${i},-1)" style="cursor:pointer; font-weight:900;">-</span><b>${item.qty}</b><span onclick="updCartQty(${i},1)" style="cursor:pointer; font-weight:900;">+</span></div>
-                    <b style="width:60px; text-align:right">${item.price * item.qty}₾</b>
+                    <div class="qty-ctrl"><span onclick="updCartQty(${i},-1)" style="cursor:pointer; font-weight:900;">-</span><b>${item.qty}</b><span onclick="updCartQty(${i},1)" style="cursor:pointer; font-weight:900;">+</span></div>
+                    <b style="width:60px; text-align:right">${parseInt(item.price) * item.qty}₾</b>
                 </div>`;
             });
             document.querySelectorAll('.badge-val').forEach(b => { b.innerText = count; b.style.display = count > 0 ? 'flex' : 'none'; });
-            
-            const total = subtotal - discount;
-            document.getElementById('cart-total').innerText = Math.max(0, total) + '₾';
+            const total = Math.max(0, subtotal - discount);
+            document.getElementById('cart-total').innerText = total + '₾';
             document.getElementById('cart-empty').style.display = cart.length ? 'none' : 'block';
             document.getElementById('cart-footer').style.display = cart.length ? 'block' : 'none';
         }
 
-        function applyPromo() {
-            const code = document.getElementById('promo-input').value.toUpperCase();
-            if(code === 'SVAQI10') {
-                discount = 10;
-                document.getElementById('discount-row').style.display = 'flex';
-                document.getElementById('discount-val').innerText = '-10₾';
-                tg.showAlert("პრომო კოდი გააქტიურდა!");
-            } else {
-                discount = 0;
-                document.getElementById('discount-row').style.display = 'none';
-                tg.showAlert("არასწორი პრომო კოდი!");
+        async function applyPromo() {
+            const inputField = document.getElementById('promo-input');
+            const inputCode = inputField.value.toUpperCase().trim();
+            if(!inputCode) return;
+
+            try {
+                const res = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=2037953246&output=csv&t=${Date.now()}`);
+                const text = await res.text();
+                const lines = text.split('\n').slice(1);
+                
+                let found = false;
+                lines.forEach(line => {
+                    const cols = line.split(',');
+                    const dbCode = cols[0].replace(/"/g,'').toUpperCase().trim();
+                    const dbValue = parseInt(cols[1]);
+
+                    if(dbCode === inputCode) {
+                        discount = dbValue;
+                        found = true;
+                    }
+                });
+
+                if(found) {
+                    inputField.style.borderColor = "var(--green)";
+                    document.getElementById('discount-row').style.display = 'flex';
+                    document.getElementById('discount-val').innerText = `-${discount}₾`;
+                    tg.HapticFeedback.notificationOccurred('success');
+                } else {
+                    discount = 0;
+                    inputField.style.borderColor = "var(--red)";
+                    document.getElementById('discount-row').style.display = 'none';
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+                updateCart();
+            } catch(e) {
+                console.error(e);
+                tg.showAlert("პრომო კოდის შემოწმება ვერ მოხერხდა.");
             }
-            updateCart();
         }
 
         function updCartQty(i, v) { cart[i].qty += v; if(cart[i].qty < 1) cart.splice(i, 1); updateCart(); }
@@ -245,16 +254,11 @@
         function finishOrder() {
             const n = document.getElementById('c-name').value, c = document.getElementById('c-city').value, a = document.getElementById('c-addr').value, p = document.getElementById('c-phone').value;
             if(!n || !c || !a || !p) return tg.showAlert("გთხოვთ შეავსოთ ყველა ველი!");
-            const finalTotal = document.getElementById('cart-total').innerText;
-            tg.showConfirm(`გსურთ გადახდაზე გადასვლა? ჯამი: ${finalTotal}`, (ok) => {
-                if(ok) {
-                    tg.showAlert("გადაგიყვანთ გადახდის გვერდზე...");
-                    cart = []; discount = 0; updateCart(); switchView('main', 0);
-                }
+            tg.showConfirm(`გადახდაზე გადასვლა? ჯამი: ${document.getElementById('cart-total').innerText}`, (ok) => {
+                if(ok) { tg.showAlert("გადაგიყვანთ გადახდის გვერდზე..."); cart = []; discount = 0; updateCart(); switchView('main', 0); }
             });
         }
         init();
     </script>
 </body>
 </html>
-``` Would you like me to add a more complex promo code logic, such as percentage-based discounts or unique codes for each customer?
