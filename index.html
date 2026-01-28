@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Svaqi Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -17,39 +16,40 @@
         .shop-logo { height: 50px; width: auto; }
         .shop-name { font-size: 22px; font-weight: 900; margin-left: 10px; }
 
-        /* --- ახალი სტილის ბანერი --- */
+        /* Floating Banner */
         .banner-wrapper { padding: 20px; position: relative; margin-top: 10px; }
         .hero-banner { 
-            background: #232a32; /* მუქი ფონი, როგორც სქრინზეა */
-            height: 180px; 
-            border-radius: 35px; 
+            background: #232a32; 
+            height: 190px; 
+            border-radius: 40px; 
             position: relative; 
             display: flex; 
             align-items: center; 
             padding: 25px;
             box-sizing: border-box;
-            overflow: visible; /* ეს აუცილებელია, რომ ბოტასი გამოვიდეს გარეთ */
+            overflow: visible;
+            cursor: pointer;
         }
-        .banner-info { width: 60%; z-index: 2; }
-        .banner-info h2 { color: white; margin: 0; font-size: 20px; font-weight: 800; line-height: 1.2; }
-        .banner-info p { color: #8e8e93; margin: 5px 0; font-size: 14px; }
-        .banner-info .price { color: white; font-size: 24px; font-weight: 900; margin-top: 10px; display: block; }
+        .banner-info { width: 55%; z-index: 2; }
+        .banner-info h2 { color: white; margin: 0; font-size: 22px; font-weight: 900; line-height: 1.1; text-transform: uppercase; }
+        .banner-info p { color: #8e8e93; margin: 8px 0; font-size: 15px; font-weight: 500; }
+        .banner-info .price { color: white; font-size: 24px; font-weight: 900; display: block; margin-top: 5px; }
 
         .floating-img { 
             position: absolute; 
-            right: -10px; 
-            top: -20px; /* სურათი ადის ბანერის ზემოთ */
-            width: 220px; 
+            right: -15px; 
+            top: 10px; 
+            width: 230px; 
             height: auto; 
             z-index: 3; 
-            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5)); /* ჩრდილი რეალისტურობისთვის */
-            transform: rotate(-15deg); /* ოდნავი დახრა დინამიურობისთვის */
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4));
+            transform: rotate(-5deg); /* ოდნავი დახრა */
         }
-        /* -------------------------- */
 
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .card { background: var(--white); border-radius: 25px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .card { background: var(--white); border-radius: 28px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+        .card h3 { font-size: 15px; margin: 10px 0 5px; font-weight: 700; }
         
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
@@ -61,16 +61,16 @@
 
     <div id="main-view" class="view active">
         <div class="header">
-            <img id="logo-img" class="shop-logo" src="https://i.ibb.co/v6m80vL/logo.png" style="display:none;">
+            <img id="logo-img" class="shop-logo" style="display:none;">
             <div id="shop-name" class="shop-name">Svaqi</div>
         </div>
 
         <div class="banner-wrapper">
-            <div class="hero-banner" id="banner-click">
+            <div class="hero-banner" id="hero-banner-el">
                 <div class="banner-info">
-                    <h2 id="b-name">Nike Air Max 270</h2>
-                    <p id="b-desc">Men's shoes</p>
-                    <span class="price" id="b-price">$290.00</span>
+                    <h2 id="b-status">იტვირთება...</h2> 
+                    <p id="b-name">...</p>
+                    <span class="price" id="b-price">0₾</span>
                 </div>
                 <img id="b-img" class="floating-img" src="">
             </div>
@@ -90,40 +90,50 @@
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
         
         async function loadData() {
-            // ლოგოს და სახელის წამოღება
-            const dRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=856847150&output=csv`);
-            const dText = await dRes.text();
-            const d = dText.split('\n')[1].split(',');
-            document.getElementById('shop-name').innerText = d[0].replace(/"/g,'');
-            if(d[1]) { 
-                const logo = document.getElementById('logo-img');
-                logo.src = d[1].replace(/"/g,'').trim(); 
-                logo.style.display = 'block'; 
-            }
+            try {
+                // მაღაზიის ინფო
+                const dRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=856847150&output=csv`);
+                const dText = await dRes.text();
+                const d = dText.split('\n')[1].split(',');
+                document.getElementById('shop-name').innerText = d[0].replace(/"/g,'');
+                if(d[1]) { 
+                    const logo = document.getElementById('logo-img');
+                    logo.src = d[1].replace(/"/g,'').trim(); 
+                    logo.style.display = 'block'; 
+                }
 
-            // პროდუქტების წამოღება
-            const pRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=0&output=csv`);
-            const pText = await pRes.text();
-            const products = pText.split('\n').slice(1).map(row => {
-                const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                return {
-                    name: c[0].replace(/"/g,''), price: c[1],
-                    img: c[2].replace(/"/g,'').split(',')[0].trim(),
-                    status: c[4]?.replace(/"/g,'') || ""
-                };
-            });
+                // პროდუქტები
+                const pRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=0&output=csv&t=${Date.now()}`);
+                const pText = await pRes.text();
+                const products = pText.split('\n').slice(1).map(row => {
+                    const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    return {
+                        name: c[0]?.replace(/"/g,'').trim(), 
+                        price: c[1],
+                        img: c[2]?.replace(/"/g,'').split(',')[0].trim(),
+                        status: c[4]?.replace(/"/g,'').trim() || ""
+                    };
+                });
 
-            // ბანერის შევსება (პროდუქტი, რომელსაც უწერია status-ში "top")
-            const topItem = products.find(p => p.status.toLowerCase().includes('top')) || products[0];
-            document.getElementById('b-name').innerText = topItem.name;
-            document.getElementById('b-price').innerText = topItem.price + "₾";
-            document.getElementById('b-img').src = topItem.img;
+                // ბანერის ლოგიკა
+                const topItem = products.find(p => p.status.toLowerCase().startsWith('top:')) || products[0];
+                
+                // ტექსტების დასმა
+                const statusText = topItem.status.includes(':') ? topItem.status.split(':')[1] : topItem.status;
+                document.getElementById('b-status').innerText = statusText || "შეთავაზება";
+                document.getElementById('b-name').innerText = topItem.name;
+                document.getElementById('b-price').innerText = topItem.price + "₾";
+                document.getElementById('b-img').src = topItem.img;
 
-            // გრიდის შევსება
-            const grid = document.getElementById('products-grid');
-            products.forEach(p => {
-                grid.innerHTML += `<div class="card"><img src="${p.img}"><h3>${p.name}</h3><b>${p.price}₾</b></div>`;
-            });
+                // დანარჩენი გრიდი
+                const grid = document.getElementById('products-grid');
+                grid.innerHTML = '';
+                products.forEach(p => {
+                    if(!p.name) return;
+                    grid.innerHTML += `<div class="card"><img src="${p.img}"><h3>${p.name}</h3><b>${p.price}₾</b></div>`;
+                });
+
+            } catch(e) { console.error("Error loading data:", e); }
         }
         loadData();
     </script>
