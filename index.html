@@ -7,7 +7,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --bg: #f2f2f7; --black: #1c1c1e; --accent: #ff6b6b; --gray: #8e8e93; --white: #ffffff; }
+        :root { --bg: #f2f2f7; --black: #1c1c1e; --accent: #ff6b6b; --gray: #8e8e93; --white: #ffffff; --green: #4cd964; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow: hidden; height: 100vh; }
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 180px; box-sizing: border-box; }
         .view.active { display: block; }
@@ -29,6 +29,10 @@
         .input-group label { display: block; font-size: 11px; font-weight: 800; color: var(--gray); margin-bottom: 6px; text-transform: uppercase; }
         .input-group input { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #e5e5ea; font-size: 16px; box-sizing: border-box; outline: none; }
         
+        .promo-box { display: flex; gap: 10px; padding: 0 20px; margin-bottom: 20px; }
+        .promo-box input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #e5e5ea; outline: none; }
+        .promo-box button { padding: 12px 20px; border-radius: 12px; border: none; background: var(--black); color: white; font-weight: 700; }
+
         .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 20px; }
         .chip { padding: 12px 18px; border-radius: 12px; background: #f2f2f7; font-weight: 700; cursor: pointer; }
         .chip.selected { background: var(--black); color: white; }
@@ -43,7 +47,7 @@
         .tab-item.active { opacity: 1; }
         .cart-badge { position: absolute; top: -8px; right: -10px; background: var(--accent); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--white); }
 
-        .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 17px; font-weight: 800; background: var(--black); color: white; cursor: pointer; transition: 0.2s; }
+        .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 17px; font-weight: 800; background: var(--black); color: white; cursor: pointer; }
         .btn-main:disabled { background: #e5e5ea; color: #8e8e93; }
     </style>
 </head>
@@ -53,7 +57,7 @@
         <div class="header">
             <div style="display:flex; align-items:center; gap:10px;">
                 <img id="shop-logo-img" class="shop-logo" style="display:none;">
-                <div id="shop-name-text" style="font-weight:900; font-size:18px;">სვაკი</div>
+                <div id="shop-name-text" style="font-weight:900; font-size:18px;">...</div>
             </div>
             <div onclick="switchView('cart', 1)" style="position:relative; cursor:pointer;">
                 <i class="fa-solid fa-cart-shopping" style="font-size:22px;"></i>
@@ -61,7 +65,7 @@
             </div>
         </div>
         <div class="main-banner" id="hero-banner">
-            <img id="h-img"><div class="banner-text"><span class="banner-badge">რეკომენდებული</span><h2 id="h-title" style="margin:0; font-size:24px;"></h2><b id="h-price" style="color:#4cd964; font-size:18px;"></b></div>
+            <img id="h-img"><div class="banner-text"><span class="banner-badge">რეკომენდებული</span><h2 id="h-title" style="margin:0; font-size:24px;"></h2><b id="h-price" style="color:var(--green); font-size:18px;"></b></div>
         </div>
         <div id="products-grid" class="grid"></div>
     </div>
@@ -86,9 +90,21 @@
         <div class="header" style="justify-content:center;"><div style="font-weight:900;">კალათა</div></div>
         <div id="cart-list"></div>
         <div id="cart-empty" style="text-align:center; padding:50px; color:var(--gray); font-weight:700;">კალათა ცარიელია</div>
-        <div id="cart-footer" style="padding:20px; display:none;">
-            <div style="display:flex; justify-content:space-between; font-size:22px; font-weight:900; margin-bottom:20px;"><span>ჯამი:</span><span id="cart-total">0₾</span></div>
-            <button class="btn-main" onclick="switchView('checkout', null)">შეკვეთის გაფორმება</button>
+        
+        <div id="cart-footer" style="display:none;">
+            <div class="promo-box">
+                <input type="text" id="promo-input" placeholder="პრომო კოდი">
+                <button onclick="applyPromo()">OK</button>
+            </div>
+            <div style="padding:0 20px 20px;">
+                <div style="display:flex; justify-content:space-between; font-size:20px; font-weight:900; margin-bottom:5px;">
+                    <span>ჯამი:</span><span id="cart-total">0₾</span>
+                </div>
+                <div id="discount-row" style="display:none; justify-content:space-between; color:var(--green); font-weight:800; margin-bottom:15px;">
+                    <span>ფასდაკლება:</span><span id="discount-val">0₾</span>
+                </div>
+                <button class="btn-main" onclick="switchView('checkout', null)">შეკვეთის გაფორმება</button>
+            </div>
         </div>
     </div>
 
@@ -114,19 +130,19 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        let cart = [], currentP = null, selSize = '', selColor = '';
+        let cart = [], currentP = null, selSize = '', selColor = '', discount = 0;
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
 
         async function init() {
             try {
+                // Load Design
                 const dRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=856847150&output=csv&t=${Date.now()}`);
                 const dText = await dRes.text();
-                const dLines = dText.split('\n');
-                if(dLines.length > 1) {
-                    const d = dLines[1].split(',');
-                    document.getElementById('shop-name-text').innerText = d[0].replace(/"/g,'');
-                    if(d[1]) { document.getElementById('shop-logo-img').src = d[1].replace(/"/g,'').trim(); document.getElementById('shop-logo-img').style.display = 'block'; }
-                }
+                const d = dText.split('\n')[1].split(',');
+                document.getElementById('shop-name-text').innerText = d[0].replace(/"/g,'');
+                if(d[1]) { document.getElementById('shop-logo-img').src = d[1].replace(/"/g,'').trim(); document.getElementById('shop-logo-img').style.display = 'block'; }
+
+                // Load Products
                 const pRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=0&output=csv&t=${Date.now()}`);
                 const pText = await pRes.text();
                 const rows = pText.split('\n').slice(1);
@@ -186,9 +202,9 @@
 
         function updateCart() {
             const list = document.getElementById('cart-list'); list.innerHTML = '';
-            let total = 0, count = 0;
+            let subtotal = 0, count = 0;
             cart.forEach((item, i) => {
-                total += (parseInt(item.price) * item.qty); count += item.qty;
+                subtotal += (parseInt(item.price) * item.qty); count += item.qty;
                 list.innerHTML += `<div class="cart-item">
                     <img src="${item.img}"><div style="flex:1"><b>${item.name}</b><br><small style="color:var(--gray)">${item.size} / ${item.color}</small></div>
                     <div class="qty-ctrl" style="gap:10px; padding:5px 12px;"><span onclick="updCartQty(${i},-1)" style="cursor:pointer; font-weight:900;">-</span><b>${item.qty}</b><span onclick="updCartQty(${i},1)" style="cursor:pointer; font-weight:900;">+</span></div>
@@ -196,9 +212,26 @@
                 </div>`;
             });
             document.querySelectorAll('.badge-val').forEach(b => { b.innerText = count; b.style.display = count > 0 ? 'flex' : 'none'; });
-            document.getElementById('cart-total').innerText = total + '₾';
+            
+            const total = subtotal - discount;
+            document.getElementById('cart-total').innerText = Math.max(0, total) + '₾';
             document.getElementById('cart-empty').style.display = cart.length ? 'none' : 'block';
             document.getElementById('cart-footer').style.display = cart.length ? 'block' : 'none';
+        }
+
+        function applyPromo() {
+            const code = document.getElementById('promo-input').value.toUpperCase();
+            if(code === 'SVAQI10') {
+                discount = 10;
+                document.getElementById('discount-row').style.display = 'flex';
+                document.getElementById('discount-val').innerText = '-10₾';
+                tg.showAlert("პრომო კოდი გააქტიურდა!");
+            } else {
+                discount = 0;
+                document.getElementById('discount-row').style.display = 'none';
+                tg.showAlert("არასწორი პრომო კოდი!");
+            }
+            updateCart();
         }
 
         function updCartQty(i, v) { cart[i].qty += v; if(cart[i].qty < 1) cart.splice(i, 1); updateCart(); }
@@ -212,11 +245,11 @@
         function finishOrder() {
             const n = document.getElementById('c-name').value, c = document.getElementById('c-city').value, a = document.getElementById('c-addr').value, p = document.getElementById('c-phone').value;
             if(!n || !c || !a || !p) return tg.showAlert("გთხოვთ შეავსოთ ყველა ველი!");
-            const total = document.getElementById('cart-total').innerText;
-            tg.showConfirm(`გსურთ გადახდაზე გადასვლა? ჯამი: ${total}`, (ok) => {
+            const finalTotal = document.getElementById('cart-total').innerText;
+            tg.showConfirm(`გსურთ გადახდაზე გადასვლა? ჯამი: ${finalTotal}`, (ok) => {
                 if(ok) {
                     tg.showAlert("გადაგიყვანთ გადახდის გვერდზე...");
-                    cart = []; updateCart(); switchView('main', 0);
+                    cart = []; discount = 0; updateCart(); switchView('main', 0);
                 }
             });
         }
@@ -224,3 +257,4 @@
     </script>
 </body>
 </html>
+``` Would you like me to add a more complex promo code logic, such as percentage-based discounts or unique codes for each customer?
