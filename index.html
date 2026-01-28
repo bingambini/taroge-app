@@ -16,39 +16,33 @@
         .header { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; background: var(--white); position: sticky; top: 0; z-index: 100; }
         .shop-logo { height: 35px; border-radius: 5px; }
 
-        /* Banner & Grid */
-        .main-banner { margin: 12px; height: 180px; border-radius: 25px; overflow: hidden; position: relative; background: #ccc; display: none; }
-        .main-banner img { width: 100%; height: 100%; object-fit: cover; }
-        .banner-text { position: absolute; bottom: 20px; left: 20px; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        /* Grid */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: var(--white); border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
 
-        /* Category View */
-        .cat-list { padding: 15px; }
-        .cat-card { background: var(--white); border-radius: 25px; padding: 20px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; position: relative; min-height: 140px; overflow: hidden; }
-        .cat-info h2 { margin: 0; font-size: 22px; font-weight: 900; }
-        .cat-img { width: 45%; position: absolute; right: 0; bottom: 0; object-fit: contain; }
+        /* Category List */
+        .cat-card { background: var(--white); border-radius: 25px; padding: 20px; margin: 15px; display: flex; align-items: center; justify-content: space-between; position: relative; min-height: 120px; overflow: hidden; cursor: pointer; }
+        .cat-info h2 { margin: 0; font-size: 20px; font-weight: 900; }
+        .cat-img { width: 40%; position: absolute; right: 0; bottom: 0; object-fit: contain; }
 
-        /* Cart & Checkout */
+        /* Cart Styles */
         .cart-item { background: white; border-radius: 20px; padding: 15px; margin: 10px; display: flex; align-items: center; gap: 15px; }
-        .qty-controls { display: flex; align-items: center; background: #f2f2f7; border-radius: 15px; padding: 5px 12px; gap: 10px; }
-        .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; }
+        .qty-controls { display: flex; align-items: center; background: #f2f2f7; border-radius: 12px; padding: 5px 10px; gap: 10px; }
+        .promo-section { padding: 15px; display: flex; gap: 10px; }
+        .promo-input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; outline: none; }
+        .promo-btn { padding: 12px 20px; background: var(--black); color: white; border-radius: 12px; border: none; font-weight: 700; }
 
-        /* Tab Bar - FIXED ICON */
+        /* Navigation Bar - UPDATED LABELS */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
-        .tab-bar { background: var(--black); height: 70px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; padding: 0 10px; }
-        .tab-item { color: white; opacity: 0.4; text-align: center; flex: 1; cursor: pointer; transition: 0.2s; }
+        .tab-bar { background: var(--black); height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; padding: 0 5px; }
+        .tab-item { color: white; opacity: 0.4; text-align: center; flex: 1; cursor: pointer; }
         .tab-item.active { opacity: 1; }
         .tab-item i { font-size: 22px; display: block; margin-bottom: 4px; }
-        .tab-item span { font-size: 11px; display: block; }
+        .tab-item span { font-size: 11px; display: block; font-weight: 500; }
         .cart-badge { position: absolute; top: -8px; right: 20%; background: var(--accent); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--black); }
 
-        /* Details Overlay */
-        #details-overlay { position: fixed; inset: 0; background: white; z-index: 2000; display: none; flex-direction: column; }
-        .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-        .chip { padding: 10px 15px; border-radius: 12px; background: #f2f2f7; font-weight: 700; cursor: pointer; }
-        .chip.selected { background: var(--black); color: white; }
+        .btn-main { width: calc(100% - 40px); margin: 0 20px; padding: 18px; border-radius: 20px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -61,21 +55,18 @@
             </div>
             <i class="fa-solid fa-magnifying-glass" style="font-size:20px;"></i>
         </div>
-        <div class="main-banner" id="hero-banner">
-            <img id="h-img"><div class="banner-text"><h2>TOP PICK</h2><b id="h-price"></b></div>
-        </div>
         <div id="products-grid" class="grid"></div>
     </div>
 
     <div id="category-view" class="view">
-        <div class="header" style="justify-content:center;"><div style="font-weight:900;">Categories</div></div>
-        <div class="cat-list">
+        <div class="header" style="justify-content:center;"><div style="font-weight:900;">კატალოგი</div></div>
+        <div id="cat-list">
             <div class="cat-card" onclick="filterByCategory('Jackets')">
-                <div class="cat-info"><h2>Jackets</h2><p>Stylish shield.</p></div>
+                <div class="cat-info"><h2>Jackets</h2></div>
                 <img src="https://i.ibb.co/LzfNqK7/jackets.png" class="cat-img">
             </div>
             <div class="cat-card" onclick="filterByCategory('Shoes')">
-                <div class="cat-info"><h2>Shoes</h2><p>Chic Footwear.</p></div>
+                <div class="cat-info"><h2>Shoes</h2></div>
                 <img src="https://i.ibb.co/mSR4P8T/shoes.png" class="cat-img">
             </div>
         </div>
@@ -83,48 +74,38 @@
 
     <div id="cart-view" class="view">
         <div class="header" style="justify-content:center;"><div style="font-weight:900;">კალათა</div></div>
-        <div id="cart-list"></div>
-        <div id="cart-footer" style="padding:20px; display:none;">
-            <div style="display:flex; justify-content:space-between; font-size:20px; font-weight:900; margin-bottom:15px;">
+        <div id="cart-list-container"></div>
+        
+        <div id="cart-footer" style="display:none;">
+            <div class="promo-section">
+                <input type="text" id="promo-input" class="promo-input" placeholder="პრომო კოდი">
+                <button class="promo-btn" onclick="applyPromo()">OK</button>
+            </div>
+            <div style="padding:20px; display:flex; justify-content:space-between; font-size:22px; font-weight:900;">
                 <span>ჯამი:</span><span id="cart-total">0₾</span>
             </div>
-            <button class="btn-main" onclick="switchView('checkout', null)">შეკვეთის გაფორმება</button>
+            <button class="btn-main" onclick="tg.showAlert('შეკვეთის ფუნქცია მალე დაემატება!')">შეკვეთის გაფორმება</button>
         </div>
-    </div>
-
-    <div id="details-overlay">
-        <div style="padding:40px 20px; text-align:center; position:relative;">
-            <div style="position:absolute; top:20px; left:20px;" onclick="closeDetails()"><i class="fa-solid fa-xmark" style="font-size:24px;"></i></div>
-            <img id="det-img" style="width:80%; max-height:250px; object-fit:contain;">
-        </div>
-        <div style="padding:25px; flex:1; overflow-y:auto;">
-            <h1 id="det-name" style="margin:0; font-size:24px; font-weight:900;"></h1>
-            <div id="det-price" style="color:var(--accent); font-size:22px; font-weight:900;"></div>
-            <p id="det-desc" style="color:var(--gray); font-size:14px; margin:15px 0;"></p>
-            <div id="size-chips" class="chip-container"></div>
-            <div id="color-chips" class="chip-container"></div>
-        </div>
-        <div style="padding:20px;"><button id="add-btn" class="btn-main" onclick="addToCart()">კალათაში დამატება</button></div>
     </div>
 
     <div class="tab-bar-container">
         <div class="tab-bar">
             <div class="tab-item active" onclick="switchView('main', 0)">
                 <i class="fa-solid fa-house"></i>
-                <span>Home</span>
+                <span>მთავარი</span>
             </div>
             <div class="tab-item" onclick="switchView('category', 1)">
                 <i class="fa-solid fa-table-cells-large"></i>
-                <span>Category</span>
+                <span>კატალოგი</span>
             </div>
             <div class="tab-item" onclick="switchView('cart', 2)" style="position:relative;">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span class="cart-badge badge-val" style="display:none;">0</span>
-                <span>Cart</span>
+                <span>კალათა</span>
             </div>
-            <div class="tab-item" onclick="tg.showAlert('პროფილი მალე!')">
+            <div class="tab-item" onclick="switchView('profile', 3)">
                 <i class="fa-solid fa-user"></i>
-                <span>Profile</span>
+                <span>პროფილი</span>
             </div>
         </div>
     </div>
@@ -132,40 +113,30 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        let allProducts = [], cart = [], currentP = null, selSize = '', selColor = '';
+        let allProducts = [], cart = [], promos = [], activeDiscount = 0;
 
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
 
         async function init() {
             try {
-                // Load Design
-                const dRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=856847150&output=csv&t=${Date.now()}`);
-                const dText = await dRes.text();
-                const dRows = dText.split('\n');
-                if(dRows[1]) {
-                    const d = dRows[1].split(',');
-                    document.getElementById('shop-name-text').innerText = d[0]?.replace(/"/g,'') || 'Svaqi';
-                    if(d[1]) {
-                        document.getElementById('shop-logo-img').src = d[1].replace(/"/g,'').trim();
-                        document.getElementById('shop-logo-img').style.display = 'block';
-                    }
-                }
+                // პრომოების ჩატვირთვა (gid=1264351326 - შენი promos ტაბი)
+                const promoRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=1264351326&output=csv&t=${Date.now()}`);
+                const promoText = await promoRes.text();
+                promos = promoText.split('\n').slice(1).map(row => {
+                    const c = row.split(',');
+                    return { code: c[0].trim(), type: c[1].trim(), val: parseFloat(c[2]) };
+                });
 
-                // Load Products
+                // პროდუქტების ჩატვირთვა
                 const pRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=0&output=csv&t=${Date.now()}`);
                 const pText = await pRes.text();
-                const rows = pText.split('\n').slice(1);
-                allProducts = rows.map(row => {
+                allProducts = pText.split('\n').slice(1).map(row => {
                     const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     return {
-                        name: c[0]?.replace(/"/g,'').trim(),
-                        price: c[1]?.trim(),
+                        name: c[0]?.replace(/"/g,''),
+                        price: parseFloat(c[1]),
                         img: c[2]?.replace(/"/g,'').split(',')[0].trim(),
-                        desc: c[3]?.replace(/"/g,'').trim(),
-                        status: c[4]?.replace(/"/g,'').trim(),
-                        sizes: c[5]?.replace(/"/g,'').split(',') || [],
-                        colors: c[6]?.replace(/"/g,'').split(',') || [],
-                        category: c[7]?.replace(/"/g,'').trim() || 'Other'
+                        category: c[7]?.trim() || 'Other'
                     };
                 });
                 renderProducts(allProducts);
@@ -179,17 +150,55 @@
                 if(!p.name) return;
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.innerHTML = `<img src="${p.img}"><h3>${p.name}</h3><b>${p.price}₾</b>`;
-                card.onclick = () => openDetails(p);
+                card.innerHTML = `<img src="${p.img}"><h3>${p.name}</h3><b>${p.price}₾</b><br><button onclick="addToCart('${p.name}')" style="margin-top:10px; border:none; background:#eee; padding:5px 10px; border-radius:10px;">დამატება</button>`;
                 grid.appendChild(card);
             });
-            const top = list.find(p => p.status?.toLowerCase().includes('top'));
-            if(top) {
-                document.getElementById('hero-banner').style.display = 'block';
-                document.getElementById('h-img').src = top.img;
-                document.getElementById('h-price').innerText = top.price + '₾';
-                document.getElementById('hero-banner').onclick = () => openDetails(top);
+        }
+
+        function addToCart(name) {
+            const p = allProducts.find(x => x.name === name);
+            cart.push({...p, qty: 1});
+            updateCart();
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function updateCart() {
+            const container = document.getElementById('cart-list-container');
+            container.innerHTML = '';
+            let subtotal = 0;
+            cart.forEach(item => {
+                subtotal += item.price;
+                container.innerHTML += `<div class="cart-item"><img src="${item.img}" style="width:50px;"><div><b>${item.name}</b><br>${item.price}₾</div></div>`;
+            });
+
+            let finalTotal = subtotal - activeDiscount;
+            if(finalTotal < 0) finalTotal = 0;
+            
+            document.getElementById('cart-total').innerText = finalTotal + '₾';
+            document.getElementById('cart-footer').style.display = cart.length ? 'block' : 'none';
+            document.querySelectorAll('.badge-val').forEach(b => {
+                b.innerText = cart.length; b.style.display = cart.length ? 'flex' : 'none';
+            });
+        }
+
+        function applyPromo() {
+            const code = document.getElementById('promo-input').value.trim().toUpperCase();
+            const found = promos.find(p => p.code === code);
+            if(found) {
+                let subtotal = cart.reduce((a, b) => a + b.price, 0);
+                activeDiscount = found.type === 'percent' ? (subtotal * found.val / 100) : found.val;
+                updateCart();
+                tg.showAlert(`პრომო კოდი გააქტიურდა! დაგაკლდათ ${activeDiscount}₾`);
+            } else {
+                tg.showAlert("არასწორი პრომო კოდი!");
             }
+        }
+
+        function switchView(id, tabIndex) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id + '-view').classList.add('active');
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            if(tabIndex !== null) document.querySelectorAll('.tab-item')[tabIndex].classList.add('active');
         }
 
         function filterByCategory(cat) {
@@ -197,57 +206,6 @@
             renderProducts(filtered);
             switchView('main', 0);
         }
-
-        function openDetails(p) {
-            currentP = p; selSize = ''; selColor = '';
-            document.getElementById('det-name').innerText = p.name;
-            document.getElementById('det-price').innerText = p.price + '₾';
-            document.getElementById('det-desc').innerText = p.desc || '';
-            document.getElementById('det-img').src = p.img;
-            renderChips('size-chips', p.sizes, 'size');
-            renderChips('color-chips', p.colors, 'color');
-            document.getElementById('details-overlay').style.display = 'flex';
-        }
-
-        function renderChips(id, vals, type) {
-            const container = document.getElementById(id); container.innerHTML = '';
-            vals.forEach(v => {
-                const val = v.trim(); if(!val) return;
-                const ch = document.createElement('div'); ch.className = 'chip'; ch.innerText = val;
-                ch.onclick = () => {
-                    container.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-                    ch.classList.add('selected');
-                    if(type === 'size') selSize = val; else selColor = val;
-                };
-                container.appendChild(ch);
-            });
-        }
-
-        function addToCart() {
-            if(!selSize || !selColor) return tg.showAlert("აირჩიეთ ზომა და ფერი");
-            cart.push({ ...currentP, size: selSize, color: selColor });
-            closeDetails();
-            updateCart();
-            tg.HapticFeedback.notificationOccurred('success');
-        }
-
-        function updateCart() {
-            const count = cart.length;
-            document.querySelectorAll('.badge-val').forEach(b => {
-                b.innerText = count; b.style.display = count > 0 ? 'flex' : 'none';
-            });
-        }
-
-        function switchView(id, tabIndex) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id + '-view').classList.add('active');
-            if (tabIndex !== null) {
-                document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-item')[tabIndex].classList.add('active');
-            }
-        }
-
-        function closeDetails() { document.getElementById('details-overlay').style.display = 'none'; }
 
         init();
     </script>
