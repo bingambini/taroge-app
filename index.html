@@ -52,6 +52,7 @@
         .cart-badge { position: absolute; top: -5px; right: 28%; background: var(--red); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--black); font-weight: 900; }
 
         .btn-main { width: calc(100% - 40px); margin: 0 20px 30px; padding: 22px; border-radius: 25px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; }
+        .btn-main:disabled { background: #e5e5ea; color: #a1a1a6; cursor: not-allowed; }
         .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: #f2f2f7; display: flex; align-items: center; justify-content: center; z-index: 2100; }
     </style>
 </head>
@@ -73,6 +74,11 @@
             </div>
         </div>
         <div id="products-grid" class="grid"></div>
+    </div>
+
+    <div id="catalog-view" class="view">
+        <div style="padding:40px 25px 10px; font-size:28px; font-weight:900;">კატალოგი</div>
+        <div id="catalog-grid" class="grid"></div>
     </div>
 
     <div id="cart-view" class="view">
@@ -101,9 +107,6 @@
             <img id="u-photo" src="https://ui-avatars.com/api/?name=User" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px; border: 4px solid #f2f2f7; object-fit: cover;">
             <h2 id="u-name" style="margin:0; font-size: 22px; color: var(--black);">სტუმარი</h2>
             <p id="u-username" style="color:var(--gray); font-size:14px; margin-top:5px; font-weight: 600;"></p>
-        </div>
-        <div style="padding: 20px; text-align: center; color: var(--gray); font-size: 13px;">
-            <i class="fa-solid fa-shield-halved"></i> თქვენი მონაცემები დაცულია Telegram-ის მიერ
         </div>
     </div>
 
@@ -138,7 +141,7 @@
     <div class="tab-bar-container">
         <div class="tab-bar">
             <div class="tab-item active" onclick="switchView('home', 0)"><i class="fa-solid fa-house"></i></div>
-            <div class="tab-item" onclick="tg.showAlert('მალე...')"><i class="fa-solid fa-magnifying-glass"></i></div>
+            <div class="tab-item" onclick="switchView('catalog', 1)"><i class="fa-solid fa-layer-group"></i></div>
             <div class="tab-item" onclick="switchView('cart', 2)">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span id="cart-badge" class="cart-badge">0</span>
@@ -180,6 +183,7 @@
                     status: r[4] || "", sizes: r[5]?.split(','), colors: r[6]?.split(',')
                 }));
                 renderHome();
+                renderCatalog();
             } catch(e) { console.error(e); }
         }
 
@@ -199,6 +203,17 @@
                 document.getElementById('b-img').src = top.imgs[0]?.trim();
                 document.getElementById('banner-btn').onclick = () => openDetails(top);
             }
+            products.slice(0, 6).forEach(p => {
+                if(!p.name) return;
+                const div = document.createElement('div'); div.className = 'card';
+                div.innerHTML = `<img src="${p.imgs[0]?.trim()}"><h3>${p.name}</h3><b>${p.price}₾</b>`;
+                div.onclick = () => openDetails(p);
+                grid.appendChild(div);
+            });
+        }
+
+        function renderCatalog() {
+            const grid = document.getElementById('catalog-grid'); grid.innerHTML = '';
             products.forEach(p => {
                 if(!p.name) return;
                 const div = document.createElement('div'); div.className = 'card';
@@ -208,18 +223,11 @@
             });
         }
 
-        function loadProfile() {
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                document.getElementById('u-name').innerText = `${user.first_name || ""} ${user.last_name || ""}`.trim();
-                document.getElementById('u-username').innerText = user.username ? "@" + user.username : "ID: " + user.id;
-                if (user.photo_url) document.getElementById('u-photo').src = user.photo_url;
-            }
-        }
-
         function openDetails(p) {
             currentP = p; selCol = null; selSiz = null;
-            document.getElementById('add-btn').disabled = true;
+            const addBtn = document.getElementById('add-btn');
+            addBtn.disabled = true; // ყოველთვის გათიშულია გახსნისას
+            
             document.getElementById('det-slider').innerHTML = p.imgs.map(i => `<img src="${i.trim()}">`).join('');
             document.getElementById('det-title').innerText = p.name;
             document.getElementById('det-price').innerText = p.price + "₾";
@@ -231,14 +239,34 @@
         function selectChip(el, type, val) {
             el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
             el.classList.add('selected');
-            if(type === 'c') selCol = val; else selSiz = val;
-            document.getElementById('add-btn').disabled = !(selCol && selSiz);
+            
+            if(type === 'c') selCol = val; 
+            if(type === 's') selSiz = val;
+            
+            // ვალიდაცია: თუ ორივე არჩეულია, ღილაკი გააქტიურდეს
+            const addBtn = document.getElementById('add-btn');
+            if (selCol && selSiz) {
+                addBtn.disabled = false;
+            } else {
+                addBtn.disabled = true;
+            }
+        }
+
+        function loadProfile() {
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                document.getElementById('u-name').innerText = `${user.first_name || ""} ${user.last_name || ""}`.trim();
+                document.getElementById('u-username').innerText = user.username ? "@" + user.username : "ID: " + user.id;
+                if (user.photo_url) document.getElementById('u-photo').src = user.photo_url;
+            }
         }
 
         function addToCart() {
+            if (!selCol || !selSiz) return;
             const match = cart.find(i => i.name === currentP.name && i.col === selCol && i.siz === selSiz);
             if(match) match.qty++; else cart.push({...currentP, col: selCol, siz: selSiz, qty: 1});
-            updateCart(); closeOverlay('details-overlay');
+            updateCart(); 
+            closeOverlay('details-overlay');
             tg.HapticFeedback.notificationOccurred('success');
         }
 
