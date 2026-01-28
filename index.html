@@ -8,79 +8,63 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --bg: #f8f9fb; --black: #1c1c1e; --white: #ffffff; --red: #ff3b30; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; }
-        
-        /* Views */
-        .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 100px; box-sizing: border-box; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 140px; box-sizing: border-box; }
         .view.active { display: block; }
-
-        /* Header */
-        .header { padding: 15px 20px; display: flex; align-items: center; background: var(--white); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .shop-logo { height: 40px; width: 40px; border-radius: 8px; object-fit: cover; }
-        .shop-name { font-size: 20px; font-weight: 800; margin-left: 10px; color: var(--black); }
-
-        /* Grid */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
-        .card { background: var(--white); border-radius: 20px; padding: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; }
-        .card img { width: 100%; aspect-ratio: 1; object-fit: contain; border-radius: 12px; }
-        .card h3 { margin: 8px 0 4px; font-size: 14px; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card b { color: var(--black); font-size: 16px; }
-
-        /* Cart Items */
-        .cart-item { background: white; margin: 10px 15px; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-
-        /* Checkout Form */
-        .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; padding: 20px; }
-        .form-group { margin-top: 50px; }
-        input { width: 100%; padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 1px solid #eee; font-size: 16px; box-sizing: border-box; background: #fdfdfd; }
-        
-        /* Buttons */
-        .btn-main { width: 100%; padding: 20px; border-radius: 20px; border: none; background: var(--black); color: white; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
-        .close-btn { position: absolute; top: 20px; right: 20px; font-size: 24px; color: var(--black); z-index: 2100; }
-
-        /* Tab Bar */
-        .tab-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: var(--black); height: 65px; border-radius: 22px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .tab-item { color: white; opacity: 0.5; font-size: 20px; }
+        .header { padding: 15px 20px; display: flex; align-items: center; background: var(--white); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .shop-logo { height: 40px; width: auto; border-radius: 8px; }
+        .shop-name { font-size: 22px; font-weight: 900; margin-left: 10px; color: var(--black); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
+        .card { background: var(--white); border-radius: 30px; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); cursor: pointer; text-align: center; }
+        .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+        .card h3 { margin: 10px 0 5px; font-size: 15px; font-weight: 800; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
+        .btn-main { width: calc(100% - 40px); margin: 0 20px 30px; padding: 22px; border-radius: 25px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; }
+        input { width: calc(100% - 40px); padding: 18px; margin: 8px 20px; border-radius: 15px; border: 1.5px solid #eee; font-size: 16px; box-sizing: border-box; outline: none; }
+        .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
+        .tab-bar { background: var(--black); height: 75px; border-radius: 28px; display: flex; justify-content: space-around; align-items: center; }
+        .tab-item { color: white; opacity: 0.4; font-size: 22px; flex: 1; text-align: center; }
         .tab-item.active { opacity: 1; }
+        .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: #f2f2f7; display: flex; align-items: center; justify-content: center; z-index: 2100; }
     </style>
 </head>
 <body>
 
     <div id="home-view" class="view active">
         <div class="header">
-            <img id="logo-img" class="shop-logo" src="" style="display:none;">
+            <img id="logo-img" class="shop-logo" style="display:none;">
             <div id="shop-name" class="shop-name">იტვირთება...</div>
         </div>
         <div id="products-grid" class="grid"></div>
     </div>
 
     <div id="cart-view" class="view">
-        <div style="padding:25px 20px 10px; font-size:24px; font-weight:800;">კალათა</div>
-        <div id="cart-list"></div>
-        <div id="cart-empty" style="text-align:center; padding:50px; color:gray;">კალათა ცარიელია</div>
-        <div id="cart-footer" style="display:none; padding: 20px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:20px; font-weight:800;">
-                <span>ჯამი:</span> <span id="cart-total">0₾</span>
-            </div>
+        <div style="padding:40px 25px 10px; font-size:28px; font-weight:900;">კალათა</div>
+        <div id="cart-list" style="padding: 0 20px;"></div>
+        <div id="cart-footer" style="display:none;">
+            <div style="padding: 20px; font-size: 22px; font-weight: 900;">ჯამი: <span id="cart-total">0₾</span></div>
             <button class="btn-main" onclick="openCheckout()">გაფორმება</button>
         </div>
     </div>
 
     <div id="checkout-overlay" class="overlay">
-        <div class="close-btn" onclick="closeOverlay()"><i class="fa-solid fa-times"></i></div>
-        <div class="form-group">
-            <h2 style="margin-bottom:20px;">მონაცემები</h2>
+        <div class="close-btn" onclick="closeOverlay('checkout-overlay')"><i class="fa-solid fa-xmark"></i></div>
+        <div style="padding:70px 0 25px;">
+            <h2 style="padding-left: 20px;">მონაცემები</h2>
             <input type="text" id="order-cust" placeholder="სახელი გვარი">
             <input type="text" id="order-city" placeholder="ქალაქი">
             <input type="text" id="order-addr" placeholder="მისამართი">
             <input type="tel" id="order-phone" placeholder="ტელეფონი">
+            <div id="order-sum-box" style="padding: 20px; font-weight: 800; font-size: 18px;"></div>
             <button class="btn-main" onclick="sendOrder()">დადასტურება</button>
         </div>
     </div>
 
-    <div class="tab-bar">
-        <div class="tab-item active" onclick="switchView('home', this)"><i class="fa-solid fa-house"></i></div>
-        <div class="tab-item" onclick="switchView('cart', this)"><i class="fa-solid fa-shopping-cart"></i></div>
+    <div class="tab-bar-container">
+        <div class="tab-bar">
+            <div class="tab-item active" onclick="switchView('home', 0)"><i class="fa-solid fa-house"></i></div>
+            <div class="tab-item" onclick="switchView('cart', 1)"><i class="fa-solid fa-cart-shopping"></i></div>
+        </div>
     </div>
 
     <script>
@@ -88,13 +72,12 @@
         tg.expand();
 
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcvhwgTgqT-kvOfGpQCX8OGIuSsBE8hkatL-LusJIlsk88wAHuJfGbqpyDZQTtpcQb/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzIhnr5_YRzr5M0xzYbfRCx_pHqk0gH3NEta1N97xICGHntvpxJuI3GIOxCC_eS_Snqg/exec';
         
         let products = [], cart = [];
 
         async function init() {
             try {
-                // Load Shop Data
                 const dRes = await fetch(`https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=856847150`);
                 const dText = await dRes.text();
                 const dRows = dText.split('\n').slice(1).map(r => r.split(',').map(c => c.replace(/^"|"$/g, '')));
@@ -103,7 +86,6 @@
                     if(dRows[0][1]) { document.getElementById('logo-img').src = dRows[0][1]; document.getElementById('logo-img').style.display = 'block'; }
                 }
 
-                // Load Products
                 const pRes = await fetch(`https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=0`);
                 const pText = await pRes.text();
                 products = pText.split('\n').slice(1).map(line => {
@@ -133,31 +115,19 @@
 
         function updateCart() {
             const list = document.getElementById('cart-list');
-            const empty = document.getElementById('cart-empty');
-            const footer = document.getElementById('cart-footer');
             let total = 0;
-
-            if(cart.length === 0) {
-                list.innerHTML = ''; empty.style.display = 'block'; footer.style.display = 'none';
-            } else {
-                empty.style.display = 'none'; footer.style.display = 'block';
-                list.innerHTML = cart.map(item => {
-                    total += item.price;
-                    return `<div class="cart-item"><span>${item.name}</span><b>${item.price}₾</b></div>`;
-                }).join('');
-            }
+            list.innerHTML = cart.map(item => {
+                total += item.price;
+                return `<div style="padding: 15px; border-bottom: 1px solid #eee;">${item.name} - <b>${item.price}₾</b></div>`;
+            }).join('');
             document.getElementById('cart-total').innerText = total + "₾";
+            document.getElementById('cart-footer').style.display = cart.length ? 'block' : 'none';
         }
 
-        function switchView(viewId, el) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(viewId + '-view').classList.add('active');
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
+        function openCheckout() {
+            document.getElementById('order-sum-box').innerText = "ჯამი: " + document.getElementById('cart-total').innerText;
+            document.getElementById('checkout-overlay').style.display = 'flex';
         }
-
-        function openCheckout() { document.getElementById('checkout-overlay').style.display = 'flex'; }
-        function closeOverlay() { document.getElementById('checkout-overlay').style.display = 'none'; }
 
         async function sendOrder() {
             const customer = document.getElementById('order-cust').value;
@@ -180,16 +150,22 @@
                             body: JSON.stringify({ customer, city, address, phone, items, total, orderID })
                         });
 
-                        tg.showAlert(`✅ გაიგზავნა!\n\nნომერი: ${orderID}\n\nდანიშნულებაში ჩაწერეთ ეს ნომერი.\n\nIBAN: GE00TB0000000000000000`);
+                        tg.showAlert(`✅ შეკვეთა გაიგზავნა!\n\nშეკვეთის ნომერი: ${orderID}\n\nგადარიცხვისას დანიშნულებაში აუცილებლად ჩაწერეთ ეს ნომერი!\n\nIBAN: GE00TB0000000000000000`);
                         
                         cart = []; updateCart();
-                        closeOverlay();
-                        switchView('home', document.querySelector('.tab-item'));
-                    } catch(e) { tg.showAlert("შეცდომაა."); }
+                        closeOverlay('checkout-overlay');
+                        switchView('home', 0);
+                    } catch(e) { tg.showAlert("შეცდომაა გაგზავნისას."); }
                 }
             });
         }
 
+        function switchView(v, idx) {
+            document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+            document.getElementById(v + '-view').classList.add('active');
+            document.querySelectorAll('.tab-item').forEach((e, i) => e.classList.toggle('active', i === idx));
+        }
+        function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
         init();
     </script>
 </body>
