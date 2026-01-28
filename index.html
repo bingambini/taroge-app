@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Svaqi Store</title>
+    <title>Svaqi Store v1.1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg: #f8f9fb; --black: #1c1c1e; --white: #ffffff; --gray: #8e8e93; --red: #ff3b30; --green: #34c759; }
+        :root { --bg: #f8f9fb; --black: #1c1c1e; --white: #ffffff; --gray: #8e8e93; --red: #ff3b30; --green: #34c759; --light-gray: #f2f2f7; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 140px; box-sizing: border-box; }
         .view.active { display: block; }
@@ -36,12 +36,12 @@
         .chip { padding: 12px 18px; border: 2px solid #f0f0f5; border-radius: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .chip.selected { background: var(--black); color: white; border-color: var(--black); }
         .cart-item { background: white; border-radius: 25px; padding: 15px; margin: 10px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
-        .qty-ctrl { display: flex; align-items: center; gap: 10px; background: #f2f2f7; padding: 5px 12px; border-radius: 15px; font-weight: 800; }
+        .qty-ctrl { display: flex; align-items: center; gap: 10px; background: var(--light-gray); padding: 5px 12px; border-radius: 15px; font-weight: 800; }
         .qty-ctrl span { cursor: pointer; padding: 0 5px; font-size: 18px; }
-        .promo-box { display: flex; gap: 10px; margin: 20px; background: #f2f2f7; padding: 10px; border-radius: 20px; }
+        .promo-box { display: flex; gap: 10px; margin: 20px; background: var(--light-gray); padding: 10px; border-radius: 20px; }
         .promo-box input { flex: 1; border: none; outline: none; background: transparent; font-weight: 600; padding: 5px 10px; font-size: 16px; width: 100%; }
         .promo-box button { background: var(--black); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-weight: 700; }
-        .pay-card { background: #f2f2f7; border-radius: 25px; padding: 20px; margin: 15px 0; border: 1px solid #e5e5ea; }
+        .pay-card { background: var(--light-gray); border-radius: 25px; padding: 20px; margin: 15px 0; border: 1px solid #e5e5ea; }
         .copy-row { background: white; padding: 12px 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border: 1px solid #ddd; }
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 28px; display: flex; justify-content: space-around; align-items: center; }
@@ -50,7 +50,14 @@
         .cart-badge { position: absolute; top: -5px; right: 28%; background: var(--red); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--black); font-weight: 900; }
         .btn-main { width: calc(100% - 40px); margin: 0 20px 30px; padding: 22px; border-radius: 25px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; }
         .btn-main:disabled { background: #e5e5ea; color: #a1a1a6; cursor: not-allowed; }
-        .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: #f2f2f7; display: flex; align-items: center; justify-content: center; z-index: 2100; }
+        .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: var(--light-gray); display: flex; align-items: center; justify-content: center; z-index: 2100; }
+        
+        /* Order History Styles */
+        .order-card { background: white; margin: 10px 20px; padding: 20px; border-radius: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+        .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--light-gray); padding-bottom: 10px; margin-bottom: 10px; }
+        .status-badge { padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-shipped { background: #d4edda; color: #155724; }
     </style>
 </head>
 <body>
@@ -103,9 +110,13 @@
     <div id="user-view" class="view">
         <div style="padding:40px 25px 10px; font-size:28px; font-weight:900;">პროფილი</div>
         <div style="background: var(--white); margin: 20px; padding: 30px; border-radius: 35px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.02);">
-            <img id="u-photo" src="https://ui-avatars.com/api/?name=User" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px; border: 4px solid #f2f2f7; object-fit: cover;">
+            <img id="u-photo" src="https://ui-avatars.com/api/?name=User" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px; border: 4px solid var(--light-gray); object-fit: cover;">
             <h2 id="u-name" style="margin:0; font-size: 22px; color: var(--black);">სტუმარი</h2>
             <p id="u-username" style="color:var(--gray); font-size:14px; margin-top:5px; font-weight: 600;"></p>
+        </div>
+        <div style="padding:10px 25px; font-weight:900; font-size:18px;">ჩემი შეკვეთები</div>
+        <div id="order-history-list">
+            <div style="text-align:center; padding:20px; color:var(--gray); font-size:14px;">ისტორია იტვირთება...</div>
         </div>
     </div>
 
@@ -132,7 +143,7 @@
             <div class="promo-box" style="margin:10px 0;"><input type="text" id="order-addr" placeholder="ზუსტი მისამართი"></div>
             <div class="promo-box" style="margin:10px 0;"><input type="tel" id="order-phone" placeholder="ტელეფონი"></div>
             <div class="promo-box" style="margin:10px 0; background: #eee;"><input type="text" id="order-id-display" readonly style="color: #555; font-weight: bold;"></div>
-            <div id="order-summary" style="background:#f2f2f7; padding:15px; border-radius:20px; margin:20px 0;"></div>
+            <div id="order-summary" style="background:var(--light-gray); padding:15px; border-radius:20px; margin:20px 0;"></div>
             <button class="btn-main" style="margin:0; width:100%;" onclick="processOrder()">დადასტურება</button>
         </div>
     </div>
@@ -154,7 +165,7 @@
         tg.expand();
 
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzIhnr5_YRzr5M0xzYbfRCx_pHqk0gH3NEta1N97xICGHntvpxJuI3GIOxCC_eS_Snqg/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwB_7Hhtk0QLk126RzIipRv545UtVLjY6RKJbPPduLW2m5s4KpGZZRE8voSixT8L0pvaw/exec';
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
 
         let products = [], promos = [], cart = [], categories = [];
@@ -286,12 +297,9 @@
 
         function openCheckout() {
             orderID = Math.floor(100000 + Math.random() * 900000);
-            // გამოვიტანოთ ნომერი გრაფაში
             document.getElementById('order-id-display').value = "შეკვეთის ნომერი: " + orderID;
-            
             let sub = cart.reduce((a, b) => a + (b.price * b.qty), 0);
             let d = activeDisc.type === 'percent' ? (sub * activeDisc.val / 100) : activeDisc.val;
-            // ტექსტის შეცვლა
             document.getElementById('order-summary').innerHTML = `გადასახდელი თანხა: <b>${(sub-d).toFixed(0)}₾</b>`;
             document.getElementById('checkout-overlay').style.display = 'flex';
         }
@@ -336,24 +344,57 @@
         }
 
         async function finalizeOrder(customer, city, address, phone, itemsText, total, finalID) {
+            const userId = tg.initDataUnsafe?.user?.id || "unknown";
             try {
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    body: JSON.stringify({ customer, city, address, phone, items: itemsText, total, orderID: finalID })
+                    body: JSON.stringify({ customer, city, address, phone, items: itemsText, total, orderID: finalID, userId: userId })
                 });
                 tg.showAlert("✅ შეკვეთა მიღებულია! მალე დაგიკავშირდებით.");
                 cart = []; activeDisc = { type: 'none', val: 0 }; updateCart();
-                location.reload();
+                switchView('user', 3);
+                loadProfile();
+                closeOverlay('checkout-overlay');
             } catch (e) { tg.showAlert("შეცდომა გაგზავნისას."); }
         }
 
-        function loadProfile() {
+        async function loadProfile() {
             const user = tg.initDataUnsafe?.user;
             if (user) {
                 document.getElementById('u-name').innerText = `${user.first_name || ""} ${user.last_name || ""}`.trim();
                 document.getElementById('u-username').innerText = user.username ? "@" + user.username : "ID: " + user.id;
                 if (user.photo_url) document.getElementById('u-photo').src = user.photo_url;
+                
+                // ისტორიის ჩატვირთვა
+                fetchHistory(user.id);
+            }
+        }
+
+        async function fetchHistory(userId) {
+            const historyBox = document.getElementById('order-history-list');
+            try {
+                const res = await fetch(`${SCRIPT_URL}?userId=${userId}`);
+                const orders = await res.json();
+                
+                if (orders.length === 0) {
+                    historyBox.innerHTML = '<div style="text-align:center; padding:20px; color:var(--gray); font-size:14px;">შეკვეთები არ მოიძებნა</div>';
+                    return;
+                }
+
+                historyBox.innerHTML = orders.map(ord => `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span style="font-weight:800;">#${ord.orderID}</span>
+                            <span class="status-badge ${ord.status === 'მოწმდება' ? 'status-pending' : 'status-shipped'}">${ord.status}</span>
+                        </div>
+                        <div style="font-size:13px; color:var(--gray); margin-bottom:8px;">${new Date(ord.date).toLocaleDateString()}</div>
+                        <div style="font-size:14px; font-weight:600;">${ord.items}</div>
+                        <div style="margin-top:10px; font-weight:900; font-size:16px; text-align:right;">${ord.total}</div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                historyBox.innerHTML = '<div style="text-align:center; padding:20px; color:var(--red);">ისტორიის ჩატვირთვა ვერ მოხერხდა</div>';
             }
         }
 
