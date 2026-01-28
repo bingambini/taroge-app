@@ -12,12 +12,12 @@
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 140px; box-sizing: border-box; }
         .view.active { display: block; }
 
-        /* Header - ხელშეუხებელი */
+        /* 1. Header - ხელშეუხებელი */
         .header { padding: 15px 20px; display: flex; align-items: center; background: var(--white); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #efeff4; }
         .shop-logo { height: 45px; width: auto; }
         .shop-name { font-size: 22px; font-weight: 900; margin-left: 10px; }
 
-        /* Floating Banner - ხელშეუხებელი */
+        /* 2. Floating Banner - ხელშეუხებელი */
         .banner-wrapper { padding: 35px 20px 20px; position: relative; }
         .hero-banner { background: #232a32; height: 180px; border-radius: 40px; position: relative; display: flex; align-items: center; padding: 25px; box-sizing: border-box; overflow: visible; cursor: pointer; }
         .banner-info { width: 55%; z-index: 2; }
@@ -26,25 +26,34 @@
         .banner-info .price { color: white; font-size: 24px; font-weight: 900; display: block; }
         .floating-img { position: absolute; right: -10px; top: -35px; width: 230px; height: auto; z-index: 3; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5)); transform: rotate(-15deg); pointer-events: none; }
 
-        /* Grid */
+        /* Grid & Cards */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
         .card { background: var(--white); border-radius: 28px; padding: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
 
-        /* აღდგენილი ქვედა ნავიგაცია (4 იკონკით) */
+        /* Product Details Page Styles */
+        #det-slider { width: 100%; height: 320px; margin-top: 50px; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+        #det-slider::-webkit-scrollbar { display: none; }
+        #det-slider img { width: 100%; height: 100%; object-fit: contain; scroll-snap-align: start; flex-shrink: 0; }
+        .details-content { padding: 25px; flex: 1; background: white; border-radius: 40px 40px 0 0; margin-top: -30px; z-index: 5; box-shadow: 0 -10px 20px rgba(0,0,0,0.05); }
+        .size-container { display: flex; gap: 10px; margin-top: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .size-chip { min-width: 50px; height: 50px; border: 2px solid #efeff4; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+        .size-chip.selected { background: var(--black); color: white; border-color: var(--black); }
+
+        /* 3. Navigation - ხელშეუხებელი (4 იკონკა) */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; flex: 1; text-align: center; font-size: 22px; cursor: pointer; position: relative; }
         .tab-item.active { opacity: 1; }
         .badge { position: absolute; top: -5px; right: 25%; background: var(--red); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; border: 2px solid var(--black); }
 
-        /* Cart & Forms */
-        .cart-item { background: white; border-radius: 22px; padding: 15px; margin: 10px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
-        .qty-ctrl { display: flex; align-items: center; gap: 12px; background: #f2f2f7; padding: 6px 12px; border-radius: 15px; margin-left: auto; }
+        /* Overlays & Common */
         .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: #f2f2f7; display: flex; align-items: center; justify-content: center; z-index: 2100; }
         .btn-main { width: calc(100% - 40px); margin: 0 20px 30px; padding: 20px; border-radius: 22px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 700; cursor: pointer; }
+        .cart-item { background: white; border-radius: 22px; padding: 15px; margin: 10px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+        .qty-ctrl { display: flex; align-items: center; gap: 12px; background: #f2f2f7; padding: 6px 12px; border-radius: 12px; margin-left: auto; }
     </style>
 </head>
 <body>
@@ -52,7 +61,7 @@
     <div id="home-view" class="view active">
         <div class="header">
             <img id="logo-img" class="shop-logo" style="display:none;">
-            <div id="shop-name" class="shop-name">იტვირთება...</div>
+            <div id="shop-name" class="shop-name">...</div>
         </div>
         <div class="banner-wrapper" id="banner-btn">
             <div class="hero-banner">
@@ -81,13 +90,34 @@
 
     <div id="details-overlay" class="overlay">
         <div class="close-btn" onclick="closeOverlay('details-overlay')"><i class="fa-solid fa-xmark"></i></div>
-        <img id="det-img" style="width:100%; height:300px; object-fit:contain; margin-top:50px;">
-        <div style="padding:25px; flex:1;">
-            <h1 id="det-title" style="margin:0; font-size:24px; font-weight:900;"></h1>
+        <div id="det-slider"></div>
+        <div class="details-content">
+            <h1 id="det-title" style="margin:0; font-size:26px; font-weight:900;"></h1>
             <div id="det-price" style="font-size:22px; font-weight:800; margin-top:5px;"></div>
-            <p id="det-desc" style="color:var(--gray); font-size:14px; margin:15px 0;"></p>
+            <div style="margin-top:20px;">
+                <span style="font-weight:700;">აირჩიეთ ზომა</span>
+                <div class="size-container" id="size-chips-box">
+                    <div class="size-chip" onclick="selectSize(this)">39</div>
+                    <div class="size-chip" onclick="selectSize(this)">40</div>
+                    <div class="size-chip" onclick="selectSize(this)">41</div>
+                    <div class="size-chip" onclick="selectSize(this)">42</div>
+                    <div class="size-chip" onclick="selectSize(this)">43</div>
+                    <div class="size-chip" onclick="selectSize(this)">44</div>
+                </div>
+            </div>
+            <p id="det-desc" style="color:var(--gray); font-size:14px; line-height:1.5; margin-top:15px;"></p>
         </div>
         <button class="btn-main" onclick="addToCart()">კალათაში დამატება</button>
+    </div>
+
+    <div id="checkout-overlay" class="overlay">
+        <div class="close-btn" onclick="closeOverlay('checkout-overlay')"><i class="fa-solid fa-xmark"></i></div>
+        <div style="padding:60px 25px 20px;"><h2 style="font-size:26px; font-weight:900;">მონაცემები</h2></div>
+        <div style="flex:1; padding:0 25px;">
+            <input type="text" id="f-name" placeholder="სახელი" style="width:100%; padding:16px; border-radius:15px; border:1px solid #ddd; margin-bottom:15px;">
+            <input type="tel" id="f-phone" placeholder="ტელეფონი" style="width:100%; padding:16px; border-radius:15px; border:1px solid #ddd;">
+        </div>
+        <button class="btn-main" onclick="sendOrder()">გაგზავნა</button>
     </div>
 
     <div class="tab-bar-container">
@@ -105,11 +135,10 @@
     <script>
         const tg = window.Telegram.WebApp;
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
-        let products = [], cart = [], currentP = null;
+        let products = [], cart = [], currentP = null, selectedSize = null;
 
         async function loadData() {
             try {
-                // ლოგო და სახელი - ხელშეუხებელი
                 const dRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=856847150&output=csv`);
                 const dText = await dRes.text();
                 const d = dText.split('\n')[1].split(',');
@@ -120,7 +149,6 @@
                     logo.style.display = 'block'; 
                 }
 
-                // პროდუქტები
                 const pRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=0&output=csv&t=${Date.now()}`);
                 const pText = await pRes.text();
                 products = pText.split('\n').slice(1).map(row => {
@@ -149,18 +177,30 @@
             });
         }
 
+        function selectSize(el) {
+            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedSize = el.innerText;
+        }
+
         function openDetails(p) {
             currentP = p;
-            document.getElementById('det-img').src = p.imgs[0].trim();
+            selectedSize = null;
+            document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('selected'));
+            
+            const slider = document.getElementById('det-slider');
+            slider.innerHTML = p.imgs.map(img => `<img src="${img.trim()}">`).join('');
+            
             document.getElementById('det-title').innerText = p.name;
             document.getElementById('det-price').innerText = p.price + "₾";
-            document.getElementById('det-desc').innerText = p.desc || "";
+            document.getElementById('det-desc').innerText = p.desc || "აღწერა არ არის.";
             openOverlay('details-overlay');
         }
 
         function addToCart() {
-            const match = cart.find(i => i.name === currentP.name);
-            if(match) match.qty++; else cart.push({...currentP, qty: 1});
+            if(!selectedSize) return tg.showAlert("გთხოვთ აირჩიოთ ზომა!");
+            const match = cart.find(i => i.name === currentP.name && i.size === selectedSize);
+            if(match) match.qty++; else cart.push({...currentP, qty: 1, size: selectedSize});
             updateCart(); closeOverlay('details-overlay');
             tg.HapticFeedback.notificationOccurred('success');
         }
@@ -170,7 +210,7 @@
             let total = 0;
             cart.forEach((item, idx) => {
                 total += item.price * item.qty;
-                list.innerHTML += `<div class="cart-item"><img src="${item.imgs[0].trim()}" style="width:60px;height:60px;object-fit:contain;"><div style="flex:1;margin-left:10px;"><b>${item.name}</b><br>${item.price}₾</div><div class="qty-ctrl"><div onclick="changeQty(${idx},-1)">-</div><b>${item.qty}</b><div onclick="changeQty(${idx},1)">+</div></div></div>`;
+                list.innerHTML += `<div class="cart-item"><img src="${item.imgs[0].trim()}" style="width:60px;height:60px;object-fit:contain;"><div style="flex:1;margin-left:10px;"><b>${item.name}</b> (${item.size})<br>${item.price}₾</div><div class="qty-ctrl"><div onclick="changeQty(${idx},-1)">-</div><b>${item.qty}</b><div onclick="changeQty(${idx},1)">+</div></div></div>`;
             });
             document.getElementById('cart-total').innerText = total + "₾";
             document.getElementById('cart-badge').innerText = cart.length;
@@ -187,6 +227,7 @@
         }
         function openOverlay(id) { document.getElementById(id).style.display = 'flex'; }
         function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
+        function sendOrder() { tg.showAlert("შეკვეთა გაიგზავნა!"); cart = []; updateCart(); closeOverlay('checkout-overlay'); switchView('home', 0); }
 
         loadData();
     </script>
