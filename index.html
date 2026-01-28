@@ -16,19 +16,13 @@
         .shop-name { font-size: 22px; font-weight: 900; color: var(--black); }
 
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .card { background: var(--white); border-radius: 30px; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); cursor: pointer; text-align: center; }
+        .card { background: var(--white); border-radius: 30px; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); cursor: pointer; }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
         .card h3 { margin: 10px 0 5px; font-size: 15px; font-weight: 800; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .cat-scroll { display: flex; gap: 10px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; background: var(--bg); position: sticky; top: 0; z-index: 10; }
-        .cat-pill { padding: 10px 20px; background: var(--white); border-radius: 20px; font-weight: 700; font-size: 14px; white-space: nowrap; cursor: pointer; }
+        .cat-pill { padding: 10px 20px; background: var(--white); border-radius: 20px; font-weight: 700; font-size: 14px; white-space: nowrap; cursor: pointer; transition: 0.2s; }
         .cat-pill.active { background: var(--black); color: white; }
-
-        .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
-        .padding-box { padding: 70px 25px 25px; }
-
-        .input-box { background: #f2f2f7; border-radius: 20px; padding: 12px 20px; margin-bottom: 12px; }
-        .input-box input { background: transparent; border: none; outline: none; width: 100%; font-size: 16px; font-weight: 600; }
 
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 28px; display: flex; justify-content: space-around; align-items: center; }
@@ -37,9 +31,6 @@
         .cart-badge { position: absolute; top: -5px; right: 28%; background: var(--red); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--black); font-weight: 900; }
 
         .btn-main { width: calc(100% - 40px); margin: 0 20px 30px; padding: 22px; border-radius: 25px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; }
-        .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: #f2f2f7; display: flex; align-items: center; justify-content: center; z-index: 2100; }
-        
-        .pay-card { background: #f2f2f7; border-radius: 25px; padding: 20px; margin: 20px 0; border: 1px solid #e5e5ea; text-align: left; }
     </style>
 </head>
 <body>
@@ -57,23 +48,13 @@
 
     <div id="cart-view" class="view">
         <div style="padding:40px 25px 10px; font-size:28px; font-weight:900;">კალათა</div>
-        <div id="cart-items" style="padding:0 20px;"></div>
+        <div id="cart-list" style="padding: 0 20px;"></div>
         <div id="cart-empty" style="text-align:center; padding:50px; color:var(--gray);">კალათა ცარიელია</div>
-        <div id="cart-footer" style="display:none;">
-            <div style="display:flex; justify-content:space-between; font-size:24px; font-weight:900; margin:20px;">
+        <div id="cart-footer" style="display:none; padding: 20px;">
+            <div style="display:flex; justify-content:space-between; font-size:24px; font-weight:900; margin-bottom:20px;">
                 <span>ჯამი:</span> <span id="cart-total">0₾</span>
             </div>
-            <button class="btn-main" onclick="openCheckout()">გაფორმება</button>
-        </div>
-    </div>
-
-    <div id="checkout-overlay" class="overlay">
-        <div class="close-btn" onclick="closeOverlay()"><i class="fa-solid fa-xmark"></i></div>
-        <div class="padding-box" id="checkout-content">
-            <h2>შეკვეთა</h2>
-            <div class="input-box"><input type="text" id="cust-name" placeholder="სახელი გვარი"></div>
-            <div class="input-box"><input type="tel" id="cust-phone" placeholder="ტელეფონი"></div>
-            <button class="btn-main" style="width:100%; margin:10px 0;" onclick="submitOrder()">დადასტურება</button>
+            <button class="btn-main" style="width:100%; margin:0;" onclick="tg.showAlert('შეკვეთა გაფორმებულია!')">გაფორმება</button>
         </div>
     </div>
 
@@ -93,7 +74,7 @@
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=0`;
 
-        let products = [], cart = [], categories = [], orderID = "";
+        let products = [], cart = [], categories = [];
 
         async function init() {
             try {
@@ -114,7 +95,7 @@
 
         function renderGrid(target, list) {
             document.getElementById(target).innerHTML = list.map(p => `
-                <div class="card" onclick="add('${p.name.replace(/'/g, "\\'")}')">
+                <div class="card" onclick="addToCart('${p.name.replace(/'/g, "\\'")}')">
                     <img src="${p.img}">
                     <h3>${p.name}</h3>
                     <b>${p.price}₾</b>
@@ -133,7 +114,7 @@
             renderGrid('catalog-grid', filtered);
         }
 
-        function add(name) {
+        function addToCart(name) {
             const p = products.find(x => x.name === name);
             if(p) { cart.push(p); updateCart(); tg.HapticFeedback.impactOccurred('light'); }
         }
@@ -144,29 +125,7 @@
             document.getElementById('cart-empty').style.display = cart.length ? 'none' : 'block';
             document.getElementById('cart-footer').style.display = cart.length ? 'block' : 'none';
             document.getElementById('cart-total').innerText = cart.reduce((a, b) => a + parseFloat(b.price), 0) + "₾";
-            document.getElementById('cart-items').innerHTML = cart.map(p => `<div style="padding:10px; border-bottom:1px solid #eee;">${p.name} - ${p.price}₾</div>`).join('');
-        }
-
-        function openCheckout() {
-            orderID = Math.floor(100000 + Math.random() * 900000);
-            document.getElementById('checkout-overlay').style.display = 'flex';
-        }
-
-        function submitOrder() {
-            const name = document.getElementById('cust-name').value;
-            if(!name) return tg.showAlert("შეავსეთ სახელი!");
-            
-            document.getElementById('checkout-content').innerHTML = `
-                <div style="text-align:center;">
-                    <i class="fa-solid fa-circle-check" style="font-size:50px; color:var(--green);"></i>
-                    <h3>შეკვეთა #${orderID}</h3>
-                    <div class="pay-card">
-                        <p>გადარიცხვისას დანიშნულებაში ჩაწერეთ: <b>${orderID}</b></p>
-                        <p>IBAN: <b>GE00TB0000000000000000</b></p>
-                    </div>
-                    <button class="btn-main" style="width:100%; background:var(--green);" onclick="location.reload()">დასრულება</button>
-                </div>
-            `;
+            document.getElementById('cart-list').innerHTML = cart.map(p => `<div style="padding:10px; border-bottom:1px solid #eee;">${p.name} - ${p.price}₾</div>`).join('');
         }
 
         function switchView(v, i) {
@@ -174,8 +133,6 @@
             document.getElementById(v + '-view').classList.add('active');
             document.querySelectorAll('.tab-item').forEach((e, idx) => e.classList.toggle('active', idx === i));
         }
-
-        function closeOverlay() { document.getElementById('checkout-overlay').style.display = 'none'; }
 
         init();
     </script>
