@@ -12,36 +12,27 @@
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 160px; box-sizing: border-box; }
         .view.active { display: block; }
 
-        /* Header */
-        .header { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; background: var(--white); position: sticky; top: 0; z-index: 100; min-height: 60px; }
-        .shop-info { display: flex; align-items: center; gap: 10px; }
+        /* Header & Banner */
+        .header { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; background: var(--white); position: sticky; top: 0; z-index: 100; }
         .shop-name { font-size: 18px; font-weight: 900; text-transform: uppercase; }
         .shop-logo { height: 35px; width: auto; object-fit: contain; }
 
-        /* Banner Style */
-        .main-banner { margin: 12px; height: 160px; border-radius: 25px; overflow: hidden; position: relative; background: #000; }
-        .main-banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-        .banner-text { position: absolute; bottom: 20px; left: 20px; color: white; }
-        .banner-text h2 { margin: 0; font-size: 22px; font-weight: 900; }
+        .main-banner { margin: 12px; height: 180px; border-radius: 25px; overflow: hidden; position: relative; background: #000; cursor: pointer; display: none; }
+        .main-banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
+        .banner-overlay { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 70%); }
+        .banner-text { position: absolute; bottom: 20px; left: 20px; color: white; right: 20px; }
+        .banner-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; display: inline-block; }
 
-        .cart-badge { position: absolute; top: -8px; right: -10px; background: var(--accent); color: white; font-size: 10px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--white); }
-
-        /* Grid */
+        /* Product Cards */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: var(--white); border-radius: 25px; padding: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
         .card h3 { font-size: 15px; margin: 10px 0 5px; font-weight: 800; }
-
-        /* Forms & Buttons */
-        .checkout-form { padding: 20px; background: var(--white); margin: 12px; border-radius: 20px; display: none; }
-        .checkout-form input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 12px; border: 1px solid #eee; box-sizing: border-box; font-size: 14px; outline: none; }
-        .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 17px; font-weight: 800; background: var(--black); color: white; cursor: pointer; }
-        .btn-main:disabled { background: #e5e5ea; color: #8e8e93; }
-
-        /* Tab Bar */
+        
+        .cart-badge { position: absolute; top: -8px; right: -10px; background: var(--accent); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--white); }
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 65px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
-        .tab-item { color: white; opacity: 0.4; font-size: 22px; cursor: pointer; }
+        .tab-item { color: white; opacity: 0.4; font-size: 22px; cursor: pointer; position: relative; }
         .tab-item.active { opacity: 1; }
     </style>
 </head>
@@ -49,21 +40,23 @@
 
     <div id="main-view" class="view active">
         <div class="header">
-            <div class="shop-info">
+            <div class="shop-info" style="display:flex; align-items:center; gap:10px;">
                 <img id="shop-logo-display" src="" class="shop-logo" style="display:none;">
                 <div id="shop-name-display" class="shop-name">...</div>
             </div>
-            <div onclick="switchView('cart', document.querySelectorAll('.tab-item')[1])" style="position:relative;">
+            <div onclick="switchView('cart', document.querySelectorAll('.tab-item')[1])" style="position:relative; cursor:pointer;">
                 <i class="fa-solid fa-cart-shopping" style="font-size:22px;"></i>
                 <span class="cart-badge">0</span>
             </div>
         </div>
 
-        <div class="main-banner">
-            <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?q=80&w=2070&auto=format&fit=crop" alt="Banner">
+        <div class="main-banner" id="top-product-banner">
+            <img id="banner-img" src="" alt="Top Product">
+            <div class="banner-overlay"></div>
             <div class="banner-text">
-                <h2>ახალი კოლექცია</h2>
-                <p style="margin:5px 0 0; opacity:0.8;">აღმოაჩინე შენი სტილი</p>
+                <span class="banner-badge">რეკომენდებული</span>
+                <h2 id="banner-title" style="margin:0; font-size:24px;"></h2>
+                <p id="banner-price" style="margin:5px 0 0; font-weight: 700; color: #4cd964;"></p>
             </div>
         </div>
 
@@ -72,23 +65,7 @@
 
     <div id="cart-view" class="view">
         <div class="header" style="justify-content: center;"><div class="shop-name">კალათა</div></div>
-        <div id="cart-items-list"></div>
-        
-        <div id="checkout-section" class="checkout-form">
-            <h3 style="margin-top:0;">საკონტაქტო ინფორმაცია</h3>
-            <input type="text" id="cust-name" placeholder="სახელი და გვარი">
-            <input type="tel" id="cust-phone" placeholder="ტელეფონის ნომერი">
-            <input type="text" id="cust-city" placeholder="ქალაქი">
-            <input type="text" id="cust-addr" placeholder="ზუსტი მისამართი">
-        </div>
-
-        <div id="cart-footer" style="display:none; padding: 20px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:900; font-size:20px;">
-                <span>ჯამი:</span><span id="total-price">0₾</span>
-            </div>
-            <button id="final-btn" class="btn-main" onclick="handleCheckout()">გაფორმება</button>
-        </div>
-        <div id="empty-msg" style="text-align:center; margin-top:100px; color:var(--gray); font-weight:700;">კალათა ცარიელია</div>
+        <div id="cart-items-list" style="padding: 20px; text-align: center; color: var(--gray);">კალათა ცარიელია</div>
     </div>
 
     <div class="tab-bar-container">
@@ -103,15 +80,13 @@
         const tg = window.Telegram.WebApp;
         tg.ready(); tg.expand();
 
-        let cart = [];
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
         const DESIGN_GID = '856847150';
         const PRODUCTS_GID = '0';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3BwX_7rQmSeVcR2M6i7Uq1bROkcxLMuh8dFvd0CjOGlb616jV9Ub2GcJ1ywF6AADMKg/exec';
 
         async function init() {
             try {
-                // დიზაინის წამოღება (სახელი და ლოგო)
+                // 1. ჩავტვირთოთ დიზაინი (სახელი/ლოგო)
                 const desRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${DESIGN_GID}&output=csv&t=${Date.now()}`);
                 const desRows = (await desRes.text()).split('\n').slice(1);
                 if(desRows.length > 0) {
@@ -121,18 +96,39 @@
                     logoImg.src = cols[1].replace(/"/g, ''); logoImg.style.display = 'block';
                 }
 
-                // პროდუქტების წამოღება
+                // 2. ჩავტვირთოთ პროდუქტები და ვიპოვოთ TOP
                 const prodRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${PRODUCTS_GID}&output=csv&t=${Date.now()}`);
                 const prodRows = (await prodRes.text()).split('\n').slice(1);
                 const grid = document.getElementById('main-grid');
                 grid.innerHTML = '';
+
+                let topProductFound = false;
+
                 prodRows.forEach(row => {
                     const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if(c.length < 3) return;
-                    const p = { name: c[0].replace(/"/g, ''), price: c[1], img: c[2].replace(/"/g, '').split(',')[0] };
+                    if(c.length < 5) return;
+
+                    const p = {
+                        name: c[0].replace(/"/g, ''),
+                        price: c[1],
+                        img: c[2].replace(/"/g, '').split(',')[0],
+                        status: c[4].replace(/"/g, '').trim() // E სვეტი (სტატუსი)
+                    };
+
+                    // თუ პროდუქტის სტატუსი არის "Top", ვაჩვენებთ ბანერზე
+                    if (p.status.toLowerCase() === 'top' && !topProductFound) {
+                        const banner = document.getElementById('top-product-banner');
+                        document.getElementById('banner-img').src = p.img;
+                        document.getElementById('banner-title').innerText = p.name;
+                        document.getElementById('banner-price').innerText = p.price + '₾';
+                        banner.style.display = 'block';
+                        topProductFound = true;
+                    }
+
+                    // დავამატოთ ჩვეულებრივ სიაში
                     const card = document.createElement('div'); card.className = 'card';
                     card.innerHTML = `<img src="${p.img}"><h3>${p.name}</h3><b>${p.price}₾</b>`;
-                    card.onclick = () => tg.showAlert(p.name + " დაემატა (სატესტო)");
+                    card.onclick = () => tg.showAlert(p.name);
                     grid.appendChild(card);
                 });
             } catch (e) { console.error(e); }
