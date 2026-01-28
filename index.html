@@ -11,42 +11,33 @@
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow: hidden; height: 100vh; }
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 180px; box-sizing: border-box; }
         .view.active { display: block; }
-
         .header { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; background: var(--white); position: sticky; top: 0; z-index: 100; min-height: 60px; }
         .shop-logo { height: 35px; width: auto; object-fit: contain; border-radius: 5px; }
-
         .main-banner { margin: 12px; height: 180px; border-radius: 25px; overflow: hidden; position: relative; background: #000; display: none; cursor: pointer; }
         .main-banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
         .banner-text { position: absolute; bottom: 20px; left: 20px; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .banner-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; margin-bottom: 5px; display: inline-block; }
-
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: var(--white); border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
-
         #details-overlay { position: fixed; inset: 0; background: white; z-index: 2000; display: none; flex-direction: column; }
         .input-group { margin-bottom: 15px; padding: 0 20px; }
         .input-group label { display: block; font-size: 11px; font-weight: 800; color: var(--gray); margin-bottom: 6px; text-transform: uppercase; }
         .input-group input { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #e5e5ea; font-size: 16px; box-sizing: border-box; outline: none; transition: 0.3s; }
-        
         .promo-box { display: flex; gap: 10px; padding: 0 20px; margin: 15px 0; }
         .promo-box input { flex: 1; padding: 14px; border-radius: 15px; border: 2px solid #e5e5ea; outline: none; font-size: 15px; transition: 0.3s; }
         .promo-box button { padding: 0 25px; border-radius: 15px; border: none; background: var(--black); color: white; font-weight: 800; cursor: pointer; }
-
         .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 20px; }
         .chip { padding: 12px 18px; border-radius: 12px; background: #f2f2f7; font-weight: 700; cursor: pointer; }
         .chip.selected { background: var(--black); color: white; }
-
         .cart-item { display: flex; align-items: center; gap: 12px; padding: 15px; background: white; margin: 10px; border-radius: 20px; }
         .cart-item img { width: 55px; height: 55px; object-fit: contain; }
         .qty-ctrl { display: flex; align-items: center; gap: 15px; background: #f2f2f7; padding: 8px 15px; border-radius: 15px; width: fit-content; }
-
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 65px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; font-size: 22px; position: relative; cursor: pointer; }
         .tab-item.active { opacity: 1; }
         .cart-badge { position: absolute; top: -8px; right: -10px; background: var(--accent); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--white); }
-
         .btn-main { width: 100%; padding: 18px; border-radius: 20px; border: none; font-size: 17px; font-weight: 800; background: var(--black); color: white; cursor: pointer; }
         .btn-main:disabled { background: #e5e5ea; color: #8e8e93; }
     </style>
@@ -111,7 +102,7 @@
             <div class="input-group"><label>ზუსტი მისამართი</label><input type="text" id="c-addr" placeholder="ქუჩა, კორპუსი, ბინა"></div>
             <div class="input-group"><label>ტელეფონი</label><input type="tel" id="c-phone" placeholder="5XXXXXXXX"></div>
         </div>
-        <div style="padding:20px;"><button class="btn-main" onclick="finishOrder()">შეკვეთის დადასტურება</button></div>
+        <div style="padding:20px;"><button id="confirm-btn" class="btn-main" onclick="finishOrder()">შეკვეთის დადასტურება</button></div>
     </div>
 
     <div class="tab-bar-container">
@@ -126,8 +117,10 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         let cart = [], currentP = null, selSize = '', selColor = '', discount = 0;
+        
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
         const PROMO_GID = '651180774';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzEjPwx8pwYc2uuGiUp4dTXfp_wUiT-aEXhtj2yQYnPjQSFLbiOeXgOdq036khoDynWGw/exec';
 
         async function init() {
             try {
@@ -208,40 +201,20 @@
             const inputField = document.getElementById('promo-input');
             const inputCode = inputField.value.toUpperCase().trim();
             if(!inputCode) return;
-
             try {
                 const res = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${PROMO_GID}&output=csv&t=${Date.now()}`);
                 const text = await res.text();
                 const lines = text.split('\n').slice(1);
-                
-                let found = false;
-                let subtotal = cart.reduce((sum, item) => sum + (parseInt(item.price) * item.qty), 0);
-
+                let found = false, subtotal = cart.reduce((sum, item) => sum + (parseInt(item.price) * item.qty), 0);
                 lines.forEach(line => {
                     const cols = line.split(',');
                     const dbCode = cols[0].replace(/"/g,'').toUpperCase().trim();
                     const type = cols[1].replace(/"/g,'').trim().toLowerCase();
                     const val = parseFloat(cols[2]);
-
-                    if(dbCode === inputCode) {
-                        discount = (type === 'percent') ? (subtotal * val) / 100 : val;
-                        found = true;
-                    }
+                    if(dbCode === inputCode) { discount = (type === 'percent') ? (subtotal * val) / 100 : val; found = true; }
                 });
-
-                if(found) {
-                    inputField.style.borderColor = "var(--green)";
-                    inputField.style.backgroundColor = "#f2fff5";
-                    document.getElementById('discount-row').style.display = 'flex';
-                    document.getElementById('discount-val').innerText = `-${Math.round(discount)}₾`;
-                    tg.HapticFeedback.notificationOccurred('success');
-                } else {
-                    discount = 0;
-                    inputField.style.borderColor = "var(--red)";
-                    inputField.style.backgroundColor = "#fff2f2";
-                    document.getElementById('discount-row').style.display = 'none';
-                    tg.HapticFeedback.notificationOccurred('error');
-                }
+                if(found) { inputField.style.borderColor = "var(--green)"; inputField.style.backgroundColor = "#f2fff5"; document.getElementById('discount-row').style.display = 'flex'; document.getElementById('discount-val').innerText = `-${Math.round(discount)}₾`; tg.HapticFeedback.notificationOccurred('success'); }
+                else { discount = 0; inputField.style.borderColor = "var(--red)"; inputField.style.backgroundColor = "#fff2f2"; document.getElementById('discount-row').style.display = 'none'; tg.HapticFeedback.notificationOccurred('error'); }
                 updateCart();
             } catch(e) { console.error(e); }
         }
@@ -254,12 +227,41 @@
             if(tab !== null) { document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active')); document.querySelectorAll('.tab-item')[tab].classList.add('active'); }
         }
 
-        function finishOrder() {
-            const n = document.getElementById('c-name').value, c = document.getElementById('c-city').value, a = document.getElementById('c-addr').value, p = document.getElementById('c-phone').value;
-            if(!n || !c || !a || !p) return tg.showAlert("გთხოვთ შეავსოთ ყველა ველი!");
-            tg.showConfirm(`შეკვეთის დადასტურება? ჯამი: ${document.getElementById('cart-total').innerText}`, (ok) => {
-                if(ok) { tg.showAlert("მადლობა! შეკვეთა მიღებულია."); cart = []; discount = 0; updateCart(); switchView('main', 0); }
-            });
+        async function finishOrder() {
+            const name = document.getElementById('c-name').value;
+            const city = document.getElementById('c-city').value;
+            const addr = document.getElementById('c-addr').value;
+            const phone = document.getElementById('c-phone').value;
+            const total = document.getElementById('cart-total').innerText;
+
+            if(!name || !city || !addr || !phone) return tg.showAlert("გთხოვთ შეავსოთ ყველა ველი!");
+            
+            const btn = document.getElementById('confirm-btn');
+            btn.disabled = true;
+            btn.innerText = "იგზავნება...";
+
+            const itemsSummary = cart.map(i => `${i.name} (${i.size}/${i.color}) x${i.qty}`).join(', ');
+
+            const orderData = { name, city, address: addr, phone, items: itemsSummary, total: parseInt(total) };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+                
+                tg.showAlert("შეკვეთა წარმატებით გაიგზავნა!");
+                cart = []; discount = 0; updateCart();
+                switchView('main', 0);
+            } catch(e) {
+                tg.showAlert("შეცდომა შეკვეთისას. სცადეთ მოგვიანებით.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "შეკვეთის დადასტურება";
+            }
         }
         init();
     </script>
