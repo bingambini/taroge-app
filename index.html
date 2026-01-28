@@ -12,36 +12,43 @@
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 160px; box-sizing: border-box; }
         .view.active { display: block; }
         
-        /* Header - გაზრდილი სიმაღლე ლოგოსთვის */
+        /* Header - გაზრდილი ლოგოსთვის */
         .header { padding: 0 20px; display: flex; align-items: center; justify-content: flex-start; background: var(--white); position: sticky; top: 0; z-index: 100; height: 80px; }
-        /* ლოგოს ზომა გაიზარდა 30px-დან 75px-მდე */
         .shop-logo { height: 75px; width: auto; object-fit: contain; border-radius: 8px; }
 
+        /* Banner */
         .main-banner { margin: 12px; height: 180px; border-radius: 25px; overflow: hidden; position: relative; background: #000; display: none; cursor: pointer; }
         .main-banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-        
         .banner-text { position: absolute; bottom: 20px; left: 20px; color: #ff3b30; } 
         .banner-text h2 { margin: 0; font-size: 24px; font-weight: 900; text-transform: uppercase; text-shadow: 0px 0px 10px rgba(255,255,255,0.5); }
         .banner-text b { color: #ffffff; font-size: 18px; }
 
+        /* Grid & Cards */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: var(--white); border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
         .card h3 { margin: 10px 0 5px; font-size: 15px; font-weight: 800; color: var(--black); }
 
+        /* Overlays & Form */
+        .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .close-overlay { position: absolute; top: 20px; left: 20px; z-index: 10; font-size: 24px; cursor: pointer; }
+        .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+        .chip { padding: 10px 15px; border-radius: 12px; background: #f2f2f7; font-weight: 700; cursor: pointer; font-size: 13px; }
+        .chip.selected { background: var(--black); color: white; }
+        
+        /* Cart items */
         .cart-item { background: white; border-radius: 20px; padding: 15px; margin: 10px; display: flex; align-items: center; gap: 15px; position: relative; }
         .cart-item img { width: 60px; height: 60px; object-fit: contain; }
         .qty-controls { display: flex; align-items: center; gap: 12px; background: #f2f2f7; padding: 5px 10px; border-radius: 12px; }
         .qty-btn { border: none; background: none; font-size: 18px; font-weight: 900; cursor: pointer; color: var(--black); padding: 0 5px; }
+
+        /* Inputs */
         .input-group { margin-bottom: 12px; padding: 0 20px; }
         .input-group label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 13px; color: var(--gray); }
         .input-group input { width: 100%; padding: 14px; border-radius: 15px; border: 1px solid #e5e5ea; box-sizing: border-box; font-size: 16px; outline: none; background: #f9f9f9; }
-        .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-        .chip { padding: 10px 15px; border-radius: 12px; background: #f2f2f7; font-weight: 700; cursor: pointer; font-size: 13px; }
-        .chip.selected { background: var(--black); color: white; }
-        .close-overlay { position: absolute; top: 20px; left: 20px; z-index: 10; font-size: 24px; cursor: pointer; }
+
+        /* Navigation */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; text-align: center; flex: 1; cursor: pointer; position: relative; }
@@ -96,10 +103,10 @@
             <h1 id="det-name" style="margin:0; font-size:24px; font-weight:900;"></h1>
             <div id="det-price" style="font-size:22px; font-weight:900; margin-top:5px;"></div>
             <p id="det-desc" style="color:var(--gray); font-size:14px; margin:15px 0;"></p>
-            <div style="font-weight:800;">ზომა</div><div id="size-chips" class="chip-container"></div>
-            <div style="font-weight:800;">ფერი</div><div id="color-chips" class="chip-container"></div>
+            <div style="font-weight:800; margin-top:10px;">ზომა</div><div id="size-chips" class="chip-container"></div>
+            <div style="font-weight:800; margin-top:10px;">ფერი</div><div id="color-chips" class="chip-container"></div>
         </div>
-        <div style="padding:20px; padding-bottom:40px;"><button class="btn-main" onclick="confirmAddToCart()">კალათაში დამატება</button></div>
+        <div style="padding:20px; padding-bottom:40px;"><button class="btn-main" id="add-to-cart-btn" onclick="confirmAddToCart()">აირჩიეთ ზომა</button></div>
     </div>
 
     <div id="checkout-overlay" class="overlay">
@@ -138,9 +145,8 @@
                     const d = dRows[1].split(',');
                     document.getElementById('shop-name-text').innerText = d[0]?.replace(/"/g,'') || 'Svaqi';
                     if(d[1]) { 
-                        const logoUrl = d[1].replace(/"/g,'').trim();
                         const logoImg = document.getElementById('shop-logo-img');
-                        logoImg.src = logoUrl;
+                        logoImg.src = d[1].replace(/"/g,'').trim();
                         logoImg.style.display = 'block';
                     }
                 }
@@ -154,8 +160,8 @@
                         img: c[2]?.replace(/"/g,'').split(',')[0].trim(),
                         desc: c[3]?.replace(/"/g,'').trim(),
                         status: c[4]?.replace(/"/g,'').trim(),
-                        sizes: c[5]?.replace(/"/g,'').split(',') || [],
-                        colors: c[6]?.replace(/"/g,'').split(',') || []
+                        sizes: (c[5]?.replace(/"/g,'').split(',') || []).filter(v => v.trim() !== ""),
+                        colors: (c[6]?.replace(/"/g,'').split(',') || []).filter(v => v.trim() !== "")
                     };
                 });
                 renderProducts(allProducts);
@@ -188,27 +194,54 @@
             document.getElementById('det-price').innerText = p.price + '₾';
             document.getElementById('det-desc').innerText = p.desc || '';
             document.getElementById('det-img').src = p.img;
+            
             renderChips('size-chips', p.sizes, 'size');
             renderChips('color-chips', p.colors, 'color');
+            
+            updateBtnState(); // ღილაკის განახლება თავიდანვე
             document.getElementById('details-overlay').style.display = 'flex';
         }
 
         function renderChips(id, vals, type) {
             const container = document.getElementById(id); container.innerHTML = '';
+            if(vals.length === 0) {
+                container.previousElementSibling.style.display = 'none';
+                if(type === 'size') selSize = 'N/A'; else selColor = 'N/A';
+                return;
+            }
+            container.previousElementSibling.style.display = 'block';
             vals.forEach(v => {
-                const val = v.trim(); if(!val) return;
+                const val = v.trim();
                 const ch = document.createElement('div'); ch.className = 'chip'; ch.innerText = val;
                 ch.onclick = () => {
                     container.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
                     ch.classList.add('selected');
                     if(type === 'size') selSize = val; else selColor = val;
+                    updateBtnState();
                 };
                 container.appendChild(ch);
             });
         }
 
+        function updateBtnState() {
+            const btn = document.getElementById('add-to-cart-btn');
+            if(!selSize) {
+                btn.innerText = "აირჩიეთ ზომა";
+                btn.style.opacity = "0.5";
+                btn.style.pointerEvents = "none";
+            } else if(!selColor) {
+                btn.innerText = "აირჩიეთ ფერი";
+                btn.style.opacity = "0.5";
+                btn.style.pointerEvents = "none";
+            } else {
+                btn.innerText = "კალათაში დამატება";
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+            }
+        }
+
         function confirmAddToCart() {
-            if(currentP.sizes[0] !== "" && !selSize) return tg.showAlert("აირჩიეთ ზომა");
+            if(!selSize || !selColor) return;
             const existing = cart.find(i => i.name === currentP.name && i.sSize === selSize && i.sColor === selColor);
             if(existing) { existing.qty++; } 
             else { cart.push({ ...currentP, sSize: selSize, sColor: selColor, qty: 1 }); }
