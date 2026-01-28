@@ -12,12 +12,10 @@
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 140px; box-sizing: border-box; }
         .view.active { display: block; }
 
-        /* Header & Logo */
         .header { padding: 15px 20px; display: flex; align-items: center; background: var(--white); position: sticky; top: 0; z-index: 100; }
         .shop-logo { height: 40px; width: auto; border-radius: 8px; }
         .shop-name { font-size: 22px; font-weight: 900; margin-left: 10px; color: var(--black); }
 
-        /* Banner */
         .banner-wrapper { padding: 20px; }
         .hero-banner { background: #232a32; height: 180px; border-radius: 40px; position: relative; display: flex; align-items: center; padding: 25px; box-sizing: border-box; cursor: pointer; }
         .banner-info { width: 55%; z-index: 2; }
@@ -25,13 +23,11 @@
         .banner-info .price { color: white; font-size: 24px; font-weight: 900; display: block; margin-top: 5px; }
         .floating-img { position: absolute; right: -10px; top: -30px; width: 220px; z-index: 3; transform: rotate(-15deg); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)); }
 
-        /* Product Grid */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
         .card { background: var(--white); border-radius: 30px; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); cursor: pointer; }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
         .card h3 { margin: 10px 0 5px; font-size: 16px; font-weight: 800; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Overlays */
         .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
         #det-slider { width: 100%; height: 320px; margin-top: 40px; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
         #det-slider img { width: 100%; height: 100%; object-fit: contain; scroll-snap-align: start; flex-shrink: 0; }
@@ -41,7 +37,6 @@
         .chip { padding: 12px 18px; border: 2px solid #f0f0f5; border-radius: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .chip.selected { background: var(--black); color: white; border-color: var(--black); }
 
-        /* Cart */
         .cart-item { background: white; border-radius: 25px; padding: 15px; margin: 10px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
         .qty-ctrl { display: flex; align-items: center; gap: 10px; background: #f2f2f7; padding: 5px 12px; border-radius: 15px; font-weight: 800; }
         .qty-ctrl span { cursor: pointer; padding: 0 5px; font-size: 18px; }
@@ -50,7 +45,6 @@
         .promo-box input { flex: 1; border: none; outline: none; background: transparent; font-weight: 600; padding: 5px 10px; font-size: 16px; width: 100%; }
         .promo-box button { background: var(--black); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-weight: 700; }
 
-        /* Navigation */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 28px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; font-size: 22px; flex: 1; text-align: center; position: relative; }
@@ -58,7 +52,6 @@
         .cart-badge { position: absolute; top: -5px; right: 28%; background: var(--red); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--black); font-weight: 900; }
 
         .btn-main { width: calc(100% - 40px); margin: 0 20px 30px; padding: 22px; border-radius: 25px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; }
-        .btn-main:disabled { background: #e5e5ea; color: #a1a1a6; }
         .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: #f2f2f7; display: flex; align-items: center; justify-content: center; z-index: 2100; }
     </style>
 </head>
@@ -102,6 +95,18 @@
         </div>
     </div>
 
+    <div id="user-view" class="view">
+        <div style="padding:40px 25px 10px; font-size:28px; font-weight:900;">პროფილი</div>
+        <div style="background: var(--white); margin: 20px; padding: 30px; border-radius: 35px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.02);">
+            <img id="u-photo" src="https://ui-avatars.com/api/?name=User" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px; border: 4px solid #f2f2f7; object-fit: cover;">
+            <h2 id="u-name" style="margin:0; font-size: 22px; color: var(--black);">სტუმარი</h2>
+            <p id="u-username" style="color:var(--gray); font-size:14px; margin-top:5px; font-weight: 600;"></p>
+        </div>
+        <div style="padding: 20px; text-align: center; color: var(--gray); font-size: 13px;">
+            <i class="fa-solid fa-shield-halved"></i> თქვენი მონაცემები დაცულია Telegram-ის მიერ
+        </div>
+    </div>
+
     <div id="details-overlay" class="overlay">
         <div class="close-btn" onclick="closeOverlay('details-overlay')"><i class="fa-solid fa-xmark"></i></div>
         <div id="det-slider"></div>
@@ -138,7 +143,7 @@
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span id="cart-badge" class="cart-badge">0</span>
             </div>
-            <div class="tab-item" onclick="tg.showAlert('მალე...')"><i class="fa-solid fa-user"></i></div>
+            <div class="tab-item" onclick="switchView('user', 3); loadProfile()"><i class="fa-solid fa-user"></i></div>
         </div>
     </div>
 
@@ -201,6 +206,15 @@
                 div.onclick = () => openDetails(p);
                 grid.appendChild(div);
             });
+        }
+
+        function loadProfile() {
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                document.getElementById('u-name').innerText = `${user.first_name || ""} ${user.last_name || ""}`.trim();
+                document.getElementById('u-username').innerText = user.username ? "@" + user.username : "ID: " + user.id;
+                if (user.photo_url) document.getElementById('u-photo').src = user.photo_url;
+            }
         }
 
         function openDetails(p) {
