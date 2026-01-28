@@ -12,12 +12,12 @@
         .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 140px; box-sizing: border-box; }
         .view.active { display: block; }
 
-        /* Header */
+        /* Header - ხელშეუხებელი */
         .header { padding: 15px 20px; display: flex; align-items: center; background: var(--white); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #efeff4; }
         .shop-logo { height: 45px; width: auto; }
         .shop-name { font-size: 22px; font-weight: 900; margin-left: 10px; }
 
-        /* Floating Banner */
+        /* Floating Banner - ხელშეუხებელი */
         .banner-wrapper { padding: 35px 20px 20px; position: relative; }
         .hero-banner { background: #232a32; height: 180px; border-radius: 40px; position: relative; display: flex; align-items: center; padding: 25px; box-sizing: border-box; overflow: visible; cursor: pointer; }
         .banner-info { width: 55%; z-index: 2; }
@@ -31,25 +31,16 @@
         .card { background: var(--white); border-radius: 28px; padding: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; }
         .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
 
-        /* Cart UI */
-        .cart-item { background: white; border-radius: 22px; padding: 15px; margin: 10px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
-        .cart-item img { width: 65px; height: 65px; object-fit: contain; }
-        .qty-ctrl { display: flex; align-items: center; gap: 12px; background: #f2f2f7; padding: 6px 12px; border-radius: 15px; margin-left: auto; }
-        .qty-btn { cursor: pointer; font-weight: 900; font-size: 18px; color: var(--black); width: 20px; text-align: center; }
-        
-        /* Promo Box */
-        .promo-container { background: white; margin: 15px 20px; padding: 10px; border-radius: 20px; display: flex; gap: 10px; }
-        .promo-input { flex: 1; border: none; background: #f2f2f7; padding: 12px 15px; border-radius: 15px; outline: none; font-weight: 600; }
-        .promo-apply { background: var(--black); color: white; border: none; padding: 0 20px; border-radius: 15px; font-weight: 700; }
-
-        /* Navigation */
+        /* აღდგენილი ქვედა ნავიგაცია (4 იკონკით) */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; flex: 1; text-align: center; font-size: 22px; cursor: pointer; position: relative; }
         .tab-item.active { opacity: 1; }
-        .badge { position: absolute; top: -5px; right: 30%; background: var(--red); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; }
+        .badge { position: absolute; top: -5px; right: 25%; background: var(--red); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; border: 2px solid var(--black); }
 
-        /* Overlays */
+        /* Cart & Forms */
+        .cart-item { background: white; border-radius: 22px; padding: 15px; margin: 10px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+        .qty-ctrl { display: flex; align-items: center; gap: 12px; background: #f2f2f7; padding: 6px 12px; border-radius: 15px; margin-left: auto; }
         .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: #f2f2f7; display: flex; align-items: center; justify-content: center; z-index: 2100; }
@@ -61,7 +52,7 @@
     <div id="home-view" class="view active">
         <div class="header">
             <img id="logo-img" class="shop-logo" style="display:none;">
-            <div id="shop-name" class="shop-name">Svaqi</div>
+            <div id="shop-name" class="shop-name">იტვირთება...</div>
         </div>
         <div class="banner-wrapper" id="banner-btn">
             <div class="hero-banner">
@@ -80,18 +71,11 @@
         <div style="padding:40px 25px 10px; font-size:28px; font-weight:900;">კალათა</div>
         <div id="cart-list"></div>
         <div id="cart-empty" style="text-align:center; padding:50px; color:var(--gray);">კალათა ცარიელია</div>
-        
-        <div id="cart-footer" style="display:none;">
-            <div class="promo-container">
-                <input type="text" id="promo-input" class="promo-input" placeholder="პრომო კოდი">
-                <button class="promo-apply" onclick="applyPromo()">OK</button>
+        <div id="cart-footer" style="display:none; padding:20px;">
+            <div style="display:flex; justify-content:space-between; font-size:24px; font-weight:900; margin-bottom:20px;">
+                <span>ჯამი:</span><span id="cart-total">0₾</span>
             </div>
-            <div style="padding:15px 30px;">
-                <div style="display:flex; justify-content:space-between; font-size:24px; font-weight:900;">
-                    <span>სულ:</span><span id="cart-total">0₾</span>
-                </div>
-            </div>
-            <button class="btn-main" onclick="openOverlay('checkout-overlay')">შეკვეთა</button>
+            <button class="btn-main" style="margin:0;" onclick="openOverlay('checkout-overlay')">შეკვეთა</button>
         </div>
     </div>
 
@@ -106,31 +90,26 @@
         <button class="btn-main" onclick="addToCart()">კალათაში დამატება</button>
     </div>
 
-    <div id="checkout-overlay" class="overlay">
-        <div class="close-btn" onclick="closeOverlay('checkout-overlay')"><i class="fa-solid fa-xmark"></i></div>
-        <div style="padding:60px 25px 20px;"><h2 style="font-size:26px; font-weight:900;">მონაცემები</h2></div>
-        <div style="flex:1; padding:0 25px;">
-            <input type="text" id="f-name" placeholder="სახელი" style="width:100%; padding:16px; border-radius:15px; border:1px solid #ddd; margin-bottom:15px;">
-            <input type="tel" id="f-phone" placeholder="ტელეფონი" style="width:100%; padding:16px; border-radius:15px; border:1px solid #ddd;">
-        </div>
-        <button class="btn-main" onclick="sendOrder()">გაგზავნა</button>
-    </div>
-
     <div class="tab-bar-container">
         <div class="tab-bar">
             <div class="tab-item active" onclick="switchView('home', 0)"><i class="fa-solid fa-house"></i></div>
-            <div class="tab-item" onclick="switchView('cart', 1)"><i class="fa-solid fa-cart-shopping"></i><span id="cart-badge" class="badge">0</span></div>
+            <div class="tab-item" onclick="tg.showAlert('ძებნა მალე დაემატება')"><i class="fa-solid fa-magnifying-glass"></i></div>
+            <div class="tab-item" onclick="switchView('cart', 2)">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cart-badge" class="badge">0</span>
+            </div>
+            <div class="tab-item" onclick="tg.showAlert('პროფილი მალე დაემატება')"><i class="fa-solid fa-user"></i></div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
-        let products = [], cart = [], currentP = null, discount = 1;
+        let products = [], cart = [], currentP = null;
 
         async function loadData() {
             try {
-                // მაღაზიის ინფო - ზუსტად ისე, როგორც პირველად მუშაობდა
+                // ლოგო და სახელი - ხელშეუხებელი
                 const dRes = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=856847150&output=csv`);
                 const dText = await dRes.text();
                 const d = dText.split('\n')[1].split(',');
@@ -191,9 +170,9 @@
             let total = 0;
             cart.forEach((item, idx) => {
                 total += item.price * item.qty;
-                list.innerHTML += `<div class="cart-item"><img src="${item.imgs[0].trim()}"><div><b>${item.name}</b><br>${item.price}₾</div><div class="qty-ctrl"><div class="qty-btn" onclick="changeQty(${idx},-1)">-</div><b>${item.qty}</b><div class="qty-btn" onclick="changeQty(${idx},1)">+</div></div></div>`;
+                list.innerHTML += `<div class="cart-item"><img src="${item.imgs[0].trim()}" style="width:60px;height:60px;object-fit:contain;"><div style="flex:1;margin-left:10px;"><b>${item.name}</b><br>${item.price}₾</div><div class="qty-ctrl"><div onclick="changeQty(${idx},-1)">-</div><b>${item.qty}</b><div onclick="changeQty(${idx},1)">+</div></div></div>`;
             });
-            document.getElementById('cart-total').innerText = (total * discount).toFixed(2) + "₾";
+            document.getElementById('cart-total').innerText = total + "₾";
             document.getElementById('cart-badge').innerText = cart.length;
             document.getElementById('cart-badge').style.display = cart.length ? 'flex' : 'none';
             document.getElementById('cart-empty').style.display = cart.length ? 'none' : 'block';
@@ -201,14 +180,6 @@
         }
 
         function changeQty(i, d) { cart[i].qty += d; if(cart[i].qty <= 0) cart.splice(i,1); updateCart(); }
-        
-        function applyPromo() {
-            const code = document.getElementById('promo-input').value.toUpperCase();
-            if(code === "SAVE10") { discount = 0.9; tg.showAlert("10% ფასდაკლება!"); } 
-            else { discount = 1; tg.showAlert("კოდი არასწორია"); }
-            updateCart();
-        }
-
         function switchView(v, i) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(v + '-view').classList.add('active');
@@ -216,7 +187,6 @@
         }
         function openOverlay(id) { document.getElementById(id).style.display = 'flex'; }
         function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
-        function sendOrder() { tg.showAlert("შეკვეთა გაიგზავნა!"); cart = []; updateCart(); closeOverlay('checkout-overlay'); switchView('home', 0); }
 
         loadData();
     </script>
