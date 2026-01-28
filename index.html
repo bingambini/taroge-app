@@ -92,7 +92,7 @@
         <div id="cart-empty" style="text-align:center; padding:50px; color:var(--gray); font-weight:700;">კალათა ცარიელია</div>
         <div id="cart-footer" style="display:none;">
             <div class="promo-box">
-                <input type="text" id="promo-input" placeholder="პრომო კოდი" oninput="this.style.borderColor='#e5e5ea'">
+                <input type="text" id="promo-input" placeholder="პრომო კოდი" oninput="this.style.backgroundColor='white'; this.style.borderColor='#e5e5ea'">
                 <button onclick="applyPromo()">OK</button>
             </div>
             <div style="padding:0 20px 20px;">
@@ -111,7 +111,7 @@
             <div class="input-group"><label>ზუსტი მისამართი</label><input type="text" id="c-addr" placeholder="ქუჩა, კორპუსი, ბინა"></div>
             <div class="input-group"><label>ტელეფონი</label><input type="tel" id="c-phone" placeholder="5XXXXXXXX"></div>
         </div>
-        <div style="padding:20px;"><button class="btn-main" onclick="finishOrder()">გადახდა</button></div>
+        <div style="padding:20px;"><button class="btn-main" onclick="finishOrder()">შეკვეთის დადასტურება</button></div>
     </div>
 
     <div class="tab-bar-container">
@@ -127,6 +127,7 @@
         tg.expand();
         let cart = [], currentP = null, selSize = '', selColor = '', discount = 0;
         const SHEET_ID = '1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA';
+        const PROMO_GID = '651180774';
 
         async function init() {
             try {
@@ -209,38 +210,40 @@
             if(!inputCode) return;
 
             try {
-                const res = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=2037953246&output=csv&t=${Date.now()}`);
+                const res = await fetch(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${PROMO_GID}&output=csv&t=${Date.now()}`);
                 const text = await res.text();
                 const lines = text.split('\n').slice(1);
                 
                 let found = false;
+                let subtotal = cart.reduce((sum, item) => sum + (parseInt(item.price) * item.qty), 0);
+
                 lines.forEach(line => {
                     const cols = line.split(',');
                     const dbCode = cols[0].replace(/"/g,'').toUpperCase().trim();
-                    const dbValue = parseInt(cols[1]);
+                    const type = cols[1].replace(/"/g,'').trim().toLowerCase();
+                    const val = parseFloat(cols[2]);
 
                     if(dbCode === inputCode) {
-                        discount = dbValue;
+                        discount = (type === 'percent') ? (subtotal * val) / 100 : val;
                         found = true;
                     }
                 });
 
                 if(found) {
                     inputField.style.borderColor = "var(--green)";
+                    inputField.style.backgroundColor = "#f2fff5";
                     document.getElementById('discount-row').style.display = 'flex';
-                    document.getElementById('discount-val').innerText = `-${discount}₾`;
+                    document.getElementById('discount-val').innerText = `-${Math.round(discount)}₾`;
                     tg.HapticFeedback.notificationOccurred('success');
                 } else {
                     discount = 0;
                     inputField.style.borderColor = "var(--red)";
+                    inputField.style.backgroundColor = "#fff2f2";
                     document.getElementById('discount-row').style.display = 'none';
                     tg.HapticFeedback.notificationOccurred('error');
                 }
                 updateCart();
-            } catch(e) {
-                console.error(e);
-                tg.showAlert("პრომო კოდის შემოწმება ვერ მოხერხდა.");
-            }
+            } catch(e) { console.error(e); }
         }
 
         function updCartQty(i, v) { cart[i].qty += v; if(cart[i].qty < 1) cart.splice(i, 1); updateCart(); }
@@ -254,8 +257,8 @@
         function finishOrder() {
             const n = document.getElementById('c-name').value, c = document.getElementById('c-city').value, a = document.getElementById('c-addr').value, p = document.getElementById('c-phone').value;
             if(!n || !c || !a || !p) return tg.showAlert("გთხოვთ შეავსოთ ყველა ველი!");
-            tg.showConfirm(`გადახდაზე გადასვლა? ჯამი: ${document.getElementById('cart-total').innerText}`, (ok) => {
-                if(ok) { tg.showAlert("გადაგიყვანთ გადახდის გვერდზე..."); cart = []; discount = 0; updateCart(); switchView('main', 0); }
+            tg.showConfirm(`შეკვეთის დადასტურება? ჯამი: ${document.getElementById('cart-total').innerText}`, (ok) => {
+                if(ok) { tg.showAlert("მადლობა! შეკვეთა მიღებულია."); cart = []; discount = 0; updateCart(); switchView('main', 0); }
             });
         }
         init();
