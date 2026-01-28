@@ -45,10 +45,10 @@
         .chip { padding: 10px 15px; border-radius: 12px; background: #f2f2f7; font-weight: 700; cursor: pointer; font-size: 13px; border: 2px solid transparent; }
         .chip.selected { background: var(--black); color: white; border-color: var(--black); }
 
-        /* Profile Styles */
+        /* Profile & Menu */
         .profile-card { background: var(--white); margin: 20px; padding: 25px; border-radius: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .profile-img { width: 80px; height: 80px; border-radius: 50%; background: #ddd; margin-bottom: 15px; border: 3px solid var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .menu-item { background: var(--white); margin: 0 20px 10px; padding: 18px; border-radius: 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .menu-item { background: var(--white); margin: 0 20px 10px; padding: 18px; border-radius: 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; font-weight: 700; }
 
         /* Cart & Forms */
         .cart-item { background: white; border-radius: 20px; padding: 15px; margin: 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 1px 5px rgba(0,0,0,0.05); }
@@ -59,7 +59,7 @@
         .input-group label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 13px; color: var(--gray); }
         .input-group input { width: 100%; padding: 14px; border-radius: 15px; border: 1px solid #e5e5ea; box-sizing: border-box; font-size: 16px; outline: none; background: #f9f9f9; }
 
-        /* Navigation */
+        /* Tab Bar */
         .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
         .tab-bar { background: var(--black); height: 75px; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; }
         .tab-item { color: white; opacity: 0.4; text-align: center; flex: 1; cursor: pointer; position: relative; }
@@ -77,10 +77,7 @@
         </div>
         <div class="main-banner" id="hero-banner">
             <img id="h-img">
-            <div class="banner-text">
-                <h2 id="h-status-text"></h2>
-                <b id="h-price"></b>
-            </div>
+            <div class="banner-text"><h2 id="h-status-text"></h2><b id="h-price"></b></div>
         </div>
         <div id="products-grid" class="grid"></div>
     </div>
@@ -105,8 +102,8 @@
         <div class="header" style="justify-content:center;"><div style="font-weight:900;">პროფილი</div></div>
         <div class="profile-card">
             <img id="u-photo" class="profile-img" src="https://via.placeholder.com/80">
-            <h2 id="u-name" style="margin:0; font-size:20px;">მომხმარებელი</h2>
-            <div id="u-id" style="color:var(--gray); font-size:13px; margin-top:5px;">ID: 000000</div>
+            <h2 id="u-name" style="margin:0;">მომხმარებელი</h2>
+            <div id="u-id" style="color:var(--gray); font-size:13px;">ID: 000000</div>
         </div>
         <div class="menu-item" onclick="tg.showAlert('მალე!')"><i class="fa-solid fa-box"></i><span>ჩემი შეკვეთები</span></div>
         <div class="menu-item" onclick="tg.showAlert('მალე!')"><i class="fa-solid fa-location-dot"></i><span>მისამართი</span></div>
@@ -134,7 +131,7 @@
             <div class="input-group"><label>მისამართი</label><input type="text" id="f-address"></div>
             <div class="input-group"><label>ტელეფონი</label><input type="tel" id="f-phone"></div>
         </div>
-        <div style="padding:20px; padding-bottom:40px;"><button class="btn-main" onclick="sendOrder()">გაგზავნა</button></div>
+        <div style="padding:20px; padding-bottom:40px;"><button class="btn-main" id="order-submit-btn" onclick="sendOrder()">გაგზავნა</button></div>
     </div>
 
     <div class="tab-bar-container">
@@ -156,7 +153,7 @@
         async function init() {
             const user = tg.initDataUnsafe?.user;
             if(user) {
-                document.getElementById('u-name').innerText = (user.first_name || 'User');
+                document.getElementById('u-name').innerText = user.first_name || 'User';
                 document.getElementById('u-id').innerText = 'ID: ' + user.id;
                 if(user.photo_url) document.getElementById('u-photo').src = user.photo_url;
             }
@@ -254,7 +251,6 @@
         }
 
         function confirmAddToCart() {
-            if(!selSize || !selColor) return;
             const existing = cart.find(i => i.name === currentP.name && i.sSize === selSize && i.sColor === selColor);
             if(existing) existing.qty++; else cart.push({ ...currentP, sSize: selSize, sColor: selColor, qty: 1, img: currentP.imgs[0] });
             updateCart(); closeOverlay('details-overlay'); tg.HapticFeedback.notificationOccurred('success');
@@ -281,10 +277,24 @@
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-item')[idx].classList.add('active');
         }
+
         function sendOrder() {
-            tg.showAlert("შეკვეთა იგზავნება...");
-            // აქ დაამატე შენი Fetch ლოგიკა...
-            cart = []; updateCart(); closeOverlay('checkout-overlay'); switchView('main', 0);
+            const btn = document.getElementById('order-submit-btn');
+            const data = {
+                customer: document.getElementById('f-name').value,
+                address: document.getElementById('f-address').value,
+                phone: document.getElementById('f-phone').value,
+                items: cart.map(i => `${i.name} (${i.sSize}/${i.sColor}) x${i.qty}`).join(', '),
+                total: document.getElementById('cart-total').innerText
+            };
+            if(!data.customer || !data.address || !data.phone) return tg.showAlert("შეავსეთ ყველა ველი!");
+            btn.disabled = true; btn.innerText = "იგზავნება...";
+            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) })
+            .then(() => {
+                tg.showAlert("შეკვეთა გაიგზავნა!");
+                cart = []; updateCart(); closeOverlay('checkout-overlay'); switchView('main', 0);
+                btn.disabled = false; btn.innerText = "გაგზავნა";
+            }).catch(() => { tg.showAlert("შეცდომა!"); btn.disabled = false; });
         }
         init();
     </script>
