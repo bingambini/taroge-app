@@ -103,23 +103,25 @@
 function renderQuickCategories() {
     const grid = document.getElementById('quick-categories-grid');
     
+    // grid-cols-4 რჩება, მაგრამ ვამცირებთ სიმაღლეს (h-14) და პედინგებს
     grid.innerHTML = dynamicCategories.map((cat, i) => {
         return `
             <div onclick="filterQuick('${cat.name}')" 
-                 class="group relative bg-white rounded-[28px] overflow-hidden flex flex-col items-center active:scale-95 transition-all duration-300 shadow-[0_8px_20px_-5px_rgba(0,0,0,0.08)] border border-gray-50">
+                 class="group relative bg-white rounded-[20px] overflow-hidden flex flex-col items-center active:scale-95 transition-all duration-300 shadow-sm border border-gray-100 py-2">
                 
-                <div class="w-full h-20 p-3 flex items-center justify-center relative">
-                    <div class="absolute inset-0 bg-slate-50 opacity-40 rounded-full scale-75 blur-2xl"></div>
+                <div class="w-10 h-10 flex items-center justify-center relative mb-1">
+                    <div class="absolute inset-0 bg-slate-50 rounded-full scale-90 blur-lg opacity-50"></div>
                     <img src="${cat.img || 'https://via.placeholder.com/100'}" 
-                         class="w-full h-full object-contain relative z-10 drop-shadow-sm">
+                         class="w-full h-full object-contain relative z-10">
                 </div>
 
-                <div class="w-full pb-3 flex flex-col items-center">
-                    <span class="text-[10px] font-black text-slate-800 uppercase tracking-tighter">
+                <div class="w-full flex justify-center px-1">
+                    <span class="text-[8px] font-black text-slate-600 uppercase tracking-tighter truncate">
                         ${cat.name || '...'}
                     </span>
-                    <div class="w-4 h-[2px] bg-slate-100 rounded-full mt-1 group-active:bg-blue-500 transition-colors"></div>
                 </div>
+                
+                <div class="w-1 h-1 bg-transparent group-active:bg-blue-500 rounded-full mt-0.5 transition-colors"></div>
             </div>
         `;
     }).join('');
