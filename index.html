@@ -14,48 +14,37 @@
         .view { display: none; min-height: 100vh; animation: fadeIn 0.3s ease; }
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .card { background: var(--white); border-radius: 25px; padding: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
-        .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
+        .card { background: var(--white); border-radius: 20px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
     </style>
 </head>
 <body>
 
     <div id="home-view" class="view active">
-        
-        <header class="p-5 flex items-center justify-between bg-white sticky top-0 z-50 shadow-sm">
+        <header class="p-4 flex items-center justify-between bg-white sticky top-0 z-50 shadow-sm">
             <div class="flex items-center gap-3">
-                <img id="logo-img" class="h-10 w-10 rounded-lg hidden">
-                <h1 id="shop-name" class="font-black text-xl">იტვირთება...</h1>
+                <img id="logo-img" class="h-8 w-8 rounded-lg hidden">
+                <h1 id="shop-name" class="font-black text-lg">იტვირთება...</h1>
             </div>
-            <i class="fa-solid fa-bell text-gray-300 text-xl"></i>
+            <i class="fa-solid fa-bell text-gray-300 text-lg"></i>
         </header>
 
-        <div class="p-5">
-            <div id="banner-btn" class="bg-[#232a32] h-48 rounded-[35px] relative p-7 flex items-center overflow-hidden cursor-pointer shadow-xl active:scale-[0.98] transition-all">
-                <div class="z-10 relative">
-                    <h2 class="text-red-500 font-black uppercase text-[10px] tracking-widest mb-1">დღის შეთავაზება</h2>
-                    <p id="b-name" class="text-white font-bold text-lg leading-tight w-[60%]">იტვირთება...</p>
-                    <span id="b-price" class="text-white font-black text-xl mt-2 block">0₾</span>
-                </div>
-                <img id="b-img" class="absolute -right-4 -top-6 w-48 rotate-[-15deg] drop-shadow-2xl object-contain">
-            </div>
+        <div class="px-4 pt-3 pb-2">
+            <div id="banner-btn"></div>
         </div>
 
-        <div class="px-5 mb-8">
-            <div id="quick-categories-grid" class="grid grid-cols-4 gap-3 py-2">
-            </div>
+        <div class="px-4 mb-4">
+            <div id="quick-categories-grid" class="grid grid-cols-4 gap-2 py-1"></div>
         </div>
 
-        <div class="px-5 font-black text-gray-800 text-lg mb-3">ახალი დამატებული</div>
-        <div id="products-grid" class="grid grid-cols-2 gap-4 px-5"></div>
+        <div class="px-5 font-black text-gray-800 text-md mb-3">ახალი დამატებული</div>
+        <div id="products-grid" class="grid grid-cols-2 gap-3 px-4"></div>
     </div>
 
-    <nav class="fixed bottom-6 left-5 right-5 h-20 bg-black rounded-[35px] flex items-center justify-around z-[1000] shadow-2xl">
-        <button onclick="switchView('home', 0)" class="nav-item text-white text-xl"><i class="fa-solid fa-house"></i></button>
-        <button onclick="switchView('catalog', 1)" class="nav-item text-white/40 text-xl"><i class="fa-solid fa-layer-group"></i></button>
-        <button onclick="switchView('cart', 2)" class="nav-item text-white/40 text-xl"><i class="fa-solid fa-cart-shopping"></i></button>
-        <button onclick="switchView('user', 3)" class="nav-item text-white/40 text-xl"><i class="fa-solid fa-user"></i></button>
+    <nav class="fixed bottom-6 left-5 right-5 h-16 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-2xl">
+        <button onclick="switchView('home', 0)" class="text-white text-lg"><i class="fa-solid fa-house"></i></button>
+        <button onclick="switchView('catalog', 1)" class="text-white/40 text-lg"><i class="fa-solid fa-layer-group"></i></button>
+        <button onclick="switchView('cart', 2)" class="text-white/40 text-lg"><i class="fa-solid fa-cart-shopping"></i></button>
+        <button onclick="switchView('user', 3)" class="text-white/40 text-lg"><i class="fa-solid fa-user"></i></button>
     </nav>
 
     <script>
@@ -66,28 +55,26 @@
 
         async function init() {
             try {
-                // 1. მონაცემების წამოღება DESIGN ტაბიდან
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 
                 if(dRows[0]) {
                     document.getElementById('shop-name').innerText = dRows[0][0];
                     if(dRows[0][1]) {
-                        document.getElementById('logo-img').src = dRows[0][1];
-                        document.getElementById('logo-img').classList.remove('hidden');
+                        const img = document.getElementById('logo-img');
+                        img.src = dRows[0][1];
+                        img.classList.remove('hidden');
                     }
 
-                    // სახელები (C-F), ფერები (G-J), სურათები (K-N)
                     dynamicCategories = [
-                        { name: dRows[0][2], color: dRows[0][6] || '#8a2be2', img: dRows[0][10] },
-                        { name: dRows[0][3], color: dRows[0][7] || '#8a2be2', img: dRows[0][11] },
-                        { name: dRows[0][4], color: dRows[0][8] || '#8a2be2', img: dRows[0][12] },
-                        { name: dRows[0][5], color: dRows[0][9] || '#8a2be2', img: dRows[0][13] }
+                        { name: dRows[0][2], img: dRows[0][10] },
+                        { name: dRows[0][3], img: dRows[0][11] },
+                        { name: dRows[0][4], img: dRows[0][12] },
+                        { name: dRows[0][5], img: dRows[0][13] }
                     ];
                     renderQuickCategories();
                 }
 
-                // 2. პროდუქტების წამოღება
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
@@ -99,101 +86,65 @@
             } catch(e) { console.error("Init Error:", e); }
         }
 
-/* --- თანამედროვე დინამიური კატეგორიების რენდერი (Soft UI) --- */
-function renderQuickCategories() {
-    const grid = document.getElementById('quick-categories-grid');
-    
-    // grid-cols-4 რჩება, მაგრამ ვამცირებთ სიმაღლეს (h-14) და პედინგებს
-    grid.innerHTML = dynamicCategories.map((cat, i) => {
-        return `
-            <div onclick="filterQuick('${cat.name}')" 
-                 class="group relative bg-white rounded-[20px] overflow-hidden flex flex-col items-center active:scale-95 transition-all duration-300 shadow-sm border border-gray-100 py-2">
-                
-                <div class="w-10 h-10 flex items-center justify-center relative mb-1">
-                    <div class="absolute inset-0 bg-slate-50 rounded-full scale-90 blur-lg opacity-50"></div>
-                    <img src="${cat.img || 'https://via.placeholder.com/100'}" 
-                         class="w-full h-full object-contain relative z-10">
-                </div>
-
-                <div class="w-full flex justify-center px-1">
-                    <span class="text-[8px] font-black text-slate-600 uppercase tracking-tighter truncate">
+        function renderQuickCategories() {
+            const grid = document.getElementById('quick-categories-grid');
+            grid.innerHTML = dynamicCategories.map(cat => `
+                <div onclick="filterQuick('${cat.name}')" class="bg-white rounded-[20px] flex flex-col items-center py-2 shadow-sm border border-gray-50 active:scale-90 transition-all">
+                    <div class="w-9 h-9 mb-1">
+                        <img src="${cat.img || 'https://via.placeholder.com/100'}" class="w-full h-full object-contain">
+                    </div>
+                    <span class="text-[7px] font-black text-slate-500 uppercase tracking-tighter truncate w-full text-center px-1">
                         ${cat.name || '...'}
                     </span>
                 </div>
-                
-                <div class="w-1 h-1 bg-transparent group-active:bg-blue-500 rounded-full mt-0.5 transition-colors"></div>
-            </div>
-        `;
-    }).join('');
-}
+            `).join('');
+        }
 
-/* --- მთავარი გვერდის რენდერი (განახლებული Soft UI ბანერით) --- */
-function renderHome() {
-    const grid = document.getElementById('products-grid');
-    grid.innerHTML = '';
-    
-    // ვიღებთ "Top" პროდუქტს ბანერისთვის
-    const top = products.find(p => p.status.includes('top')) || products[0];
-    
-    if(top) {
-        const banner = document.getElementById('banner-btn');
-        
-        // ბანერის ახალი სტილი
-        banner.className = "relative h-52 rounded-[40px] overflow-hidden cursor-pointer transition-all active:scale-[0.98] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-white";
-        
-        banner.innerHTML = `
-            <div class="absolute inset-0 bg-gradient-to-br from-slate-800 to-black"></div>
+        function renderHome() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
             
-            <div class="absolute -top-10 -left-10 w-40 h-40 bg-blue-500/20 rounded-full blur-[50px]"></div>
-            <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-purple-500/20 rounded-full blur-[50px]"></div>
-
-            <div class="z-10 relative p-8 h-full flex flex-col justify-center">
-                <div class="bg-white/10 backdrop-blur-md border border-white/10 self-start px-3 py-1 rounded-full mb-3">
-                    <h2 class="text-white font-black uppercase text-[9px] tracking-[0.2em]">ტოპ შეთავაზება</h2>
-                </div>
-                
-                <p class="text-white font-bold text-2xl leading-tight w-[55%] drop-shadow-md">
-                    ${top.name}
-                </p>
-                
-                <div class="mt-4 flex items-center gap-2">
-                    <span class="text-white font-black text-2xl">${top.price}₾</span>
-                    <div class="bg-blue-500 p-2 rounded-xl text-white text-xs px-4 font-bold shadow-lg shadow-blue-500/30">
-                        ყიდვა
+            const top = products.find(p => p.status.includes('top')) || products[0];
+            
+            if(top) {
+                const banner = document.getElementById('banner-btn');
+                // სიმაღლე შემცირდა h-44-ზე
+                banner.className = "relative h-44 rounded-[32px] overflow-hidden cursor-pointer transition-all active:scale-[0.98] shadow-lg border border-white/10";
+                banner.innerHTML = `
+                    <div class="absolute inset-0 bg-gradient-to-br from-slate-800 to-black"></div>
+                    <div class="absolute -top-10 -left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-[40px]"></div>
+                    <div class="z-10 relative p-6 h-full flex flex-col justify-center">
+                        <div class="bg-white/10 backdrop-blur-md self-start px-2 py-0.5 rounded-full mb-2">
+                            <h2 class="text-white font-black uppercase text-[8px] tracking-widest">TOP PRICE</h2>
+                        </div>
+                        <p class="text-white font-bold text-lg leading-tight w-[55%]">${top.name}</p>
+                        <div class="mt-3 flex items-center gap-2">
+                            <span class="text-white font-black text-xl">${top.price}₾</span>
+                            <div class="bg-blue-600 px-3 py-1 rounded-lg text-white text-[10px] font-bold">ყიდვა</div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                    <img src="${top.imgs[0]?.trim()}" class="absolute -right-4 top-1/2 -translate-y-1/2 w-44 rotate-[-10deg] drop-shadow-2xl object-contain">
+                `;
+            }
 
-            <img src="${top.imgs[0]?.trim()}" 
-                 class="absolute -right-6 top-1/2 -translate-y-1/2 w-56 rotate-[-10deg] drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)] object-contain transition-transform duration-500 hover:rotate-0">
-        `;
-        
-        banner.onclick = () => openDetails(top);
-    }
-
-    // ახალი დამატებულების რენდერი
-    products.slice(0, 4).forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'card group active:scale-95 transition-all duration-300 border border-transparent hover:border-slate-100 shadow-[0_4px_15px_rgba(0,0,0,0.02)]';
-        div.innerHTML = `
-            <div class="relative overflow-hidden rounded-2xl bg-slate-50 mb-3 aspect-square flex items-center justify-center p-2">
-                <img src="${p.imgs[0]}" class="w-full h-full object-contain drop-shadow-sm group-hover:scale-110 transition-transform">
-            </div>
-            <h3 class="font-bold text-xs text-slate-700 truncate px-1">${p.name}</h3>
-            <div class="flex items-center justify-between mt-2 px-1">
-                <b class="text-slate-900 text-sm">${p.price}₾</b>
-                <div class="w-6 h-6 bg-slate-900 text-white rounded-lg flex items-center justify-center text-[10px]">
-                    <i class="fa-solid fa-plus"></i>
-                </div>
-            </div>
-        `;
-        div.onclick = () => openDetails(p);
-        grid.appendChild(div);
-    });
-}
+            products.slice(0, 6).forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'card active:scale-95 transition-all duration-300';
+                div.innerHTML = `
+                    <div class="relative overflow-hidden rounded-xl bg-slate-50 mb-2 aspect-square flex items-center justify-center p-2">
+                        <img src="${p.imgs[0]}" class="w-full h-full object-contain">
+                    </div>
+                    <h3 class="font-bold text-[10px] text-slate-700 truncate">${p.name}</h3>
+                    <div class="flex justify-between items-center mt-1">
+                        <b class="text-slate-900 text-xs">${p.price}₾</b>
+                        <i class="fa-solid fa-circle-plus text-slate-900 text-sm"></i>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
 
         function filterQuick(cat) { alert("ფილტრი: " + cat); }
-        
         function switchView(v, i) { 
             document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
             document.getElementById(v + '-view').classList.add('active');
