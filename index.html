@@ -3,173 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Svaqi Store v1.1.1</title>
+    <title>Svaqi Store AI v1.2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root { --bg: #f8f9fb; --black: #1c1c1e; --white: #ffffff; --gray: #8e8e93; --red: #ff3b30; --green: #34c759; --light-gray: #f2f2f7; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-        .view { height: 100vh; overflow-y: auto; display: none; padding-bottom: 140px; box-sizing: border-box; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; }
+        .view { display: none; min-height: 100vh; animation: fadeIn 0.3s ease; }
         .view.active { display: block; }
-        .header { padding: 15px 20px; display: flex; align-items: center; background: var(--white); position: sticky; top: 0; z-index: 100; }
-        .shop-logo { height: 40px; width: auto; border-radius: 8px; }
-        .shop-name { font-size: 22px; font-weight: 900; margin-left: 10px; color: var(--black); }
-        .banner-wrapper { padding: 20px; }
-        .hero-banner { background: #232a32; height: 180px; border-radius: 40px; position: relative; display: flex; align-items: center; padding: 25px; box-sizing: border-box; cursor: pointer; }
-        .banner-info { width: 55%; z-index: 2; }
-        .banner-info h2 { color: var(--red); margin: 0; font-size: 20px; font-weight: 900; }
-        .banner-info .price { color: white; font-size: 24px; font-weight: 900; display: block; margin-top: 5px; }
-        .floating-img { position: absolute; right: -10px; top: -30px; width: 220px; z-index: 3; transform: rotate(-15deg); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .card { background: var(--white); border-radius: 30px; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); cursor: pointer; }
-        .card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
-        .card h3 { margin: 10px 0 5px; font-size: 15px; font-weight: 800; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .cat-scroll { display: flex; gap: 10px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; background: var(--bg); position: sticky; top: 0; z-index: 10; }
-        .cat-pill { padding: 10px 20px; background: var(--white); border-radius: 20px; font-weight: 700; font-size: 14px; white-space: nowrap; cursor: pointer; border: 1.5px solid transparent; transition: 0.2s; }
-        .cat-pill.active { background: var(--black); color: white; }
-        .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
-        #det-slider { width: 100%; height: 320px; margin-top: 40px; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
-        #det-slider img { width: 100%; height: 100%; object-fit: contain; scroll-snap-align: start; flex-shrink: 0; }
-        .details-content { padding: 25px; flex: 1; border-radius: 40px 40px 0 0; margin-top: -30px; background: white; z-index: 5; }
-        .chip-container { display: flex; gap: 10px; margin: 10px 0 20px; overflow-x: auto; scrollbar-width: none; }
-        .chip { padding: 12px 18px; border: 2px solid #f0f0f5; border-radius: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-        .chip.selected { background: var(--black); color: white; border-color: var(--black); }
-        .cart-item { background: white; border-radius: 25px; padding: 15px; margin: 10px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
-        .qty-ctrl { display: flex; align-items: center; gap: 10px; background: var(--light-gray); padding: 5px 12px; border-radius: 15px; font-weight: 800; }
-        .qty-ctrl span { cursor: pointer; padding: 0 5px; font-size: 18px; }
-        .promo-box { display: flex; gap: 10px; margin: 20px; background: var(--light-gray); padding: 10px; border-radius: 20px; }
-        .promo-box input { flex: 1; border: none; outline: none; background: transparent; font-weight: 600; padding: 5px 10px; font-size: 16px; width: 100%; }
-        .promo-box button { background: var(--black); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-weight: 700; }
-        .pay-card { background: var(--light-gray); border-radius: 25px; padding: 20px; margin: 15px 0; border: 1px solid #e5e5ea; }
-        .copy-row { background: white; padding: 12px 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border: 1px solid #ddd; }
-        .tab-bar-container { position: fixed; bottom: 20px; left: 15px; right: 15px; z-index: 1000; }
-        .tab-bar { background: var(--black); height: 75px; border-radius: 28px; display: flex; justify-content: space-around; align-items: center; }
-        .tab-item { color: white; opacity: 0.4; font-size: 22px; flex: 1; text-align: center; position: relative; }
-        .tab-item.active { opacity: 1; }
-        .cart-badge { position: absolute; top: -5px; right: 28%; background: var(--red); color: white; font-size: 10px; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; border: 2px solid var(--black); font-weight: 900; }
-        .btn-main { width: calc(100% - 40px); margin: 0 20px 30px; padding: 22px; border-radius: 25px; border: none; background: var(--black); color: white; font-size: 17px; font-weight: 800; cursor: pointer; }
-        .close-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: var(--light-gray); display: flex; align-items: center; justify-content: center; z-index: 2100; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Order History */
-        .order-card { background: white; margin: 10px 20px; padding: 20px; border-radius: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
-        .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--light-gray); padding-bottom: 10px; margin-bottom: 10px; }
-        .status-badge { padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 800; }
-        .status-pending { background: #fff3cd; color: #856404; }
+        /* ბარათების სტილი */
+        .card { background: var(--white); border-radius: 25px; padding: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: 0.2s; }
+        .card:active { transform: scale(0.96); }
+        
+        /* ჩიპები (ზომა/ფერი) */
+        .chip { padding: 10px 18px; border: 2px solid #f0f0f5; border-radius: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; font-size: 13px; }
+        .chip.selected { background: var(--black); color: white; border-color: var(--black); }
+
+        .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
+        .cat-pill { padding: 8px 18px; background: var(--white); border-radius: 15px; font-weight: 700; font-size: 13px; border: 1px solid #eee; }
+        .cat-pill.active { background: var(--black); color: white; }
     </style>
 </head>
 <body>
 
     <div id="home-view" class="view active">
-        <div class="header">
-            <img id="logo-img" class="shop-logo" style="display:none;">
-            <div id="shop-name" class="shop-name">იტვირთება...</div>
-        </div>
-        <div class="banner-wrapper" id="banner-btn">
-            <div class="hero-banner">
-                <div class="banner-info">
-                    <h2 id="b-status">...</h2>
-                    <p id="b-name" style="color:var(--gray); margin:5px 0;">...</p>
-                    <span class="price" id="b-price">0₾</span>
+        <header class="p-5 flex items-center justify-between bg-white sticky top-0 z-50">
+            <div class="flex items-center gap-3">
+                <img id="logo-img" class="h-10 w-10 rounded-lg hidden">
+                <h1 id="shop-name" class="font-black text-xl">იტვირთება...</h1>
+            </div>
+            <i class="fa-solid fa-bell text-gray-300 text-xl"></i>
+        </header>
+
+        <div class="p-5" id="banner-section">
+            <div id="banner-btn" class="bg-[#232a32] h-44 rounded-[35px] relative p-6 flex items-center overflow-hidden cursor-pointer">
+                <div class="z-10">
+                    <h2 id="b-status" class="text-red-500 font-black uppercase text-sm">...</h2>
+                    <p id="b-name" class="text-white font-bold text-lg mt-1 leading-tight">...</p>
+                    <span id="b-price" class="text-white font-black text-xl mt-2 block">0₾</span>
                 </div>
-                <img id="b-img" class="floating-img">
+                <img id="b-img" class="absolute -right-4 -top-6 w-48 rotate-[-15deg] drop-shadow-2xl">
             </div>
         </div>
-        <div id="products-grid" class="grid"></div>
+
+        <div class="px-5 font-black text-gray-800 text-lg mb-3">ახალი დამატებული</div>
+        <div id="products-grid" class="grid grid-cols-2 gap-4 px-5"></div>
     </div>
 
     <div id="catalog-view" class="view">
-        <div id="category-list" class="cat-scroll"></div>
-        <div id="catalog-grid" class="grid"></div>
-    </div>
-
-    <div id="cart-view" class="view">
-        <div style="padding:40px 25px 10px; font-size:28px; font-weight:900;">კალათა</div>
-        <div id="cart-list"></div>
-        <div id="cart-empty" style="text-align:center; padding:50px; color:var(--gray);">კალათა ცარიელია</div>
-        <div id="cart-footer" style="display:none;">
-            <div class="promo-box">
-                <input type="text" id="promo-input" placeholder="პრომო კოდი">
-                <button onclick="applyPromo()">გამოყენება</button>
+        <div class="p-5 pt-8">
+            <h2 class="font-black text-2xl mb-4">აღმოაჩინე</h2>
+            <div class="bg-white rounded-2xl flex items-center p-2 shadow-sm border border-gray-100 mb-6">
+                <div class="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center mr-3">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <input type="text" id="ai-shop-search" placeholder="მაგ: შავი კედები 42 ზომა..." class="flex-1 outline-none text-sm font-medium">
+                <button onclick="runStoreAISearch()" id="ai-shop-btn" class="bg-black text-white w-10 h-10 rounded-xl">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </button>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:24px; font-weight:900; margin:20px;">
-                <span>ჯამი:</span>
-                <span id="cart-total">0₾</span>
-            </div>
-            <button class="btn-main" onclick="openCheckout()">შეკვეთა</button>
-        </div>
-    </div>
+            <div id="ai-shop-status" class="text-[10px] text-indigo-500 font-black mb-4 hidden">AI აანალიზებს მოთხოვნას...</div>
 
-    <div id="user-view" class="view">
-        <div style="padding:40px 25px 10px; font-size:28px; font-weight:900;">პროფილი</div>
-        <div style="background: var(--white); margin: 20px; padding: 30px; border-radius: 35px; text-align: center;">
-            <img id="u-photo" src="https://ui-avatars.com/api/?name=User" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--light-gray);">
-            <h2 id="u-name" style="margin:10px 0 0;">სტუმარი</h2>
-            <p id="u-username" style="color:var(--gray); font-size:14px; margin:5px 0 0;"></p>
+            <div id="category-list" class="flex gap-2 overflow-x-auto pb-4 no-scrollbar"></div>
+            <div id="catalog-grid" class="grid grid-cols-2 gap-4 mt-2"></div>
         </div>
-        <div style="padding:10px 25px; font-weight:900; font-size:18px;">ჩემი შეკვეთები</div>
-        <div id="order-history-list"></div>
     </div>
 
     <div id="details-overlay" class="overlay">
-        <div class="close-btn" onclick="closeOverlay('details-overlay')"><i class="fa-solid fa-xmark"></i></div>
-        <div id="det-slider"></div>
-        <div class="details-content">
-            <h1 id="det-title" style="margin:0; font-size:26px;"></h1>
-            <span id="det-price" style="font-size:24px; font-weight:900; display:block; margin-top:5px;"></span>
-            <div class="chip-container" id="color-box"></div>
-            <div class="chip-container" id="size-box"></div>
-        </div>
-        <button class="btn-main" id="add-btn" disabled onclick="addToCart()">კალათაში დამატება</button>
-    </div>
-
-    <div id="checkout-overlay" class="overlay">
-        <div class="close-btn" onclick="closeOverlay('checkout-overlay')"><i class="fa-solid fa-xmark"></i></div>
-        <div style="padding:70px 25px 25px;" id="checkout-main-content">
-            <h2 style="margin-bottom:20px;">შეკვეთა</h2>
-            <div class="promo-box" style="margin:10px 0;"><input type="text" id="order-cust" placeholder="სახელი გვარი"></div>
-            <div class="promo-box" style="margin:10px 0;"><input type="text" id="order-city" placeholder="ქალაქი"></div>
-            <div class="promo-box" style="margin:10px 0;"><input type="text" id="order-addr" placeholder="ზუსტი მისამართი"></div>
-            <div class="promo-box" style="margin:10px 0;"><input type="tel" id="order-phone" placeholder="ტელეფონი"></div>
-            <div class="promo-box" style="margin:10px 0; background: #eee;"><input type="text" id="order-id-display" readonly style="color: #555; font-weight: bold;"></div>
-            <div id="order-summary" style="background:var(--light-gray); padding:15px; border-radius:20px; margin:20px 0;"></div>
-            <button class="btn-main" style="margin:0; width:100%;" onclick="processOrder()">დადასტურება</button>
-        </div>
-    </div>
-
-    <div class="tab-bar-container">
-        <div class="tab-bar">
-            <div class="tab-item active" onclick="switchView('home', 0)"><i class="fa-solid fa-house"></i></div>
-            <div class="tab-item" onclick="switchView('catalog', 1)"><i class="fa-solid fa-layer-group"></i></div>
-            <div class="tab-item" onclick="switchView('cart', 2)">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span id="cart-badge" class="cart-badge">0</span>
+        <button onclick="closeOverlay('details-overlay')" class="absolute top-6 left-6 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center z-50">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        
+        <div id="det-slider" class="w-full h-80 flex overflow-x-auto snap-x snap-mandatory no-scrollbar bg-gray-50 pt-10"></div>
+        
+        <div class="details-content p-8 bg-white rounded-t-[40px] -mt-10 relative z-10 flex-1 shadow-2xl">
+            <h1 id="det-title" class="font-black text-2xl text-gray-800"></h1>
+            <span id="det-price" class="text-2xl font-black text-gray-900 mt-2 block"></span>
+            
+            <div class="mt-6">
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">აირჩიეთ ფერი</p>
+                <div id="color-box" class="flex gap-2 overflow-x-auto no-scrollbar"></div>
             </div>
-            <div class="tab-item" onclick="switchView('user', 3); loadProfile()"><i class="fa-solid fa-user"></i></div>
+
+            <div class="mt-6">
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">აირჩიეთ ზომა</p>
+                <div id="size-box" class="flex gap-2 overflow-x-auto no-scrollbar"></div>
+            </div>
+
+            <button id="add-btn" disabled onclick="addToCart()" class="w-full bg-black text-white py-5 rounded-3xl font-black mt-10 disabled:opacity-30 transition-all">
+                კალათაში დამატება
+            </button>
         </div>
     </div>
+
+    <nav class="fixed bottom-6 left-5 right-5 h-20 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-2xl">
+        <button onclick="switchView('home', 0)" class="nav-item text-white/40 text-xl active"><i class="fa-solid fa-house"></i></button>
+        <button onclick="switchView('catalog', 1)" class="nav-item text-white/40 text-xl"><i class="fa-solid fa-layer-group"></i></button>
+        <button onclick="switchView('cart', 2)" class="nav-item text-white/40 text-xl relative">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-[9px] w-5 h-5 rounded-full hidden items-center justify-center border-2 border-black font-black text-white">0</span>
+        </button>
+        <button onclick="switchView('user', 3)" class="nav-item text-white/40 text-xl"><i class="fa-solid fa-user"></i></button>
+    </nav>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
+        /* --- კონფიგურაცია --- */
+        const API_KEY = "ჩასვი_შენი_GEMINI_API_KEY"; // აუცილებელია AI ძებნისთვის
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwm0zPTAuEymKRJvXX5DLQ9Ytha-aoPy90efPKYXuES-ivBYBRWVj3h5Wy7gFDp7rDkAA/exec';
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
 
-        let products = [], promos = [], cart = [], categories = [];
-        let currentP = null, selCol = null, selSiz = null, activeDisc = { type: 'none', val: 0 }, orderID = "";
+        let products = [], categories = [], cart = [];
+        let currentP = null, selCol = null, selSiz = null;
 
+        /* --- ფუნქციები: მონაცემების ჩატვირთვა --- */
         async function init() {
             try {
+                // მაღაზიის ინფორმაცია
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 if(dRows[0]) {
                     document.getElementById('shop-name').innerText = dRows[0][0];
-                    if(dRows[0][1]) { document.getElementById('logo-img').src = dRows[0][1]; document.getElementById('logo-img').style.display = 'block'; }
+                    if(dRows[0][1]) { document.getElementById('logo-img').src = dRows[0][1]; document.getElementById('logo-img').classList.remove('hidden'); }
                 }
-                const prRes = await fetch(BASE + '651180774');
-                const prRows = parseCSV(await prRes.text());
-                promos = prRows.map(r => ({ code: r[0]?.toUpperCase(), type: r[1]?.toLowerCase(), val: parseFloat(r[2]) || 0 }));
+
+                // პროდუქტები
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
@@ -177,19 +137,14 @@
                     status: r[4] || "", sizes: r[5]?.split(','), colors: r[6]?.split(','),
                     category: r[7]?.trim() || "სხვა"
                 }));
+                
                 categories = ["ყველა", ...new Set(products.map(p => p.category))];
                 renderHome();
                 renderCatalog("ყველა");
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error("Init Error:", e); }
         }
 
-        function parseCSV(text) {
-            return text.split('\n').slice(1).map(line => {
-                const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-                return matches ? matches.map(m => m.replace(/^"|"$/g, '')) : [];
-            });
-        }
-
+        /* --- ფუნქციები: მთავარი გვერდი --- */
         function renderHome() {
             const grid = document.getElementById('products-grid'); grid.innerHTML = '';
             const top = products.find(p => p.status.includes('top')) || products[0];
@@ -200,31 +155,59 @@
                 document.getElementById('b-img').src = top.imgs[0]?.trim();
                 document.getElementById('banner-btn').onclick = () => openDetails(top);
             }
-            products.slice(0, 6).forEach(p => {
-                const div = document.createElement('div'); div.className = 'card';
-                div.innerHTML = `<img src="${p.imgs[0]?.trim()}"><h3>${p.name}</h3><b>${p.price}₾</b>`;
-                div.onclick = () => openDetails(p);
-                grid.appendChild(div);
-            });
+            products.slice(0, 4).forEach(p => grid.appendChild(createCard(p)));
         }
 
+        /* --- ფუნქციები: კატალოგი და AI ძებნა --- */
         function renderCatalog(filter) {
             const catBox = document.getElementById('category-list');
             catBox.innerHTML = categories.map(c => `<div class="cat-pill ${c === filter ? 'active' : ''}" onclick="renderCatalog('${c}')">${c}</div>`).join('');
+            
             const grid = document.getElementById('catalog-grid'); grid.innerHTML = '';
             const filtered = filter === "ყველა" ? products : products.filter(p => p.category === filter);
-            filtered.forEach(p => {
-                const div = document.createElement('div'); div.className = 'card';
-                div.innerHTML = `<img src="${p.imgs[0]?.trim()}"><h3>${p.name}</h3><b>${p.price}₾</b>`;
-                div.onclick = () => openDetails(p);
-                grid.appendChild(div);
-            });
+            filtered.forEach(p => grid.appendChild(createCard(p)));
+        }
+
+        async function runStoreAISearch() {
+            const query = document.getElementById('ai-shop-search').value.trim();
+            if (!query) return;
+
+            const status = document.getElementById('ai-shop-status');
+            status.classList.remove('hidden');
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            const prompt = `დააანალიზე: "${query}". ამოიღე JSON-ში: { "color": "null/ფერი", "size": "null/ზომა", "maxPrice": "null/რიცხვი", "keyword": "null/სიტყვა" }. დააბრუნე მხოლოდ JSON.`;
+
+            try {
+                const res = await fetch(url, { method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
+                const data = await res.json();
+                const criteria = JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json|```/g, "").trim());
+                
+                let filtered = products;
+                if(criteria.maxPrice) filtered = filtered.filter(p => p.price <= criteria.maxPrice);
+                if(criteria.color) filtered = filtered.filter(p => p.colors.some(c => c.toLowerCase().includes(criteria.color.toLowerCase())));
+                if(criteria.size) filtered = filtered.filter(p => p.sizes.some(s => s.trim() === criteria.size.toString()));
+                if(criteria.keyword) filtered = filtered.filter(p => p.name.toLowerCase().includes(criteria.keyword.toLowerCase()));
+
+                const grid = document.getElementById('catalog-grid');
+                grid.innerHTML = '';
+                filtered.forEach(p => grid.appendChild(createCard(p)));
+            } catch (e) { console.error(e); } finally { status.classList.add('hidden'); }
+        }
+
+        /* --- დამხმარე ფუნქციები --- */
+        function createCard(p) {
+            const div = document.createElement('div'); div.className = 'card';
+            div.innerHTML = `<img src="${p.imgs[0]?.trim()}" class="w-full aspect-square object-contain mb-3">
+                             <h3 class="font-bold text-sm truncate">${p.name}</h3>
+                             <b class="text-gray-900">${p.price}₾</b>`;
+            div.onclick = () => openDetails(p);
+            return div;
         }
 
         function openDetails(p) {
             currentP = p; selCol = null; selSiz = null;
-            document.getElementById('add-btn').disabled = true;
-            document.getElementById('det-slider').innerHTML = p.imgs.map(i => `<img src="${i.trim()}">`).join('');
+            document.getElementById('det-slider').innerHTML = p.imgs.map(i => `<img src="${i.trim()}" class="w-full flex-shrink-0 snap-center object-contain px-10">`).join('');
             document.getElementById('det-title').innerText = p.name;
             document.getElementById('det-price').innerText = p.price + "₾";
             document.getElementById('color-box').innerHTML = p.colors.map(c => `<div class="chip" onclick="selectChip(this,'c','${c.trim()}')">${c.trim()}</div>`).join('');
@@ -239,121 +222,23 @@
             document.getElementById('add-btn').disabled = !(selCol && selSiz);
         }
 
-        function addToCart() {
-            const match = cart.find(i => i.name === currentP.name && i.col === selCol && i.siz === selSiz);
-            if(match) match.qty++; else cart.push({...currentP, col: selCol, siz: selSiz, qty: 1});
-            updateCart(); closeOverlay('details-overlay');
-        }
-
-        function changeQty(idx, delta) {
-            cart[idx].qty += delta;
-            if (cart[idx].qty <= 0) cart.splice(idx, 1);
-            updateCart();
-        }
-
-        function applyPromo() {
-            const code = document.getElementById('promo-input').value.toUpperCase().trim();
-            const found = promos.find(p => p.code === code);
-            if(found) { activeDisc = { type: found.type, val: found.val, code: code }; tg.showAlert("✅ პრომო გააქტიურდა!"); }
-            else { activeDisc = { type: 'none', val: 0, code: "" }; tg.showAlert("❌ არასწორი კოდი"); }
-            updateCart();
-        }
-
-        function updateCart() {
-            const list = document.getElementById('cart-list'); list.innerHTML = '';
-            let subtotal = 0;
-            cart.forEach((item, i) => {
-                subtotal += item.price * item.qty;
-                list.innerHTML += `<div class="cart-item"><img src="${item.imgs[0].trim()}" style="width:50px;height:50px;object-fit:contain;"><div style="flex:1;"><b>${item.name}</b><br><small>${item.col}/${item.siz}</small></div><div class="qty-ctrl"><span onclick="changeQty(${i},-1)">-</span><b>${item.qty}</b><span onclick="changeQty(${i},1)">+</span></div></div>`;
-            });
-            let disc = activeDisc.type === 'percent' ? (subtotal * activeDisc.val / 100) : activeDisc.val;
-            document.getElementById('cart-total').innerText = (subtotal - disc).toFixed(0) + "₾";
-            document.getElementById('cart-badge').innerText = cart.reduce((a, b) => a + b.qty, 0);
-            document.getElementById('cart-badge').style.display = cart.length ? 'flex' : 'none';
-            document.getElementById('cart-empty').style.display = cart.length ? 'none' : 'block';
-            document.getElementById('cart-footer').style.display = cart.length ? 'block' : 'none';
-        }
-
-        function openCheckout() {
-            orderID = Math.floor(100000 + Math.random() * 900000);
-            document.getElementById('order-id-display').value = "შეკვეთის ნომერი: " + orderID;
-            document.getElementById('order-summary').innerHTML = `გადასახდელი თანხა: <b>${document.getElementById('cart-total').innerText}</b>`;
-            document.getElementById('checkout-overlay').style.display = 'flex';
-        }
-
-        function processOrder() {
-            const customer = document.getElementById('order-cust').value.trim();
-            const city = document.getElementById('order-city').value.trim();
-            const address = document.getElementById('order-addr').value.trim();
-            const phone = document.getElementById('order-phone').value.trim();
-            if (!customer || !city || !address || !phone) { tg.showAlert("შეავსეთ ველები!"); return; }
-
-            const itemsText = cart.map(i => `${i.name} (${i.col}/${i.siz}) x${i.qty}`).join(', ');
-            const total = document.getElementById('cart-total').innerText;
-
-            document.getElementById('checkout-main-content').innerHTML = `
-                <div style="text-align:center;">
-                    <i class="fa-solid fa-circle-check" style="font-size:60px; color:var(--green); margin-bottom:15px;"></i>
-                    <h2>თითქმის მზადაა!</h2>
-                    <p>შეკვეთის ნომერი: <b>${orderID}</b></p>
-                    <div class="pay-card">
-                        <small style="color:var(--red); font-weight:800;">⚠️ აუცილებელი პირობა:</small>
-                        <p style="font-size:13px; margin:10px 0;">გადარიცხვისას დანიშნულებაში ჩაწერეთ მხოლოდ ეს ნომერი:</p>
-                        <div class="copy-row"><b id="copy-oid">${orderID}</b><i class="fa-regular fa-copy" onclick="copyTxt('copy-oid')"></i></div>
-                        <small style="display:block; margin-top:15px; text-align:left;">IBAN (TBC):</small>
-                        <div class="copy-row"><b id="copy-iban">GE00TB0000000000000000</b><i class="fa-regular fa-copy" onclick="copyTxt('copy-iban')"></i></div>
-                    </div>
-                    <button class="btn-main" style="width:100%; margin-top:20px; background:var(--green);" onclick="finalizeOrder('${customer}','${city}','${address}','${phone}','${itemsText}','${total}', '${orderID}')">დავადასტურე გადახდა</button>
-                </div>`;
-        }
-
-        async function finalizeOrder(customer, city, address, phone, itemsText, total, finalID) {
-            const userId = tg.initDataUnsafe?.user?.id || "unknown";
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({ 
-                        customer, city, address, phone, items: itemsText, total, 
-                        orderID: finalID, userId: userId, promoCode: activeDisc.code || "" 
-                    })
-                });
-                tg.showAlert("✅ შეკვეთა მიღებულია!");
-                cart = []; updateCart(); switchView('user', 3); loadProfile(); closeOverlay('checkout-overlay');
-            } catch (e) { tg.showAlert("შეცდომა გაგზავნისას."); }
-        }
-
-        async function loadProfile() {
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                document.getElementById('u-name').innerText = user.first_name || "სტუმარი";
-                document.getElementById('u-username').innerText = user.username ? "@" + user.username : "";
-                if (user.photo_url) document.getElementById('u-photo').src = user.photo_url;
-                fetchHistory(user.id);
-            }
-        }
-
-        async function fetchHistory(userId) {
-            const hBox = document.getElementById('order-history-list');
-            try {
-                const res = await fetch(`${SCRIPT_URL}?userId=${userId}`);
-                const orders = await res.json();
-                hBox.innerHTML = orders.length ? orders.map(ord => `
-                    <div class="order-card">
-                        <div class="order-header"><b>#${ord.orderID}</b><span class="status-badge status-pending">${ord.status}</span></div>
-                        <div style="font-size:14px;">${ord.items}</div>
-                        <div style="margin-top:10px; font-weight:900; text-align:right;">${ord.total}</div>
-                    </div>`).join('') : '<div style="text-align:center; padding:20px; color:var(--gray);">შეკვეთები არ არის</div>';
-            } catch (e) { hBox.innerHTML = 'შეცდომა ჩატვირთვისას'; }
-        }
-
         function switchView(v, i) {
             document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
             document.getElementById(v + '-view').classList.add('active');
-            document.querySelectorAll('.tab-item').forEach((e, idx) => e.classList.toggle('active', idx === i));
+            document.querySelectorAll('.nav-item').forEach((e, idx) => {
+                e.style.opacity = (idx === i) ? "1" : "0.4";
+            });
         }
+
         function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
-        function copyTxt(id) { navigator.clipboard.writeText(document.getElementById(id).innerText); tg.showAlert("დაკოპირდა"); }
+        
+        function parseCSV(text) {
+            return text.split('\n').slice(1).map(line => {
+                const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                return matches ? matches.map(m => m.replace(/^"|"$/g, '')) : [];
+            });
+        }
+
         init();
     </script>
 </body>
