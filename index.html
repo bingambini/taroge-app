@@ -32,11 +32,12 @@
             <div id="banner-btn"></div>
         </div>
 
-        <div class="px-4 mb-4">
+        <div class="px-4 mb-2">
             <div id="quick-categories-grid" class="grid grid-cols-4 gap-2 py-1"></div>
         </div>
 
-        <div class="px-5 font-black text-gray-800 text-md mb-3">ახალი დამატებული</div>
+        <div class="px-5 font-extrabold text-slate-500 text-[10px] uppercase tracking-[0.1em] mb-2">ახალი დამატებული</div>
+        
         <div id="products-grid" class="grid grid-cols-2 gap-3 px-4"></div>
     </div>
 
@@ -108,7 +109,6 @@
             
             if(top) {
                 const banner = document.getElementById('banner-btn');
-                // სიმაღლე შემცირდა h-44-ზე
                 banner.className = "relative h-44 rounded-[32px] overflow-hidden cursor-pointer transition-all active:scale-[0.98] shadow-lg border border-white/10";
                 banner.innerHTML = `
                     <div class="absolute inset-0 bg-gradient-to-br from-slate-800 to-black"></div>
