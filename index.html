@@ -91,15 +91,15 @@ function renderQuickCategories() {
     const grid = document.getElementById('quick-categories-grid');
     grid.innerHTML = dynamicCategories.map(cat => `
         <div onclick="filterQuick('${cat.name}')" 
-             class="group relative bg-white rounded-[18px] flex flex-col items-center overflow-hidden shadow-sm border border-gray-100 active:scale-90 transition-all">
+             class="group relative bg-white rounded-[22px] flex flex-col items-center overflow-hidden shadow-sm border border-gray-50 active:scale-95 transition-all h-[85px]">
             
-            <div class="w-full h-10 flex items-center justify-center p-2 pt-3">
+            <div class="w-full flex-1 flex items-center justify-center p-1 overflow-hidden">
                 <img src="${cat.img || 'https://via.placeholder.com/100'}" 
-                     class="w-full h-full object-contain">
+                     class="w-full h-full object-contain transform scale-[1.4] transition-transform duration-300 group-hover:scale-[1.5]">
             </div>
 
-            <div class="w-full bg-slate-900 mt-2 py-1.5 flex items-center justify-center">
-                <span class="text-[7px] font-black text-white uppercase tracking-tighter truncate px-1">
+            <div class="w-full bg-[#0f172a] py-2 flex items-center justify-center">
+                <span class="text-[8px] font-black text-white uppercase tracking-wider text-center px-1 leading-none">
                     ${cat.name || '...'}
                 </span>
             </div>
