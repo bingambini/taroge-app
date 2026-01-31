@@ -1,81 +1,197 @@
-<div id="home-view" class="view active">
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Svaqi Store AI v1.2</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --bg: #f8f9fb; --black: #1c1c1e; --white: #ffffff; --gray: #8e8e93; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; }
+        .view { display: none; min-height: 100vh; animation: fadeIn 0.3s ease; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .card { background: var(--white); border-radius: 25px; padding: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .chip { padding: 10px 18px; border: 2px solid #f0f0f5; border-radius: 15px; font-weight: 700; cursor: pointer; font-size: 13px; }
+        .chip.selected { background: var(--black); color: white; border-color: var(--black); }
+        .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
+        .cat-pill { padding: 8px 18px; background: var(--white); border-radius: 15px; font-weight: 700; font-size: 13px; border: 1px solid #eee; white-space: nowrap; }
+        .cat-pill.active { background: var(--black); color: white; }
+    </style>
+</head>
+<body>
 
-    <header class="p-5 flex items-center justify-between bg-white sticky top-0 z-50 shadow-sm">
-        <div class="flex items-center gap-3">
-            <img id="logo-img" class="h-10 w-10 rounded-lg hidden">
-            <h1 id="shop-name" class="font-black text-xl text-slate-800 tracking-tight">იტვირთება...</h1>
-        </div>
-        <div class="relative">
+    <div id="home-view" class="view active">
+        
+        <header class="p-5 flex items-center justify-between bg-white sticky top-0 z-50">
+            <div class="flex items-center gap-3">
+                <img id="logo-img" class="h-10 w-10 rounded-lg hidden">
+                <h1 id="shop-name" class="font-black text-xl">იტვირთება...</h1>
+            </div>
             <i class="fa-solid fa-bell text-gray-300 text-xl"></i>
-            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-        </div>
-    </header>
+        </header>
 
-    <div class="p-5">
-        <div id="banner-btn" class="bg-[#232a32] h-48 rounded-[35px] relative p-7 flex items-center overflow-hidden cursor-pointer shadow-xl active:scale-[0.98] transition-all">
-            <div class="z-10 relative">
-                <h2 id="b-status" class="text-red-500 font-black uppercase text-[10px] tracking-[0.2em] mb-1">დღის შეთავაზება</h2>
-                <p id="b-name" class="text-white font-bold text-xl leading-tight w-[60%] mb-2">იტვირთება...</p>
-                <div class="flex items-center gap-2">
-                    <span id="b-price" class="text-white font-black text-2xl">0₾</span>
+        <div class="p-5">
+            <div id="banner-btn" class="bg-[#232a32] h-48 rounded-[35px] relative p-7 flex items-center overflow-hidden cursor-pointer shadow-xl active:scale-[0.98] transition-all">
+                <div class="z-10 relative">
+                    <h2 id="b-status" class="text-red-500 font-black uppercase text-[10px] tracking-widest mb-1">TOP SELLER</h2>
+                    <p id="b-name" class="text-white font-bold text-lg leading-tight w-[60%]">იტვირთება...</p>
+                    <span id="b-price" class="text-white font-black text-xl mt-2 block">0₾</span>
+                </div>
+                <img id="b-img" class="absolute -right-4 -top-6 w-48 rotate-[-15deg] drop-shadow-2xl object-contain">
+            </div>
+        </div>
+
+        <div class="px-5 mb-8">
+            <div class="grid grid-cols-4 gap-3">
+                <div onclick="renderCatalog('ყველა'); switchView('catalog', 1)" class="bg-white p-3 rounded-[28px] shadow-sm border border-gray-50 text-center active:scale-90 transition-all">
+                    <div class="w-11 h-11 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-1 text-xl"><i class="fa-solid fa-border-all"></i></div>
+                    <span class="text-[9px] font-black text-slate-700 uppercase">ყველა</span>
+                </div>
+                <div onclick="filterQuick('კაცი')" class="bg-white p-3 rounded-[28px] shadow-sm border border-gray-50 text-center active:scale-90 transition-all">
+                    <div class="w-11 h-11 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-1 text-xl"><i class="fa-solid fa-mars"></i></div>
+                    <span class="text-[9px] font-black text-slate-700 uppercase">კაცი</span>
+                </div>
+                <div onclick="filterQuick('ქალი')" class="bg-white p-3 rounded-[28px] shadow-sm border border-gray-50 text-center active:scale-90 transition-all">
+                    <div class="w-11 h-11 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-1 text-xl"><i class="fa-solid fa-venus"></i></div>
+                    <span class="text-[9px] font-black text-slate-700 uppercase">ქალი</span>
+                </div>
+                <div onclick="filterQuick('ბავშვი')" class="bg-white p-3 rounded-[28px] shadow-sm border border-gray-50 text-center active:scale-90 transition-all">
+                    <div class="w-11 h-11 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-1 text-xl"><i class="fa-solid fa-child"></i></div>
+                    <span class="text-[9px] font-black text-slate-700 uppercase">ბავშვი</span>
                 </div>
             </div>
-            <img id="b-img" class="absolute -right-4 -bottom-4 w-52 rotate-[-12deg] drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)] object-contain">
+        </div>
+
+        <div class="px-5 font-black text-gray-800 text-lg mb-3">ახალი დამატებული</div>
+        <div id="products-grid" class="grid grid-cols-2 gap-4 px-5"></div>
+    </div>
+
+    <div id="catalog-view" class="view">
+        <div class="p-5 pt-8">
+            <h2 class="font-black text-2xl mb-4">აღმოაჩინე</h2>
+            <div class="bg-white rounded-2xl flex items-center p-2 shadow-sm border border-gray-100 mb-6">
+                <input type="text" id="ai-shop-search" placeholder="AI ძებნა..." class="flex-1 px-3 outline-none text-sm font-medium">
+                <button onclick="runStoreAISearch()" id="ai-shop-btn" class="bg-black text-white w-10 h-10 rounded-xl"><i class="fa-solid fa-wand-magic-sparkles text-xs"></i></button>
+            </div>
+            <div id="category-list" class="flex gap-2 overflow-x-auto pb-4 no-scrollbar"></div>
+            <div id="catalog-grid" class="grid grid-cols-2 gap-4 mt-2"></div>
         </div>
     </div>
 
-    <div class="px-5 mb-8">
-        <div class="grid grid-cols-4 gap-3 py-2">
-            
-            <div onclick="renderCatalog('ყველა'); switchView('catalog', 1)" class="bg-white p-3 rounded-[28px] shadow-sm border border-gray-50 text-center active:scale-90 transition-all">
-                <div class="w-11 h-11 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl shadow-inner">
-                    <i class="fa-solid fa-border-all"></i>
-                </div>
-                <span class="text-[9px] font-black text-slate-700 uppercase tracking-tighter">ყველა</span>
-            </div>
-            
-            <div onclick="filterQuick('კაცი')" class="bg-white p-3 rounded-[28px] shadow-sm border border-gray-50 text-center active:scale-90 transition-all">
-                <div class="w-11 h-11 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl shadow-inner">
-                    <i class="fa-solid fa-mars"></i>
-                </div>
-                <span class="text-[9px] font-black text-slate-700 uppercase tracking-tighter">კაცი</span>
-            </div>
-
-            <div onclick="filterQuick('ქალი')" class="bg-white p-3 rounded-[28px] shadow-sm border border-gray-50 text-center active:scale-90 transition-all">
-                <div class="w-11 h-11 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl shadow-inner">
-                    <i class="fa-solid fa-venus"></i>
-                </div>
-                <span class="text-[9px] font-black text-slate-700 uppercase tracking-tighter">ქალი</span>
-            </div>
-
-            <div onclick="filterQuick('ბავშვი')" class="bg-white p-3 rounded-[28px] shadow-sm border border-gray-50 text-center active:scale-90 transition-all">
-                <div class="w-11 h-11 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl shadow-inner">
-                    <i class="fa-solid fa-child"></i>
-                </div>
-                <span class="text-[9px] font-black text-slate-700 uppercase tracking-tighter">ბავშვი</span>
-            </div>
+    <div id="details-overlay" class="overlay">
+        <button onclick="closeOverlay('details-overlay')" class="absolute top-6 left-6 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center z-50"><i class="fa-solid fa-xmark"></i></button>
+        <div id="det-slider" class="w-full h-80 flex overflow-x-auto snap-x snap-mandatory no-scrollbar bg-gray-50 pt-10"></div>
+        <div class="p-8 bg-white rounded-t-[40px] -mt-10 relative z-10 flex-1 shadow-2xl">
+            <h1 id="det-title" class="font-black text-2xl text-gray-800"></h1>
+            <span id="det-price" class="text-2xl font-black text-gray-900 mt-2 block"></span>
+            <div id="color-box" class="flex gap-2 mt-6 overflow-x-auto no-scrollbar"></div>
+            <div id="size-box" class="flex gap-2 mt-6 overflow-x-auto no-scrollbar"></div>
+            <button id="add-btn" disabled onclick="addToCart()" class="w-full bg-black text-white py-5 rounded-3xl font-black mt-10 disabled:opacity-30 transition-all">დამატება</button>
         </div>
     </div>
 
-    <div class="px-5 flex items-center justify-between mb-4">
-        <h3 class="font-black text-gray-800 text-lg">ახალი დამატებული</h3>
-        <button onclick="switchView('catalog', 1)" class="text-xs font-bold text-gray-400">ყველას ნახვა</button>
-    </div>
-    <div id="products-grid" class="grid grid-cols-2 gap-4 px-5">
-        </div>
+    <nav class="fixed bottom-6 left-5 right-5 h-20 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-2xl border border-white/5">
+        <button onclick="switchView('home', 0)" class="nav-item text-white text-xl opacity-100"><i class="fa-solid fa-house"></i></button>
+        <button onclick="switchView('catalog', 1)" class="nav-item text-white/40 text-xl"><i class="fa-solid fa-layer-group"></i></button>
+        <button onclick="switchView('cart', 2)" class="nav-item text-white/40 text-xl"><i class="fa-solid fa-cart-shopping"></i></button>
+        <button onclick="switchView('user', 3)" class="nav-item text-white/40 text-xl"><i class="fa-solid fa-user"></i></button>
+    </nav>
 
-</div> <nav class="fixed bottom-6 left-5 right-5 h-20 bg-black rounded-[35px] flex items-center justify-around z-[1000] shadow-[0_15px_40px_rgba(0,0,0,0.3)] border border-white/10">
-    <button onclick="switchView('home', 0)" class="nav-item text-white text-xl transition-all duration-300 opacity-100">
-        <i class="fa-solid fa-house"></i>
-    </button>
-    <button onclick="switchView('catalog', 1)" class="nav-item text-white/40 text-xl transition-all duration-300">
-        <i class="fa-solid fa-layer-group"></i>
-    </button>
-    <button onclick="switchView('cart', 2)" class="nav-item text-white/40 text-xl relative transition-all duration-300">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-[9px] w-5 h-5 rounded-full hidden items-center justify-center border-2 border-black font-black text-white">0</span>
-    </button>
-    <button onclick="switchView('user', 3)" class="nav-item text-white/40 text-xl transition-all duration-300">
-        <i class="fa-solid fa-user"></i>
-    </button>
-</nav>
+    <script>
+        /* --- კონფიგურაცია --- */
+        const API_KEY = "ჩასვი_შენი_GEMINI_API_KEY"; 
+        const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
+        const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
+
+        let products = [], categories = [];
+        let currentP = null, selCol = null, selSiz = null;
+
+        async function init() {
+            try {
+                const dRes = await fetch(BASE + '856847150');
+                const dRows = parseCSV(await dRes.text());
+                if(dRows[0]) {
+                    document.getElementById('shop-name').innerText = dRows[0][0];
+                    if(dRows[0][1]) { document.getElementById('logo-img').src = dRows[0][1]; document.getElementById('logo-img').classList.remove('hidden'); }
+                }
+
+                const pRes = await fetch(BASE + '0');
+                const pRows = parseCSV(await pRes.text());
+                products = pRows.map(r => ({
+                    name: r[0], price: parseFloat(r[1]), imgs: r[2]?.split(','),
+                    status: r[4] || "", sizes: r[5]?.split(','), colors: r[6]?.split(','),
+                    category: r[7]?.trim() || "სხვა"
+                }));
+                
+                categories = ["ყველა", ...new Set(products.map(p => p.category))];
+                renderHome();
+                renderCatalog("ყველა");
+            } catch(e) { console.error(e); }
+        }
+
+        function renderHome() {
+            const grid = document.getElementById('products-grid'); grid.innerHTML = '';
+            const top = products.find(p => p.status.includes('top')) || products[0];
+            if(top) {
+                document.getElementById('b-name').innerText = top.name;
+                document.getElementById('b-price').innerText = top.price + "₾";
+                document.getElementById('b-img').src = top.imgs[0]?.trim();
+                document.getElementById('banner-btn').onclick = () => openDetails(top);
+            }
+            products.slice(0, 4).forEach(p => grid.appendChild(createCard(p)));
+        }
+
+        function filterQuick(gender) { switchView('catalog', 1); renderCatalog(gender); }
+
+        function renderCatalog(filter) {
+            const catBox = document.getElementById('category-list');
+            catBox.innerHTML = categories.map(c => `<div class="cat-pill ${c === filter ? 'active' : ''}" onclick="renderCatalog('${c}')">${c}</div>`).join('');
+            const grid = document.getElementById('catalog-grid'); grid.innerHTML = '';
+            const filtered = filter === "ყველა" ? products : products.filter(p => p.category === filter || p.name.includes(filter));
+            filtered.forEach(p => grid.appendChild(createCard(p)));
+        }
+
+        function createCard(p) {
+            const div = document.createElement('div'); div.className = 'card';
+            div.innerHTML = `<img src="${p.imgs[0]?.trim()}" class="w-full aspect-square object-contain mb-3 rounded-xl">
+                             <h3 class="font-bold text-sm truncate">${p.name}</h3><b class="text-slate-900">${p.price}₾</b>`;
+            div.onclick = () => openDetails(p);
+            return div;
+        }
+
+        function openDetails(p) {
+            currentP = p; selCol = null; selSiz = null;
+            document.getElementById('det-slider').innerHTML = p.imgs.map(i => `<img src="${i.trim()}" class="w-full flex-shrink-0 snap-center object-contain px-10">`).join('');
+            document.getElementById('det-title').innerText = p.name;
+            document.getElementById('det-price').innerText = p.price + "₾";
+            document.getElementById('color-box').innerHTML = p.colors.map(c => `<div class="chip" onclick="selectChip(this,'c','${c.trim()}')">${c.trim()}</div>`).join('');
+            document.getElementById('size-box').innerHTML = p.sizes.map(s => `<div class="chip" onclick="selectChip(this,'s','${s.trim()}')">${s.trim()}</div>`).join('');
+            document.getElementById('details-overlay').style.display = 'flex';
+        }
+
+        function selectChip(el, type, val) {
+            el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            if(type === 'c') selCol = val; else selSiz = val;
+            document.getElementById('add-btn').disabled = !(selCol && selSiz);
+        }
+
+        function switchView(v, i) {
+            document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+            document.getElementById(v + '-view').classList.add('active');
+            document.querySelectorAll('.nav-item').forEach((e, idx) => e.style.opacity = (idx === i) ? "1" : "0.4");
+        }
+
+        function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
+        function parseCSV(text) { return text.split('\n').slice(1).map(l => { const m = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g); return m ? m.map(x => x.replace(/^"|"$/g, '')) : []; }); }
+
+        init();
+    </script>
+</body>
+</html>
