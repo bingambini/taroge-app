@@ -23,11 +23,8 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .card { background: var(--white); border-radius: 20px; padding: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        
-        /* Glassmorphism ეფექტი */
         .glass-effect { backdrop-filter: blur(15px) saturate(180%); -webkit-backdrop-filter: blur(15px) saturate(180%); }
         
-        /* დინამიური ფერები */
         .bg-main { background-color: var(--main-color) !important; }
         .text-main { color: var(--main-color) !important; }
     </style>
@@ -37,7 +34,7 @@
     <div id="home-view" class="view active">
         <header id="main-header" class="px-4 flex items-center sticky top-0 z-50 transition-all duration-500 ease-in-out">
             <div id="header-content" class="flex items-center gap-3 w-full">
-                <img id="logo-img" class="h-8 w-8 rounded-lg hidden object-cover">
+                <img id="logo-img" class="hidden object-cover transition-all duration-500">
                 <h1 id="shop-name" class="font-black">იტვირთება...</h1>
             </div>
             <i id="header-bell" class="fa-solid fa-bell text-gray-300 text-lg"></i>
@@ -52,7 +49,6 @@
         </div>
 
         <div class="px-5 font-extrabold text-slate-500 text-[10px] uppercase tracking-[0.1em] mb-2">ახალი დამატებული</div>
-        
         <div id="products-grid" class="grid grid-cols-2 gap-3 px-4"></div>
     </div>
 
@@ -67,11 +63,10 @@
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
 
-        let products = [], dynamicCategories = [];
+        let products = [];
 
         async function init() {
             try {
-                // 1. დიზაინის მონაცემების წამოღება (GID: 856847150)
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 
@@ -79,7 +74,6 @@
                     const d = dRows[0];
                     const root = document.documentElement;
 
-                    // ძირითადი ტექსტი და ლოგო
                     document.getElementById('shop-name').innerText = d[0];
                     if(d[1]) {
                         const img = document.getElementById('logo-img');
@@ -87,19 +81,13 @@
                         img.classList.remove('hidden');
                     }
 
-                    // ფერების ცვლადების დასმა
-                    if(d[2]) root.style.setProperty('--header-bg', d[2].trim());    // C: H_BG
-                    if(d[3]) root.style.setProperty('--header-text', d[3].trim());  // D: H_Text
-                    if(d[10]) root.style.setProperty('--main-color', d[10].trim()); // K: Main_Color
+                    if(d[2]) root.style.setProperty('--header-bg', d[2].trim());
+                    if(d[3]) root.style.setProperty('--header-text', d[3].trim());
+                    if(d[10]) root.style.setProperty('--main-color', d[10].trim());
 
-                    // ჰედერის სტილების გამოყენება (E, F, G, H, I, J სვეტები)
                     applyHeaderStyles(d);
-
-                    // ძველი ლოგიკა კატეგორიებისთვის (თუ გადაწყვიტავ მათ დაბრუნებას)
-                    // dynamicCategories = [ ... ]; 
                 }
 
-                // 2. პროდუქტების მონაცემების წამოღება
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
@@ -115,6 +103,7 @@
             const header = document.getElementById('main-header');
             const content = document.getElementById('header-content');
             const shopTitle = document.getElementById('shop-name');
+            const logo = document.getElementById('logo-img');
             const bell = document.getElementById('header-bell');
 
             const layout = d[4]?.trim();   // E: H_Layout
@@ -123,42 +112,51 @@
             const height = d[7]?.trim();   // H: H_Height
             const fontSize = d[8]?.trim(); // I: H_Font_Size
             const border = d[9]?.trim();   // J: H_Border
+            const logoSize = d[11]?.trim(); // L: Logo_Size
+            const logoRad = d[12]?.trim();  // M: Logo_Radius
 
-            // ფერების მინიჭება
+            // 1. ფერები
             header.style.backgroundColor = "var(--header-bg)";
             header.style.color = "var(--header-text)";
             bell.style.color = "var(--header-text)";
             bell.style.opacity = "0.3";
 
-            // ა) განლაგება
+            // 2. განლაგება და სტილი
+            header.className = "px-4 flex items-center sticky top-0 z-50 transition-all duration-500 ease-in-out";
             content.className = "flex items-center gap-3 w-full";
+
             if (layout === 'center') content.classList.add('justify-center');
             else if (layout === 'between') content.classList.add('justify-between');
             else content.classList.add('justify-start');
 
-            // ბ) სტილი
-            header.className = "px-4 flex items-center sticky top-0 z-50 transition-all duration-500 ease-in-out";
             if (style === 'floating') header.classList.add('m-4', 'rounded-[24px]', 'top-4');
             else if (style === 'glass') header.classList.add('glass-effect', 'bg-opacity-70');
 
-            // გ) ჩრდილი
             if (shadow && shadow !== 'none') header.classList.add(`shadow-${shadow}`);
             else header.classList.add('shadow-sm');
 
-            // დ) სიმაღლე
+            // 3. სიმაღლე და ტექსტი
             header.style.height = height ? `${height}px` : '70px';
-
-            // ე) შრიფტის ზომა
             shopTitle.className = `font-black tracking-tight ${fontSize || 'text-lg'}`;
-
-            // ვ) ქვედა ხაზი
             header.style.borderBottom = border === 'thin' ? '1px solid rgba(0,0,0,0.1)' : 'none';
+
+            // 4. ლოგოს ზომა და ფორმა (L და M სვეტები)
+            if (logo) {
+                const s = logoSize || '32';
+                logo.style.height = `${s}px`;
+                logo.style.width = `${s}px`;
+                
+                if (logoRad) {
+                    logo.style.borderRadius = logoRad.includes('%') ? logoRad : `${logoRad}px`;
+                } else {
+                    logo.style.borderRadius = '8px';
+                }
+            }
         }
 
         function renderHome() {
             const grid = document.getElementById('products-grid');
             grid.innerHTML = '';
-            
             const top = products.find(p => p.status.includes('top')) || products[0];
             
             if(top) {
@@ -173,7 +171,7 @@
                         <p class="text-white font-bold text-lg leading-tight w-[55%]">${top.name}</p>
                         <div class="mt-3 flex items-center gap-2">
                             <span class="text-white font-black text-xl">${top.price}₾</span>
-                            <div class="bg-main px-3 py-1 rounded-lg text-white text-[10px] font-bold shadow-lg shadow-blue-500/20">ყიდვა</div>
+                            <div class="bg-main px-3 py-1 rounded-lg text-white text-[10px] font-bold shadow-lg">ყიდვა</div>
                         </div>
                     </div>
                     <img src="${top.imgs ? top.imgs[0]?.trim() : ''}" class="absolute -right-4 top-1/2 -translate-y-1/2 w-44 rotate-[-10deg] drop-shadow-2xl object-contain">
