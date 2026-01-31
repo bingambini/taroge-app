@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Svaqi Store AI - ჰედერ+ბანერ 1.0</title>
+    <title>Svaqi Store AI - ჰედერ+ბანერ 1.1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -35,8 +35,6 @@
         .text-main { color: var(--main-color) !important; }
 
         .app-container { max-width: 600px; margin: 0 auto; position: relative; }
-        
-        /* პრემიუმ ჩრდილი გამჭვირვალე სურათისთვის */
         .png-shadow { filter: drop-shadow(0 25px 35px rgba(0,0,0,0.5)); }
     </style>
 </head>
@@ -53,7 +51,7 @@
                 <i id="header-bell" class="fa-solid fa-bell text-gray-300 text-lg ml-2"></i>
             </header>
 
-            <div class="px-4 pt-4 pb-2">
+            <div class="px-4 pb-2">
                 <div id="banner-btn" class="relative"></div>
             </div>
 
@@ -89,14 +87,16 @@
                     const d = dRows[0];
                     const root = document.documentElement;
 
-                    // მონაცემების შენახვა ობიექტში
                     designData = {
                         name: d[0], logo: d[1], h_bg: d[2], h_text: d[3],
                         layout: d[4], style: d[5], shadow: d[6], height: d[7],
                         fontSize: d[8], border: d[9], mainColor: d[10],
                         logoSize: d[11], logoRad: d[12], 
                         bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
-                        bImage: d[17] // სვეტი R
+                        bImage: d[17],
+                        bTitleSize: d[18], // სვეტი S
+                        bSubSize: d[19],   // სვეტი T
+                        bMarginTop: d[20]  // სვეტი U
                     };
 
                     document.getElementById('shop-name').innerText = designData.name;
@@ -162,21 +162,25 @@
             
             if(top && banner) {
                 const bH = designData.bHeight || "180";
-                // სურათი სვეტი R-დან, თუ ცარიელია - პროდუქტის პირველი ფოტო
                 const bImg = designData.bImage || (top.imgs ? top.imgs[0]?.trim() : '');
+                
+                // ტექსტების და დაშორების რეგულატორები
+                const tSize = designData.bTitleSize || "22";
+                const sSize = designData.bSubSize || "9";
+                const mTop = designData.bMarginTop || "16";
 
-                // banner-btn არის კონტეინერი, რომელსაც არ აქვს overflow-hidden
-                banner.className = "relative mt-8 mb-10 cursor-pointer transition-all active:scale-[0.98]";
+                banner.className = "relative mb-10 cursor-pointer transition-all active:scale-[0.98]";
                 banner.style.height = `${bH}px`;
+                banner.style.marginTop = `${mTop}px`;
                 
                 banner.innerHTML = `
                     <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black rounded-[35px] shadow-2xl overflow-hidden border border-white/5">
                         <div class="absolute -top-10 -left-10 w-40 h-40 bg-main opacity-20 blur-[60px] rounded-full"></div>
                         <div class="z-10 relative p-7 h-full flex flex-col justify-center">
-                            <span class="text-main font-black text-[9px] tracking-[0.2em] uppercase mb-2">
+                            <span style="font-size: ${sSize}px" class="text-main font-black text-[9px] tracking-[0.2em] uppercase mb-2">
                                 ${designData.bSub || 'Premium Quality'}
                             </span>
-                            <h2 class="text-white font-black text-2xl leading-tight w-[55%] drop-shadow-lg">
+                            <h2 style="font-size: ${tSize}px" class="text-white font-black leading-tight w-[55%] drop-shadow-lg">
                                 ${designData.bTitle || top.name}
                             </h2>
                             <div class="mt-5 flex items-center gap-3">
@@ -187,7 +191,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="absolute -right-4 -top-12 w-[60%] h-[140%] z-20 flex items-center justify-center">
+                    <div class="absolute -right-4 -top-12 w-[60%] h-[140%] z-20 flex items-center justify-center pointer-events-none">
                         <img src="${bImg}" class="w-full h-full object-contain png-shadow transform rotate-[-12deg] transition-all duration-700 hover:rotate-0">
                     </div>
                 `;
@@ -213,7 +217,6 @@
         function switchView(v, i) { 
             document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
             document.getElementById(v + '-view').classList.add('active');
-            
             const btns = document.querySelectorAll('nav button');
             btns.forEach((b, idx) => { b.style.opacity = idx === i ? "1" : "0.4"; });
         }
