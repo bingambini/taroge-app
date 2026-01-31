@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Svaqi Store AI</title>
+    <title>Svaqi Store AI - ჰედერ+ბანერ 1.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,15 +34,17 @@
         .bg-main { background-color: var(--main-color) !important; }
         .text-main { color: var(--main-color) !important; }
 
-        /* რესპონსიული კონტეინერი მაქსიმალური სიგანით პლანშეტებისთვის */
         .app-container { max-width: 600px; margin: 0 auto; position: relative; }
+        
+        /* პრემიუმ ჩრდილი გამჭვირვალე სურათისთვის */
+        .png-shadow { filter: drop-shadow(0 25px 35px rgba(0,0,0,0.5)); }
     </style>
 </head>
 <body>
 
     <div class="app-container">
         <div id="home-view" class="view active">
-            <header id="main-header" class="px-4 flex items-center sticky top-0 z-50 transition-all duration-500 ease-in-out" 
+            <header id="main-header" class="px-4 flex items-center sticky top-0 z-[100] transition-all duration-500 ease-in-out" 
                     style="padding-top: env(safe-area-inset-top, 0px);">
                 <div id="header-content" class="flex items-center gap-3 w-full overflow-hidden">
                     <img id="logo-img" class="hidden object-cover transition-all duration-500 flex-shrink-0">
@@ -51,15 +53,15 @@
                 <i id="header-bell" class="fa-solid fa-bell text-gray-300 text-lg ml-2"></i>
             </header>
 
-            <div class="px-4 pt-3 pb-2">
-                <div id="banner-btn"></div>
+            <div class="px-4 pt-4 pb-2">
+                <div id="banner-btn" class="relative"></div>
             </div>
 
             <div class="px-4 mb-2">
                 <div id="quick-categories-grid" class="grid grid-cols-4 gap-2 py-1"></div>
             </div>
 
-            <div class="px-5 font-extrabold text-slate-500 text-[10px] uppercase tracking-[0.1em] mb-2">ახალი დამატებული</div>
+            <div class="px-5 font-extrabold text-slate-400 text-[10px] uppercase tracking-[0.15em] mb-4">ახალი კოლექცია</div>
             <div id="products-grid" class="grid grid-cols-2 gap-3 px-4"></div>
         </div>
 
@@ -76,6 +78,7 @@
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
 
         let products = [];
+        let designData = {};
 
         async function init() {
             try {
@@ -86,16 +89,26 @@
                     const d = dRows[0];
                     const root = document.documentElement;
 
-                    document.getElementById('shop-name').innerText = d[0];
-                    if(d[1]) {
+                    // მონაცემების შენახვა ობიექტში
+                    designData = {
+                        name: d[0], logo: d[1], h_bg: d[2], h_text: d[3],
+                        layout: d[4], style: d[5], shadow: d[6], height: d[7],
+                        fontSize: d[8], border: d[9], mainColor: d[10],
+                        logoSize: d[11], logoRad: d[12], 
+                        bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
+                        bImage: d[17] // სვეტი R
+                    };
+
+                    document.getElementById('shop-name').innerText = designData.name;
+                    if(designData.logo) {
                         const img = document.getElementById('logo-img');
-                        img.src = d[1];
+                        img.src = designData.logo;
                         img.classList.remove('hidden');
                     }
 
-                    if(d[2]) root.style.setProperty('--header-bg', d[2].trim());
-                    if(d[3]) root.style.setProperty('--header-text', d[3].trim());
-                    if(d[10]) root.style.setProperty('--main-color', d[10].trim());
+                    if(designData.h_bg) root.style.setProperty('--header-bg', designData.h_bg.trim());
+                    if(designData.h_text) root.style.setProperty('--header-text', designData.h_text.trim());
+                    if(designData.mainColor) root.style.setProperty('--main-color', designData.mainColor.trim());
 
                     applyHeaderStyles(d);
                 }
@@ -116,81 +129,67 @@
             const content = document.getElementById('header-content');
             const shopTitle = document.getElementById('shop-name');
             const logo = document.getElementById('logo-img');
-            const bell = document.getElementById('header-bell');
 
-            const layout = d[4]?.trim();
-            const style = d[5]?.trim();
-            const shadow = d[6]?.trim();
-            const height = d[7]?.trim() || '70';
-            const fontSize = d[8]?.trim();
-            const border = d[9]?.trim();
-            const logoSize = d[11]?.trim() || '32';
-            const logoRad = d[12]?.trim();
-
+            const hH = designData.height || '70';
+            header.style.minHeight = `${hH}px`;
+            header.style.paddingTop = 'calc(env(safe-area-inset-top, 0px) + 10px)';
             header.style.backgroundColor = "var(--header-bg)";
             header.style.color = "var(--header-text)";
-            bell.style.color = "var(--header-text)";
-            bell.style.opacity = "0.3";
-
-            // რესპონსიული სიმაღლე
-            header.style.minHeight = `${height}px`;
-            header.style.height = 'auto';
-            header.style.paddingTop = 'calc(env(safe-area-inset-top, 0px) + 10px)';
-            header.style.paddingBottom = '10px';
 
             content.className = "flex items-center gap-3 w-full overflow-hidden";
-            if (layout === 'center') content.classList.add('justify-center');
-            else if (layout === 'between') content.classList.add('justify-between');
-            else content.classList.add('justify-start');
+            if (designData.layout === 'center') content.classList.add('justify-center');
+            else if (designData.layout === 'between') content.classList.add('justify-between');
 
-            header.className = "px-4 flex items-center sticky top-0 z-50 transition-all duration-500 ease-in-out";
-            if (style === 'floating') header.classList.add('m-4', 'rounded-[24px]', 'top-4');
-            else if (style === 'glass') header.classList.add('glass-effect', 'bg-opacity-70');
+            if (designData.style === 'floating') header.classList.add('m-4', 'rounded-[24px]', 'top-4');
+            else if (designData.style === 'glass') header.classList.add('glass-effect', 'bg-opacity-70');
 
-            if (shadow && shadow !== 'none') header.classList.add(`shadow-${shadow}`);
-            else header.classList.add('shadow-sm');
-
-            // რესპონსიული ტექსტის ზომა
-            shopTitle.style.fontSize = `clamp(14px, 4vw, 22px)`;
-            shopTitle.classList.add('font-black', 'tracking-tight');
-
-            header.style.borderBottom = border === 'thin' ? '1px solid rgba(0,0,0,0.1)' : 'none';
-
-            // რესპონსიული ლოგოს ზომა (Clamp მინიმუმ 24px, მაქსიმუმ logoSize)
+            shopTitle.style.fontSize = `clamp(16px, 5vw, 22px)`;
+            
             if (logo) {
-                const s = logoSize;
+                const s = designData.logoSize || '32';
                 logo.style.height = `clamp(24px, 12vw, ${s}px)`;
                 logo.style.width = `clamp(24px, 12vw, ${s}px)`;
-                
-                if (logoRad) {
-                    logo.style.borderRadius = logoRad.includes('%') ? logoRad : `${logoRad}px`;
-                } else {
-                    logo.style.borderRadius = '8px';
-                }
+                logo.style.borderRadius = designData.logoRad?.includes('%') ? designData.logoRad : `${designData.logoRad || 8}px`;
             }
         }
 
         function renderHome() {
+            const banner = document.getElementById('banner-btn');
             const grid = document.getElementById('products-grid');
             grid.innerHTML = '';
+            
             const top = products.find(p => p.status.includes('top')) || products[0];
             
-            if(top) {
-                const banner = document.getElementById('banner-btn');
-                banner.className = "relative h-44 rounded-[32px] overflow-hidden cursor-pointer transition-all active:scale-[0.98] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] border border-white/10";
+            if(top && banner) {
+                const bH = designData.bHeight || "180";
+                // სურათი სვეტი R-დან, თუ ცარიელია - პროდუქტის პირველი ფოტო
+                const bImg = designData.bImage || (top.imgs ? top.imgs[0]?.trim() : '');
+
+                // banner-btn არის კონტეინერი, რომელსაც არ აქვს overflow-hidden
+                banner.className = "relative mt-8 mb-10 cursor-pointer transition-all active:scale-[0.98]";
+                banner.style.height = `${bH}px`;
+                
                 banner.innerHTML = `
-                    <div class="absolute inset-0 bg-gradient-to-br from-slate-800 to-black"></div>
-                    <div class="z-10 relative p-6 h-full flex flex-col justify-center">
-                        <div class="bg-white/10 backdrop-blur-md self-start px-2 py-0.5 rounded-full mb-2">
-                            <h2 class="text-white font-black uppercase text-[8px] tracking-widest">TOP PRICE</h2>
-                        </div>
-                        <p class="text-white font-bold text-lg leading-tight w-[55%] break-words">${top.name}</p>
-                        <div class="mt-3 flex items-center gap-2">
-                            <span class="text-white font-black text-xl">${top.price}₾</span>
-                            <div class="bg-main px-3 py-1 rounded-lg text-white text-[10px] font-bold shadow-lg">ყიდვა</div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black rounded-[35px] shadow-2xl overflow-hidden border border-white/5">
+                        <div class="absolute -top-10 -left-10 w-40 h-40 bg-main opacity-20 blur-[60px] rounded-full"></div>
+                        <div class="z-10 relative p-7 h-full flex flex-col justify-center">
+                            <span class="text-main font-black text-[9px] tracking-[0.2em] uppercase mb-2">
+                                ${designData.bSub || 'Premium Quality'}
+                            </span>
+                            <h2 class="text-white font-black text-2xl leading-tight w-[55%] drop-shadow-lg">
+                                ${designData.bTitle || top.name}
+                            </h2>
+                            <div class="mt-5 flex items-center gap-3">
+                                <span class="text-white font-black text-xl">${top.price}₾</span>
+                                <div class="bg-main px-4 py-2 rounded-xl text-white text-[10px] font-bold shadow-lg uppercase tracking-wider">
+                                    ${designData.bBtn || 'ნახვა'}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <img src="${top.imgs ? top.imgs[0]?.trim() : ''}" class="absolute -right-4 top-1/2 -translate-y-1/2 w-32 sm:w-44 rotate-[-10deg] drop-shadow-2xl object-contain">
+                    <div class="absolute -right-4 -top-12 w-[60%] h-[140%] z-20 flex items-center justify-center">
+                        <img src="${bImg}" class="w-full h-full object-contain png-shadow transform rotate-[-12deg] transition-all duration-700 hover:rotate-0">
+                    </div>
                 `;
             }
 
@@ -198,13 +197,13 @@
                 const div = document.createElement('div');
                 div.className = 'card active:scale-95 transition-all duration-300';
                 div.innerHTML = `
-                    <div class="relative overflow-hidden rounded-xl bg-slate-50 mb-2 aspect-square flex items-center justify-center p-2">
+                    <div class="relative overflow-hidden rounded-2xl bg-slate-50 mb-3 aspect-square flex items-center justify-center p-3">
                         <img src="${p.imgs ? p.imgs[0] : ''}" class="w-full h-full object-contain">
                     </div>
-                    <h3 class="font-bold text-[10px] text-slate-700 truncate">${p.name}</h3>
-                    <div class="flex justify-between items-center mt-1">
-                        <b class="text-slate-900 text-xs">${p.price}₾</b>
-                        <i class="fa-solid fa-circle-plus text-main text-sm"></i>
+                    <h3 class="font-bold text-[11px] text-slate-800 truncate px-1">${p.name}</h3>
+                    <div class="flex justify-between items-center mt-2 px-1">
+                        <b class="text-slate-900 text-sm">${p.price}₾</b>
+                        <div class="bg-slate-100 p-1.5 rounded-lg"><i class="fa-solid fa-plus text-main text-[10px]"></i></div>
                     </div>
                 `;
                 grid.appendChild(div);
@@ -215,11 +214,8 @@
             document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
             document.getElementById(v + '-view').classList.add('active');
             
-            // ნავიგაციის ფერების შეცვლა
             const btns = document.querySelectorAll('nav button');
-            btns.forEach((b, idx) => {
-                b.style.opacity = idx === i ? "1" : "0.4";
-            });
+            btns.forEach((b, idx) => { b.style.opacity = idx === i ? "1" : "0.4"; });
         }
 
         function parseCSV(t) {
