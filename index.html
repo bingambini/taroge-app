@@ -44,7 +44,7 @@
 
         <div class="px-5 mb-8">
             <div id="quick-categories-grid" class="grid grid-cols-4 gap-3 py-2">
-                </div>
+            </div>
         </div>
 
         <div class="px-5 font-black text-gray-800 text-lg mb-3">ახალი დამატებული</div>
@@ -59,7 +59,6 @@
     </nav>
 
     <script>
-        /* --- კონფიგურაცია --- */
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
 
@@ -67,7 +66,7 @@
 
         async function init() {
             try {
-                // 1. მონაცემების წამოღება DESIGN ტაბიდან (GID: 856847150)
+                // 1. მონაცემების წამოღება DESIGN ტაბიდან
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 
@@ -78,12 +77,12 @@
                         document.getElementById('logo-img').classList.remove('hidden');
                     }
 
-                    // კატეგორიები და ფერები (C-F სახელი, G-J ფერი)
+                    // სახელები (C-F), ფერები (G-J), სურათები (K-N)
                     dynamicCategories = [
-                        { name: dRows[0][2], color: dRows[0][6] || '#3b82f6' },
-                        { name: dRows[0][3], color: dRows[0][7] || '#6366f1' },
-                        { name: dRows[0][4], color: dRows[0][8] || '#ec4899' },
-                        { name: dRows[0][5], color: dRows[0][9] || '#f59e0b' }
+                        { name: dRows[0][2], color: dRows[0][6] || '#8a2be2', img: dRows[0][10] },
+                        { name: dRows[0][3], color: dRows[0][7] || '#8a2be2', img: dRows[0][11] },
+                        { name: dRows[0][4], color: dRows[0][8] || '#8a2be2', img: dRows[0][12] },
+                        { name: dRows[0][5], color: dRows[0][9] || '#8a2be2', img: dRows[0][13] }
                     ];
                     renderQuickCategories();
                 }
@@ -100,20 +99,25 @@
             } catch(e) { console.error("Init Error:", e); }
         }
 
-        /* --- კატეგორიების გენერირება --- */
+        /* --- კატეგორიების რენდერი სურათებით და მუქი ფუტერით --- */
         function renderQuickCategories() {
             const grid = document.getElementById('quick-categories-grid');
-            const icons = ["fa-border-all", "fa-mars", "fa-venus", "fa-child"];
-
+            
             grid.innerHTML = dynamicCategories.map((cat, i) => {
-                const bg = cat.color + '1a'; // 10% გამჭვირვალობა ფონისთვის
                 return `
-                    <div onclick="filterQuick('${cat.name}')" class="bg-white p-3 rounded-[28px] shadow-sm border border-gray-50 text-center active:scale-90 transition-all">
-                        <div style="background-color: ${bg}; color: ${cat.color};" 
-                             class="w-11 h-11 rounded-2xl flex items-center justify-center mx-auto mb-1 text-xl shadow-inner">
-                            <i class="fa-solid ${icons[i]}"></i>
+                    <div onclick="filterQuick('${cat.name}')" 
+                         class="relative bg-white border-[2px] border-[#8a2be2] rounded-[22px] overflow-hidden flex flex-col items-center active:scale-95 transition-all shadow-md">
+                        
+                        <div class="w-full h-16 p-2 flex items-center justify-center">
+                            <img src="${cat.img || 'https://via.placeholder.com/100'}" 
+                                 class="w-full h-full object-contain">
                         </div>
-                        <span class="text-[9px] font-black text-slate-700 uppercase tracking-tighter">${cat.name || '...'}</span>
+
+                        <div class="w-full bg-[#0a0f1e] py-1.5 flex items-center justify-center">
+                            <span class="text-[8px] font-black text-white uppercase tracking-tighter">
+                                ${cat.name || '...'}
+                            </span>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -141,6 +145,7 @@
         }
 
         function filterQuick(cat) { alert("ფილტრი: " + cat); }
+        
         function switchView(v, i) { 
             document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
             document.getElementById(v + '-view').classList.add('active');
