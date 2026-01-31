@@ -87,19 +87,25 @@
             } catch(e) { console.error("Init Error:", e); }
         }
 
-        function renderQuickCategories() {
-            const grid = document.getElementById('quick-categories-grid');
-            grid.innerHTML = dynamicCategories.map(cat => `
-                <div onclick="filterQuick('${cat.name}')" class="bg-white rounded-[20px] flex flex-col items-center py-2 shadow-sm border border-gray-50 active:scale-90 transition-all">
-                    <div class="w-9 h-9 mb-1">
-                        <img src="${cat.img || 'https://via.placeholder.com/100'}" class="w-full h-full object-contain">
-                    </div>
-                    <span class="text-[7px] font-black text-slate-500 uppercase tracking-tighter truncate w-full text-center px-1">
-                        ${cat.name || '...'}
-                    </span>
-                </div>
-            `).join('');
-        }
+function renderQuickCategories() {
+    const grid = document.getElementById('quick-categories-grid');
+    grid.innerHTML = dynamicCategories.map(cat => `
+        <div onclick="filterQuick('${cat.name}')" 
+             class="group relative bg-white rounded-[18px] flex flex-col items-center overflow-hidden shadow-sm border border-gray-100 active:scale-90 transition-all">
+            
+            <div class="w-full h-10 flex items-center justify-center p-2 pt-3">
+                <img src="${cat.img || 'https://via.placeholder.com/100'}" 
+                     class="w-full h-full object-contain">
+            </div>
+
+            <div class="w-full bg-slate-900 mt-2 py-1.5 flex items-center justify-center">
+                <span class="text-[7px] font-black text-white uppercase tracking-tighter truncate px-1">
+                    ${cat.name || '...'}
+                </span>
+            </div>
+        </div>
+    `).join('');
+}
 
         function renderHome() {
             const grid = document.getElementById('products-grid');
