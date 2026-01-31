@@ -2,7 +2,7 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Svaqi Store AI</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script> 
@@ -17,7 +17,13 @@
             --header-bg: #ffffff;
             --header-text: #1c1c1e;
         }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; overflow-x: hidden; }
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding-bottom: env(safe-area-inset-bottom, 100px); 
+            overflow-x: hidden; 
+        }
         .view { display: none; min-height: 100vh; animation: fadeIn 0.3s ease; }
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -27,37 +33,43 @@
         
         .bg-main { background-color: var(--main-color) !important; }
         .text-main { color: var(--main-color) !important; }
+
+        /* რესპონსიული კონტეინერი მაქსიმალური სიგანით პლანშეტებისთვის */
+        .app-container { max-width: 600px; margin: 0 auto; position: relative; }
     </style>
 </head>
 <body>
 
-    <div id="home-view" class="view active">
-        <header id="main-header" class="px-4 flex items-center sticky top-0 z-50 transition-all duration-500 ease-in-out">
-            <div id="header-content" class="flex items-center gap-3 w-full">
-                <img id="logo-img" class="hidden object-cover transition-all duration-500">
-                <h1 id="shop-name" class="font-black">იტვირთება...</h1>
+    <div class="app-container">
+        <div id="home-view" class="view active">
+            <header id="main-header" class="px-4 flex items-center sticky top-0 z-50 transition-all duration-500 ease-in-out" 
+                    style="padding-top: env(safe-area-inset-top, 0px);">
+                <div id="header-content" class="flex items-center gap-3 w-full overflow-hidden">
+                    <img id="logo-img" class="hidden object-cover transition-all duration-500 flex-shrink-0">
+                    <h1 id="shop-name" class="font-black truncate">იტვირთება...</h1>
+                </div>
+                <i id="header-bell" class="fa-solid fa-bell text-gray-300 text-lg ml-2"></i>
+            </header>
+
+            <div class="px-4 pt-3 pb-2">
+                <div id="banner-btn"></div>
             </div>
-            <i id="header-bell" class="fa-solid fa-bell text-gray-300 text-lg"></i>
-        </header>
 
-        <div class="px-4 pt-3 pb-2">
-            <div id="banner-btn"></div>
+            <div class="px-4 mb-2">
+                <div id="quick-categories-grid" class="grid grid-cols-4 gap-2 py-1"></div>
+            </div>
+
+            <div class="px-5 font-extrabold text-slate-500 text-[10px] uppercase tracking-[0.1em] mb-2">ახალი დამატებული</div>
+            <div id="products-grid" class="grid grid-cols-2 gap-3 px-4"></div>
         </div>
 
-        <div class="px-4 mb-2">
-            <div id="quick-categories-grid" class="grid grid-cols-4 gap-2 py-1"></div>
-        </div>
-
-        <div class="px-5 font-extrabold text-slate-500 text-[10px] uppercase tracking-[0.1em] mb-2">ახალი დამატებული</div>
-        <div id="products-grid" class="grid grid-cols-2 gap-3 px-4"></div>
+        <nav class="fixed bottom-6 left-5 right-5 h-16 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-[0_20px_40px_rgba(0,0,0,0.4)] max-w-[560px] mx-auto">
+            <button onclick="switchView('home', 0)" class="text-white text-lg"><i class="fa-solid fa-house"></i></button>
+            <button onclick="switchView('catalog', 1)" class="text-white/40 text-lg"><i class="fa-solid fa-layer-group"></i></button>
+            <button onclick="switchView('cart', 2)" class="text-white/40 text-lg"><i class="fa-solid fa-cart-shopping"></i></button>
+            <button onclick="switchView('user', 3)" class="text-white/40 text-lg"><i class="fa-solid fa-user"></i></button>
+        </nav>
     </div>
-
-    <nav class="fixed bottom-6 left-5 right-5 h-16 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
-        <button onclick="switchView('home', 0)" class="text-white text-lg"><i class="fa-solid fa-house"></i></button>
-        <button onclick="switchView('catalog', 1)" class="text-white/40 text-lg"><i class="fa-solid fa-layer-group"></i></button>
-        <button onclick="switchView('cart', 2)" class="text-white/40 text-lg"><i class="fa-solid fa-cart-shopping"></i></button>
-        <button onclick="switchView('user', 3)" class="text-white/40 text-lg"><i class="fa-solid fa-user"></i></button>
-    </nav>
 
     <script>
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
@@ -106,45 +118,49 @@
             const logo = document.getElementById('logo-img');
             const bell = document.getElementById('header-bell');
 
-            const layout = d[4]?.trim();   // E: H_Layout
-            const style = d[5]?.trim();    // F: H_Style
-            const shadow = d[6]?.trim();   // G: H_Shadow
-            const height = d[7]?.trim();   // H: H_Height
-            const fontSize = d[8]?.trim(); // I: H_Font_Size
-            const border = d[9]?.trim();   // J: H_Border
-            const logoSize = d[11]?.trim(); // L: Logo_Size
-            const logoRad = d[12]?.trim();  // M: Logo_Radius
+            const layout = d[4]?.trim();
+            const style = d[5]?.trim();
+            const shadow = d[6]?.trim();
+            const height = d[7]?.trim() || '70';
+            const fontSize = d[8]?.trim();
+            const border = d[9]?.trim();
+            const logoSize = d[11]?.trim() || '32';
+            const logoRad = d[12]?.trim();
 
-            // 1. ფერები
             header.style.backgroundColor = "var(--header-bg)";
             header.style.color = "var(--header-text)";
             bell.style.color = "var(--header-text)";
             bell.style.opacity = "0.3";
 
-            // 2. განლაგება და სტილი
-            header.className = "px-4 flex items-center sticky top-0 z-50 transition-all duration-500 ease-in-out";
-            content.className = "flex items-center gap-3 w-full";
+            // რესპონსიული სიმაღლე
+            header.style.minHeight = `${height}px`;
+            header.style.height = 'auto';
+            header.style.paddingTop = 'calc(env(safe-area-inset-top, 0px) + 10px)';
+            header.style.paddingBottom = '10px';
 
+            content.className = "flex items-center gap-3 w-full overflow-hidden";
             if (layout === 'center') content.classList.add('justify-center');
             else if (layout === 'between') content.classList.add('justify-between');
             else content.classList.add('justify-start');
 
+            header.className = "px-4 flex items-center sticky top-0 z-50 transition-all duration-500 ease-in-out";
             if (style === 'floating') header.classList.add('m-4', 'rounded-[24px]', 'top-4');
             else if (style === 'glass') header.classList.add('glass-effect', 'bg-opacity-70');
 
             if (shadow && shadow !== 'none') header.classList.add(`shadow-${shadow}`);
             else header.classList.add('shadow-sm');
 
-            // 3. სიმაღლე და ტექსტი
-            header.style.height = height ? `${height}px` : '70px';
-            shopTitle.className = `font-black tracking-tight ${fontSize || 'text-lg'}`;
+            // რესპონსიული ტექსტის ზომა
+            shopTitle.style.fontSize = `clamp(14px, 4vw, 22px)`;
+            shopTitle.classList.add('font-black', 'tracking-tight');
+
             header.style.borderBottom = border === 'thin' ? '1px solid rgba(0,0,0,0.1)' : 'none';
 
-            // 4. ლოგოს ზომა და ფორმა (L და M სვეტები)
+            // რესპონსიული ლოგოს ზომა (Clamp მინიმუმ 24px, მაქსიმუმ logoSize)
             if (logo) {
-                const s = logoSize || '32';
-                logo.style.height = `${s}px`;
-                logo.style.width = `${s}px`;
+                const s = logoSize;
+                logo.style.height = `clamp(24px, 12vw, ${s}px)`;
+                logo.style.width = `clamp(24px, 12vw, ${s}px)`;
                 
                 if (logoRad) {
                     logo.style.borderRadius = logoRad.includes('%') ? logoRad : `${logoRad}px`;
@@ -168,13 +184,13 @@
                         <div class="bg-white/10 backdrop-blur-md self-start px-2 py-0.5 rounded-full mb-2">
                             <h2 class="text-white font-black uppercase text-[8px] tracking-widest">TOP PRICE</h2>
                         </div>
-                        <p class="text-white font-bold text-lg leading-tight w-[55%]">${top.name}</p>
+                        <p class="text-white font-bold text-lg leading-tight w-[55%] break-words">${top.name}</p>
                         <div class="mt-3 flex items-center gap-2">
                             <span class="text-white font-black text-xl">${top.price}₾</span>
                             <div class="bg-main px-3 py-1 rounded-lg text-white text-[10px] font-bold shadow-lg">ყიდვა</div>
                         </div>
                     </div>
-                    <img src="${top.imgs ? top.imgs[0]?.trim() : ''}" class="absolute -right-4 top-1/2 -translate-y-1/2 w-44 rotate-[-10deg] drop-shadow-2xl object-contain">
+                    <img src="${top.imgs ? top.imgs[0]?.trim() : ''}" class="absolute -right-4 top-1/2 -translate-y-1/2 w-32 sm:w-44 rotate-[-10deg] drop-shadow-2xl object-contain">
                 `;
             }
 
@@ -198,6 +214,12 @@
         function switchView(v, i) { 
             document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
             document.getElementById(v + '-view').classList.add('active');
+            
+            // ნავიგაციის ფერების შეცვლა
+            const btns = document.querySelectorAll('nav button');
+            btns.forEach((b, idx) => {
+                b.style.opacity = idx === i ? "1" : "0.4";
+            });
         }
 
         function parseCSV(t) {
