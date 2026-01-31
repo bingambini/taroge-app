@@ -4,19 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Svaqi Store AI</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        :root { --bg: #f8f9fb; --black: #1c1c1e; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; }
-        .view { display: none; min-height: 100vh; }
+        :root { --bg: #f8f9fb; --black: #1c1c1e; --white: #ffffff; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; overflow-x: hidden; }
+        .view { display: none; min-height: 100vh; animation: fadeIn 0.3s ease; }
         .view.active { display: block; }
-        .card { background: white; border-radius: 25px; padding: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .card { background: var(--white); border-radius: 25px; padding: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .overlay { position: fixed; inset: 0; background: var(--white); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; }
     </style>
 </head>
 <body>
 
     <div id="home-view" class="view active">
+        
         <header class="p-5 flex items-center justify-between bg-white sticky top-0 z-50 shadow-sm">
             <div class="flex items-center gap-3">
                 <img id="logo-img" class="h-10 w-10 rounded-lg hidden">
@@ -26,18 +32,18 @@
         </header>
 
         <div class="p-5">
-            <div id="banner-btn" class="bg-[#232a32] h-48 rounded-[35px] relative p-7 flex items-center overflow-hidden cursor-pointer shadow-xl">
+            <div id="banner-btn" class="bg-[#232a32] h-48 rounded-[35px] relative p-7 flex items-center overflow-hidden cursor-pointer shadow-xl active:scale-[0.98] transition-all">
                 <div class="z-10 relative">
                     <h2 class="text-red-500 font-black uppercase text-[10px] tracking-widest mb-1">დღის შეთავაზება</h2>
                     <p id="b-name" class="text-white font-bold text-lg leading-tight w-[60%]">იტვირთება...</p>
                     <span id="b-price" class="text-white font-black text-xl mt-2 block">0₾</span>
                 </div>
-                <img id="b-img" class="absolute -right-4 -top-6 w-48 rotate-[-15deg] object-contain">
+                <img id="b-img" class="absolute -right-4 -top-6 w-48 rotate-[-15deg] drop-shadow-2xl object-contain">
             </div>
         </div>
 
         <div class="px-5 mb-8">
-            <div id="quick-categories-grid" class="grid grid-cols-4 gap-3">
+            <div id="quick-categories-grid" class="grid grid-cols-4 gap-3 py-2">
                 </div>
         </div>
 
@@ -45,7 +51,7 @@
         <div id="products-grid" class="grid grid-cols-2 gap-4 px-5"></div>
     </div>
 
-    <nav class="fixed bottom-6 left-5 right-5 h-20 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-2xl">
+    <nav class="fixed bottom-6 left-5 right-5 h-20 bg-black rounded-[35px] flex items-center justify-around z-[1000] shadow-2xl">
         <button onclick="switchView('home', 0)" class="nav-item text-white text-xl"><i class="fa-solid fa-house"></i></button>
         <button onclick="switchView('catalog', 1)" class="nav-item text-white/40 text-xl"><i class="fa-solid fa-layer-group"></i></button>
         <button onclick="switchView('cart', 2)" class="nav-item text-white/40 text-xl"><i class="fa-solid fa-cart-shopping"></i></button>
@@ -53,6 +59,7 @@
     </nav>
 
     <script>
+        /* --- კონფიგურაცია --- */
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
 
@@ -60,22 +67,28 @@
 
         async function init() {
             try {
-                // კითხულობს Design ტაბს (GID: 856847150)
+                // 1. მონაცემების წამოღება DESIGN ტაბიდან (GID: 856847150)
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 
                 if(dRows[0]) {
-                    // მაღაზიის სახელი და ლოგო
                     document.getElementById('shop-name').innerText = dRows[0][0];
                     if(dRows[0][1]) {
                         document.getElementById('logo-img').src = dRows[0][1];
                         document.getElementById('logo-img').classList.remove('hidden');
                     }
-                    // იღებს კატეგორიების სახელებს C, D, E, F სვეტებიდან
-                    dynamicCategories = [dRows[0][2], dRows[0][3], dRows[0][4], dRows[0][5]];
+
+                    // კატეგორიები და ფერები (C-F სახელი, G-J ფერი)
+                    dynamicCategories = [
+                        { name: dRows[0][2], color: dRows[0][6] || '#3b82f6' },
+                        { name: dRows[0][3], color: dRows[0][7] || '#6366f1' },
+                        { name: dRows[0][4], color: dRows[0][8] || '#ec4899' },
+                        { name: dRows[0][5], color: dRows[0][9] || '#f59e0b' }
+                    ];
+                    renderQuickCategories();
                 }
 
-                // კითხულობს პროდუქტებს
+                // 2. პროდუქტების წამოღება
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
@@ -83,29 +96,27 @@
                     status: r[4] || "", category: r[7]?.trim()
                 }));
                 
-                renderQuickCategories();
                 renderHome();
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error("Init Error:", e); }
         }
 
+        /* --- კატეგორიების გენერირება --- */
         function renderQuickCategories() {
             const grid = document.getElementById('quick-categories-grid');
             const icons = ["fa-border-all", "fa-mars", "fa-venus", "fa-child"];
-            const colors = ["blue", "indigo", "pink", "amber"];
 
-            grid.innerHTML = dynamicCategories.map((name, i) => `
-                <div onclick="filterQuick('${name}')" class="bg-white p-3 rounded-[28px] shadow-sm border border-gray-50 text-center active:scale-90 transition-all">
-                    <div class="w-11 h-11 bg-${colors[i]}-50 text-${colors[i]}-500 rounded-2xl flex items-center justify-center mx-auto mb-1 text-xl shadow-inner">
-                        <i class="fa-solid ${icons[i]}"></i>
+            grid.innerHTML = dynamicCategories.map((cat, i) => {
+                const bg = cat.color + '1a'; // 10% გამჭვირვალობა ფონისთვის
+                return `
+                    <div onclick="filterQuick('${cat.name}')" class="bg-white p-3 rounded-[28px] shadow-sm border border-gray-50 text-center active:scale-90 transition-all">
+                        <div style="background-color: ${bg}; color: ${cat.color};" 
+                             class="w-11 h-11 rounded-2xl flex items-center justify-center mx-auto mb-1 text-xl shadow-inner">
+                            <i class="fa-solid ${icons[i]}"></i>
+                        </div>
+                        <span class="text-[9px] font-black text-slate-700 uppercase tracking-tighter">${cat.name || '...'}</span>
                     </div>
-                    <span class="text-[9px] font-black text-slate-700 uppercase">${name || '...'}</span>
-                </div>
-            `).join('');
-        }
-
-        function filterQuick(cat) {
-            console.log("ფილტრი:", cat);
-            // აქ დაამატე კატალოგზე გადასვლის ლოგიკა
+                `;
+            }).join('');
         }
 
         function renderHome() {
@@ -118,15 +129,29 @@
                 document.getElementById('b-img').src = top.imgs[0]?.trim();
             }
             products.slice(0, 4).forEach(p => {
-                const d = document.createElement('div'); d.className = 'card';
-                d.innerHTML = `<img src="${p.imgs[0]}" class="w-full h-32 object-contain mb-2">
-                               <p class="text-xs font-bold truncate">${p.name}</p><b>${p.price}₾</b>`;
-                grid.appendChild(d);
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                    <img src="${p.imgs[0]}" class="w-full aspect-square object-contain mb-3 rounded-xl">
+                    <h3 class="font-bold text-xs truncate">${p.name}</h3>
+                    <b class="text-slate-900">${p.price}₾</b>
+                `;
+                grid.appendChild(div);
             });
         }
 
-        function parseCSV(t) { return t.split('\n').slice(1).map(l => l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g).map(x => x.replace(/^"|"$/g, ''))); }
-        function switchView(v, i) { /* ხედების გადართვა */ }
+        function filterQuick(cat) { alert("ფილტრი: " + cat); }
+        function switchView(v, i) { 
+            document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+            document.getElementById(v + '-view').classList.add('active');
+        }
+
+        function parseCSV(t) {
+            return t.split('\n').slice(1).map(l => {
+                const m = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                return m ? m.map(x => x.replace(/^"|"$/g, '')) : [];
+            });
+        }
 
         init();
     </script>
