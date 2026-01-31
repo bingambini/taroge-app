@@ -42,8 +42,7 @@
 
     <div class="app-container">
         <div id="home-view" class="view active">
-            <header id="main-header" class="px-4 flex items-center sticky top-0 z-[100] transition-all duration-500 ease-in-out" 
-                    style="padding-top: env(safe-area-inset-top, 0px);">
+            <header id="main-header" class="px-4 flex items-center sticky top-0 z-[100] transition-all duration-500 ease-in-out">
                 <div id="header-content" class="flex items-center gap-3 w-full overflow-hidden">
                     <img id="logo-img" class="hidden object-cover transition-all duration-500 flex-shrink-0">
                     <h1 id="shop-name" class="font-black truncate">იტვირთება...</h1>
@@ -94,9 +93,9 @@
                         logoSize: d[11], logoRad: d[12], 
                         bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
                         bImage: d[17],
-                        bTitleSize: d[18], // სვეტი S
-                        bSubSize: d[19],   // სვეტი T
-                        bMarginTop: d[20]  // სვეტი U
+                        bTitleSize: d[18],
+                        bSubSize: d[19],
+                        bMarginTop: d[20]
                     };
 
                     document.getElementById('shop-name').innerText = designData.name;
@@ -131,12 +130,18 @@
             const logo = document.getElementById('logo-img');
 
             const hH = designData.height || '70';
+            header.style.height = `${hH}px`;
             header.style.minHeight = `${hH}px`;
-            header.style.paddingTop = 'calc(env(safe-area-inset-top, 0px) + 10px)';
+            
+            // ვერტიკალური ცენტრირებისთვის
+            header.style.paddingTop = '0px'; 
+            header.style.display = 'flex';
+            header.style.alignItems = 'center';
+
             header.style.backgroundColor = "var(--header-bg)";
             header.style.color = "var(--header-text)";
 
-            content.className = "flex items-center gap-3 w-full overflow-hidden";
+            content.className = "flex items-center gap-3 w-full overflow-hidden h-full";
             if (designData.layout === 'center') content.classList.add('justify-center');
             else if (designData.layout === 'between') content.classList.add('justify-between');
 
@@ -147,8 +152,8 @@
             
             if (logo) {
                 const s = designData.logoSize || '32';
-                logo.style.height = `clamp(24px, 12vw, ${s}px)`;
-                logo.style.width = `clamp(24px, 12vw, ${s}px)`;
+                logo.style.height = `${s}px`;
+                logo.style.width = `${s}px`;
                 logo.style.borderRadius = designData.logoRad?.includes('%') ? designData.logoRad : `${designData.logoRad || 8}px`;
             }
         }
@@ -164,7 +169,6 @@
                 const bH = designData.bHeight || "180";
                 const bImg = designData.bImage || (top.imgs ? top.imgs[0]?.trim() : '');
                 
-                // ტექსტების და დაშორების რეგულატორები
                 const tSize = designData.bTitleSize || "22";
                 const sSize = designData.bSubSize || "9";
                 const mTop = designData.bMarginTop || "16";
@@ -177,7 +181,7 @@
                     <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black rounded-[35px] shadow-2xl overflow-hidden border border-white/5">
                         <div class="absolute -top-10 -left-10 w-40 h-40 bg-main opacity-20 blur-[60px] rounded-full"></div>
                         <div class="z-10 relative p-7 h-full flex flex-col justify-center">
-                            <span style="font-size: ${sSize}px" class="text-main font-black text-[9px] tracking-[0.2em] uppercase mb-2">
+                            <span style="font-size: ${sSize}px" class="text-main font-black tracking-[0.2em] uppercase mb-2">
                                 ${designData.bSub || 'Premium Quality'}
                             </span>
                             <h2 style="font-size: ${tSize}px" class="text-white font-black leading-tight w-[55%] drop-shadow-lg">
