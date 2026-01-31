@@ -9,24 +9,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --bg: #f8f9fb; --black: #1c1c1e; --white: #ffffff; }
+        :root { 
+            --bg: #f8f9fb; 
+            --black: #1c1c1e; 
+            --white: #ffffff;
+            --main-color: #3b82f6;
+            --header-bg: #ffffff;
+            --header-text: #1c1c1e;
+        }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; overflow-x: hidden; }
         .view { display: none; min-height: 100vh; animation: fadeIn 0.3s ease; }
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        /* პროდუქტის ბარათებისთვისაც დავამატე მსუბუქი ჩრდილი */
+        
         .card { background: var(--white); border-radius: 20px; padding: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        
+        /* Glassmorphism ეფექტი */
+        .glass-effect { backdrop-filter: blur(15px) saturate(180%); -webkit-backdrop-filter: blur(15px) saturate(180%); }
+        
+        /* დინამიური ფერები */
+        .bg-main { background-color: var(--main-color) !important; }
+        .text-main { color: var(--main-color) !important; }
     </style>
 </head>
 <body>
 
     <div id="home-view" class="view active">
-        <header class="p-4 flex items-center justify-between bg-white sticky top-0 z-50 shadow-sm">
-            <div class="flex items-center gap-3">
-                <img id="logo-img" class="h-8 w-8 rounded-lg hidden">
-                <h1 id="shop-name" class="font-black text-lg">იტვირთება...</h1>
+        <header id="main-header" class="px-4 flex items-center sticky top-0 z-50 transition-all duration-500 ease-in-out">
+            <div id="header-content" class="flex items-center gap-3 w-full">
+                <img id="logo-img" class="h-8 w-8 rounded-lg hidden object-cover">
+                <h1 id="shop-name" class="font-black">იტვირთება...</h1>
             </div>
-            <i class="fa-solid fa-bell text-gray-300 text-lg"></i>
+            <i id="header-bell" class="fa-solid fa-bell text-gray-300 text-lg"></i>
         </header>
 
         <div class="px-4 pt-3 pb-2">
@@ -57,26 +71,35 @@
 
         async function init() {
             try {
+                // 1. დიზაინის მონაცემების წამოღება (GID: 856847150)
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 
                 if(dRows[0]) {
-                    document.getElementById('shop-name').innerText = dRows[0][0];
-                    if(dRows[0][1]) {
+                    const d = dRows[0];
+                    const root = document.documentElement;
+
+                    // ძირითადი ტექსტი და ლოგო
+                    document.getElementById('shop-name').innerText = d[0];
+                    if(d[1]) {
                         const img = document.getElementById('logo-img');
-                        img.src = dRows[0][1];
+                        img.src = d[1];
                         img.classList.remove('hidden');
                     }
 
-                    dynamicCategories = [
-                        { name: dRows[0][2], img: dRows[0][10] },
-                        { name: dRows[0][3], img: dRows[0][11] },
-                        { name: dRows[0][4], img: dRows[0][12] },
-                        { name: dRows[0][5], img: dRows[0][13] }
-                    ];
-                    renderQuickCategories();
+                    // ფერების ცვლადების დასმა
+                    if(d[2]) root.style.setProperty('--header-bg', d[2].trim());    // C: H_BG
+                    if(d[3]) root.style.setProperty('--header-text', d[3].trim());  // D: H_Text
+                    if(d[10]) root.style.setProperty('--main-color', d[10].trim()); // K: Main_Color
+
+                    // ჰედერის სტილების გამოყენება (E, F, G, H, I, J სვეტები)
+                    applyHeaderStyles(d);
+
+                    // ძველი ლოგიკა კატეგორიებისთვის (თუ გადაწყვიტავ მათ დაბრუნებას)
+                    // dynamicCategories = [ ... ]; 
                 }
 
+                // 2. პროდუქტების მონაცემების წამოღება
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
@@ -88,27 +111,48 @@
             } catch(e) { console.error("Init Error:", e); }
         }
 
-        // განახლებული ფუნქცია ჩრდილით იკონკებისთვის
-        function renderQuickCategories() {
-            const grid = document.getElementById('quick-categories-grid');
-            grid.innerHTML = dynamicCategories.map(cat => `
-                <div onclick="filterQuick('${cat.name}')" 
-                     class="group relative bg-white rounded-[22px] flex flex-col items-center overflow-hidden 
-                            shadow-[0_8px_15px_-3px_rgba(0,0,0,0.08)] border border-gray-50 active:scale-95 transition-all h-[95px]">
-                    
-                    <div class="w-full flex-1 flex items-center justify-center p-2 overflow-hidden">
-                        <img src="${cat.img || 'https://via.placeholder.com/100'}" 
-                             class="w-full h-full object-contain transform scale-[1.2] transition-transform">
-                    </div>
+        function applyHeaderStyles(d) {
+            const header = document.getElementById('main-header');
+            const content = document.getElementById('header-content');
+            const shopTitle = document.getElementById('shop-name');
+            const bell = document.getElementById('header-bell');
 
-                    <div class="w-full bg-slate-900/80 backdrop-blur-sm min-h-[32px] flex items-center justify-center px-1.5 py-1.5">
-                        <span class="text-[10px] font-black text-white uppercase tracking-tight text-center 
-                                     break-all leading-[1.1] w-full drop-shadow-sm">
-                            ${cat.name || '...'}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
+            const layout = d[4]?.trim();   // E: H_Layout
+            const style = d[5]?.trim();    // F: H_Style
+            const shadow = d[6]?.trim();   // G: H_Shadow
+            const height = d[7]?.trim();   // H: H_Height
+            const fontSize = d[8]?.trim(); // I: H_Font_Size
+            const border = d[9]?.trim();   // J: H_Border
+
+            // ფერების მინიჭება
+            header.style.backgroundColor = "var(--header-bg)";
+            header.style.color = "var(--header-text)";
+            bell.style.color = "var(--header-text)";
+            bell.style.opacity = "0.3";
+
+            // ა) განლაგება
+            content.className = "flex items-center gap-3 w-full";
+            if (layout === 'center') content.classList.add('justify-center');
+            else if (layout === 'between') content.classList.add('justify-between');
+            else content.classList.add('justify-start');
+
+            // ბ) სტილი
+            header.className = "px-4 flex items-center sticky top-0 z-50 transition-all duration-500 ease-in-out";
+            if (style === 'floating') header.classList.add('m-4', 'rounded-[24px]', 'top-4');
+            else if (style === 'glass') header.classList.add('glass-effect', 'bg-opacity-70');
+
+            // გ) ჩრდილი
+            if (shadow && shadow !== 'none') header.classList.add(`shadow-${shadow}`);
+            else header.classList.add('shadow-sm');
+
+            // დ) სიმაღლე
+            header.style.height = height ? `${height}px` : '70px';
+
+            // ე) შრიფტის ზომა
+            shopTitle.className = `font-black tracking-tight ${fontSize || 'text-lg'}`;
+
+            // ვ) ქვედა ხაზი
+            header.style.borderBottom = border === 'thin' ? '1px solid rgba(0,0,0,0.1)' : 'none';
         }
 
         function renderHome() {
@@ -119,11 +163,9 @@
             
             if(top) {
                 const banner = document.getElementById('banner-btn');
-                // ბანერს დავამატე shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)]
                 banner.className = "relative h-44 rounded-[32px] overflow-hidden cursor-pointer transition-all active:scale-[0.98] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] border border-white/10";
                 banner.innerHTML = `
                     <div class="absolute inset-0 bg-gradient-to-br from-slate-800 to-black"></div>
-                    <div class="absolute -top-10 -left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-[40px]"></div>
                     <div class="z-10 relative p-6 h-full flex flex-col justify-center">
                         <div class="bg-white/10 backdrop-blur-md self-start px-2 py-0.5 rounded-full mb-2">
                             <h2 class="text-white font-black uppercase text-[8px] tracking-widest">TOP PRICE</h2>
@@ -131,10 +173,10 @@
                         <p class="text-white font-bold text-lg leading-tight w-[55%]">${top.name}</p>
                         <div class="mt-3 flex items-center gap-2">
                             <span class="text-white font-black text-xl">${top.price}₾</span>
-                            <div class="bg-blue-600 px-3 py-1 rounded-lg text-white text-[10px] font-bold">ყიდვა</div>
+                            <div class="bg-main px-3 py-1 rounded-lg text-white text-[10px] font-bold shadow-lg shadow-blue-500/20">ყიდვა</div>
                         </div>
                     </div>
-                    <img src="${top.imgs[0]?.trim()}" class="absolute -right-4 top-1/2 -translate-y-1/2 w-44 rotate-[-10deg] drop-shadow-2xl object-contain">
+                    <img src="${top.imgs ? top.imgs[0]?.trim() : ''}" class="absolute -right-4 top-1/2 -translate-y-1/2 w-44 rotate-[-10deg] drop-shadow-2xl object-contain">
                 `;
             }
 
@@ -143,19 +185,18 @@
                 div.className = 'card active:scale-95 transition-all duration-300';
                 div.innerHTML = `
                     <div class="relative overflow-hidden rounded-xl bg-slate-50 mb-2 aspect-square flex items-center justify-center p-2">
-                        <img src="${p.imgs[0]}" class="w-full h-full object-contain">
+                        <img src="${p.imgs ? p.imgs[0] : ''}" class="w-full h-full object-contain">
                     </div>
                     <h3 class="font-bold text-[10px] text-slate-700 truncate">${p.name}</h3>
                     <div class="flex justify-between items-center mt-1">
                         <b class="text-slate-900 text-xs">${p.price}₾</b>
-                        <i class="fa-solid fa-circle-plus text-slate-900 text-sm"></i>
+                        <i class="fa-solid fa-circle-plus text-main text-sm"></i>
                     </div>
                 `;
                 grid.appendChild(div);
             });
         }
 
-        function filterQuick(cat) { alert("ფილტრი: " + cat); }
         function switchView(v, i) { 
             document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
             document.getElementById(v + '-view').classList.add('active');
