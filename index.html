@@ -14,7 +14,8 @@
         .view { display: none; min-height: 100vh; animation: fadeIn 0.3s ease; }
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .card { background: var(--white); border-radius: 20px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        /* პროდუქტის ბარათებისთვისაც დავამატე მსუბუქი ჩრდილი */
+        .card { background: var(--white); border-radius: 20px; padding: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -41,7 +42,7 @@
         <div id="products-grid" class="grid grid-cols-2 gap-3 px-4"></div>
     </div>
 
-    <nav class="fixed bottom-6 left-5 right-5 h-16 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-2xl">
+    <nav class="fixed bottom-6 left-5 right-5 h-16 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
         <button onclick="switchView('home', 0)" class="text-white text-lg"><i class="fa-solid fa-house"></i></button>
         <button onclick="switchView('catalog', 1)" class="text-white/40 text-lg"><i class="fa-solid fa-layer-group"></i></button>
         <button onclick="switchView('cart', 2)" class="text-white/40 text-lg"><i class="fa-solid fa-cart-shopping"></i></button>
@@ -87,26 +88,28 @@
             } catch(e) { console.error("Init Error:", e); }
         }
 
-function renderQuickCategories() {
-    const grid = document.getElementById('quick-categories-grid');
-    grid.innerHTML = dynamicCategories.map(cat => `
-        <div onclick="filterQuick('${cat.name}')" 
-             class="group relative bg-white rounded-[22px] flex flex-col items-center overflow-hidden shadow-sm border border-gray-100 active:scale-95 transition-all h-[95px]">
-            
-            <div class="w-full flex-1 flex items-center justify-center p-2 overflow-hidden">
-                <img src="${cat.img || 'https://via.placeholder.com/100'}" 
-                     class="w-full h-full object-contain transform scale-[1.2] transition-transform">
-            </div>
+        // განახლებული ფუნქცია ჩრდილით იკონკებისთვის
+        function renderQuickCategories() {
+            const grid = document.getElementById('quick-categories-grid');
+            grid.innerHTML = dynamicCategories.map(cat => `
+                <div onclick="filterQuick('${cat.name}')" 
+                     class="group relative bg-white rounded-[22px] flex flex-col items-center overflow-hidden 
+                            shadow-[0_8px_15px_-3px_rgba(0,0,0,0.08)] border border-gray-50 active:scale-95 transition-all h-[95px]">
+                    
+                    <div class="w-full flex-1 flex items-center justify-center p-2 overflow-hidden">
+                        <img src="${cat.img || 'https://via.placeholder.com/100'}" 
+                             class="w-full h-full object-contain transform scale-[1.2] transition-transform">
+                    </div>
 
-            <div class="w-full bg-slate-900/80 backdrop-blur-sm min-h-[32px] flex items-center justify-center px-1.5 py-1.5">
-                <span class="text-[10px] font-black text-white uppercase tracking-tight text-center 
-                             break-all leading-[1.1] w-full drop-shadow-sm">
-                    ${cat.name || '...'}
-                </span>
-            </div>
-        </div>
-    `).join('');
-}
+                    <div class="w-full bg-slate-900/80 backdrop-blur-sm min-h-[32px] flex items-center justify-center px-1.5 py-1.5">
+                        <span class="text-[10px] font-black text-white uppercase tracking-tight text-center 
+                                     break-all leading-[1.1] w-full drop-shadow-sm">
+                            ${cat.name || '...'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
 
         function renderHome() {
             const grid = document.getElementById('products-grid');
@@ -116,7 +119,8 @@ function renderQuickCategories() {
             
             if(top) {
                 const banner = document.getElementById('banner-btn');
-                banner.className = "relative h-44 rounded-[32px] overflow-hidden cursor-pointer transition-all active:scale-[0.98] shadow-lg border border-white/10";
+                // ბანერს დავამატე shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)]
+                banner.className = "relative h-44 rounded-[32px] overflow-hidden cursor-pointer transition-all active:scale-[0.98] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] border border-white/10";
                 banner.innerHTML = `
                     <div class="absolute inset-0 bg-gradient-to-br from-slate-800 to-black"></div>
                     <div class="absolute -top-10 -left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-[40px]"></div>
