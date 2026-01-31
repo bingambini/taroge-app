@@ -99,29 +99,31 @@
             } catch(e) { console.error("Init Error:", e); }
         }
 
-        /* --- კატეგორიების რენდერი სურათებით და მუქი ფუტერით --- */
-        function renderQuickCategories() {
-            const grid = document.getElementById('quick-categories-grid');
-            
-            grid.innerHTML = dynamicCategories.map((cat, i) => {
-                return `
-                    <div onclick="filterQuick('${cat.name}')" 
-                         class="relative bg-white border-[2px] border-[#8a2be2] rounded-[22px] overflow-hidden flex flex-col items-center active:scale-95 transition-all shadow-md">
-                        
-                        <div class="w-full h-16 p-2 flex items-center justify-center">
-                            <img src="${cat.img || 'https://via.placeholder.com/100'}" 
-                                 class="w-full h-full object-contain">
-                        </div>
+/* --- თანამედროვე დინამიური კატეგორიების რენდერი (Soft UI) --- */
+function renderQuickCategories() {
+    const grid = document.getElementById('quick-categories-grid');
+    
+    grid.innerHTML = dynamicCategories.map((cat, i) => {
+        return `
+            <div onclick="filterQuick('${cat.name}')" 
+                 class="group relative bg-white rounded-[28px] overflow-hidden flex flex-col items-center active:scale-95 transition-all duration-300 shadow-[0_8px_20px_-5px_rgba(0,0,0,0.08)] border border-gray-50">
+                
+                <div class="w-full h-20 p-3 flex items-center justify-center relative">
+                    <div class="absolute inset-0 bg-slate-50 opacity-40 rounded-full scale-75 blur-2xl"></div>
+                    <img src="${cat.img || 'https://via.placeholder.com/100'}" 
+                         class="w-full h-full object-contain relative z-10 drop-shadow-sm">
+                </div>
 
-                        <div class="w-full bg-[#0a0f1e] py-1.5 flex items-center justify-center">
-                            <span class="text-[8px] font-black text-white uppercase tracking-tighter">
-                                ${cat.name || '...'}
-                            </span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+                <div class="w-full pb-3 flex flex-col items-center">
+                    <span class="text-[10px] font-black text-slate-800 uppercase tracking-tighter">
+                        ${cat.name || '...'}
+                    </span>
+                    <div class="w-4 h-[2px] bg-slate-100 rounded-full mt-1 group-active:bg-blue-500 transition-colors"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
         function renderHome() {
             const grid = document.getElementById('products-grid');
