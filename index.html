@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store - Final Fix</title>
+    <title>Shoes Store - Pro Design</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,13 +13,14 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; }
 
-        /* ჰედერის გარანტირებული სტილი */
+        /* ჰედერის სტილი */
         #main-header {
             width: 100%;
             display: flex;
             align-items: center;
             z-index: 9999;
             position: relative;
+            transition: all 0.3s ease;
         }
 
         .header-floating {
@@ -51,6 +52,7 @@
 
     <div class="px-7 mb-4 flex justify-between items-center">
         <h2 id="section-title" class="font-black text-xl text-slate-800">იტვირთება...</h2>
+        <span class="text-blue-600 text-xs font-bold">ყველა</span>
     </div>
     <div id="product-grid" class="grid grid-cols-2 gap-4 px-6"></div>
 
@@ -63,62 +65,62 @@
             try {
                 const res = await fetch(API_URL);
                 const data = await res.json();
-                console.log("Data received:", data); // შეამოწმე კონსოლში
-
+                
                 renderHeader(data.header);
                 renderBanner(data.banner);
                 renderProducts(data.latest);
                 renderNavigation(data.navigation);
             } catch (e) {
-                console.error("Main init error:", e);
-                document.getElementById('main-header').innerHTML = `<div class="p-4 bg-red-500 text-white">Error loading data</div>`;
+                console.error("Load error:", e);
+                document.getElementById('main-header').innerHTML = `<div class="p-4 bg-red-500 text-white text-center w-full">ჩატვირთვის შეცდომა</div>`;
             }
         }
 
         function renderHeader(h) {
             const el = document.getElementById('main-header');
-            if (!h) return;
+            if (!h || h.status !== 'active') { el.style.display = 'none'; return; }
 
-            // 1. ფიზიკური სტილები (inline style უფრო საიმედოა)
-            el.style.backgroundColor = h.bg || "#000000";
-            el.style.height = (h.height || 80) + "px";
-            el.style.color = h.textColor || "#ffffff";
-            el.style.padding = "0 20px";
-            
-            // 2. კლასების მართვა
-            el.className = "flex items-center transition-all";
-            if (h.style === 'floating') {
-                el.classList.add('header-floating');
-            }
-
-            // 3. განლაგება
-            el.style.justifyContent = h.layout === 'center' ? 'center' : 'space-between';
-
-            // 4. შიგთავსი (ლოგოს ზომის დაზღვევით)
-            const lSize = h.logoSize || 40;
-            const lRadius = h.logoRadius || 0;
+            // 1. მონაცემების დამუშავება (რიცხვებად გადაქცევა)
+            const lSize = parseInt(h.logoSize) || 40; 
+            const lRadius = parseInt(h.logoRadius) || 0;
+            const hHeight = parseInt(h.height) || 80;
             const fSize = isNaN(h.fontSize) ? "18px" : h.fontSize + "px";
 
+            // 2. ვიზუალური სტილები
+            el.style.backgroundColor = h.bg || "#000000";
+            el.style.height = hHeight + "px";
+            el.style.color = h.textColor || "#ffffff";
+            el.style.padding = `0 ${h.padding || 20}px`;
+            
+            el.className = "flex items-center transition-all";
+            if (h.style === 'floating') el.classList.add('header-floating');
+
+            el.style.justifyContent = h.layout === 'center' ? 'center' : 'space-between';
+            if (h.shadow === 'sm') el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+
+            // 3. HTML შიგთავსი
             el.innerHTML = `
                 <div class="flex items-center gap-3">
-                    <img src="${h.logo}" style="width: ${lSize}px; height: auto; border-radius: ${lRadius}%" onerror="this.src='https://via.placeholder.com/40'">
+                    <img src="${h.logo}" 
+                         style="width: ${lSize}px; height: auto; border-radius: ${lRadius}%" 
+                         onerror="this.src='https://via.placeholder.com/40'">
                     <span style="font-size: ${fSize}; font-weight: 800">${h.name || 'მაღაზია'}</span>
                 </div>
-                ${h.layout !== 'center' ? `<i class="fa-solid fa-bell" style="font-size: 1.2rem; color: ${h.iconColor || '#fff'}"></i>` : ''}
+                ${h.layout !== 'center' ? `<i class="fa-solid fa-bell" style="font-size: 1.2rem; color: ${h.iconColor || h.textColor}"></i>` : ''}
             `;
         }
 
         function renderBanner(b) {
             const el = document.getElementById('hero-banner');
             if (!b) return;
-            el.style.height = (b.height || 180) + "px";
-            el.style.marginTop = (b.marginTop || 20) + "px";
+            el.style.height = (parseInt(b.height) || 180) + "px";
+            el.style.marginTop = (parseInt(b.marginTop) || 20) + "px";
             el.style.background = b.gradient === "1" ? `linear-gradient(135deg, #1e293b, #334155)` : "#1e293b";
 
             el.innerHTML = `
                 <div class="p-8 w-1/2 z-10">
-                    <p class="font-bold opacity-70 text-white" style="font-size: 12px">${b.subtitle}</p>
-                    <h2 class="font-black text-white leading-tight mb-4" style="font-size: 20px">${b.title}</h2>
+                    <p class="font-bold opacity-70 text-white" style="font-size: ${b.subSize}px">${b.subtitle}</p>
+                    <h2 class="font-black text-white leading-tight mb-4" style="font-size: ${b.titleSize}px">${b.title}</h2>
                     <button class="bg-white text-black px-6 py-2 rounded-2xl font-black text-[10px] uppercase">${b.btnText}</button>
                 </div>
                 <img src="${b.image}" class="absolute -right-6 w-52 rotate-[-15deg] drop-shadow-2xl">
