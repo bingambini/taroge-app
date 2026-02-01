@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store - Optimized 2.0</title>
+    <title>Shoes Store - Optimized 2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -11,127 +11,41 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; }
         
-        /* --- ჰედერის სტილების დასაწყისი --- */
-        #main-header { 
-            width: 100%; 
-            z-index: 9999; 
-            position: relative; 
-            transition: all 0.3s ease; 
-            display: none; 
-        }
+        /* --- ჰედერის სტილი --- */
+        #main-header { width: 100%; z-index: 9999; position: relative; transition: all 0.3s ease; display: none; }
+        .header-container { width: 100%; max-width: 600px; margin: 0 auto; display: flex; align-items: center; height: 100%; padding: 0 20px; }
+        .header-floating { margin: 10px auto !important; border-radius: 20px !important; width: calc(100% - 30px) !important; max-width: 570px !important; overflow: hidden; }
 
-        .header-container {
-            width: 100%;
-            max-width: 600px; 
-            margin: 0 auto;   
-            display: flex;
-            align-items: center;
-            height: 100%;
-            padding: 0 20px;
-        }
+        /* --- ბანერის სტილი --- */
+        #hero-banner { margin: 20px auto; border-radius: 35px; overflow: hidden; position: relative; max-width: 600px; width: calc(100% - 40px); display: flex; align-items: center; }
+        .banner-content { padding: 25px; width: 60%; z-index: 10; position: relative; }
+        .banner-img { position: absolute; right: -15px; width: 50%; transform: rotate(-15deg); filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4)); z-index: 5; pointer-events: none; }
 
-        .header-floating { 
-            margin: 10px auto !important; 
-            border-radius: 20px !important; 
-            width: calc(100% - 30px) !important; 
-            max-width: 570px !important; 
-            overflow: hidden; 
-        }
-        /* --- ჰედერის სტილების დასასრული --- */
-
-        /* --- მთავარი ბანერის სტილების დასაწყისი --- */
-        #hero-banner { 
-            margin: 20px auto; 
-            border-radius: 35px; 
-            overflow: hidden; 
-            position: relative; 
-            max-width: 600px; 
-            width: calc(100% - 40px);
-            display: flex;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
-        .banner-content {
-            padding: 25px;
-            width: 60%;
-            z-index: 10;
-            position: relative;
-        }
-
-        .banner-img {
-            position: absolute;
-            right: -15px;
-            width: 50%;
-            transform: rotate(-15deg);
-            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4));
-            z-index: 5;
-            pointer-events: none;
-        }
-        /* --- მთავარი ბანერის სტილების დასასრული --- */
-
-        /* --- ქვედა მენიუს (Foot_Nav) სტილების დასაწყისი --- */
+        /* --- დინამიური ქვედა მენიუს სტილი --- */
         #bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 40px);
-            max-width: 500px;
-            height: 70px;
-            background: #000000;
-            border-radius: 25px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 10000;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 40px); max-width: 500px; height: 70px;
+            background: #000000; border-radius: 25px;
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 10000; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #888888;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888888; text-decoration: none; transition: all 0.3s ease; }
         .nav-item.active { color: #ffffff; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item span { font-size: 10px; font-weight: 700; }
-        /* --- ქვედა მენიუს სტილების დასასრული --- */
     </style>
 </head>
 <body>
 
     <header id="main-header" class="flex items-center"></header>
-
     <div id="hero-banner"></div>
-
     <div id="product-grid" class="grid grid-cols-2 gap-4 px-6"></div>
-
-    <nav id="bottom-nav">
-        <a href="#" class="nav-item active">
-            <i class="fa-solid fa-house"></i>
-            <span>მთავარი</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-layer-group"></i>
-            <span>კატეგორია</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-cart-shopping"></i>
-            <span>კალათა</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-user"></i>
-            <span>პროფილი</span>
-        </a>
-    </nav>
+    
+    <nav id="bottom-nav"></nav>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbympRzSjk5nJHba_CrRdGOYNvmrWwrHzGYnOVFfCZ9hKgbJH5IlDJNuYXO0YYUK_aBYIw/exec";
+        // შენი ახალი API ლინკი
+        const API_URL = "https://script.google.com/macros/s/AKfycbxEk4CBQaC7I9SSDDmj5oiTl4cOSy8w3owUk-isAEkgMidLwudVdo8mX04RCKI5yA2tPA/exec";
 
         async function init() {
             try {
@@ -141,97 +55,65 @@
                 if (data.header) renderHeader(data.header);
                 if (data.banner) renderBanner(data.banner);
                 if (data.latest) renderProducts(data.latest);
+                if (data.navigation) renderNavigation(data.navigation); // ახალი ფუნქციის გამოძახება
             } catch (e) {
                 console.error("Error loading data:", e);
             }
         }
 
-        // ==========================================
-        // ჰედერის რენდერი
-        // ==========================================
         function renderHeader(h) {
             const el = document.getElementById('main-header');
             if (h.status !== 'active') return;
-
-            const lSize = parseInt(h.logoSize) || 50; 
-            const lRadius = parseInt(h.logoRadius) || 0;
-            const hHeight = parseInt(h.height) || 80;
-
-            const isSmallScreen = window.innerWidth < 370;
-            const responsiveLogoSize = isSmallScreen ? lSize * 0.85 : lSize; 
-            const responsiveFontSize = isSmallScreen ? "16px" : "18px";
-
+            const isSmall = window.innerWidth < 370;
             el.style.display = 'flex';
             el.style.backgroundColor = h.bg || "#24afeb";
-            el.style.height = hHeight + "px";
+            el.style.height = (parseInt(h.height) || 80) + "px";
             el.style.color = h.textColor || "#ffffff";
-            
             if (h.style === 'floating') el.classList.add('header-floating');
-
             el.innerHTML = `
                 <div class="header-container" style="justify-content: ${h.layout === 'center' ? 'center' : 'space-between'}">
                     <div class="flex items-center gap-3">
-                        <img src="${h.logo}" 
-                             style="width: ${responsiveLogoSize}px !important; height: auto; border-radius: ${lRadius}%" 
-                             class="object-contain"
-                             onerror="this.style.opacity='0'">
-                        <span style="font-weight: 800; font-size: ${responsiveFontSize}; white-space: nowrap;">
-                            ${h.name || ''}
-                        </span>
+                        <img src="${h.logo}" style="width: ${isSmall ? 40 : 50}px; border-radius: ${h.logoRadius}%" onerror="this.style.opacity='0'">
+                        <span style="font-weight: 800; font-size: ${isSmall ? '16px' : '18px'}">${h.name || ''}</span>
                     </div>
-                    ${h.layout !== 'center' ? '<div class="flex items-center"><i class="fa-solid fa-bell text-xl"></i></div>' : ''}
-                </div>
-            `;
+                    ${h.layout !== 'center' ? '<div><i class="fa-solid fa-bell text-xl"></i></div>' : ''}
+                </div>`;
         }
 
-        // ==========================================
-        // ბანერის რენდერი
-        // ==========================================
         function renderBanner(b) {
             const el = document.getElementById('hero-banner');
-            if (!b) return;
-
-            const bHeight = parseInt(b.height) || 180;
-            const bMarginTop = parseInt(b.marginTop) || 20;
-            const titleFontSize = parseInt(b.titleSize) || 20;
-            
             const isSmall = window.innerWidth < 370;
             const scale = isSmall ? 0.85 : 1;
-
-            el.style.height = (bHeight * scale) + "px";
-            el.style.marginTop = bMarginTop + "px";
-            
-            el.style.background = b.gradient === "1" 
-                ? "linear-gradient(135deg, #1e293b 0%, #334155 100%)" 
-                : "#1e293b";
-
+            el.style.height = (parseInt(b.height) * scale || 180) + "px";
+            el.style.marginTop = (parseInt(b.marginTop) || 20) + "px";
+            el.style.background = b.gradient === "1" ? "linear-gradient(135deg, #1e293b 0%, #334155 100%)" : "#1e293b";
             el.innerHTML = `
                 <div class="banner-content">
-                    <h2 style="font-size: ${titleFontSize * scale}px; color: white; font-weight: 900; line-height: 1.1;">
-                        ${b.title}
-                    </h2>
-                    <p style="color: rgba(255,255,255,0.7); font-size: ${10 * scale}px; margin-top: 8px; text-transform: uppercase; font-weight: 700;">
-                        ${b.subtitle || ''}
-                    </p>
-                    <button class="mt-5 bg-white text-black px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase shadow-2xl active:scale-95 transition-all">
-                        ${b.btnText}
-                    </button>
+                    <h2 style="font-size: ${parseInt(b.titleSize) * scale}px; color: white; font-weight: 900; line-height: 1.1;">${b.title}</h2>
+                    <p style="color: rgba(255,255,255,0.7); font-size: ${10 * scale}px; margin-top: 8px; font-weight: 700;">${b.subtitle || ''}</p>
+                    <button class="mt-5 bg-white text-black px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase shadow-2xl active:scale-95 transition-all">${b.btnText}</button>
                 </div>
-                <img src="${b.image}" class="banner-img" onerror="this.style.opacity='0'">
-            `;
+                <img src="${b.image}" class="banner-img" onerror="this.style.opacity='0'">`;
         }
 
-        // ==========================================
-        // პროდუქტების რენდერი
-        // ==========================================
         function renderProducts(l) {
             const grid = document.getElementById('product-grid');
             grid.innerHTML = l.items.map(p => `
-                <div class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm relative">
+                <div class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm">
                     <img src="${p.images.split(',')[0]}" class="h-28 mx-auto object-contain">
                     <h4 class="font-bold text-[11px] text-slate-700 truncate mt-2">${p.name}</h4>
                     <p class="text-blue-600 font-black text-sm">${p.price}₾</p>
-                </div>
+                </div>`).join('');
+        }
+
+        // --- ახალი ფუნქცია: ნავიგაციის რენდერი შიტიდან ---
+        function renderNavigation(items) {
+            const nav = document.getElementById('bottom-nav');
+            nav.innerHTML = items.map((item, index) => `
+                <a href="#" class="nav-item ${index === 0 ? 'active' : ''}">
+                    <i class="${item.icon}"></i>
+                    <span>${item.name}</span>
+                </a>
             `).join('');
         }
 
