@@ -3,25 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Svaqi Store Premium - v1.4</title>
+    <title>Svaqi Store Premium - v1.5</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --bg: #f8f9fb; --main: #3b82f6; --white: #ffffff; }
+        :root { --bg: #f8f9fb; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; overflow-x: hidden; }
-        
-        /* სურათების ჩრდილები */
         .png-shadow { filter: drop-shadow(0 25px 35px rgba(0,0,0,0.3)); }
         .card-shadow { box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); }
-        
-        /* პროდუქტის დეტალების ამოწევადი ფანჯარა */
-        #bottom-sheet { 
-            transform: translateY(100%); 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            z-index: 2000; height: auto; max-height: 94vh; overflow-y: auto;
-        }
+        #bottom-sheet { transform: translateY(100%); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; height: auto; max-height: 94vh; overflow-y: auto; }
         #bottom-sheet.active { transform: translateY(0); }
         .overlay { display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1500; }
         .overlay.active { display: block; }
@@ -49,7 +41,6 @@
     </div>
 
     <div id="overlay" class="overlay fixed inset-0" onclick="closeDetails()"></div>
-    
     <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-10 max-w-[600px] mx-auto shadow-2xl">
         <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-4 cursor-pointer" onclick="closeDetails()"></div>
         <div id="details-content"></div>
@@ -74,7 +65,7 @@
 
         async function init() {
             try {
-                // დიზაინის პარამეტრების წამოღება
+                // დიზაინის წამოღება
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 if(dRows[0]) {
@@ -84,8 +75,7 @@
                         logoSize: d[11], logoRad: d[12], bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
                         bImage: d[17], bTitleSize: d[18], bSubSize: d[19], bMarginTop: d[20],
                         bActionType: d[21], bActionValue: d[22], bTimerEnd: d[23],
-                        sectionMarginTop: d[28], // <--- AC სვეტი (ინდექსი 28)
-                        qvTitleSize: d[26], qvPriceSize: d[27]
+                        qvTitleSize: d[26], qvPriceSize: d[27], sectionMarginTop: d[28]
                     };
                     applyDesign();
                 }
@@ -96,62 +86,54 @@
                 products = pRows.map(r => ({
                     name: r[0], price: r[1], imgs: r[2]?.split(',').map(s=>s.trim()), 
                     oldPrice: r[3], status: r[4] || "", desc: r[5], 
-                    sizes: r[8]?.split(','), colors: r[9]?.split(',')
+                    inStock: r[6], sizes: r[8]?.split(','), colors: r[9]?.split(',')
                 }));
                 renderUI();
-            } catch(e) { console.error("მონაცემების ჩატვირთვის შეცდომა:", e); }
+            } catch(e) { console.error(e); }
         }
 
-        // დიზაინის ვიზუალური მორგება
         function applyDesign() {
             document.getElementById('shop-name').innerText = design.name;
             if(design.logo) {
                 const img = document.getElementById('logo-img');
                 img.src = design.logo; img.classList.remove('hidden');
                 img.style.width = img.style.height = `${design.logoSize || 32}px`;
-                img.style.borderRadius = design.logoRad;
+                img.style.borderRadius = design.logoRad + 'px';
             }
             const h = document.getElementById('main-header');
             h.style.height = `${design.height || 70}px`;
             h.style.background = design.h_bg;
             h.style.color = design.h_text;
-            
-            // მანძილის დარეგულირება AC სვეტიდან ჩაწერილი მნიშვნელობით
-            const sTitle = document.getElementById('section-title');
-            sTitle.style.marginTop = `${design.sectionMarginTop || 32}px`;
+            document.getElementById('section-title').style.marginTop = `${design.sectionMarginTop || 32}px`;
         }
 
-        // ბანერისა და პროდუქტების ბადის აწყობა
         function renderUI() {
             const banner = document.getElementById('banner-btn');
-            const topP = products.find(p => p.status.includes('top')) || products[0];
-            
             banner.style.height = `${design.bHeight || 180}px`;
             banner.style.marginTop = `${design.bMarginTop || 16}px`;
             
             banner.innerHTML = `
                 <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black rounded-[40px] shadow-2xl overflow-hidden">
                     <div class="z-10 relative p-8 h-full flex flex-col justify-center">
-                        <span id="b-timer-sub" style="font-size: ${design.bSubSize}px" class="text-blue-400 font-black tracking-[0.2em] uppercase mb-1">${design.bSub}</span>
-                        <h2 style="font-size: ${design.bTitleSize}px" class="text-white font-black leading-tight w-[60%]">${design.bTitle || topP.name}</h2>
+                        <span style="font-size: ${design.bSubSize}px" class="text-blue-400 font-black tracking-[0.2em] uppercase mb-1">${design.bSub}</span>
+                        <h2 style="font-size: ${design.bTitleSize}px" class="text-white font-black leading-tight w-[60%]">${design.bTitle}</h2>
                         <div id="banner-footer" class="mt-4 flex items-center gap-3">
-                            <span class="text-white font-bold text-xl">${topP.price}₾</span>
                             <div class="bg-blue-500 px-5 py-2 rounded-2xl text-white text-[10px] font-extrabold uppercase">${design.bBtn}</div>
                         </div>
                     </div>
                 </div>
-                <img src="${design.bImage || topP.imgs[0]}" class="absolute -right-6 -top-12 w-[65%] h-[140%] object-contain z-20 png-shadow rotate-[-12deg] pointer-events-none">
+                <img src="${design.bImage}" class="absolute -right-6 -top-12 w-[65%] h-[140%] object-contain z-20 png-shadow rotate-[-12deg] pointer-events-none">
             `;
             
             if(design.bActionType === 'timer') startTimer();
 
             const grid = document.getElementById('products-grid');
-            grid.innerHTML = products.slice(0, 10).map(p => {
+            grid.innerHTML = products.filter(p => p.inStock === 'Yes').map(p => {
                 const disc = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
                 return `
                     <div class="bg-white rounded-[32px] p-3 card-shadow active:scale-95 transition-all" onclick="openQuickView('${p.name.replace(/'/g, "\\'")}')">
                         <div class="relative aspect-square bg-slate-50 rounded-[24px] mb-3 flex items-center justify-center p-4">
-                            ${disc ? `<div class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-lg">-${disc}%</div>` : ''}
+                            ${disc > 0 ? `<div class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-lg">-${disc}%</div>` : ''}
                             <img src="${p.imgs[0]}" class="w-full h-full object-contain png-shadow">
                         </div>
                         <h3 class="font-bold text-[12px] px-1 truncate">${p.name}</h3>
@@ -161,25 +143,6 @@
             }).join('');
         }
 
-        // ტაიმერის ფუნქცია
-        function startTimer() {
-            const target = new Date(design.bTimerEnd).getTime();
-            const footer = document.getElementById('banner-footer');
-            clearInterval(timerId);
-            timerId = setInterval(() => {
-                const now = new Date().getTime();
-                const diff = target - now;
-                if(diff < 0) { clearInterval(timerId); return; }
-                const h = Math.floor(diff/(1000*60*60)), m = Math.floor((diff%(1000*60*60))/(1000*60)), s = Math.floor((diff%(1000*60))/1000);
-                footer.innerHTML = `<div class="flex gap-2 text-white font-black text-lg">
-                    <div class="bg-white/10 px-3 py-1 rounded-xl">${h}სთ</div>
-                    <div class="bg-white/10 px-3 py-1 rounded-xl">${m}წთ</div>
-                    <div class="bg-blue-500 px-3 py-1 rounded-xl shadow-lg">${s}წმ</div>
-                </div>`;
-            }, 1000);
-        }
-
-        // პროდუქტის სწრაფი ნახვა (Popup)
         function openQuickView(name) {
             const p = products.find(x => x.name === name);
             const content = document.getElementById('details-content');
@@ -199,7 +162,6 @@
             document.getElementById('overlay').classList.add('active');
         }
 
-        // სრული აღწერის და ზომების გვერდი
         function openFullDetails(name) {
             selectedSize = null; selectedColor = null;
             const p = products.find(x => x.name === name);
@@ -235,25 +197,20 @@
             updateMainButton(p.name);
         }
 
-        // ზომის არჩევის ვიზუალი
         function selectSize(btn, pName) {
             document.querySelectorAll('.size-btn').forEach(b => { b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9'; });
             btn.style.background = 'black'; btn.style.color = 'white'; btn.style.borderColor = 'black';
-            selectedSize = btn.innerText;
-            updateMainButton(pName);
+            selectedSize = btn.innerText; updateMainButton(pName);
         }
 
-        // ფერის არჩევის ვიზუალი
         function selectColor(btn, pName) {
             document.querySelectorAll('.color-btn').forEach(b => { b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9'; });
             btn.style.background = 'black'; btn.style.color = 'white'; btn.style.borderColor = 'black';
-            selectedColor = btn.innerText;
-            updateMainButton(pName);
+            selectedColor = btn.innerText; updateMainButton(pName);
         }
 
-        // კალათის ღილაკის მართვა
-        function updateMainButton(productName) {
-            const p = products.find(x => x.name === productName);
+        function updateMainButton(pName) {
+            const p = products.find(x => x.name === pName);
             const btn = document.getElementById('main-action-btn');
             if(!btn) return;
             const hasS = p.sizes && p.sizes[0] !== "";
@@ -270,29 +227,20 @@
             } else {
                 btn.innerText = "კალათაში დამატება";
                 btn.className = "w-full bg-black text-white rounded-[30px] py-6 font-black shadow-2xl active:scale-95";
-                btn.onclick = () => { Telegram.WebApp.showAlert("დაემატა კალათაში!"); closeDetails(); };
+                btn.onclick = () => { Telegram.WebApp.showAlert("დაემატა!"); closeDetails(); };
             }
         }
 
-        // ბანერზე დაჭერის ეფექტი
         function handleBannerAction() {
-            const type = design.bActionType;
-            const val = design.bActionValue;
-            if(type === 'copy') {
-                navigator.clipboard.writeText(val);
-                Telegram.WebApp.showAlert("დაკოპირდა: " + val);
-            } else if(type === 'info') {
-                Telegram.WebApp.showPopup({ message: val });
-            }
+            if(design.bActionType === 'product') openQuickView(design.bActionValue);
+            else if(design.bActionType === 'info') Telegram.WebApp.showPopup({ message: design.bActionValue });
         }
 
-        // ფანჯრის დახურვა
         function closeDetails() { 
             document.getElementById('bottom-sheet').classList.remove('active'); 
             document.getElementById('overlay').classList.remove('active'); 
         }
 
-        // CSV პარსერი
         function parseCSV(t) {
             return t.split('\n').slice(1).map(l => {
                 const m = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
@@ -300,7 +248,6 @@
             });
         }
 
-        // აპლიკაციის ჩართვა
         init();
     </script>
 </body>
