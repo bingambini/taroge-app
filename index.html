@@ -12,23 +12,19 @@
         :root { --bg: #f8f9fb; --main: #3b82f6; --white: #ffffff; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; overflow-x: hidden; }
         
-        /* ჩრდილები სურათებისთვის და ბარათებისთვის */
+        /* სურათების ჩრდილები */
         .png-shadow { filter: drop-shadow(0 25px 35px rgba(0,0,0,0.3)); }
         .card-shadow { box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); }
         
-        /* პროდუქტის დეტალების ფანჯარა (Bottom Sheet) */
+        /* პროდუქტის დეტალების ამოწევადი ფანჯარა */
         #bottom-sheet { 
             transform: translateY(100%); 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
             z-index: 2000; height: auto; max-height: 94vh; overflow-y: auto;
         }
         #bottom-sheet.active { transform: translateY(0); }
-        
-        /* უკანა ფონის დაბინდვა დეტალების გახსნისას */
         .overlay { display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1500; }
         .overlay.active { display: block; }
-        
-        /* სქროლის დამალვა */
         #bottom-sheet::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -37,7 +33,7 @@
     <div class="max-w-[600px] mx-auto relative">
         <header id="main-header" class="px-4 flex items-center sticky top-0 z-[100] transition-all duration-500">
             <div id="header-content" class="flex items-center gap-3 w-full overflow-hidden">
-                <img id="logo-img" class="hidden object-cover transition-all flex-shrink-0">
+                <img id="logo-img" class="hidden object-cover flex-shrink-0">
                 <h1 id="shop-name" class="font-black truncate">იტვირთება...</h1>
             </div>
             <i class="fa-solid fa-bell text-gray-300 text-lg ml-2"></i>
@@ -56,7 +52,7 @@
     
     <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-10 max-w-[600px] mx-auto shadow-2xl">
         <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-4 cursor-pointer" onclick="closeDetails()"></div>
-        <div id="details-content" class="transition-all duration-300"></div>
+        <div id="details-content"></div>
     </div>
 
     <nav class="fixed bottom-6 left-5 right-5 h-16 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-2xl max-w-[560px] mx-auto">
@@ -67,7 +63,6 @@
     </nav>
 
     <script>
-        // Google Sheets მონაცემები
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
 
@@ -77,37 +72,37 @@
         let selectedSize = null;
         let selectedColor = null;
 
-        // საწყისი ფუნქცია: მონაცემების წამოღება Google Sheets-იდან
         async function init() {
             try {
-                // დიზაინის მონაცემების წამოღება (GID: 856847150)
+                // დიზაინის პარამეტრების წამოღება
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 if(dRows[0]) {
                     const d = dRows[0];
                     design = {
-                        name: d[0], logo: d[1], h_bg: d[2], h_text: d[3], height: d[7], mainColor: d[10],
+                        name: d[0], logo: d[1], h_bg: d[2], h_text: d[3], height: d[7],
                         logoSize: d[11], logoRad: d[12], bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
                         bImage: d[17], bTitleSize: d[18], bSubSize: d[19], bMarginTop: d[20],
                         bActionType: d[21], bActionValue: d[22], bTimerEnd: d[23],
-                        sectionMarginTop: d[24], // <--- აქ დაემატა მანძილი (Sheets-ში სვეტი Y ან შესაბამისი ინდექსი)
+                        sectionMarginTop: d[28], // <--- AC სვეტი (ინდექსი 28)
                         qvTitleSize: d[26], qvPriceSize: d[27]
                     };
                     applyDesign();
                 }
                 
-                // პროდუქტების მონაცემების წამოღება (GID: 0)
+                // პროდუქტების წამოღება
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
-                    name: r[0], price: r[1], imgs: r[2]?.split(',').map(s=>s.trim()), oldPrice: r[3],
-                    status: r[4] || "", desc: r[5], sizes: r[8]?.split(','), colors: r[9]?.split(',')
+                    name: r[0], price: r[1], imgs: r[2]?.split(',').map(s=>s.trim()), 
+                    oldPrice: r[3], status: r[4] || "", desc: r[5], 
+                    sizes: r[8]?.split(','), colors: r[9]?.split(',')
                 }));
                 renderUI();
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error("მონაცემების ჩატვირთვის შეცდომა:", e); }
         }
 
-        // დიზაინის პარამეტრების მორგება
+        // დიზაინის ვიზუალური მორგება
         function applyDesign() {
             document.getElementById('shop-name').innerText = design.name;
             if(design.logo) {
@@ -121,12 +116,12 @@
             h.style.background = design.h_bg;
             h.style.color = design.h_text;
             
-            // სექციის სათაურის ზედა მანძილის დარეგულირება
+            // მანძილის დარეგულირება AC სვეტიდან ჩაწერილი მნიშვნელობით
             const sTitle = document.getElementById('section-title');
             sTitle.style.marginTop = `${design.sectionMarginTop || 32}px`;
         }
 
-        // ინტერფეისის აწყობა (ბანერი და პროდუქტები)
+        // ბანერისა და პროდუქტების ბადის აწყობა
         function renderUI() {
             const banner = document.getElementById('banner-btn');
             const topP = products.find(p => p.status.includes('top')) || products[0];
@@ -141,7 +136,7 @@
                         <h2 style="font-size: ${design.bTitleSize}px" class="text-white font-black leading-tight w-[60%]">${design.bTitle || topP.name}</h2>
                         <div id="banner-footer" class="mt-4 flex items-center gap-3">
                             <span class="text-white font-bold text-xl">${topP.price}₾</span>
-                            <div class="bg-blue-500 px-5 py-2 rounded-2xl text-white text-[10px] font-extrabold uppercase tracking-wider">${design.bBtn}</div>
+                            <div class="bg-blue-500 px-5 py-2 rounded-2xl text-white text-[10px] font-extrabold uppercase">${design.bBtn}</div>
                         </div>
                     </div>
                 </div>
@@ -150,7 +145,6 @@
             
             if(design.bActionType === 'timer') startTimer();
 
-            // პროდუქტების სიის გამოტანა
             const grid = document.getElementById('products-grid');
             grid.innerHTML = products.slice(0, 10).map(p => {
                 const disc = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
@@ -167,7 +161,7 @@
             }).join('');
         }
 
-        // უკუათვლის ტაიმერი
+        // ტაიმერის ფუნქცია
         function startTimer() {
             const target = new Date(design.bTimerEnd).getTime();
             const footer = document.getElementById('banner-footer');
@@ -185,7 +179,7 @@
             }, 1000);
         }
 
-        // სწრაფი ნახვის ფანჯარა
+        // პროდუქტის სწრაფი ნახვა (Popup)
         function openQuickView(name) {
             const p = products.find(x => x.name === name);
             const content = document.getElementById('details-content');
@@ -196,7 +190,7 @@
                     </div>
                     <h2 style="font-size: ${design.qvTitleSize}px" class="font-black text-slate-900 mb-1 text-center px-2">${p.name}</h2>
                     <div style="font-size: ${design.qvPriceSize}px" class="font-black text-blue-500 mb-8">${p.price}₾</div>
-                    <button onclick="openFullDetails('${p.name.replace(/'/g, "\\'")}')" class="w-full bg-slate-100 text-slate-900 rounded-[28px] py-5 font-black flex items-center justify-center gap-3 active:scale-95 transition-all">
+                    <button onclick="openFullDetails('${p.name.replace(/'/g, "\\'")}')" class="w-full bg-slate-100 text-slate-900 rounded-[28px] py-5 font-black flex items-center justify-center gap-3">
                         დეტალურად <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </div>
@@ -205,7 +199,7 @@
             document.getElementById('overlay').classList.add('active');
         }
 
-        // სრული დეტალების ფანჯარა
+        // სრული აღწერის და ზომების გვერდი
         function openFullDetails(name) {
             selectedSize = null; selectedColor = null;
             const p = products.find(x => x.name === name);
@@ -213,24 +207,24 @@
             content.innerHTML = `
                 <div class="space-y-8 pb-4">
                     <div class="flex justify-between items-start">
-                        <h2 class="font-black text-2xl text-slate-900 w-2/3 leading-tight">${p.name}</h2>
+                        <h2 class="font-black text-2xl text-slate-900 w-2/3">${p.name}</h2>
                         <div class="text-right font-black text-2xl text-blue-500">${p.price}₾</div>
                     </div>
                     <div class="w-full aspect-square bg-slate-50 rounded-[40px] flex items-center justify-center p-8">
                         <img src="${p.imgs[0]}" class="max-h-full object-contain png-shadow">
                     </div>
                     <div>
-                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-3">აღწერა</p>
+                        <p class="text-slate-400 text-[10px] font-black uppercase mb-3">აღწერა</p>
                         <p class="text-slate-600 text-sm">${p.desc || 'აღწერა არ არის'}</p>
                     </div>
                     <div>
-                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">აირჩიეთ ზომა</p>
+                        <p class="text-slate-400 text-[10px] font-black uppercase mb-4">ზომა</p>
                         <div class="flex flex-wrap gap-2">
                             ${p.sizes ? p.sizes.map(s => `<button class="size-btn border-2 border-slate-100 rounded-2xl px-6 py-3 font-bold text-sm bg-white" onclick="selectSize(this, '${p.name.replace(/'/g, "\\'")}')">${s.trim()}</button>`).join('') : ''}
                         </div>
                     </div>
                     ${p.colors && p.colors[0] ? `<div>
-                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">აირჩიეთ ფერი</p>
+                        <p class="text-slate-400 text-[10px] font-black uppercase mb-4">ფერი</p>
                         <div class="flex flex-wrap gap-2">
                             ${p.colors.map(c => `<button class="color-btn border-2 border-slate-100 rounded-2xl px-6 py-3 font-bold text-sm bg-white" onclick="selectColor(this, '${p.name.replace(/'/g, "\\'")}')">${c.trim()}</button>`).join('')}
                         </div>
@@ -241,27 +235,23 @@
             updateMainButton(p.name);
         }
 
-        // ზომის არჩევის ლოგიკა
+        // ზომის არჩევის ვიზუალი
         function selectSize(btn, pName) {
-            document.querySelectorAll('.size-btn').forEach(b => {
-                b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9';
-            });
+            document.querySelectorAll('.size-btn').forEach(b => { b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9'; });
             btn.style.background = 'black'; btn.style.color = 'white'; btn.style.borderColor = 'black';
             selectedSize = btn.innerText;
             updateMainButton(pName);
         }
 
-        // ფერის არჩევის ლოგიკა
+        // ფერის არჩევის ვიზუალი
         function selectColor(btn, pName) {
-            document.querySelectorAll('.color-btn').forEach(b => {
-                b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9';
-            });
+            document.querySelectorAll('.color-btn').forEach(b => { b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9'; });
             btn.style.background = 'black'; btn.style.color = 'white'; btn.style.borderColor = 'black';
             selectedColor = btn.innerText;
             updateMainButton(pName);
         }
 
-        // კალათაში დამატების ღილაკის განახლება
+        // კალათის ღილაკის მართვა
         function updateMainButton(productName) {
             const p = products.find(x => x.name === productName);
             const btn = document.getElementById('main-action-btn');
@@ -271,7 +261,7 @@
 
             if (hasS && !selectedSize) {
                 btn.innerText = "აირჩიეთ ზომა";
-                btn.className = "w-full bg-slate-100 text-slate-400 rounded-[30px] py-6 font-black cursor-not-allowed";
+                btn.className = "w-full bg-slate-100 text-slate-400 rounded-[30px] py-6 font-black";
                 btn.onclick = null;
             } else if (hasC && !selectedColor) {
                 btn.innerText = "აირჩიეთ ფერი";
@@ -284,7 +274,7 @@
             }
         }
 
-        // ბანერზე დაჭერის რეაქცია
+        // ბანერზე დაჭერის ეფექტი
         function handleBannerAction() {
             const type = design.bActionType;
             const val = design.bActionValue;
@@ -302,7 +292,7 @@
             document.getElementById('overlay').classList.remove('active'); 
         }
 
-        // CSV მონაცემების დამუშავება
+        // CSV პარსერი
         function parseCSV(t) {
             return t.split('\n').slice(1).map(l => {
                 const m = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
@@ -310,7 +300,7 @@
             });
         }
 
-        // აპლიკაციის გაშვება
+        // აპლიკაციის ჩართვა
         init();
     </script>
 </body>
