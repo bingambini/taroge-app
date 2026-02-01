@@ -3,15 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store - Final</title>
+    <title>Shoes Store - Optimized</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; }
         
-        #main-header { width: 100%; z-index: 9999; position: relative; transition: all 0.3s ease; display: none; }
-        .header-floating { margin: 10px 15px !important; border-radius: 20px !important; width: calc(100% - 30px) !important; overflow: hidden; }
+        /* --- ჰედერის სტილების დასაწყისი --- */
+        #main-header { 
+            width: 100%; 
+            z-index: 9999; 
+            position: relative; 
+            transition: all 0.3s ease; 
+            display: none; 
+        }
+
+        /* კონტეინერი, რომელიც აკონტროლებს ჰედერის შიგთავსს ნებისმიერ ეკრანზე */
+        .header-container {
+            width: 100%;
+            max-width: 600px; /* ზღუდავს სიგანეს დიდ ეკრანებზე რომ არ გაიწელოს */
+            margin: 0 auto;   /* აცენტრებს ჰედერს */
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0 20px;
+        }
+
+        /* "მცურავი" ჰედერის სტილი */
+        .header-floating { 
+            margin: 10px auto !important; 
+            border-radius: 20px !important; 
+            width: calc(100% - 30px) !important; 
+            max-width: 570px !important; 
+            overflow: hidden; 
+        }
+        /* --- ჰედერის სტილების დასასრული --- */
         
         #hero-banner { margin: 20px; border-radius: 35px; overflow: hidden; min-height: 100px; background: #f1f5f9; position: relative; }
     </style>
@@ -19,18 +47,18 @@
 <body>
 
     <header id="main-header" class="flex items-center"></header>
+
     <div id="hero-banner"></div>
+
     <div id="product-grid" class="grid grid-cols-2 gap-4 px-6"></div>
 
     <script>
-        // შენი ახალი API ლინკი
         const API_URL = "https://script.google.com/macros/s/AKfycbxcFkep42wZOBQDWuzgdbh2txh3LSlFx_rQzz702UHtHpS0MPqEyxsIrOB5-A_eVe03PQ/exec";
 
         async function init() {
             try {
                 const res = await fetch(API_URL);
                 const data = await res.json();
-                console.log("Data Received:", data);
                 
                 if (data.header) renderHeader(data.header);
                 if (data.banner) renderBanner(data.banner);
@@ -40,32 +68,49 @@
             }
         }
 
+        // ==========================================
+        // ჰედერის რენდერის ფუნქცია (ოპტიმიზირებული)
+        // ==========================================
         function renderHeader(h) {
             const el = document.getElementById('main-header');
             if (h.status !== 'active') return;
 
-            // ზომების მიღება შიტიდან
+            // მონაცემების დამუშავება Google Sheet-იდან
             const lSize = parseInt(h.logoSize) || 50; 
             const lRadius = parseInt(h.logoRadius) || 0;
             const hHeight = parseInt(h.height) || 80;
+
+            // ეკრანის ზომის შემოწმება და ადაპტაცია
+            const isSmallScreen = window.innerWidth < 370;
+            const responsiveLogoSize = isSmallScreen ? lSize * 0.85 : lSize; // პატარა ეკრანზე ლოგო მცირდება 15%-ით
+            const responsiveFontSize = isSmallScreen ? "16px" : "18px";
 
             el.style.display = 'flex';
             el.style.backgroundColor = h.bg || "#24afeb";
             el.style.height = hHeight + "px";
             el.style.color = h.textColor || "#ffffff";
-            el.style.padding = "0 20px";
-            el.style.justifyContent = h.layout === 'center' ? 'center' : 'space-between';
-
+            
+            // მცურავი სტილის გამოყენება
             if (h.style === 'floating') el.classList.add('header-floating');
 
             el.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <img src="${h.logo}" style="width: ${lSize}px !important; height: auto; border-radius: ${lRadius}%" class="object-contain">
-                    <span style="font-weight: 800; font-size: 18px;">${h.name || ''}</span>
+                <div class="header-container" style="justify-content: ${h.layout === 'center' ? 'center' : 'space-between'}">
+                    <div class="flex items-center gap-3">
+                        <img src="${h.logo}" 
+                             style="width: ${responsiveLogoSize}px !important; height: auto; border-radius: ${lRadius}%" 
+                             class="object-contain"
+                             onerror="this.style.opacity='0'">
+                        <span style="font-weight: 800; font-size: ${responsiveFontSize}; white-space: nowrap;">
+                            ${h.name || ''}
+                        </span>
+                    </div>
+                    ${h.layout !== 'center' ? '<div class="flex items-center"><i class="fa-solid fa-bell text-xl"></i></div>' : ''}
                 </div>
-                ${h.layout !== 'center' ? '<i class="fa-solid fa-bell text-xl"></i>' : ''}
             `;
         }
+        // ==========================================
+        // ჰედერის კოდის დასასრული
+        // ==========================================
 
         function renderBanner(b) {
             const el = document.getElementById('hero-banner');
