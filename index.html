@@ -3,123 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store</title>
-    
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Shoes Store - Pro Design</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
-
-        /* ჰედერის სტილი - თავიდანვე ფიქსირებული სიმაღლე რომ არ "ხტუნაობდეს" */
-        #main-header {
-            width: 100%; display: flex; align-items: center; z-index: 9999;
-            min-height: 70px; transition: opacity 0.3s ease;
-        }
-
-        .header-floating {
-            margin: 10px 15px !important; border-radius: 20px !important;
-            width: calc(100% - 30px) !important;
-        }
-
-        #hero-banner { margin: 20px; border-radius: 35px; position: relative; overflow: hidden; min-height: 150px; background: #eee; }
-        .product-card { background: white; border-radius: 30px; padding: 15px; border: 1px solid #f1f5f9; }
-        
-        #bottom-nav {
-            position: fixed; bottom: 20px; left: 15px; right: 15px;
-            height: 85px; background: #000; border-radius: 35px;
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            align-items: center; z-index: 1000;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; }
+        #main-header { width: 100%; z-index: 9999; position: relative; display: none; transition: all 0.3s ease; }
+        .header-floating { margin: 10px 15px !important; border-radius: 20px !important; width: calc(100% - 30px) !important; overflow: hidden; }
+        #hero-banner { margin: 20px; border-radius: 35px; overflow: hidden; min-height: 100px; background: #f1f5f9; position: relative; }
     </style>
 </head>
 <body>
 
-    <header id="main-header"></header>
+    <header id="main-header" class="flex items-center"></header>
     <div id="hero-banner"></div>
-
-    <div class="px-7 mb-4 flex justify-between items-center">
-        <h2 id="section-title" class="font-black text-xl text-slate-800">იტვირთება...</h2>
-    </div>
     <div id="product-grid" class="grid grid-cols-2 gap-4 px-6"></div>
-
-    <nav id="bottom-nav"></nav>
+    <nav id="bottom-nav" class="fixed bottom-5 left-4 right-4 h-20 bg-black rounded-[30px] flex justify-around items-center z-[1000]"></nav>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbx40aDt-cSil4iQV2y0Fe4jepNTQmYWvYeJiuItoHa-s14yuCOm9YQmOueP1OkVNas9gQ/exec";
 
-        // მონაცემების ჩატვირთვა
         async function init() {
             try {
                 const res = await fetch(API_URL);
                 const data = await res.json();
                 
-                // დაუყოვნებლივი რენდერი
-                if(data.header) renderHeader(data.header);
-                if(data.banner) renderBanner(data.banner);
-                if(data.latest) renderProducts(data.latest);
-                if(data.navigation) renderNavigation(data.navigation);
-                
+                if (data.header) renderHeader(data.header);
+                if (data.banner) renderBanner(data.banner);
+                if (data.latest) renderProducts(data.latest);
+                if (data.navigation) renderNavigation(data.navigation);
             } catch (e) {
-                console.error("Fetch Error:", e);
-                document.getElementById('main-header').style.background = "#ff4444";
-                document.getElementById('main-header').innerHTML = "<p class='text-white p-4'>კავშირის შეცდომა</p>";
+                console.error("ჩატვირთვის შეცდომა:", e);
             }
         }
 
         function renderHeader(h) {
             const el = document.getElementById('main-header');
-            if (!h || h.status !== 'active') { el.style.display = 'none'; return; }
+            if (h.status !== 'active') return;
 
-            // პარამეტრების დაზღვევა
-            const size = parseInt(h.logoSize) || 40;
-            const radius = parseInt(h.logoRadius) || 0;
-            const height = parseInt(h.height) || 70;
-            
+            // მონაცემების დაზუსტება
+            const lSize = parseInt(h.logoSize) || 40;
+            const hHeight = parseInt(h.height) || 70;
+            const lRadius = parseInt(h.logoRadius) || 0;
+
+            el.style.display = 'flex';
             el.style.backgroundColor = h.bg || "#000";
-            el.style.height = height + "px";
+            el.style.height = hHeight + "px";
             el.style.color = h.textColor || "#fff";
             el.style.padding = "0 20px";
-            
-            if (h.style === 'floating') el.classList.add('header-floating');
             el.style.justifyContent = h.layout === 'center' ? 'center' : 'space-between';
+
+            if (h.style === 'floating') el.classList.add('header-floating');
 
             el.innerHTML = `
                 <div class="flex items-center gap-3">
-                    <img src="${h.logo}" style="width: ${size}px; height: auto; border-radius: ${radius}%" 
-                         onload="this.style.opacity=1" style="opacity:0; transition: opacity 0.3s">
-                    <span style="font-size: 18px; font-weight: 800">${h.name || ''}</span>
+                    <img src="${h.logo}" style="width: ${lSize}px !important; height: auto; border-radius: ${lRadius}%" class="object-contain">
+                    <span style="font-weight: 800; font-size: 18px;">${h.name || ''}</span>
                 </div>
-                ${h.layout !== 'center' ? '<i class="fa-solid fa-bell text-xl"></i>' : ''}
+                ${h.layout !== 'center' ? `<i class="fa-solid fa-bell text-xl" style="color: ${h.iconColor || h.textColor}"></i>` : ''}
             `;
         }
 
         function renderBanner(b) {
             const el = document.getElementById('hero-banner');
             el.style.height = (parseInt(b.height) || 180) + "px";
+            el.style.marginTop = (parseInt(b.marginTop) || 20) + "px";
             el.style.background = b.gradient === "1" ? `linear-gradient(135deg, #1e293b, #334155)` : "#1e293b";
             el.innerHTML = `
-                <div class="p-8 w-1/2 z-10 text-white">
-                    <p class="text-xs opacity-70">${b.subtitle}</p>
-                    <h2 class="font-black text-xl mb-4">${b.title}</h2>
-                    <button class="bg-white text-black px-4 py-2 rounded-xl text-[10px] font-bold uppercase">${b.btnText}</button>
+                <div class="p-8 w-1/2 text-white relative z-10">
+                    <h2 class="font-black text-xl leading-tight">${b.title}</h2>
+                    <button class="mt-3 bg-white text-black px-5 py-2 rounded-xl text-[10px] font-extrabold uppercase shadow-lg">${b.btnText}</button>
                 </div>
-                <img src="${b.image}" class="absolute -right-5 w-48 rotate-[-15deg] drop-shadow-2xl">
+                <img src="${b.image}" class="absolute -right-5 w-44 rotate-[-15deg] drop-shadow-2xl z-0">
             `;
         }
 
-        function renderProducts(latest) {
-            document.getElementById('section-title').innerText = latest.title;
+        function renderProducts(l) {
             const grid = document.getElementById('product-grid');
-            grid.innerHTML = latest.items.map(p => `
-                <div class="product-card">
-                    <div class="h-28 flex items-center justify-center mb-2">
-                        <img src="${p.images.split(',')[0]}" class="max-h-full object-contain">
-                    </div>
-                    <h4 class="font-bold text-[11px] truncate">${p.name}</h4>
-                    <p class="text-blue-600 font-black text-sm">${p.price}₾</p>
+            grid.innerHTML = l.items.map(p => `
+                <div class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm relative overflow-hidden">
+                    ${p.badge ? `<div class="absolute top-3 right-3 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-lg">${p.badge}</div>` : ''}
+                    <img src="${p.images.split(',')[0]}" class="h-28 mx-auto object-contain mb-2">
+                    <h4 class="font-bold text-[11px] text-slate-700 truncate">${p.name}</h4>
+                    <p class="text-blue-600 font-black text-sm mt-1">${p.price}₾</p>
                 </div>
             `).join('');
         }
@@ -128,8 +95,8 @@
             const container = document.getElementById('bottom-nav');
             container.innerHTML = nav.map(n => `
                 <div class="flex flex-col items-center ${n.Status === 'active' ? 'text-white' : 'text-gray-500'}">
-                    <i class="fa-solid ${n.Icon} text-xl mb-1"></i>
-                    <span class="text-[10px] font-bold">${n.Label}</span>
+                    <i class="fa-solid ${n.Icon} text-xl"></i>
+                    <span class="text-[9px] font-bold mt-1">${n.Label}</span>
                 </div>
             `).join('');
         }
