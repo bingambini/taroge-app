@@ -14,33 +14,29 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; }
 
         /* ჰედერის სტილები */
-/* ჰედერის გარანტირებული გამოჩენა */
-#main-header {
-    position: relative; /* რომ არ გაიჭედოს სადმე */
-    width: 100%;
-    display: flex;
-    align-items: center;
-    z-index: 2000; /* ყველაფერზე მაღლა */
-    transition: all 0.3s ease;
-}
+        #main-header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            z-index: 2000;
+            transition: all 0.3s ease;
+        }
 
-.floating-header {
-    margin: 10px auto;
-    width: 92% !important;
-    border-radius: 20px;
-}
+        .floating-header {
+            margin: 10px 15px !important;
+            border-radius: 20px !important;
+            width: auto !important;
+        }
         
-        /* ბანერის სტილები */
         #hero-banner { 
             margin: 20px; border-radius: 35px; position: relative; 
             overflow: hidden; display: flex; align-items: center;
+            z-index: 10;
         }
 
-        /* პროდუქტების სტილი */
         .product-card { background: white; border-radius: 30px; padding: 15px; position: relative; border: 1px solid #f1f5f9; }
         .badge { position: absolute; top: 12px; right: 12px; background: #ff5f5f; color: white; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 800; }
 
-        /* ქვედა ნავიგაცია */
         #bottom-nav {
             position: fixed; bottom: 20px; left: 15px; right: 15px;
             height: 85px; background: #000; border-radius: 35px;
@@ -79,46 +75,33 @@
             } catch (e) { console.error("Load failed", e); }
         }
 
-function renderHeader(h) {
+        function renderHeader(h) {
             const el = document.getElementById('main-header');
-            if (!h || h.status !== 'active') { 
-                el.style.display = 'none'; 
-                return; 
-            }
+            if (!h || h.status !== 'active') { el.style.display = 'none'; return; }
 
-            // 1. ბაზისური სტილები
-            el.style.display = 'flex';
+            // სტილების მინიჭება
             el.style.backgroundColor = h.bg;
             el.style.height = h.height + "px";
             el.style.color = h.textColor;
             el.style.padding = `0 ${h.padding || 20}px`;
             
-            // 2. კლასების გაწმენდა და ხელახლა დამატება
+            // ფონტის ზომის კორექცია (text-xl -> 20px)
+            let fSize = h.fontSize === 'text-xl' ? '20px' : h.fontSize;
+            
+            // Layout & Style
             el.className = "flex items-center transition-all duration-300";
-            
-            if (h.style === 'floating') {
-                el.classList.add('floating-header');
-            }
-            
-            // 3. განლაგება (Layout)
-            if (h.layout === 'center') {
-                el.style.justifyContent = 'center';
-            } else {
-                el.style.justifyContent = 'space-between';
-            }
-
+            if (h.style === 'floating') el.classList.add('floating-header');
+            el.style.justifyContent = h.layout === 'center' ? 'center' : 'space-between';
             if (h.shadow === 'sm') el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
 
-            // 4. შიგთავსი
             el.innerHTML = `
                 <div class="flex items-center gap-3">
                     <img src="${h.logo}" style="width: ${h.logoSize}px; border-radius: ${h.logoRadius}%" class="object-contain">
-                    <span style="font-size: ${h.fontSize}; font-weight: 800">${h.name}</span>
+                    <span style="font-size: ${fSize}; font-weight: 800">${h.name}</span>
                 </div>
                 ${h.layout !== 'center' ? `<i class="fa-solid fa-bell" style="color: ${h.iconColor || h.textColor}; font-size: 1.2rem;"></i>` : ''}
             `;
         }
-
 
         function renderBanner(b) {
             const el = document.getElementById('hero-banner');
