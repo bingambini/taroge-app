@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store - Pro Design</title>
+    <title>Shoes Store - Final Fix</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,50 +13,45 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; }
 
-        /* ჰედერის სტილები */
+        /* ჰედერის გარანტირებული სტილი */
         #main-header {
-            position: relative;
+            width: 100%;
             display: flex;
             align-items: center;
-            z-index: 2000;
-            transition: all 0.3s ease;
+            z-index: 9999;
+            position: relative;
         }
 
-        .floating-header {
+        .header-floating {
             margin: 10px 15px !important;
             border-radius: 20px !important;
-            width: auto !important;
+            width: calc(100% - 30px) !important;
         }
-        
+
         #hero-banner { 
             margin: 20px; border-radius: 35px; position: relative; 
             overflow: hidden; display: flex; align-items: center;
-            z-index: 10;
         }
 
-        .product-card { background: white; border-radius: 30px; padding: 15px; position: relative; border: 1px solid #f1f5f9; }
-        .badge { position: absolute; top: 12px; right: 12px; background: #ff5f5f; color: white; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 800; }
-
+        .product-card { background: white; border-radius: 30px; padding: 15px; border: 1px solid #f1f5f9; }
+        
         #bottom-nav {
             position: fixed; bottom: 20px; left: 15px; right: 15px;
             height: 85px; background: #000; border-radius: 35px;
             display: grid; grid-template-columns: repeat(4, 1fr);
-            align-items: center; z-index: 1000; box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            align-items: center; z-index: 1000;
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #555; }
-        .nav-item.active { color: #fff; }
     </style>
 </head>
 <body>
 
     <header id="main-header"></header>
+
     <div id="hero-banner"></div>
 
     <div class="px-7 mb-4 flex justify-between items-center">
-        <h2 id="section-title" class="font-black text-xl text-slate-800"></h2>
-        <span class="text-blue-600 text-xs font-bold">ყველა</span>
+        <h2 id="section-title" class="font-black text-xl text-slate-800">იტვირთება...</h2>
     </div>
-    
     <div id="product-grid" class="grid grid-cols-2 gap-4 px-6"></div>
 
     <nav id="bottom-nav"></nav>
@@ -68,51 +63,62 @@
             try {
                 const res = await fetch(API_URL);
                 const data = await res.json();
+                console.log("Data received:", data); // შეამოწმე კონსოლში
+
                 renderHeader(data.header);
                 renderBanner(data.banner);
                 renderProducts(data.latest);
                 renderNavigation(data.navigation);
-            } catch (e) { console.error("Load failed", e); }
+            } catch (e) {
+                console.error("Main init error:", e);
+                document.getElementById('main-header').innerHTML = `<div class="p-4 bg-red-500 text-white">Error loading data</div>`;
+            }
         }
 
         function renderHeader(h) {
             const el = document.getElementById('main-header');
-            if (!h || h.status !== 'active') { el.style.display = 'none'; return; }
+            if (!h) return;
 
-            // სტილების მინიჭება
-            el.style.backgroundColor = h.bg;
-            el.style.height = h.height + "px";
-            el.style.color = h.textColor;
-            el.style.padding = `0 ${h.padding || 20}px`;
+            // 1. ფიზიკური სტილები (inline style უფრო საიმედოა)
+            el.style.backgroundColor = h.bg || "#000000";
+            el.style.height = (h.height || 80) + "px";
+            el.style.color = h.textColor || "#ffffff";
+            el.style.padding = "0 20px";
             
-            // ფონტის ზომის კორექცია (text-xl -> 20px)
-            let fSize = h.fontSize === 'text-xl' ? '20px' : h.fontSize;
-            
-            // Layout & Style
-            el.className = "flex items-center transition-all duration-300";
-            if (h.style === 'floating') el.classList.add('floating-header');
+            // 2. კლასების მართვა
+            el.className = "flex items-center transition-all";
+            if (h.style === 'floating') {
+                el.classList.add('header-floating');
+            }
+
+            // 3. განლაგება
             el.style.justifyContent = h.layout === 'center' ? 'center' : 'space-between';
-            if (h.shadow === 'sm') el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+
+            // 4. შიგთავსი (ლოგოს ზომის დაზღვევით)
+            const lSize = h.logoSize || 40;
+            const lRadius = h.logoRadius || 0;
+            const fSize = isNaN(h.fontSize) ? "18px" : h.fontSize + "px";
 
             el.innerHTML = `
                 <div class="flex items-center gap-3">
-                    <img src="${h.logo}" style="width: ${h.logoSize}px; border-radius: ${h.logoRadius}%" class="object-contain">
-                    <span style="font-size: ${fSize}; font-weight: 800">${h.name}</span>
+                    <img src="${h.logo}" style="width: ${lSize}px; height: auto; border-radius: ${lRadius}%" onerror="this.src='https://via.placeholder.com/40'">
+                    <span style="font-size: ${fSize}; font-weight: 800">${h.name || 'მაღაზია'}</span>
                 </div>
-                ${h.layout !== 'center' ? `<i class="fa-solid fa-bell" style="color: ${h.iconColor || h.textColor}; font-size: 1.2rem;"></i>` : ''}
+                ${h.layout !== 'center' ? `<i class="fa-solid fa-bell" style="font-size: 1.2rem; color: ${h.iconColor || '#fff'}"></i>` : ''}
             `;
         }
 
         function renderBanner(b) {
             const el = document.getElementById('hero-banner');
-            el.style.height = b.height + "px";
-            el.style.marginTop = b.marginTop + "px";
+            if (!b) return;
+            el.style.height = (b.height || 180) + "px";
+            el.style.marginTop = (b.marginTop || 20) + "px";
             el.style.background = b.gradient === "1" ? `linear-gradient(135deg, #1e293b, #334155)` : "#1e293b";
 
             el.innerHTML = `
                 <div class="p-8 w-1/2 z-10">
-                    <p class="font-bold opacity-70" style="font-size: ${b.subSize}px; color: ${b.titleColor}">${b.subtitle}</p>
-                    <h2 class="font-black leading-tight mb-4" style="font-size: ${b.titleSize}px; color: ${b.titleColor}">${b.title}</h2>
+                    <p class="font-bold opacity-70 text-white" style="font-size: 12px">${b.subtitle}</p>
+                    <h2 class="font-black text-white leading-tight mb-4" style="font-size: 20px">${b.title}</h2>
                     <button class="bg-white text-black px-6 py-2 rounded-2xl font-black text-[10px] uppercase">${b.btnText}</button>
                 </div>
                 <img src="${b.image}" class="absolute -right-6 w-52 rotate-[-15deg] drop-shadow-2xl">
@@ -120,11 +126,11 @@
         }
 
         function renderProducts(latest) {
+            if (!latest) return;
             document.getElementById('section-title').innerText = latest.title;
             const grid = document.getElementById('product-grid');
             grid.innerHTML = latest.items.map(p => `
                 <div class="product-card">
-                    ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
                     <div class="h-32 flex items-center justify-center mb-3">
                         <img src="${p.images.split(',')[0]}" class="max-h-full object-contain">
                     </div>
@@ -135,9 +141,10 @@
         }
 
         function renderNavigation(nav) {
+            if (!nav) return;
             const container = document.getElementById('bottom-nav');
             container.innerHTML = nav.map(n => `
-                <div class="nav-item ${n.Status === 'active' ? 'active' : ''}">
+                <div class="flex flex-col items-center ${n.Status === 'active' ? 'text-white' : 'text-gray-500'}">
                     <i class="fa-solid ${n.Icon} text-xl mb-1"></i>
                     <span class="text-[10px] font-bold">${n.Label}</span>
                 </div>
