@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store - Optimized</title>
+    <title>Shoes Store - Optimized 2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -69,6 +69,38 @@
             pointer-events: none;
         }
         /* --- მთავარი ბანერის სტილების დასასრული --- */
+
+        /* --- ქვედა მენიუს (Foot_Nav) სტილების დასაწყისი --- */
+        #bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 500px;
+            height: 70px;
+            background: #000000;
+            border-radius: 25px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 10000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #888888;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active { color: #ffffff; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item span { font-size: 10px; font-weight: 700; }
+        /* --- ქვედა მენიუს სტილების დასასრული --- */
     </style>
 </head>
 <body>
@@ -79,8 +111,27 @@
 
     <div id="product-grid" class="grid grid-cols-2 gap-4 px-6"></div>
 
+    <nav id="bottom-nav">
+        <a href="#" class="nav-item active">
+            <i class="fa-solid fa-house"></i>
+            <span>მთავარი</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>კატეგორია</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span>კალათა</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fa-solid fa-user"></i>
+            <span>პროფილი</span>
+        </a>
+    </nav>
+
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbxcFkep42wZOBQDWuzgdbh2txh3LSlFx_rQzz702UHtHpS0MPqEyxsIrOB5-A_eVe03PQ/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbympRzSjk5nJHba_CrRdGOYNvmrWwrHzGYnOVFfCZ9hKgbJH5IlDJNuYXO0YYUK_aBYIw/exec";
 
         async function init() {
             try {
@@ -96,7 +147,7 @@
         }
 
         // ==========================================
-        // ჰედერის რენდერის ფუნქცია (ოპტიმიზირებული)
+        // ჰედერის რენდერი
         // ==========================================
         function renderHeader(h) {
             const el = document.getElementById('main-header');
@@ -134,13 +185,12 @@
         }
 
         // ==========================================
-        // მთავარი ბანერის რენდერის ფუნქცია (ოპტიმიზირებული)
+        // ბანერის რენდერი
         // ==========================================
         function renderBanner(b) {
             const el = document.getElementById('hero-banner');
             if (!b) return;
 
-            // მონაცემები შიტიდან
             const bHeight = parseInt(b.height) || 180;
             const bMarginTop = parseInt(b.marginTop) || 20;
             const titleFontSize = parseInt(b.titleSize) || 20;
@@ -151,7 +201,6 @@
             el.style.height = (bHeight * scale) + "px";
             el.style.marginTop = bMarginTop + "px";
             
-            // ფონის მართვა
             el.style.background = b.gradient === "1" 
                 ? "linear-gradient(135deg, #1e293b 0%, #334155 100%)" 
                 : "#1e293b";
@@ -172,6 +221,9 @@
             `;
         }
 
+        // ==========================================
+        // პროდუქტების რენდერი
+        // ==========================================
         function renderProducts(l) {
             const grid = document.getElementById('product-grid');
             grid.innerHTML = l.items.map(p => `
