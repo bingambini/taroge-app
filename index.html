@@ -11,23 +11,16 @@
     <style>
         :root { --bg: #f8f9fb; --main: #3b82f6; --white: #ffffff; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; overflow-x: hidden; }
-        
         .png-shadow { filter: drop-shadow(0 25px 35px rgba(0,0,0,0.3)); }
         .card-shadow { box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); }
-        
         #bottom-sheet { 
             transform: translateY(100%); 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            z-index: 2000; 
-            height: auto;
-            max-height: 94vh;
-            overflow-y: auto;
+            z-index: 2000; height: auto; max-height: 94vh; overflow-y: auto;
         }
         #bottom-sheet.active { transform: translateY(0); }
         .overlay { display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1500; }
         .overlay.active { display: block; }
-        
-        /* სქროლის დამალვა */
         #bottom-sheet::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -47,13 +40,11 @@
         </div>
 
         <div id="section-title" class="px-6 font-black text-slate-400 text-[10px] uppercase tracking-[0.2em] mb-4 mt-8">ახალი კოლექცია</div>
-        
         <div id="products-grid" class="grid grid-cols-2 gap-4 px-4"></div>
     </div>
 
     <div id="overlay" class="overlay fixed inset-0" onclick="closeDetails()"></div>
-    
-    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-10 max-w-[600px] mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.1)]">
+    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-10 max-w-[600px] mx-auto shadow-2xl">
         <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-4 cursor-pointer" onclick="closeDetails()"></div>
         <div id="details-content" class="transition-all duration-300"></div>
     </div>
@@ -81,26 +72,24 @@
                 if(dRows[0]) {
                     const d = dRows[0];
                     design = {
-                        name: d[0], logo: d[1], h_bg: d[2], h_text: d[3], layout: d[4], height: d[7], mainColor: d[10],
+                        name: d[0], logo: d[1], h_bg: d[2], h_text: d[3], height: d[7], mainColor: d[10],
                         logoSize: d[11], logoRad: d[12], bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
                         bImage: d[17], bTitleSize: d[18], bSubSize: d[19], bMarginTop: d[20],
-                        bActionType: d[21], bActionValue: d[22], bTimerEnd: d[23],
-                        qvTitleSize: d[26], qvPriceSize: d[27]
+                        bActionType: d[21], bActionValue: d[22], qvTitleSize: d[26], qvPriceSize: d[27]
                     };
                     applyDesign();
                 }
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
-                    name: r[0], price: r[1], imgs: r[2]?.split(',').map(s=>s.trim()), oldPrice: r[3],
-                    status: r[4] || "", desc: r[5], category: r[7], sizes: r[8]?.split(','), colors: r[9]?.split(',')
+                    name: r[0], price: r[1], imgs: r[2]?.split(',').map(s=>s.trim()), 
+                    status: r[4] || "", desc: r[5], sizes: r[8]?.split(','), colors: r[9]?.split(',')
                 }));
                 renderUI();
             } catch(e) { console.error(e); }
         }
 
         function applyDesign() {
-            const root = document.documentElement;
             document.getElementById('shop-name').innerText = design.name;
             if(design.logo) {
                 const img = document.getElementById('logo-img');
@@ -108,7 +97,6 @@
                 img.style.width = img.style.height = `${design.logoSize || 32}px`;
                 img.style.borderRadius = design.logoRad;
             }
-            root.style.setProperty('--main', design.mainColor || '#3b82f6');
             const h = document.getElementById('main-header');
             h.style.height = `${design.height || 70}px`;
             h.style.background = design.h_bg;
@@ -116,48 +104,37 @@
         }
 
         function renderUI() {
-            const banner = document.getElementById('banner-btn');
-            const topP = products.find(p => p.status.includes('top')) || products[0];
-            banner.className = "relative cursor-pointer transition-all active:scale-95";
-            banner.style.height = `${design.bHeight || 180}px`;
-            banner.style.marginTop = `${design.bMarginTop || 16}px`;
-            banner.innerHTML = `
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black rounded-[40px] shadow-2xl overflow-hidden">
-                    <div class="z-10 relative p-8 h-full flex flex-col justify-center">
-                        <span style="font-size: ${design.bSubSize}px" class="text-blue-400 font-black tracking-[0.2em] uppercase mb-1">${design.bSub}</span>
-                        <h2 style="font-size: ${design.bTitleSize}px" class="text-white font-black leading-tight w-[60%]">${design.bTitle || topP.name}</h2>
-                        <div class="mt-4 flex items-center gap-3">
-                            <span class="text-white font-bold text-xl">${topP.price}₾</span>
-                            <div class="bg-blue-500 px-5 py-2 rounded-2xl text-white text-[10px] font-extrabold uppercase tracking-wider">${design.bBtn}</div>
-                        </div>
-                    </div>
-                </div>
-                <img src="${design.bImage || topP.imgs[0]}" class="absolute -right-6 -top-12 w-[65%] h-[140%] object-contain z-20 png-shadow rotate-[-12deg] pointer-events-none">
-            `;
             const grid = document.getElementById('products-grid');
-            grid.innerHTML = products.slice(0, 4).map(p => `
+            grid.innerHTML = products.slice(0, 10).map(p => `
                 <div class="bg-white rounded-[32px] p-3 card-shadow active:scale-95 transition-all" onclick="openQuickView('${p.name.replace(/'/g, "\\'")}')">
                     <div class="relative aspect-square bg-slate-50 rounded-[24px] mb-3 flex items-center justify-center p-4">
                         <img src="${p.imgs[0]}" class="w-full h-full object-contain png-shadow">
                     </div>
-                    <h3 class="font-bold text-[12px] px-1 truncate">${p.name}</h3>
-                    <b class="text-sm font-black px-1">${p.price}₾</b>
+                    <h3 class="font-bold text-[12px] px-1 truncate text-slate-800">${p.name}</h3>
+                    <b class="text-sm font-black px-1 text-blue-600">${p.price}₾</b>
                 </div>
             `).join('');
+            
+            const banner = document.getElementById('banner-btn');
+            banner.className = "relative cursor-pointer mt-4";
+            banner.innerHTML = `<div class="bg-slate-900 rounded-[35px] p-8 h-40 flex flex-col justify-center overflow-hidden relative">
+                <h2 class="text-white text-xl font-black z-10">${design.bTitle || 'ახალი კოლექცია'}</h2>
+                <button class="bg-blue-600 text-white w-fit px-6 py-2 rounded-xl mt-3 text-xs font-bold z-10">${design.bBtn || 'ნახვა'}</button>
+                <img src="${products[0]?.imgs[0]}" class="absolute -right-4 top-0 h-full object-contain opacity-50">
+            </div>`;
         }
 
         function openQuickView(name) {
             const p = products.find(x => x.name === name);
             const content = document.getElementById('details-content');
             content.innerHTML = `
-                <div class="relative flex flex-col items-center">
-                    <button onclick="closeDetails()" class="absolute -top-1 left-0 w-12 h-12 flex items-center justify-start text-slate-400"><i class="fa-solid fa-chevron-left text-xl"></i></button>
-                    <div class="w-full aspect-[4/3] bg-slate-50 rounded-[50px] flex items-center justify-center p-4 mt-8 mb-6 overflow-hidden">
-                        <img src="${p.imgs[0]}" class="max-h-[120%] w-auto object-contain png-shadow transform -rotate-[10deg] scale-110">
+                <div class="flex flex-col items-center">
+                    <div class="w-full aspect-square bg-slate-50 rounded-[40px] flex items-center justify-center p-8 mb-6 mt-4">
+                        <img src="${p.imgs[0]}" class="max-h-full png-shadow transform -rotate-12">
                     </div>
-                    <h2 style="font-size: ${design.qvTitleSize || 24}px" class="font-black text-slate-900 mb-1 text-center px-2">${p.name}</h2>
-                    <div style="font-size: ${design.qvPriceSize || 22}px" class="font-black text-blue-500 mb-8">${p.price}₾</div>
-                    <button onclick="openFullDetails('${p.name.replace(/'/g, "\\'")}')" class="w-full bg-slate-100 text-slate-900 rounded-[28px] py-5 font-black flex items-center justify-center gap-3">დეტალურად <i class="fa-solid fa-arrow-right text-xs"></i></button>
+                    <h2 class="text-2xl font-black text-slate-900 text-center">${p.name}</h2>
+                    <div class="text-xl font-black text-blue-600 mb-8">${p.price}₾</div>
+                    <button onclick="openFullDetails('${p.name.replace(/'/g, "\\'")}')" class="w-full bg-slate-100 py-5 rounded-[25px] font-black">დეტალურად</button>
                 </div>
             `;
             document.getElementById('bottom-sheet').classList.add('active');
@@ -168,89 +145,89 @@
             selectedSize = null; selectedColor = null;
             const p = products.find(x => x.name === name);
             const content = document.getElementById('details-content');
-            content.style.opacity = '0';
-            setTimeout(() => {
-                content.innerHTML = `
-                    <div class="flex flex-col pb-6">
-                        <div class="flex items-center gap-4 mb-6">
-                            <button onclick="openQuickView('${p.name.replace(/'/g, "\\'")}')" class="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-full"><i class="fa-solid fa-arrow-left text-slate-600"></i></button>
-                            <h2 class="font-black text-xl text-slate-900 truncate">${p.name}</h2>
-                        </div>
-                        <div class="w-full aspect-square bg-slate-50 rounded-[45px] flex items-center justify-center p-8 mb-8 overflow-hidden">
-                            <img src="${p.imgs[0]}" class="max-h-full w-auto object-contain png-shadow">
-                        </div>
-                        <div class="flex justify-between items-end mb-8 px-2">
-                            <div><p class="text-slate-400 text-[10px] font-black uppercase mb-1">ფასი</p><div class="text-3xl font-black text-blue-600">${p.price}₾</div></div>
-                            ${p.status ? `<span class="bg-blue-100 text-blue-600 px-4 py-2 rounded-2xl text-[10px] font-black uppercase">${p.status}</span>` : ''}
-                        </div>
-                        <div class="bg-slate-50 rounded-[30px] p-6 mb-8">
-                            <p class="text-slate-400 text-[10px] font-black uppercase mb-3">აღწერა</p>
-                            <p class="text-slate-600 text-sm font-medium leading-relaxed">${p.desc || 'აღწერა არ არის'}</p>
-                        </div>
-                        ${p.colors && p.colors[0] ? `
-                        <div class="px-2 mb-8">
-                            <p class="text-slate-400 text-[10px] font-black uppercase mb-4">აირჩიეთ ფერი</p>
-                            <div class="flex flex-wrap gap-3">
-                                ${p.colors.map(c => `<button class="color-btn border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-xs bg-white" onclick="selectColor(this, '${p.name.replace(/'/g, "\\'")}')">${c.trim()}</button>`).join('')}
-                            </div>
-                        </div>` : ''}
-                        <div class="px-2 mb-10">
-                            <p class="text-slate-400 text-[10px] font-black uppercase mb-4">აირჩიეთ ზომა</p>
-                            <div class="flex flex-wrap gap-3">
-                                ${p.sizes ? p.sizes.map(s => `<button class="size-btn min-w-[60px] border-2 border-slate-100 rounded-2xl py-4 px-4 font-black text-sm bg-white" onclick="selectSize(this, '${p.name.replace(/'/g, "\\'")}')">${s.trim()}</button>`).join('')}
-                            </div>
-                        </div>
-                        <button id="main-action-btn" class="w-full py-6 font-black text-lg rounded-[30px] transition-all"></button>
+            content.innerHTML = `
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-4 mb-6">
+                        <button onclick="openQuickView('${p.name.replace(/'/g, "\\'")}')" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button>
+                        <h2 class="font-black text-lg truncate">${p.name}</h2>
                     </div>
-                `;
-                content.style.opacity = '1';
-                updateMainButton(p.name);
-            }, 150);
-        }
+                    <div class="w-full aspect-square bg-slate-50 rounded-[40px] flex items-center justify-center p-8 mb-8">
+                        <img src="${p.imgs[0]}" class="max-h-full png-shadow">
+                    </div>
+                    <div class="bg-slate-50 rounded-[30px] p-6 mb-8">
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-2">აღწერა</p>
+                        <p class="text-sm text-slate-600">${p.desc || 'აღწერა არ არის'}</p>
+                    </div>
+                    
+                    <div class="px-2 mb-6">
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-4">აირჩიეთ ზომა</p>
+                        <div class="flex flex-wrap gap-2">
+                            ${p.sizes ? p.sizes.map(s => `<button class="size-btn border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-sm bg-white transition-all" onclick="selectSize(this, '${p.name.replace(/'/g, "\\'")}')">${s.trim()}</button>`).join('') : ''}
+                        </div>
+                    </div>
 
-        function updateMainButton(productName) {
-            const p = products.find(x => x.name === productName);
-            const btn = document.getElementById('main-action-btn');
-            if (!btn) return;
-            const hasSizes = p.sizes && p.sizes[0] !== "";
-            const hasColors = p.colors && p.colors[0] !== "";
+                    ${p.colors && p.colors[0] ? `
+                    <div class="px-2 mb-8">
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-4">აირჩიეთ ფერი</p>
+                        <div class="flex flex-wrap gap-2">
+                            ${p.colors.map(c => `<button class="color-btn border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-sm bg-white transition-all" onclick="selectColor(this, '${p.name.replace(/'/g, "\\'")}')">${c.trim()}</button>`).join('')}
+                        </div>
+                    </div>` : ''}
 
-            if (hasSizes && !selectedSize) {
-                btn.innerText = "ჯერ აირჩიეთ ზომა";
-                btn.className = "w-full bg-slate-200 text-slate-500 rounded-[30px] py-6 font-black text-lg cursor-not-allowed";
-                btn.onclick = null;
-            } else if (hasColors && !selectedColor) {
-                btn.innerText = "ახლა აირჩიეთ ფერი";
-                btn.className = "w-full bg-blue-100 text-blue-600 rounded-[30px] py-6 font-black text-lg active:scale-95";
-                btn.onclick = null;
-            } else {
-                btn.innerHTML = `<i class="fa-solid fa-cart-plus mr-2"></i> კალათაში დამატება`;
-                btn.className = "w-full bg-black text-white rounded-[30px] py-6 font-black text-lg shadow-2xl active:scale-95";
-                btn.onclick = () => addToCart(productName);
-            }
+                    <button id="main-action-btn" class="w-full py-6 font-black text-lg rounded-[30px] transition-all"></button>
+                </div>
+            `;
+            updateMainButton(p.name);
         }
 
         function selectSize(btn, pName) {
-            document.querySelectorAll('.size-btn').forEach(b => b.classList.replace('bg-black', 'bg-white'), b.classList.replace('text-white', 'text-black'));
-            btn.classList.add('bg-black', 'text-white');
+            document.querySelectorAll('.size-btn').forEach(b => {
+                b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9';
+            });
+            btn.style.background = 'black'; btn.style.color = 'white'; btn.style.borderColor = 'black';
             selectedSize = btn.innerText;
             updateMainButton(pName);
             if(window.Telegram) Telegram.WebApp.HapticFeedback.selectionChanged();
         }
 
         function selectColor(btn, pName) {
-            document.querySelectorAll('.color-btn').forEach(b => b.classList.replace('bg-black', 'bg-white'), b.classList.replace('text-white', 'text-black'));
-            btn.classList.add('bg-black', 'text-white');
+            document.querySelectorAll('.color-btn').forEach(b => {
+                b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9';
+            });
+            btn.style.background = 'black'; btn.style.color = 'white'; btn.style.borderColor = 'black';
             selectedColor = btn.innerText;
             updateMainButton(pName);
             if(window.Telegram) Telegram.WebApp.HapticFeedback.selectionChanged();
         }
 
+        function updateMainButton(productName) {
+            const p = products.find(x => x.name === productName);
+            const btn = document.getElementById('main-action-btn');
+            if(!btn) return;
+
+            const hasSizes = p.sizes && p.sizes[0] !== "";
+            const hasColors = p.colors && p.colors[0] !== "";
+
+            if (hasSizes && !selectedSize) {
+                btn.innerText = "ჯერ აირჩიეთ ზომა";
+                btn.className = "w-full bg-slate-200 text-slate-400 rounded-[30px] py-6 font-black cursor-not-allowed";
+                btn.onclick = null;
+            } else if (hasColors && !selectedColor) {
+                btn.innerText = "ახლა აირჩიეთ ფერი";
+                btn.className = "w-full bg-blue-100 text-blue-600 rounded-[30px] py-6 font-black";
+                btn.onclick = null;
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-cart-plus mr-2"></i> კალათაში დამატება`;
+                btn.className = "w-full bg-black text-white rounded-[30px] py-6 font-black shadow-xl active:scale-95";
+                btn.onclick = () => addToCart(productName);
+            }
+        }
+
         function addToCart(name) {
             if(window.Telegram) {
-                Telegram.WebApp.showPopup({ title: "კალათა", message: `${name} დაემატა!` });
+                Telegram.WebApp.showAlert(`${name} (${selectedSize}, ${selectedColor || ''}) დაემატა!`);
                 Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-            }
+            } else { alert(`${name} დაემატა!`); }
             closeDetails();
         }
 
