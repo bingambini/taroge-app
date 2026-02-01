@@ -85,7 +85,9 @@
                         name: d[0], logo: d[1], h_bg: d[2], h_text: d[3], layout: d[4], height: d[7], mainColor: d[10],
                         logoSize: d[11], logoRad: d[12], bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
                         bImage: d[17], bTitleSize: d[18], bSubSize: d[19], bMarginTop: d[20],
-                        bActionType: d[21], bActionValue: d[22], bTimerEnd: d[23]
+                        bActionType: d[21], bActionValue: d[22], bTimerEnd: d[23],
+                        qvTitleSize: d[26], // AA სვეტი
+                        qvPriceSize: d[27]  // AB სვეტი
                     };
                     applyDesign();
                 }
@@ -177,22 +179,36 @@
             }, 1000);
         }
 
-        // ეტაპი 1: სწრაფი ნახვა (ნახევარი ეკრანი)
+        // ეტაპი 1: სწრაფი ნახვა (განახლებული ვიზუალით)
         function openQuickView(name) {
             const p = products.find(x => x.name === name);
             const content = document.getElementById('details-content');
             
+            const titleSize = design.qvTitleSize || 24;
+            const priceSize = design.qvPriceSize || 22;
+
             content.innerHTML = `
-                <div class="flex flex-col items-center text-center p-2">
-                    <div class="w-48 h-48 bg-slate-50 rounded-[40px] flex items-center justify-center p-6 mb-6">
-                        <img src="${p.imgs[0]}" class="max-h-full object-contain png-shadow">
+                <div class="relative flex flex-col items-center">
+                    <button onclick="closeDetails()" class="absolute -top-1 left-0 w-12 h-12 flex items-center justify-start text-slate-400 active:text-black">
+                        <i class="fa-solid fa-chevron-left text-xl"></i>
+                    </button>
+
+                    <div class="w-full aspect-[4/3] bg-slate-50 rounded-[50px] flex items-center justify-center p-4 mt-8 mb-6 relative overflow-hidden">
+                        <img src="${p.imgs[0]}" 
+                             class="max-h-[120%] w-auto object-contain png-shadow transform -rotate-[10deg] scale-110">
                     </div>
-                    <h2 class="font-black text-2xl text-slate-900 mb-2">${p.name}</h2>
-                    <div class="text-xl font-black text-blue-500 mb-8">${p.price}₾</div>
+
+                    <h2 style="font-size: ${titleSize}px" class="font-black text-slate-900 mb-1 text-center px-2 leading-tight">
+                        ${p.name}
+                    </h2>
+                    
+                    <div style="font-size: ${priceSize}px" class="font-black text-blue-500 mb-8">
+                        ${p.price}₾
+                    </div>
                     
                     <button onclick="openFullDetails('${p.name.replace(/'/g, "\\'")}')" 
-                        class="w-full bg-slate-100 text-slate-900 rounded-[24px] py-5 font-black flex items-center justify-center gap-3 active:scale-95 transition-all">
-                        დეტალურად <i class="fa-solid fa-chevron-right text-xs"></i>
+                        class="w-full bg-slate-100 text-slate-900 rounded-[28px] py-5 font-black flex items-center justify-center gap-3 active:scale-95 transition-all">
+                        დეტალურად <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </div>
             `;
@@ -202,7 +218,6 @@
             if(window.Telegram) Telegram.WebApp.HapticFeedback.impactOccurred('light');
         }
 
-        // ეტაპი 2: სრული დეტალები
         function openFullDetails(name) {
             const p = products.find(x => x.name === name);
             const content = document.getElementById('details-content');
