@@ -12,17 +12,25 @@
         :root { --bg: #f8f9fb; --main: #3b82f6; --white: #ffffff; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; overflow-x: hidden; }
         
-        /* პრემიუმ ეფექტები */
         .png-shadow { filter: drop-shadow(0 25px 35px rgba(0,0,0,0.3)); }
         .card-shadow { box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); }
         
-        /* Bottom Sheet ანიმაცია */
-        #bottom-sheet { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; }
+        #bottom-sheet { 
+            transform: translateY(100%); 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            z-index: 2000; 
+            height: auto;
+            max-height: 94vh;
+            overflow-y: auto;
+        }
         #bottom-sheet.active { transform: translateY(0); }
         .overlay { display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1500; }
         .overlay.active { display: block; }
         
         .size-btn.active { background: #000 !important; color: #fff !important; border-color: #000 !important; }
+        
+        /* სქროლის დამალვა */
+        #bottom-sheet::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
@@ -46,9 +54,10 @@
     </div>
 
     <div id="overlay" class="overlay fixed inset-0" onclick="closeDetails()"></div>
-    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-12 max-w-[600px] mx-auto">
-        <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto my-4"></div>
-        <div id="details-content"></div>
+    
+    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-10 max-w-[600px] mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.1)]">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-4 cursor-pointer" onclick="closeDetails()"></div>
+        <div id="details-content" class="transition-all duration-300"></div>
     </div>
 
     <nav class="fixed bottom-6 left-5 right-5 h-16 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-2xl max-w-[560px] mx-auto">
@@ -68,7 +77,6 @@
 
         async function init() {
             try {
-                // დიზაინის ჩატვირთვა
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 if(dRows[0]) {
@@ -82,7 +90,6 @@
                     applyDesign();
                 }
 
-                // პროდუქტების ჩატვირთვა
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
@@ -111,7 +118,6 @@
         }
 
         function renderUI() {
-            // ბანერის რენდერი
             const banner = document.getElementById('banner-btn');
             const topP = products.find(p => p.status.includes('top')) || products[0];
             
@@ -136,12 +142,11 @@
 
             if(design.bActionType === 'timer') startTimer();
 
-            // 4 ბარათის რენდერი
             const grid = document.getElementById('products-grid');
             grid.innerHTML = products.slice(0, 4).map(p => {
                 const disc = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
                 return `
-                    <div class="bg-white rounded-[32px] p-3 card-shadow active:scale-95 transition-all" onclick="openDetails('${p.name.replace(/'/g, "\\'")}')">
+                    <div class="bg-white rounded-[32px] p-3 card-shadow active:scale-95 transition-all" onclick="openQuickView('${p.name.replace(/'/g, "\\'")}')">
                         <div class="relative aspect-square bg-slate-50 rounded-[24px] mb-3 flex items-center justify-center p-4 overflow-hidden">
                             ${disc ? `<div class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-lg">-${disc}%</div>` : ''}
                             <img src="${p.imgs[0]}" class="w-full h-full object-contain png-shadow">
@@ -172,32 +177,69 @@
             }, 1000);
         }
 
-        function openDetails(name) {
+        // ეტაპი 1: სწრაფი ნახვა (ნახევარი ეკრანი)
+        function openQuickView(name) {
             const p = products.find(x => x.name === name);
             const content = document.getElementById('details-content');
+            
             content.innerHTML = `
-                <div class="flex gap-5 mb-8">
-                    <div class="w-32 h-32 bg-slate-50 rounded-[30px] flex items-center justify-center p-4">
+                <div class="flex flex-col items-center text-center p-2">
+                    <div class="w-48 h-48 bg-slate-50 rounded-[40px] flex items-center justify-center p-6 mb-6">
                         <img src="${p.imgs[0]}" class="max-h-full object-contain png-shadow">
                     </div>
-                    <div class="flex-1 flex flex-col justify-center">
-                        <h2 class="font-black text-xl text-slate-900 mb-1">${p.name}</h2>
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl font-black text-blue-500">${p.price}₾</span>
-                            ${p.oldPrice ? `<span class="text-sm text-slate-300 line-through">${p.oldPrice}₾</span>` : ''}
-                        </div>
-                    </div>
+                    <h2 class="font-black text-2xl text-slate-900 mb-2">${p.name}</h2>
+                    <div class="text-xl font-black text-blue-500 mb-8">${p.price}₾</div>
+                    
+                    <button onclick="openFullDetails('${p.name.replace(/'/g, "\\'")}')" 
+                        class="w-full bg-slate-100 text-slate-900 rounded-[24px] py-5 font-black flex items-center justify-center gap-3 active:scale-95 transition-all">
+                        დეტალურად <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
                 </div>
-                <div class="mb-8">
-                    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">აირჩიეთ ზომა</p>
-                    <div class="flex flex-wrap gap-2">
-                        ${p.sizes?.map(s => `<button class="size-btn border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-sm transition-all" onclick="selectSize(this)">${s.trim()}</button>`).join('')}
-                    </div>
-                </div>
-                <button onclick="addToCart('${p.name}')" class="w-full bg-black text-white rounded-[24px] py-5 font-bold text-lg shadow-xl active:scale-95 transition-all">კალათაში დამატება</button>
             `;
+            
             document.getElementById('bottom-sheet').classList.add('active');
             document.getElementById('overlay').classList.add('active');
+            if(window.Telegram) Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        }
+
+        // ეტაპი 2: სრული დეტალები
+        function openFullDetails(name) {
+            const p = products.find(x => x.name === name);
+            const content = document.getElementById('details-content');
+            
+            content.style.opacity = '0';
+            setTimeout(() => {
+                content.innerHTML = `
+                    <div class="space-y-8 pb-4">
+                        <div class="flex justify-between items-start">
+                            <h2 class="font-black text-2xl text-slate-900 w-2/3 leading-tight">${p.name}</h2>
+                            <div class="text-right font-black text-2xl text-blue-500">${p.price}₾</div>
+                        </div>
+
+                        <div class="w-full aspect-square bg-slate-50 rounded-[40px] flex items-center justify-center p-8">
+                            <img src="${p.imgs[0]}" class="max-h-full object-contain png-shadow">
+                        </div>
+
+                        <div>
+                            <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-3">აღწერა</p>
+                            <p class="text-slate-600 leading-relaxed text-sm font-medium">${p.desc || 'აღწერა არ არის'}</p>
+                        </div>
+
+                        <div>
+                            <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">აირჩიეთ ზომა</p>
+                            <div class="flex flex-wrap gap-2">
+                                ${p.sizes?.map(s => `<button class="size-btn border-2 border-slate-100 rounded-2xl px-6 py-3 font-bold text-sm transition-all" onclick="selectSize(this)">${s.trim()}</button>`).join('')}
+                            </div>
+                        </div>
+
+                        <button onclick="addToCart('${p.name}')" class="w-full bg-black text-white rounded-[24px] py-5 font-black text-lg shadow-2xl active:scale-95 transition-all mt-4">
+                            კალათაში დამატება
+                        </button>
+                    </div>
+                `;
+                content.style.opacity = '1';
+            }, 150);
+
             if(window.Telegram) Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
 
@@ -209,14 +251,7 @@
         function selectSize(btn) { 
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active')); 
             btn.classList.add('active'); 
-            Telegram.WebApp.HapticFeedback.selectionChanged();
-        }
-
-        function parseCSV(t) {
-            return t.split('\n').slice(1).map(l => {
-                const m = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-                return m ? m.map(x => x.replace(/^"|"$/g, '')) : [];
-            });
+            if(window.Telegram) Telegram.WebApp.HapticFeedback.selectionChanged();
         }
 
         function handleBannerAction() {
@@ -228,6 +263,13 @@
             } else if(type === 'info') {
                 Telegram.WebApp.showPopup({ message: val });
             }
+        }
+
+        function parseCSV(t) {
+            return t.split('\n').slice(1).map(l => {
+                const m = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                return m ? m.map(x => x.replace(/^"|"$/g, '')) : [];
+            });
         }
 
         init();
