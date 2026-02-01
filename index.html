@@ -21,6 +21,7 @@
         #bottom-sheet.active { transform: translateY(0); }
         .overlay { display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1500; }
         .overlay.active { display: block; }
+        .size-btn.active { background: #000 !important; color: #fff !important; border-color: #000 !important; }
         #bottom-sheet::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -44,7 +45,7 @@
     </div>
 
     <div id="overlay" class="overlay fixed inset-0" onclick="closeDetails()"></div>
-    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-10 max-w-[600px] mx-auto shadow-2xl">
+    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-10 max-w-[600px] mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.1)]">
         <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-4 cursor-pointer" onclick="closeDetails()"></div>
         <div id="details-content" class="transition-all duration-300"></div>
     </div>
@@ -62,6 +63,7 @@
 
         let products = [];
         let design = {};
+        let timerId;
         let selectedSize = null;
         let selectedColor = null;
 
@@ -75,14 +77,15 @@
                         name: d[0], logo: d[1], h_bg: d[2], h_text: d[3], height: d[7], mainColor: d[10],
                         logoSize: d[11], logoRad: d[12], bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
                         bImage: d[17], bTitleSize: d[18], bSubSize: d[19], bMarginTop: d[20],
-                        bActionType: d[21], bActionValue: d[22], qvTitleSize: d[26], qvPriceSize: d[27]
+                        bActionType: d[21], bActionValue: d[22], bTimerEnd: d[23],
+                        qvTitleSize: d[26], qvPriceSize: d[27]
                     };
                     applyDesign();
                 }
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
-                    name: r[0], price: r[1], imgs: r[2]?.split(',').map(s=>s.trim()), 
+                    name: r[0], price: r[1], imgs: r[2]?.split(',').map(s=>s.trim()), oldPrice: r[3],
                     status: r[4] || "", desc: r[5], sizes: r[8]?.split(','), colors: r[9]?.split(',')
                 }));
                 renderUI();
@@ -104,37 +107,73 @@
         }
 
         function renderUI() {
-            const grid = document.getElementById('products-grid');
-            grid.innerHTML = products.slice(0, 10).map(p => `
-                <div class="bg-white rounded-[32px] p-3 card-shadow active:scale-95 transition-all" onclick="openQuickView('${p.name.replace(/'/g, "\\'")}')">
-                    <div class="relative aspect-square bg-slate-50 rounded-[24px] mb-3 flex items-center justify-center p-4">
-                        <img src="${p.imgs[0]}" class="w-full h-full object-contain png-shadow">
-                    </div>
-                    <h3 class="font-bold text-[12px] px-1 truncate text-slate-800">${p.name}</h3>
-                    <b class="text-sm font-black px-1 text-blue-600">${p.price}₾</b>
-                </div>
-            `).join('');
-            
             const banner = document.getElementById('banner-btn');
-            banner.className = "relative cursor-pointer mt-4";
-            banner.innerHTML = `<div class="bg-slate-900 rounded-[35px] p-8 h-40 flex flex-col justify-center overflow-hidden relative">
-                <h2 class="text-white text-xl font-black z-10">${design.bTitle || 'ახალი კოლექცია'}</h2>
-                <button class="bg-blue-600 text-white w-fit px-6 py-2 rounded-xl mt-3 text-xs font-bold z-10">${design.bBtn || 'ნახვა'}</button>
-                <img src="${products[0]?.imgs[0]}" class="absolute -right-4 top-0 h-full object-contain opacity-50">
-            </div>`;
+            const topP = products.find(p => p.status.includes('top')) || products[0];
+            banner.className = "relative cursor-pointer transition-all active:scale-95";
+            banner.style.height = `${design.bHeight || 180}px`;
+            banner.style.marginTop = `${design.bMarginTop || 16}px`;
+            
+            banner.innerHTML = `
+                <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black rounded-[40px] shadow-2xl overflow-hidden">
+                    <div class="z-10 relative p-8 h-full flex flex-col justify-center">
+                        <span id="b-timer-sub" style="font-size: ${design.bSubSize}px" class="text-blue-400 font-black tracking-[0.2em] uppercase mb-1">${design.bSub}</span>
+                        <h2 style="font-size: ${design.bTitleSize}px" class="text-white font-black leading-tight w-[60%]">${design.bTitle || topP.name}</h2>
+                        <div id="banner-footer" class="mt-4 flex items-center gap-3">
+                            <span class="text-white font-bold text-xl">${topP.price}₾</span>
+                            <div class="bg-blue-500 px-5 py-2 rounded-2xl text-white text-[10px] font-extrabold uppercase tracking-wider">${design.bBtn}</div>
+                        </div>
+                    </div>
+                </div>
+                <img src="${design.bImage || topP.imgs[0]}" class="absolute -right-6 -top-12 w-[65%] h-[140%] object-contain z-20 png-shadow rotate-[-12deg] pointer-events-none">
+            `;
+            if(design.bActionType === 'timer') startTimer();
+
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = products.slice(0, 10).map(p => {
+                const disc = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
+                return `
+                    <div class="bg-white rounded-[32px] p-3 card-shadow active:scale-95 transition-all" onclick="openQuickView('${p.name.replace(/'/g, "\\'")}')">
+                        <div class="relative aspect-square bg-slate-50 rounded-[24px] mb-3 flex items-center justify-center p-4">
+                            ${disc ? `<div class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-lg">-${disc}%</div>` : ''}
+                            <img src="${p.imgs[0]}" class="w-full h-full object-contain png-shadow">
+                        </div>
+                        <h3 class="font-bold text-[12px] px-1 truncate">${p.name}</h3>
+                        <b class="text-sm font-black text-blue-600 px-1">${p.price}₾</b>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function startTimer() {
+            const target = new Date(design.bTimerEnd).getTime();
+            const footer = document.getElementById('banner-footer');
+            clearInterval(timerId);
+            timerId = setInterval(() => {
+                const now = new Date().getTime();
+                const diff = target - now;
+                if(diff < 0) { clearInterval(timerId); return; }
+                const h = Math.floor(diff/(1000*60*60)), m = Math.floor((diff%(1000*60*60))/(1000*60)), s = Math.floor((diff%(1000*60))/1000);
+                footer.innerHTML = `<div class="flex gap-2 text-white font-black text-lg">
+                    <div class="bg-white/10 px-3 py-1 rounded-xl">${h}სთ</div>
+                    <div class="bg-white/10 px-3 py-1 rounded-xl">${m}წთ</div>
+                    <div class="bg-blue-500 px-3 py-1 rounded-xl shadow-lg">${s}წმ</div>
+                </div>`;
+            }, 1000);
         }
 
         function openQuickView(name) {
             const p = products.find(x => x.name === name);
             const content = document.getElementById('details-content');
             content.innerHTML = `
-                <div class="flex flex-col items-center">
-                    <div class="w-full aspect-square bg-slate-50 rounded-[40px] flex items-center justify-center p-8 mb-6 mt-4">
-                        <img src="${p.imgs[0]}" class="max-h-full png-shadow transform -rotate-12">
+                <div class="relative flex flex-col items-center">
+                    <div class="w-full aspect-[4/3] bg-slate-50 rounded-[50px] flex items-center justify-center p-4 mt-8 mb-6 relative overflow-hidden">
+                        <img src="${p.imgs[0]}" class="max-h-[120%] w-auto object-contain png-shadow transform -rotate-[10deg] scale-110">
                     </div>
-                    <h2 class="text-2xl font-black text-slate-900 text-center">${p.name}</h2>
-                    <div class="text-xl font-black text-blue-600 mb-8">${p.price}₾</div>
-                    <button onclick="openFullDetails('${p.name.replace(/'/g, "\\'")}')" class="w-full bg-slate-100 py-5 rounded-[25px] font-black">დეტალურად</button>
+                    <h2 style="font-size: ${design.qvTitleSize}px" class="font-black text-slate-900 mb-1 text-center px-2">${p.name}</h2>
+                    <div style="font-size: ${design.qvPriceSize}px" class="font-black text-blue-500 mb-8">${p.price}₾</div>
+                    <button onclick="openFullDetails('${p.name.replace(/'/g, "\\'")}')" class="w-full bg-slate-100 text-slate-900 rounded-[28px] py-5 font-black flex items-center justify-center gap-3 active:scale-95 transition-all">
+                        დეტალურად <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
                 </div>
             `;
             document.getElementById('bottom-sheet').classList.add('active');
@@ -146,34 +185,30 @@
             const p = products.find(x => x.name === name);
             const content = document.getElementById('details-content');
             content.innerHTML = `
-                <div class="flex flex-col">
-                    <div class="flex items-center gap-4 mb-6">
-                        <button onclick="openQuickView('${p.name.replace(/'/g, "\\'")}')" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button>
-                        <h2 class="font-black text-lg truncate">${p.name}</h2>
+                <div class="space-y-8 pb-4">
+                    <div class="flex justify-between items-start">
+                        <h2 class="font-black text-2xl text-slate-900 w-2/3 leading-tight">${p.name}</h2>
+                        <div class="text-right font-black text-2xl text-blue-500">${p.price}₾</div>
                     </div>
-                    <div class="w-full aspect-square bg-slate-50 rounded-[40px] flex items-center justify-center p-8 mb-8">
-                        <img src="${p.imgs[0]}" class="max-h-full png-shadow">
+                    <div class="w-full aspect-square bg-slate-50 rounded-[40px] flex items-center justify-center p-8">
+                        <img src="${p.imgs[0]}" class="max-h-full object-contain png-shadow">
                     </div>
-                    <div class="bg-slate-50 rounded-[30px] p-6 mb-8">
-                        <p class="text-[10px] font-black text-slate-400 uppercase mb-2">აღწერა</p>
-                        <p class="text-sm text-slate-600">${p.desc || 'აღწერა არ არის'}</p>
+                    <div>
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-3">აღწერა</p>
+                        <p class="text-slate-600 text-sm">${p.desc || 'აღწერა არ არის'}</p>
                     </div>
-                    
-                    <div class="px-2 mb-6">
-                        <p class="text-[10px] font-black text-slate-400 uppercase mb-4">აირჩიეთ ზომა</p>
+                    <div>
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">აირჩიეთ ზომა</p>
                         <div class="flex flex-wrap gap-2">
-                            ${p.sizes ? p.sizes.map(s => `<button class="size-btn border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-sm bg-white transition-all" onclick="selectSize(this, '${p.name.replace(/'/g, "\\'")}')">${s.trim()}</button>`).join('') : ''}
+                            ${p.sizes ? p.sizes.map(s => `<button class="size-btn border-2 border-slate-100 rounded-2xl px-6 py-3 font-bold text-sm bg-white" onclick="selectSize(this, '${p.name.replace(/'/g, "\\'")}')">${s.trim()}</button>`).join('') : ''}
                         </div>
                     </div>
-
-                    ${p.colors && p.colors[0] ? `
-                    <div class="px-2 mb-8">
-                        <p class="text-[10px] font-black text-slate-400 uppercase mb-4">აირჩიეთ ფერი</p>
+                    ${p.colors && p.colors[0] ? `<div>
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">აირჩიეთ ფერი</p>
                         <div class="flex flex-wrap gap-2">
-                            ${p.colors.map(c => `<button class="color-btn border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-sm bg-white transition-all" onclick="selectColor(this, '${p.name.replace(/'/g, "\\'")}')">${c.trim()}</button>`).join('')}
+                            ${p.colors.map(c => `<button class="color-btn border-2 border-slate-100 rounded-2xl px-6 py-3 font-bold text-sm bg-white" onclick="selectColor(this, '${p.name.replace(/'/g, "\\'")}')">${c.trim()}</button>`).join('')}
                         </div>
                     </div>` : ''}
-
                     <button id="main-action-btn" class="w-full py-6 font-black text-lg rounded-[30px] transition-all"></button>
                 </div>
             `;
@@ -187,7 +222,6 @@
             btn.style.background = 'black'; btn.style.color = 'white'; btn.style.borderColor = 'black';
             selectedSize = btn.innerText;
             updateMainButton(pName);
-            if(window.Telegram) Telegram.WebApp.HapticFeedback.selectionChanged();
         }
 
         function selectColor(btn, pName) {
@@ -197,38 +231,39 @@
             btn.style.background = 'black'; btn.style.color = 'white'; btn.style.borderColor = 'black';
             selectedColor = btn.innerText;
             updateMainButton(pName);
-            if(window.Telegram) Telegram.WebApp.HapticFeedback.selectionChanged();
         }
 
         function updateMainButton(productName) {
             const p = products.find(x => x.name === productName);
             const btn = document.getElementById('main-action-btn');
             if(!btn) return;
+            const hasS = p.sizes && p.sizes[0] !== "";
+            const hasC = p.colors && p.colors[0] !== "";
 
-            const hasSizes = p.sizes && p.sizes[0] !== "";
-            const hasColors = p.colors && p.colors[0] !== "";
-
-            if (hasSizes && !selectedSize) {
+            if (hasS && !selectedSize) {
                 btn.innerText = "ჯერ აირჩიეთ ზომა";
-                btn.className = "w-full bg-slate-200 text-slate-400 rounded-[30px] py-6 font-black cursor-not-allowed";
+                btn.className = "w-full bg-slate-100 text-slate-400 rounded-[30px] py-6 font-black cursor-not-allowed";
                 btn.onclick = null;
-            } else if (hasColors && !selectedColor) {
-                btn.innerText = "ახლა აირჩიეთ ფერი";
+            } else if (hasC && !selectedColor) {
+                btn.innerText = "აირჩიეთ ფერი";
                 btn.className = "w-full bg-blue-100 text-blue-600 rounded-[30px] py-6 font-black";
                 btn.onclick = null;
             } else {
-                btn.innerHTML = `<i class="fa-solid fa-cart-plus mr-2"></i> კალათაში დამატება`;
-                btn.className = "w-full bg-black text-white rounded-[30px] py-6 font-black shadow-xl active:scale-95";
-                btn.onclick = () => addToCart(productName);
+                btn.innerText = "კალათაში დამატება";
+                btn.className = "w-full bg-black text-white rounded-[30px] py-6 font-black shadow-2xl active:scale-95";
+                btn.onclick = () => { Telegram.WebApp.showAlert("დაემატა კალათაში!"); closeDetails(); };
             }
         }
 
-        function addToCart(name) {
-            if(window.Telegram) {
-                Telegram.WebApp.showAlert(`${name} (${selectedSize}, ${selectedColor || ''}) დაემატა!`);
-                Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-            } else { alert(`${name} დაემატა!`); }
-            closeDetails();
+        function handleBannerAction() {
+            const type = design.bActionType;
+            const val = design.bActionValue;
+            if(type === 'copy') {
+                navigator.clipboard.writeText(val);
+                Telegram.WebApp.showAlert("დაკოპირდა: " + val);
+            } else if(type === 'info') {
+                Telegram.WebApp.showPopup({ message: val });
+            }
         }
 
         function closeDetails() { 
