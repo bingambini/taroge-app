@@ -14,8 +14,21 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; }
 
         /* ჰედერის სტილები */
-        #main-header { transition: all 0.4s ease; z-index: 1000; }
-        .floating-header { margin: 10px 15px; border-radius: 20px; }
+/* ჰედერის გარანტირებული გამოჩენა */
+#main-header {
+    position: relative; /* რომ არ გაიჭედოს სადმე */
+    width: 100%;
+    display: flex;
+    align-items: center;
+    z-index: 2000; /* ყველაფერზე მაღლა */
+    transition: all 0.3s ease;
+}
+
+.floating-header {
+    margin: 10px auto;
+    width: 92% !important;
+    border-radius: 20px;
+}
         
         /* ბანერის სტილები */
         #hero-banner { 
@@ -66,30 +79,46 @@
             } catch (e) { console.error("Load failed", e); }
         }
 
-        function renderHeader(h) {
+function renderHeader(h) {
             const el = document.getElementById('main-header');
-            if (h.status !== 'active') { el.style.display = 'none'; return; }
+            if (!h || h.status !== 'active') { 
+                el.style.display = 'none'; 
+                return; 
+            }
 
-            // დინამიური სტილები შიტიდან
+            // 1. ბაზისური სტილები
+            el.style.display = 'flex';
             el.style.backgroundColor = h.bg;
             el.style.height = h.height + "px";
             el.style.color = h.textColor;
-            el.style.padding = `0 ${h.padding}px`;
+            el.style.padding = `0 ${h.padding || 20}px`;
             
-            if (h.style === 'floating') el.classList.add('floating-header');
-            if (h.shadow === 'sm') el.style.boxShadow = '0 4px 10px rgba(0,0,0,0.05)';
+            // 2. კლასების გაწმენდა და ხელახლა დამატება
+            el.className = "flex items-center transition-all duration-300";
+            
+            if (h.style === 'floating') {
+                el.classList.add('floating-header');
+            }
+            
+            // 3. განლაგება (Layout)
+            if (h.layout === 'center') {
+                el.style.justifyContent = 'center';
+            } else {
+                el.style.justifyContent = 'space-between';
+            }
 
-            const justify = h.layout === 'center' ? 'justify-center' : 'justify-between';
-            el.className += ` flex items-center ${justify}`;
+            if (h.shadow === 'sm') el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
 
+            // 4. შიგთავსი
             el.innerHTML = `
                 <div class="flex items-center gap-3">
-                    <img src="${h.logo}" style="width: ${h.logoSize}px; border-radius: ${h.logoRadius}%">
+                    <img src="${h.logo}" style="width: ${h.logoSize}px; border-radius: ${h.logoRadius}%" class="object-contain">
                     <span style="font-size: ${h.fontSize}; font-weight: 800">${h.name}</span>
                 </div>
-                ${h.layout !== 'center' ? `<i class="fa-solid fa-bell" style="color: ${h.iconColor}; font-size: 1.2rem;"></i>` : ''}
+                ${h.layout !== 'center' ? `<i class="fa-solid fa-bell" style="color: ${h.iconColor || h.textColor}; font-size: 1.2rem;"></i>` : ''}
             `;
         }
+
 
         function renderBanner(b) {
             const el = document.getElementById('hero-banner');
