@@ -11,17 +11,24 @@
     <style>
         :root { --bg: #f8f9fb; --main: #3b82f6; --white: #ffffff; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; overflow-x: hidden; }
+        
+        /* ჩრდილები სურათებისთვის და ბარათებისთვის */
         .png-shadow { filter: drop-shadow(0 25px 35px rgba(0,0,0,0.3)); }
         .card-shadow { box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); }
+        
+        /* პროდუქტის დეტალების ფანჯარა (Bottom Sheet) */
         #bottom-sheet { 
             transform: translateY(100%); 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
             z-index: 2000; height: auto; max-height: 94vh; overflow-y: auto;
         }
         #bottom-sheet.active { transform: translateY(0); }
+        
+        /* უკანა ფონის დაბინდვა დეტალების გახსნისას */
         .overlay { display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1500; }
         .overlay.active { display: block; }
-        .size-btn.active { background: #000 !important; color: #fff !important; border-color: #000 !important; }
+        
+        /* სქროლის დამალვა */
         #bottom-sheet::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -40,12 +47,14 @@
             <div id="banner-btn" class="relative" onclick="handleBannerAction()"></div>
         </div>
 
-        <div id="section-title" class="px-6 font-black text-slate-400 text-[10px] uppercase tracking-[0.2em] mb-4 mt-8">ახალი კოლექცია</div>
+        <div id="section-title" class="px-6 font-black text-slate-400 text-[10px] uppercase tracking-[0.2em] mb-4">ახალი კოლექცია</div>
+        
         <div id="products-grid" class="grid grid-cols-2 gap-4 px-4"></div>
     </div>
 
     <div id="overlay" class="overlay fixed inset-0" onclick="closeDetails()"></div>
-    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-10 max-w-[600px] mx-auto shadow-[0_-20px_40px_rgba(0,0,0,0.1)]">
+    
+    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-10 max-w-[600px] mx-auto shadow-2xl">
         <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-4 cursor-pointer" onclick="closeDetails()"></div>
         <div id="details-content" class="transition-all duration-300"></div>
     </div>
@@ -58,6 +67,7 @@
     </nav>
 
     <script>
+        // Google Sheets მონაცემები
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
 
@@ -67,8 +77,10 @@
         let selectedSize = null;
         let selectedColor = null;
 
+        // საწყისი ფუნქცია: მონაცემების წამოღება Google Sheets-იდან
         async function init() {
             try {
+                // დიზაინის მონაცემების წამოღება (GID: 856847150)
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 if(dRows[0]) {
@@ -78,10 +90,13 @@
                         logoSize: d[11], logoRad: d[12], bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
                         bImage: d[17], bTitleSize: d[18], bSubSize: d[19], bMarginTop: d[20],
                         bActionType: d[21], bActionValue: d[22], bTimerEnd: d[23],
+                        sectionMarginTop: d[24], // <--- აქ დაემატა მანძილი (Sheets-ში სვეტი Y ან შესაბამისი ინდექსი)
                         qvTitleSize: d[26], qvPriceSize: d[27]
                     };
                     applyDesign();
                 }
+                
+                // პროდუქტების მონაცემების წამოღება (GID: 0)
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
@@ -92,6 +107,7 @@
             } catch(e) { console.error(e); }
         }
 
+        // დიზაინის პარამეტრების მორგება
         function applyDesign() {
             document.getElementById('shop-name').innerText = design.name;
             if(design.logo) {
@@ -104,12 +120,17 @@
             h.style.height = `${design.height || 70}px`;
             h.style.background = design.h_bg;
             h.style.color = design.h_text;
+            
+            // სექციის სათაურის ზედა მანძილის დარეგულირება
+            const sTitle = document.getElementById('section-title');
+            sTitle.style.marginTop = `${design.sectionMarginTop || 32}px`;
         }
 
+        // ინტერფეისის აწყობა (ბანერი და პროდუქტები)
         function renderUI() {
             const banner = document.getElementById('banner-btn');
             const topP = products.find(p => p.status.includes('top')) || products[0];
-            banner.className = "relative cursor-pointer transition-all active:scale-95";
+            
             banner.style.height = `${design.bHeight || 180}px`;
             banner.style.marginTop = `${design.bMarginTop || 16}px`;
             
@@ -126,8 +147,10 @@
                 </div>
                 <img src="${design.bImage || topP.imgs[0]}" class="absolute -right-6 -top-12 w-[65%] h-[140%] object-contain z-20 png-shadow rotate-[-12deg] pointer-events-none">
             `;
+            
             if(design.bActionType === 'timer') startTimer();
 
+            // პროდუქტების სიის გამოტანა
             const grid = document.getElementById('products-grid');
             grid.innerHTML = products.slice(0, 10).map(p => {
                 const disc = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
@@ -144,6 +167,7 @@
             }).join('');
         }
 
+        // უკუათვლის ტაიმერი
         function startTimer() {
             const target = new Date(design.bTimerEnd).getTime();
             const footer = document.getElementById('banner-footer');
@@ -161,6 +185,7 @@
             }, 1000);
         }
 
+        // სწრაფი ნახვის ფანჯარა
         function openQuickView(name) {
             const p = products.find(x => x.name === name);
             const content = document.getElementById('details-content');
@@ -180,6 +205,7 @@
             document.getElementById('overlay').classList.add('active');
         }
 
+        // სრული დეტალების ფანჯარა
         function openFullDetails(name) {
             selectedSize = null; selectedColor = null;
             const p = products.find(x => x.name === name);
@@ -215,6 +241,7 @@
             updateMainButton(p.name);
         }
 
+        // ზომის არჩევის ლოგიკა
         function selectSize(btn, pName) {
             document.querySelectorAll('.size-btn').forEach(b => {
                 b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9';
@@ -224,6 +251,7 @@
             updateMainButton(pName);
         }
 
+        // ფერის არჩევის ლოგიკა
         function selectColor(btn, pName) {
             document.querySelectorAll('.color-btn').forEach(b => {
                 b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9';
@@ -233,6 +261,7 @@
             updateMainButton(pName);
         }
 
+        // კალათაში დამატების ღილაკის განახლება
         function updateMainButton(productName) {
             const p = products.find(x => x.name === productName);
             const btn = document.getElementById('main-action-btn');
@@ -255,6 +284,7 @@
             }
         }
 
+        // ბანერზე დაჭერის რეაქცია
         function handleBannerAction() {
             const type = design.bActionType;
             const val = design.bActionValue;
@@ -266,11 +296,13 @@
             }
         }
 
+        // ფანჯრის დახურვა
         function closeDetails() { 
             document.getElementById('bottom-sheet').classList.remove('active'); 
             document.getElementById('overlay').classList.remove('active'); 
         }
 
+        // CSV მონაცემების დამუშავება
         function parseCSV(t) {
             return t.split('\n').slice(1).map(l => {
                 const m = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
@@ -278,6 +310,7 @@
             });
         }
 
+        // აპლიკაციის გაშვება
         init();
     </script>
 </body>
