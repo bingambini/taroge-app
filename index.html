@@ -65,7 +65,6 @@
 
         async function init() {
             try {
-                // დიზაინის წამოღება
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 if(dRows[0]) {
@@ -80,13 +79,13 @@
                     applyDesign();
                 }
                 
-                // პროდუქტების წამოღება
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
                     name: r[0], price: r[1], imgs: r[2]?.split(',').map(s=>s.trim()), 
                     oldPrice: r[3], status: r[4] || "", desc: r[5], 
-                    inStock: r[6], sizes: r[8]?.split(','), colors: r[9]?.split(',')
+                    inStock: r[6], sizes: r[8]?.split(','), colors: r[9]?.split(','),
+                    id: r[10] // <--- K სვეტი (ID)
                 }));
                 renderUI();
             } catch(e) { console.error(e); }
@@ -131,7 +130,7 @@
             grid.innerHTML = products.filter(p => p.inStock === 'Yes').map(p => {
                 const disc = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
                 return `
-                    <div class="bg-white rounded-[32px] p-3 card-shadow active:scale-95 transition-all" onclick="openQuickView('${p.name.replace(/'/g, "\\'")}')">
+                    <div class="bg-white rounded-[32px] p-3 card-shadow active:scale-95 transition-all" onclick="openQuickViewById('${p.id}')">
                         <div class="relative aspect-square bg-slate-50 rounded-[24px] mb-3 flex items-center justify-center p-4">
                             ${disc > 0 ? `<div class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-lg">-${disc}%</div>` : ''}
                             <img src="${p.imgs[0]}" class="w-full h-full object-contain png-shadow">
@@ -143,8 +142,11 @@
             }).join('');
         }
 
-        function openQuickView(name) {
-            const p = products.find(x => x.name === name);
+        // ახალი ფუნქცია ID-ით მოსაძებნად
+        function openQuickViewById(id) {
+            const p = products.find(x => String(x.id) === String(id));
+            if (!p) return;
+            
             const content = document.getElementById('details-content');
             content.innerHTML = `
                 <div class="relative flex flex-col items-center">
@@ -153,7 +155,7 @@
                     </div>
                     <h2 style="font-size: ${design.qvTitleSize}px" class="font-black text-slate-900 mb-1 text-center px-2">${p.name}</h2>
                     <div style="font-size: ${design.qvPriceSize}px" class="font-black text-blue-500 mb-8">${p.price}₾</div>
-                    <button onclick="openFullDetails('${p.name.replace(/'/g, "\\'")}')" class="w-full bg-slate-100 text-slate-900 rounded-[28px] py-5 font-black flex items-center justify-center gap-3">
+                    <button onclick="openFullDetailsById('${p.id}')" class="w-full bg-slate-100 text-slate-900 rounded-[28px] py-5 font-black flex items-center justify-center gap-3">
                         დეტალურად <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </div>
@@ -162,9 +164,11 @@
             document.getElementById('overlay').classList.add('active');
         }
 
-        function openFullDetails(name) {
+        function openFullDetailsById(id) {
             selectedSize = null; selectedColor = null;
-            const p = products.find(x => x.name === name);
+            const p = products.find(x => String(x.id) === String(id));
+            if (!p) return;
+
             const content = document.getElementById('details-content');
             content.innerHTML = `
                 <div class="space-y-8 pb-4">
@@ -182,35 +186,35 @@
                     <div>
                         <p class="text-slate-400 text-[10px] font-black uppercase mb-4">ზომა</p>
                         <div class="flex flex-wrap gap-2">
-                            ${p.sizes ? p.sizes.map(s => `<button class="size-btn border-2 border-slate-100 rounded-2xl px-6 py-3 font-bold text-sm bg-white" onclick="selectSize(this, '${p.name.replace(/'/g, "\\'")}')">${s.trim()}</button>`).join('') : ''}
+                            ${p.sizes ? p.sizes.map(s => `<button class="size-btn border-2 border-slate-100 rounded-2xl px-6 py-3 font-bold text-sm bg-white" onclick="selectSize(this, '${p.id}')">${s.trim()}</button>`).join('') : ''}
                         </div>
                     </div>
                     ${p.colors && p.colors[0] ? `<div>
                         <p class="text-slate-400 text-[10px] font-black uppercase mb-4">ფერი</p>
                         <div class="flex flex-wrap gap-2">
-                            ${p.colors.map(c => `<button class="color-btn border-2 border-slate-100 rounded-2xl px-6 py-3 font-bold text-sm bg-white" onclick="selectColor(this, '${p.name.replace(/'/g, "\\'")}')">${c.trim()}</button>`).join('')}
+                            ${p.colors.map(c => `<button class="color-btn border-2 border-slate-100 rounded-2xl px-6 py-3 font-bold text-sm bg-white" onclick="selectColor(this, '${p.id}')">${c.trim()}</button>`).join('')}
                         </div>
                     </div>` : ''}
                     <button id="main-action-btn" class="w-full py-6 font-black text-lg rounded-[30px] transition-all"></button>
                 </div>
             `;
-            updateMainButton(p.name);
+            updateMainButtonById(p.id);
         }
 
-        function selectSize(btn, pName) {
+        function selectSize(btn, id) {
             document.querySelectorAll('.size-btn').forEach(b => { b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9'; });
             btn.style.background = 'black'; btn.style.color = 'white'; btn.style.borderColor = 'black';
-            selectedSize = btn.innerText; updateMainButton(pName);
+            selectedSize = btn.innerText; updateMainButtonById(id);
         }
 
-        function selectColor(btn, pName) {
+        function selectColor(btn, id) {
             document.querySelectorAll('.color-btn').forEach(b => { b.style.background = 'white'; b.style.color = 'black'; b.style.borderColor = '#f1f5f9'; });
             btn.style.background = 'black'; btn.style.color = 'white'; btn.style.borderColor = 'black';
-            selectedColor = btn.innerText; updateMainButton(pName);
+            selectedColor = btn.innerText; updateMainButtonById(id);
         }
 
-        function updateMainButton(pName) {
-            const p = products.find(x => x.name === pName);
+        function updateMainButtonById(id) {
+            const p = products.find(x => String(x.id) === String(id));
             const btn = document.getElementById('main-action-btn');
             if(!btn) return;
             const hasS = p.sizes && p.sizes[0] !== "";
@@ -232,8 +236,14 @@
         }
 
         function handleBannerAction() {
-            if(design.bActionType === 'product') openQuickView(design.bActionValue);
-            else if(design.bActionType === 'info') Telegram.WebApp.showPopup({ message: design.bActionValue });
+            const type = design.bActionType?.trim().toLowerCase();
+            const val = design.bActionValue?.trim();
+            
+            if(type === 'product' && val) {
+                openQuickViewById(val);
+            } else if(type === 'info') {
+                Telegram.WebApp.showPopup({ message: val });
+            }
         }
 
         function closeDetails() { 
