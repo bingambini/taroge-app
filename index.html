@@ -3,255 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Svaqi Store AI - v1.3</title>
+    <title>Svaqi Store Premium - v1.4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { 
-            --bg: #f8f9fb; 
-            --black: #1c1c1e; 
-            --white: #ffffff;
-            --main-color: #3b82f6;
-            --header-bg: #ffffff;
-            --header-text: #1c1c1e;
-        }
-        body { 
-            font-family: -apple-system, system-ui, sans-serif; 
-            background: var(--bg); 
-            margin: 0; 
-            padding-bottom: env(safe-area-inset-bottom, 100px); 
-            overflow-x: hidden; 
-        }
-        .view { display: none; min-height: 100vh; animation: fadeIn 0.3s ease; }
-        .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        :root { --bg: #f8f9fb; --main: #3b82f6; --white: #ffffff; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; overflow-x: hidden; }
         
-        /* Bottom Sheet Styles */
-        #bottom-sheet { 
-            transform: translateY(100%); 
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            z-index: 2000; 
-        }
+        /* პრემიუმ ეფექტები */
+        .png-shadow { filter: drop-shadow(0 25px 35px rgba(0,0,0,0.3)); }
+        .card-shadow { box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05); }
+        
+        /* Bottom Sheet ანიმაცია */
+        #bottom-sheet { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; }
         #bottom-sheet.active { transform: translateY(0); }
-        .overlay { 
-            display: none; 
-            background: rgba(0,0,0,0.6); 
-            backdrop-filter: blur(4px);
-            z-index: 1500; 
-        }
+        .overlay { display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1500; }
         .overlay.active { display: block; }
-
-        .card { background: var(--white); border-radius: 28px; padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); }
-        .png-shadow { filter: drop-shadow(0 15px 25px rgba(0,0,0,0.15)); }
-        .size-btn.active { background: black !important; color: white !important; border-color: black !important; }
+        
+        .size-btn.active { background: #000 !important; color: #fff !important; border-color: #000 !important; }
     </style>
 </head>
 <body>
 
-    <div class="app-container max-w-[600px] mx-auto relative">
-        <div id="home-view" class="view active">
-            <header id="main-header" class="px-4 flex items-center sticky top-0 z-[100] transition-all duration-500 ease-in-out">
-                <div id="header-content" class="flex items-center gap-3 w-full overflow-hidden">
-                    <img id="logo-img" class="hidden object-cover transition-all duration-500 flex-shrink-0">
-                    <h1 id="shop-name" class="font-black truncate">იტვირთება...</h1>
-                </div>
-                <i class="fa-solid fa-bell text-gray-300 text-lg ml-2"></i>
-            </header>
-
-            <div class="px-4 pb-2">
-                <div id="banner-btn" class="relative" onclick="handleBannerAction()"></div>
+    <div class="max-w-[600px] mx-auto relative">
+        <header id="main-header" class="px-4 flex items-center sticky top-0 z-[100] transition-all duration-500">
+            <div id="header-content" class="flex items-center gap-3 w-full overflow-hidden">
+                <img id="logo-img" class="hidden object-cover transition-all flex-shrink-0">
+                <h1 id="shop-name" class="font-black truncate">იტვირთება...</h1>
             </div>
+            <i class="fa-solid fa-bell text-gray-300 text-lg ml-2"></i>
+        </header>
 
-            <div id="section-title" class="px-5 font-black text-slate-400 text-[10px] uppercase tracking-[0.2em] mb-4 mt-6">ახალი კოლექცია</div>
-            <div id="products-grid" class="grid grid-cols-2 gap-4 px-4"></div>
+        <div class="px-4 pb-2">
+            <div id="banner-btn" class="relative" onclick="handleBannerAction()"></div>
         </div>
 
-        <nav class="fixed bottom-6 left-5 right-5 h-16 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-2xl max-w-[560px] mx-auto">
-            <button onclick="location.reload()" class="text-white text-lg"><i class="fa-solid fa-house"></i></button>
-            <button class="text-white/40 text-lg"><i class="fa-solid fa-layer-group"></i></button>
-            <button class="text-white/40 text-lg relative">
-                <i class="fa-solid fa-cart-shopping"></i>
-            </button>
-            <button class="text-white/40 text-lg"><i class="fa-solid fa-user"></i></button>
-        </nav>
+        <div id="section-title" class="px-6 font-black text-slate-400 text-[10px] uppercase tracking-[0.2em] mb-4 mt-8">ახალი კოლექცია</div>
+        
+        <div id="products-grid" class="grid grid-cols-2 gap-4 px-4"></div>
     </div>
 
     <div id="overlay" class="overlay fixed inset-0" onclick="closeDetails()"></div>
-    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-10 shadow-2xl max-w-[600px] mx-auto">
-        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-4"></div>
+    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-12 max-w-[600px] mx-auto">
+        <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto my-4"></div>
         <div id="details-content"></div>
     </div>
+
+    <nav class="fixed bottom-6 left-5 right-5 h-16 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-2xl max-w-[560px] mx-auto">
+        <button onclick="location.reload()" class="text-white text-lg"><i class="fa-solid fa-house"></i></button>
+        <button class="text-white/30 text-lg"><i class="fa-solid fa-layer-group"></i></button>
+        <button class="text-white/30 text-lg"><i class="fa-solid fa-cart-shopping"></i></button>
+        <button class="text-white/30 text-lg"><i class="fa-solid fa-user"></i></button>
+    </nav>
 
     <script>
         const S_ID = '1jClKK61qjRoPT1OlhNegeuLSjGbbDjKLZFD-oi4WCAI';
         const BASE = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&gid=`;
 
         let products = [];
-        let designData = {};
+        let design = {};
+        let timerId;
 
         async function init() {
             try {
-                // Load Design
+                // დიზაინის ჩატვირთვა
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
                 if(dRows[0]) {
                     const d = dRows[0];
-                    designData = {
-                        name: d[0], logo: d[1], h_bg: d[2], h_text: d[3],
-                        layout: d[4], style: d[5], height: d[7], mainColor: d[10],
-                        logoSize: d[11], logoRad: d[12], 
-                        bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
+                    design = {
+                        name: d[0], logo: d[1], h_bg: d[2], h_text: d[3], layout: d[4], height: d[7], mainColor: d[10],
+                        logoSize: d[11], logoRad: d[12], bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
                         bImage: d[17], bTitleSize: d[18], bSubSize: d[19], bMarginTop: d[20],
                         bActionType: d[21], bActionValue: d[22], bTimerEnd: d[23]
                     };
-                    setupTheme();
+                    applyDesign();
                 }
 
-                // Load Products
+                // პროდუქტების ჩატვირთვა
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
-                    name: r[0], price: parseFloat(r[1]), 
-                    imgs: r[2]?.split(',').map(s => s.trim()),
-                    oldPrice: r[3] ? parseFloat(r[3]) : null,
-                    status: r[4] || "", desc: r[5] || "",
-                    category: r[7]?.trim(),
-                    sizes: r[8]?.split(',').map(s => s.trim()),
-                    colors: r[9]?.split(',').map(s => s.trim())
+                    name: r[0], price: r[1], imgs: r[2]?.split(',').map(s=>s.trim()), oldPrice: r[3],
+                    status: r[4] || "", desc: r[5], category: r[7], sizes: r[8]?.split(','), colors: r[9]?.split(',')
                 }));
                 
-                renderHome();
-            } catch(e) { console.error("Init Error:", e); }
+                renderUI();
+            } catch(e) { console.error(e); }
         }
 
-        function setupTheme() {
+        function applyDesign() {
             const root = document.documentElement;
-            document.getElementById('shop-name').innerText = designData.name;
-            if(designData.logo) {
+            document.getElementById('shop-name').innerText = design.name;
+            if(design.logo) {
                 const img = document.getElementById('logo-img');
-                img.src = designData.logo;
-                img.classList.remove('hidden');
-                img.style.height = `${designData.logoSize || 32}px`;
-                img.style.width = `${designData.logoSize || 32}px`;
-                img.style.borderRadius = designData.logoRad?.includes('%') ? designData.logoRad : `${designData.logoRad || 8}px`;
+                img.src = design.logo; img.classList.remove('hidden');
+                img.style.width = img.style.height = `${design.logoSize || 32}px`;
+                img.style.borderRadius = design.logoRad;
             }
-            if(designData.h_bg) root.style.setProperty('--header-bg', designData.h_bg.trim());
-            if(designData.h_text) root.style.setProperty('--header-text', designData.h_text.trim());
-            if(designData.mainColor) root.style.setProperty('--main-color', designData.mainColor.trim());
-            
-            const header = document.getElementById('main-header');
-            header.style.height = `${designData.height || 70}px`;
-            header.style.backgroundColor = "var(--header-bg)";
-            header.style.color = "var(--header-text)";
+            root.style.setProperty('--main', design.mainColor || '#3b82f6');
+            const h = document.getElementById('main-header');
+            h.style.height = `${design.height || 70}px`;
+            h.style.background = design.h_bg;
+            h.style.color = design.h_text;
         }
 
-        function renderHome() {
+        function renderUI() {
+            // ბანერის რენდერი
             const banner = document.getElementById('banner-btn');
-            const grid = document.getElementById('products-grid');
+            const topP = products.find(p => p.status.includes('top')) || products[0];
             
-            // Render Banner
-            const top = products.find(p => p.status.includes('top')) || products[0];
-            if(top && banner) {
-                banner.className = "relative mb-6 cursor-pointer transition-all active:scale-[0.98]";
-                banner.style.height = `${designData.bHeight || 180}px`;
-                banner.style.marginTop = `${designData.bMarginTop || 16}px`;
-                banner.innerHTML = `
-                    <div class="absolute inset-0 bg-gradient-to-br from-slate-900 to-black rounded-[35px] shadow-xl overflow-hidden">
-                        <div class="absolute -top-10 -left-10 w-40 h-40 bg-main opacity-20 blur-[60px] rounded-full"></div>
-                        <div class="z-10 relative p-7 h-full flex flex-col justify-center">
-                            <span style="font-size: ${designData.bSubSize}px" class="text-main font-black tracking-widest uppercase mb-1">${designData.bSub || 'Premium'}</span>
-                            <h2 style="font-size: ${designData.bTitleSize}px" class="text-white font-black leading-tight w-[55%]">${designData.bTitle || top.name}</h2>
-                            <div class="mt-4 flex items-center gap-3">
-                                <span class="text-white font-bold text-xl">${top.price}₾</span>
-                                <div class="bg-main px-4 py-2 rounded-xl text-white text-[10px] font-bold uppercase">${designData.bBtn || 'ნახვა'}</div>
-                            </div>
+            banner.className = "relative cursor-pointer transition-all active:scale-95";
+            banner.style.height = `${design.bHeight || 180}px`;
+            banner.style.marginTop = `${design.bMarginTop || 16}px`;
+            
+            banner.innerHTML = `
+                <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black rounded-[40px] shadow-2xl overflow-hidden">
+                    <div class="absolute -top-10 -left-10 w-40 h-40 bg-blue-500 opacity-20 blur-[60px] rounded-full"></div>
+                    <div class="z-10 relative p-8 h-full flex flex-col justify-center">
+                        <span id="b-timer-sub" style="font-size: ${design.bSubSize}px" class="text-blue-400 font-black tracking-[0.2em] uppercase mb-1">${design.bSub}</span>
+                        <h2 style="font-size: ${design.bTitleSize}px" class="text-white font-black leading-tight w-[60%]">${design.bTitle || topP.name}</h2>
+                        <div id="banner-footer" class="mt-4 flex items-center gap-3">
+                            <span class="text-white font-bold text-xl">${topP.price}₾</span>
+                            <div class="bg-blue-500 px-5 py-2 rounded-2xl text-white text-[10px] font-extrabold uppercase tracking-wider shadow-lg shadow-blue-500/30">${design.bBtn}</div>
                         </div>
                     </div>
-                    <img src="${designData.bImage || top.imgs[0]}" class="absolute -right-4 -top-10 w-[60%] h-[130%] object-contain z-20 png-shadow rotate-[-10deg]">
-                `;
-            }
+                </div>
+                <img src="${design.bImage || topP.imgs[0]}" class="absolute -right-6 -top-12 w-[65%] h-[140%] object-contain z-20 png-shadow rotate-[-12deg] pointer-events-none">
+            `;
 
-            // Render 4 Product Cards
-            grid.innerHTML = '';
-            products.slice(0, 4).forEach(p => {
-                const discount = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
-                const div = document.createElement('div');
-                div.className = 'card active:scale-95 transition-all duration-300 cursor-pointer';
-                div.onclick = () => openDetails(p.name);
-                div.innerHTML = `
-                    <div class="relative overflow-hidden rounded-[22px] bg-slate-50 mb-3 aspect-square flex items-center justify-center p-4">
-                        ${discount ? `<div class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-lg">-${discount}%</div>` : ''}
-                        <img src="${p.imgs[0]}" class="w-full h-full object-contain png-shadow">
-                    </div>
-                    <h3 class="font-bold text-[12px] text-slate-800 truncate px-1">${p.name}</h3>
-                    <div class="flex items-center gap-2 mt-1 px-1">
-                        <b class="text-slate-900 text-sm">${p.price}₾</b>
-                        ${p.oldPrice ? `<span class="text-[10px] text-slate-300 line-through">${p.oldPrice}₾</span>` : ''}
+            if(design.bActionType === 'timer') startTimer();
+
+            // 4 ბარათის რენდერი
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = products.slice(0, 4).map(p => {
+                const disc = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
+                return `
+                    <div class="bg-white rounded-[32px] p-3 card-shadow active:scale-95 transition-all" onclick="openDetails('${p.name.replace(/'/g, "\\'")}')">
+                        <div class="relative aspect-square bg-slate-50 rounded-[24px] mb-3 flex items-center justify-center p-4 overflow-hidden">
+                            ${disc ? `<div class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-lg">-${disc}%</div>` : ''}
+                            <img src="${p.imgs[0]}" class="w-full h-full object-contain png-shadow">
+                        </div>
+                        <h3 class="font-bold text-[12px] px-1 truncate">${p.name}</h3>
+                        <div class="flex items-center gap-2 mt-1 px-1">
+                            <b class="text-sm font-black">${p.price}₾</b>
+                            ${p.oldPrice ? `<span class="text-[10px] text-slate-300 line-through">${p.oldPrice}₾</span>` : ''}
+                        </div>
                     </div>
                 `;
-                grid.appendChild(div);
-            });
+            }).join('');
+        }
+
+        function startTimer() {
+            const target = new Date(design.bTimerEnd).getTime();
+            const footer = document.getElementById('banner-footer');
+            timerId = setInterval(() => {
+                const now = new Date().getTime();
+                const diff = target - now;
+                if(diff < 0) { clearInterval(timerId); return; }
+                const h = Math.floor(diff/(1000*60*60)), m = Math.floor((diff%(1000*60*60))/(1000*60)), s = Math.floor((diff%(1000*60))/1000);
+                footer.innerHTML = `<div class="flex gap-2 text-white font-black text-lg">
+                    <div class="bg-white/10 px-3 py-1 rounded-xl">${h}სთ</div>
+                    <div class="bg-white/10 px-3 py-1 rounded-xl">${m}წთ</div>
+                    <div class="bg-blue-500 px-3 py-1 rounded-xl shadow-lg shadow-blue-500/40">${s}წმ</div>
+                </div>`;
+            }, 1000);
         }
 
         function openDetails(name) {
             const p = products.find(x => x.name === name);
             const content = document.getElementById('details-content');
-            
             content.innerHTML = `
-                <div class="flex gap-5 mb-6">
-                    <div class="w-32 h-32 bg-slate-50 rounded-[30px] flex items-center justify-center p-3">
+                <div class="flex gap-5 mb-8">
+                    <div class="w-32 h-32 bg-slate-50 rounded-[30px] flex items-center justify-center p-4">
                         <img src="${p.imgs[0]}" class="max-h-full object-contain png-shadow">
                     </div>
                     <div class="flex-1 flex flex-col justify-center">
-                        <h2 class="font-black text-xl leading-tight text-slate-900 mb-1">${p.name}</h2>
+                        <h2 class="font-black text-xl text-slate-900 mb-1">${p.name}</h2>
                         <div class="flex items-center gap-3">
-                            <span class="text-2xl font-black text-main">${p.price}₾</span>
+                            <span class="text-2xl font-black text-blue-500">${p.price}₾</span>
                             ${p.oldPrice ? `<span class="text-sm text-slate-300 line-through">${p.oldPrice}₾</span>` : ''}
                         </div>
                     </div>
                 </div>
-                
-                ${p.desc ? `<p class="text-slate-500 text-sm leading-relaxed mb-6">${p.desc}</p>` : ''}
-
                 <div class="mb-8">
-                    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-3">აირჩიეთ ზომა</p>
+                    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">აირჩიეთ ზომა</p>
                     <div class="flex flex-wrap gap-2">
-                        ${p.sizes ? p.sizes.map(s => `<button class="size-btn border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-sm transition-all" onclick="selectSize(this)">${s}</button>`).join('') : '<span class="text-slate-400">ზომები არ არის</span>'}
+                        ${p.sizes?.map(s => `<button class="size-btn border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-sm transition-all" onclick="selectSize(this)">${s.trim()}</button>`).join('')}
                     </div>
                 </div>
-
-                <button onclick="addToCart('${p.name}')" class="w-full bg-black text-white rounded-[22px] py-5 font-bold text-lg shadow-xl shadow-black/20 active:scale-95 transition-all">
-                    კალათაში დამატება
-                </button>
+                <button onclick="addToCart('${p.name}')" class="w-full bg-black text-white rounded-[24px] py-5 font-bold text-lg shadow-xl active:scale-95 transition-all">კალათაში დამატება</button>
             `;
-            
             document.getElementById('bottom-sheet').classList.add('active');
             document.getElementById('overlay').classList.add('active');
-            if(window.Telegram && Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            if(window.Telegram) Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
 
-        function closeDetails() {
-            document.getElementById('bottom-sheet').classList.remove('active');
-            document.getElementById('overlay').classList.remove('active');
+        function closeDetails() { 
+            document.getElementById('bottom-sheet').classList.remove('active'); 
+            document.getElementById('overlay').classList.remove('active'); 
         }
 
-        function selectSize(btn) {
-            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if(window.Telegram && Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.selectionChanged();
-        }
-
-        function addToCart(name) {
-            const selectedSize = document.querySelector('.size-btn.active');
-            if(!selectedSize) {
-                Telegram.WebApp.showAlert("გთხოვთ აირჩიოთ ზომა!");
-                return;
-            }
-            Telegram.WebApp.notificationOccurred('success');
-            closeDetails();
-            Telegram.WebApp.showPopup({ message: `${name} (${selectedSize.innerText}) დაემატა კალათაში!` });
+        function selectSize(btn) { 
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active')); 
+            btn.classList.add('active'); 
+            Telegram.WebApp.HapticFeedback.selectionChanged();
         }
 
         function parseCSV(t) {
@@ -259,6 +217,17 @@
                 const m = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
                 return m ? m.map(x => x.replace(/^"|"$/g, '')) : [];
             });
+        }
+
+        function handleBannerAction() {
+            const type = design.bActionType;
+            const val = design.bActionValue;
+            if(type === 'copy') {
+                navigator.clipboard.writeText(val);
+                Telegram.WebApp.showAlert("დაკოპირდა: " + val);
+            } else if(type === 'info') {
+                Telegram.WebApp.showPopup({ message: val });
+            }
         }
 
         init();
