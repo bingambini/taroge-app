@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store Dynamic</title>
+    <title>Shoes Store - Pro Design</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,45 +11,43 @@
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; }
 
-        /* დინამიური ჰედერი */
-        #main-header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; transition: 0.3s; z-index: 1000;
-        }
-
-        /* ბანერის სტილი */
-        #hero-banner {
-            margin: 20px; border-radius: 35px; position: relative;
+        /* ჰედერის სტილები */
+        #main-header { transition: all 0.4s ease; z-index: 1000; }
+        .floating-header { margin: 10px 15px; border-radius: 20px; }
+        
+        /* ბანერის სტილები */
+        #hero-banner { 
+            margin: 20px; border-radius: 35px; position: relative; 
             overflow: hidden; display: flex; align-items: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        /* ნავიგაცია */
+        /* პროდუქტების სტილი */
+        .product-card { background: white; border-radius: 30px; padding: 15px; position: relative; border: 1px solid #f1f5f9; }
+        .badge { position: absolute; top: 12px; right: 12px; background: #ff5f5f; color: white; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 800; }
+
+        /* ქვედა ნავიგაცია */
         #bottom-nav {
             position: fixed; bottom: 20px; left: 15px; right: 15px;
-            height: 80px; background: #000; border-radius: 30px;
+            height: 85px; background: #000; border-radius: 35px;
             display: grid; grid-template-columns: repeat(4, 1fr);
-            align-items: center; z-index: 1000;
+            align-items: center; z-index: 1000; box-shadow: 0 15px 30px rgba(0,0,0,0.4);
         }
-
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #555; }
         .nav-item.active { color: #fff; }
-
-        .product-card { background: white; border-radius: 30px; padding: 15px; position: relative; border: 1px solid #f1f5f9; }
-        .badge { position: absolute; top: 10px; right: 10px; background: #ff5f5f; color: white; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 800; }
     </style>
 </head>
 <body>
 
     <header id="main-header"></header>
-
     <div id="hero-banner"></div>
 
-    <div class="px-7 mb-4">
+    <div class="px-7 mb-4 flex justify-between items-center">
         <h2 id="section-title" class="font-black text-xl text-slate-800"></h2>
+        <span class="text-blue-600 text-xs font-bold">ყველა</span>
     </div>
+    
     <div id="product-grid" class="grid grid-cols-2 gap-4 px-6"></div>
 
     <nav id="bottom-nav"></nav>
@@ -61,43 +59,51 @@
             try {
                 const res = await fetch(API_URL);
                 const data = await res.json();
-                
                 renderHeader(data.header);
                 renderBanner(data.banner);
                 renderProducts(data.latest);
                 renderNavigation(data.navigation);
-                
-            } catch (e) { console.error("Load error:", e); }
+            } catch (e) { console.error("Load failed", e); }
         }
 
         function renderHeader(h) {
             const el = document.getElementById('main-header');
+            if (h.status !== 'active') { el.style.display = 'none'; return; }
+
+            // დინამიური სტილები შიტიდან
             el.style.backgroundColor = h.bg;
             el.style.height = h.height + "px";
             el.style.color = h.textColor;
+            el.style.padding = `0 ${h.padding}px`;
             
+            if (h.style === 'floating') el.classList.add('floating-header');
+            if (h.shadow === 'sm') el.style.boxShadow = '0 4px 10px rgba(0,0,0,0.05)';
+
+            const justify = h.layout === 'center' ? 'justify-center' : 'justify-between';
+            el.className += ` flex items-center ${justify}`;
+
             el.innerHTML = `
                 <div class="flex items-center gap-3">
-                    <img src="${h.logo}" style="height: ${h.height * 0.6}px">
+                    <img src="${h.logo}" style="width: ${h.logoSize}px; border-radius: ${h.logoRadius}%">
                     <span style="font-size: ${h.fontSize}; font-weight: 800">${h.name}</span>
                 </div>
-                <i class="fa-solid fa-bell opacity-50 text-xl"></i>
+                ${h.layout !== 'center' ? `<i class="fa-solid fa-bell" style="color: ${h.iconColor}; font-size: 1.2rem;"></i>` : ''}
             `;
         }
 
         function renderBanner(b) {
             const el = document.getElementById('hero-banner');
             el.style.height = b.height + "px";
-            el.style.background = b.gradient === "1" ? `linear-gradient(135deg, #1e293b, #334155)` : "#1e293b";
             el.style.marginTop = b.marginTop + "px";
+            el.style.background = b.gradient === "1" ? `linear-gradient(135deg, #1e293b, #334155)` : "#1e293b";
 
             el.innerHTML = `
                 <div class="p-8 w-1/2 z-10">
                     <p class="font-bold opacity-70" style="font-size: ${b.subSize}px; color: ${b.titleColor}">${b.subtitle}</p>
                     <h2 class="font-black leading-tight mb-4" style="font-size: ${b.titleSize}px; color: ${b.titleColor}">${b.title}</h2>
-                    <button class="bg-white text-black px-6 py-2 rounded-2xl font-black text-xs uppercase">${b.btnText}</button>
+                    <button class="bg-white text-black px-6 py-2 rounded-2xl font-black text-[10px] uppercase">${b.btnText}</button>
                 </div>
-                <img src="${b.image}" class="absolute -right-5 w-52 rotate-[-15deg] drop-shadow-2xl">
+                <img src="${b.image}" class="absolute -right-6 w-52 rotate-[-15deg] drop-shadow-2xl">
             `;
         }
 
@@ -110,8 +116,8 @@
                     <div class="h-32 flex items-center justify-center mb-3">
                         <img src="${p.images.split(',')[0]}" class="max-h-full object-contain">
                     </div>
-                    <h4 class="font-bold text-xs truncate">${p.name}</h4>
-                    <p class="text-blue-600 font-black mt-1">${p.price}₾</p>
+                    <h4 class="font-bold text-[11px] truncate text-slate-700">${p.name}</h4>
+                    <p class="text-blue-600 font-black text-sm mt-1">${p.price}₾</p>
                 </div>
             `).join('');
         }
