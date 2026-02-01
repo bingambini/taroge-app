@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Svaqi Store AI - ჰედერ+ბანერ 1.2</title>
+    <title>Svaqi Store AI - v1.3</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -28,46 +28,60 @@
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        .card { background: var(--white); border-radius: 20px; padding: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .glass-effect { backdrop-filter: blur(15px) saturate(180%); -webkit-backdrop-filter: blur(15px) saturate(180%); }
-        
-        .bg-main { background-color: var(--main-color) !important; }
-        .text-main { color: var(--main-color) !important; }
+        /* Bottom Sheet Styles */
+        #bottom-sheet { 
+            transform: translateY(100%); 
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            z-index: 2000; 
+        }
+        #bottom-sheet.active { transform: translateY(0); }
+        .overlay { 
+            display: none; 
+            background: rgba(0,0,0,0.6); 
+            backdrop-filter: blur(4px);
+            z-index: 1500; 
+        }
+        .overlay.active { display: block; }
 
-        .app-container { max-width: 600px; margin: 0 auto; position: relative; }
-        .png-shadow { filter: drop-shadow(0 25px 35px rgba(0,0,0,0.5)); }
+        .card { background: var(--white); border-radius: 28px; padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); }
+        .png-shadow { filter: drop-shadow(0 15px 25px rgba(0,0,0,0.15)); }
+        .size-btn.active { background: black !important; color: white !important; border-color: black !important; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="app-container max-w-[600px] mx-auto relative">
         <div id="home-view" class="view active">
             <header id="main-header" class="px-4 flex items-center sticky top-0 z-[100] transition-all duration-500 ease-in-out">
                 <div id="header-content" class="flex items-center gap-3 w-full overflow-hidden">
                     <img id="logo-img" class="hidden object-cover transition-all duration-500 flex-shrink-0">
                     <h1 id="shop-name" class="font-black truncate">იტვირთება...</h1>
                 </div>
-                <i id="header-bell" class="fa-solid fa-bell text-gray-300 text-lg ml-2"></i>
+                <i class="fa-solid fa-bell text-gray-300 text-lg ml-2"></i>
             </header>
 
             <div class="px-4 pb-2">
                 <div id="banner-btn" class="relative" onclick="handleBannerAction()"></div>
             </div>
 
-            <div class="px-4 mb-2">
-                <div id="quick-categories-grid" class="grid grid-cols-4 gap-2 py-1"></div>
-            </div>
-
-            <div id="section-title" class="px-5 font-extrabold text-slate-400 text-[10px] uppercase tracking-[0.15em] mb-4">ახალი კოლექცია</div>
-            <div id="products-grid" class="grid grid-cols-2 gap-3 px-4"></div>
+            <div id="section-title" class="px-5 font-black text-slate-400 text-[10px] uppercase tracking-[0.2em] mb-4 mt-6">ახალი კოლექცია</div>
+            <div id="products-grid" class="grid grid-cols-2 gap-4 px-4"></div>
         </div>
 
-        <nav class="fixed bottom-6 left-5 right-5 h-16 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-[0_20px_40px_rgba(0,0,0,0.4)] max-w-[560px] mx-auto">
+        <nav class="fixed bottom-6 left-5 right-5 h-16 bg-black rounded-[30px] flex items-center justify-around z-[1000] shadow-2xl max-w-[560px] mx-auto">
             <button onclick="location.reload()" class="text-white text-lg"><i class="fa-solid fa-house"></i></button>
-            <button onclick="switchView('catalog', 1)" class="text-white/40 text-lg"><i class="fa-solid fa-layer-group"></i></button>
-            <button onclick="switchView('cart', 2)" class="text-white/40 text-lg"><i class="fa-solid fa-cart-shopping"></i></button>
-            <button onclick="switchView('user', 3)" class="text-white/40 text-lg"><i class="fa-solid fa-user"></i></button>
+            <button class="text-white/40 text-lg"><i class="fa-solid fa-layer-group"></i></button>
+            <button class="text-white/40 text-lg relative">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </button>
+            <button class="text-white/40 text-lg"><i class="fa-solid fa-user"></i></button>
         </nav>
+    </div>
+
+    <div id="overlay" class="overlay fixed inset-0" onclick="closeDetails()"></div>
+    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] px-6 pt-2 pb-10 shadow-2xl max-w-[600px] mx-auto">
+        <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-4"></div>
+        <div id="details-content"></div>
     </div>
 
     <script>
@@ -76,195 +90,168 @@
 
         let products = [];
         let designData = {};
-        let timerInterval;
 
         async function init() {
             try {
+                // Load Design
                 const dRes = await fetch(BASE + '856847150');
                 const dRows = parseCSV(await dRes.text());
-                
                 if(dRows[0]) {
                     const d = dRows[0];
-                    const root = document.documentElement;
-
                     designData = {
                         name: d[0], logo: d[1], h_bg: d[2], h_text: d[3],
-                        layout: d[4], style: d[5], shadow: d[6], height: d[7],
-                        fontSize: d[8], border: d[9], mainColor: d[10],
+                        layout: d[4], style: d[5], height: d[7], mainColor: d[10],
                         logoSize: d[11], logoRad: d[12], 
                         bTitle: d[13], bSub: d[14], bBtn: d[15], bHeight: d[16],
                         bImage: d[17], bTitleSize: d[18], bSubSize: d[19], bMarginTop: d[20],
-                        bActionType: d[21],  // სვეტი V
-                        bActionValue: d[22], // სვეტი W
-                        bTimerEnd: d[23]     // სვეტი X
+                        bActionType: d[21], bActionValue: d[22], bTimerEnd: d[23]
                     };
-
-                    document.getElementById('shop-name').innerText = designData.name;
-                    if(designData.logo) {
-                        const img = document.getElementById('logo-img');
-                        img.src = designData.logo;
-                        img.classList.remove('hidden');
-                    }
-
-                    if(designData.h_bg) root.style.setProperty('--header-bg', designData.h_bg.trim());
-                    if(designData.h_text) root.style.setProperty('--header-text', designData.h_text.trim());
-                    if(designData.mainColor) root.style.setProperty('--main-color', designData.mainColor.trim());
-
-                    applyHeaderStyles();
+                    setupTheme();
                 }
 
+                // Load Products
                 const pRes = await fetch(BASE + '0');
                 const pRows = parseCSV(await pRes.text());
                 products = pRows.map(r => ({
-                    name: r[0], price: parseFloat(r[1]), imgs: r[2]?.split(','),
-                    status: r[4] || "", category: r[7]?.trim()
+                    name: r[0], price: parseFloat(r[1]), 
+                    imgs: r[2]?.split(',').map(s => s.trim()),
+                    oldPrice: r[3] ? parseFloat(r[3]) : null,
+                    status: r[4] || "", desc: r[5] || "",
+                    category: r[7]?.trim(),
+                    sizes: r[8]?.split(',').map(s => s.trim()),
+                    colors: r[9]?.split(',').map(s => s.trim())
                 }));
                 
                 renderHome();
             } catch(e) { console.error("Init Error:", e); }
         }
 
-        function applyHeaderStyles() {
+        function setupTheme() {
+            const root = document.documentElement;
+            document.getElementById('shop-name').innerText = designData.name;
+            if(designData.logo) {
+                const img = document.getElementById('logo-img');
+                img.src = designData.logo;
+                img.classList.remove('hidden');
+                img.style.height = `${designData.logoSize || 32}px`;
+                img.style.width = `${designData.logoSize || 32}px`;
+                img.style.borderRadius = designData.logoRad?.includes('%') ? designData.logoRad : `${designData.logoRad || 8}px`;
+            }
+            if(designData.h_bg) root.style.setProperty('--header-bg', designData.h_bg.trim());
+            if(designData.h_text) root.style.setProperty('--header-text', designData.h_text.trim());
+            if(designData.mainColor) root.style.setProperty('--main-color', designData.mainColor.trim());
+            
             const header = document.getElementById('main-header');
-            const content = document.getElementById('header-content');
-            const shopTitle = document.getElementById('shop-name');
-            const logo = document.getElementById('logo-img');
-
             header.style.height = `${designData.height || 70}px`;
-            header.style.display = 'flex';
-            header.style.alignItems = 'center';
             header.style.backgroundColor = "var(--header-bg)";
             header.style.color = "var(--header-text)";
-
-            content.className = "flex items-center gap-3 w-full overflow-hidden h-full";
-            if (designData.layout === 'center') content.classList.add('justify-center');
-            else if (designData.layout === 'between') content.classList.add('justify-between');
-
-            if (designData.style === 'floating') header.classList.add('m-4', 'rounded-[24px]', 'top-4');
-            shopTitle.style.fontSize = `clamp(16px, 5vw, 22px)`;
-            
-            if (logo) {
-                const s = designData.logoSize || '32';
-                logo.style.height = `${s}px`;
-                logo.style.width = `${s}px`;
-                logo.style.borderRadius = designData.logoRad?.includes('%') ? designData.logoRad : `${designData.logoRad || 8}px`;
-            }
         }
 
         function renderHome() {
             const banner = document.getElementById('banner-btn');
-            const top = products.find(p => p.status.includes('top')) || products[0];
+            const grid = document.getElementById('products-grid');
             
+            // Render Banner
+            const top = products.find(p => p.status.includes('top')) || products[0];
             if(top && banner) {
-                const bImg = designData.bImage || (top.imgs ? top.imgs[0]?.trim() : '');
-                banner.className = "relative mb-10 cursor-pointer transition-all active:scale-[0.98]";
+                banner.className = "relative mb-6 cursor-pointer transition-all active:scale-[0.98]";
                 banner.style.height = `${designData.bHeight || 180}px`;
                 banner.style.marginTop = `${designData.bMarginTop || 16}px`;
-                
                 banner.innerHTML = `
-                    <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black rounded-[35px] shadow-2xl overflow-hidden border border-white/5">
+                    <div class="absolute inset-0 bg-gradient-to-br from-slate-900 to-black rounded-[35px] shadow-xl overflow-hidden">
                         <div class="absolute -top-10 -left-10 w-40 h-40 bg-main opacity-20 blur-[60px] rounded-full"></div>
                         <div class="z-10 relative p-7 h-full flex flex-col justify-center">
-                            <span id="banner-sub" style="font-size: ${designData.bSubSize}px" class="text-main font-black tracking-[0.2em] uppercase mb-2">
-                                ${designData.bSub || 'Premium Quality'}
-                            </span>
-                            <h2 style="font-size: ${designData.bTitleSize}px" class="text-white font-black leading-tight w-[55%] drop-shadow-lg">
-                                ${designData.bTitle || top.name}
-                            </h2>
-                            <div id="banner-action-area" class="mt-5 flex items-center gap-3">
-                                <span class="text-white font-black text-xl">${top.price}₾</span>
-                                <div class="bg-main px-4 py-2 rounded-xl text-white text-[10px] font-bold shadow-lg uppercase tracking-wider">
-                                    ${designData.bBtn || 'ნახვა'}
-                                </div>
+                            <span style="font-size: ${designData.bSubSize}px" class="text-main font-black tracking-widest uppercase mb-1">${designData.bSub || 'Premium'}</span>
+                            <h2 style="font-size: ${designData.bTitleSize}px" class="text-white font-black leading-tight w-[55%]">${designData.bTitle || top.name}</h2>
+                            <div class="mt-4 flex items-center gap-3">
+                                <span class="text-white font-bold text-xl">${top.price}₾</span>
+                                <div class="bg-main px-4 py-2 rounded-xl text-white text-[10px] font-bold uppercase">${designData.bBtn || 'ნახვა'}</div>
                             </div>
                         </div>
                     </div>
-                    <div class="absolute -right-4 -top-12 w-[60%] h-[140%] z-20 flex items-center justify-center pointer-events-none">
-                        <img src="${bImg}" class="w-full h-full object-contain png-shadow transform rotate-[-12deg]">
-                    </div>
+                    <img src="${designData.bImage || top.imgs[0]}" class="absolute -right-4 -top-10 w-[60%] h-[130%] object-contain z-20 png-shadow rotate-[-10deg]">
                 `;
-
-                if(designData.bActionType === 'timer') startBannerTimer();
             }
-            renderProductGrid(products.slice(0, 10));
-        }
 
-        function renderProductGrid(data) {
-            const grid = document.getElementById('products-grid');
+            // Render 4 Product Cards
             grid.innerHTML = '';
-            data.forEach(p => {
+            products.slice(0, 4).forEach(p => {
+                const discount = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
                 const div = document.createElement('div');
-                div.className = 'card active:scale-95 transition-all duration-300';
+                div.className = 'card active:scale-95 transition-all duration-300 cursor-pointer';
+                div.onclick = () => openDetails(p.name);
                 div.innerHTML = `
-                    <div class="relative overflow-hidden rounded-2xl bg-slate-50 mb-3 aspect-square flex items-center justify-center p-3">
-                        <img src="${p.imgs ? p.imgs[0] : ''}" class="w-full h-full object-contain">
+                    <div class="relative overflow-hidden rounded-[22px] bg-slate-50 mb-3 aspect-square flex items-center justify-center p-4">
+                        ${discount ? `<div class="absolute top-2 right-2 bg-red-500 text-white text-[9px] font-black px-2 py-1 rounded-lg">-${discount}%</div>` : ''}
+                        <img src="${p.imgs[0]}" class="w-full h-full object-contain png-shadow">
                     </div>
-                    <h3 class="font-bold text-[11px] text-slate-800 truncate px-1">${p.name}</h3>
-                    <div class="flex justify-between items-center mt-2 px-1">
+                    <h3 class="font-bold text-[12px] text-slate-800 truncate px-1">${p.name}</h3>
+                    <div class="flex items-center gap-2 mt-1 px-1">
                         <b class="text-slate-900 text-sm">${p.price}₾</b>
-                        <div class="bg-slate-100 p-1.5 rounded-lg"><i class="fa-solid fa-plus text-main text-[10px]"></i></div>
+                        ${p.oldPrice ? `<span class="text-[10px] text-slate-300 line-through">${p.oldPrice}₾</span>` : ''}
                     </div>
                 `;
                 grid.appendChild(div);
             });
         }
 
-        function handleBannerAction() {
-            const type = designData.bActionType;
-            const val = designData.bActionValue;
-
-            if(type === 'product') {
-                const p = products.find(x => x.name.toLowerCase().trim() === val.toLowerCase().trim());
-                if(p) {
-                    document.getElementById('section-title').innerText = "შერჩეული პროდუქტი";
-                    renderProductGrid([p]);
-                    window.scrollTo({ top: 400, behavior: 'smooth' });
-                }
-            } else if(type === 'category') {
-                const filtered = products.filter(x => x.category?.toLowerCase() === val.toLowerCase());
-                document.getElementById('section-title').innerText = val;
-                renderProductGrid(filtered);
-                window.scrollTo({ top: 400, behavior: 'smooth' });
-            } else if(type === 'copy') {
-                navigator.clipboard.writeText(val);
-                Telegram.WebApp.showAlert("პრომო კოდი " + val + " დაკოპირდა!");
-            } else if(type === 'info') {
-                Telegram.WebApp.showPopup({ message: val });
-            }
-        }
-
-        function startBannerTimer() {
-            const target = new Date(designData.bTimerEnd).getTime();
-            const actionArea = document.getElementById('banner-action-area');
+        function openDetails(name) {
+            const p = products.find(x => x.name === name);
+            const content = document.getElementById('details-content');
             
-            timerInterval = setInterval(() => {
-                const now = new Date().getTime();
-                const diff = target - now;
-
-                if (diff < 0) {
-                    clearInterval(timerInterval);
-                    document.getElementById('banner-sub').innerText = "აქცია დასრულდა";
-                    return;
-                }
-
-                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-                actionArea.innerHTML = `
-                    <div class="flex gap-2">
-                        <div class="bg-white/10 backdrop-blur px-3 py-1 rounded-lg text-white text-center">
-                            <div class="text-lg font-black">${h}</div><div class="text-[8px] opacity-50 uppercase">სთ</div>
-                        </div>
-                        <div class="bg-white/10 backdrop-blur px-3 py-1 rounded-lg text-white text-center">
-                            <div class="text-lg font-black">${m}</div><div class="text-[8px] opacity-50 uppercase">წთ</div>
-                        </div>
-                        <div class="bg-main px-3 py-1 rounded-lg text-white text-center shadow-lg shadow-main/40">
-                            <div class="text-lg font-black">${s}</div><div class="text-[8px] opacity-70 uppercase">წმ</div>
+            content.innerHTML = `
+                <div class="flex gap-5 mb-6">
+                    <div class="w-32 h-32 bg-slate-50 rounded-[30px] flex items-center justify-center p-3">
+                        <img src="${p.imgs[0]}" class="max-h-full object-contain png-shadow">
+                    </div>
+                    <div class="flex-1 flex flex-col justify-center">
+                        <h2 class="font-black text-xl leading-tight text-slate-900 mb-1">${p.name}</h2>
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl font-black text-main">${p.price}₾</span>
+                            ${p.oldPrice ? `<span class="text-sm text-slate-300 line-through">${p.oldPrice}₾</span>` : ''}
                         </div>
                     </div>
-                `;
-            }, 1000);
+                </div>
+                
+                ${p.desc ? `<p class="text-slate-500 text-sm leading-relaxed mb-6">${p.desc}</p>` : ''}
+
+                <div class="mb-8">
+                    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-3">აირჩიეთ ზომა</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${p.sizes ? p.sizes.map(s => `<button class="size-btn border-2 border-slate-100 rounded-2xl px-5 py-3 font-bold text-sm transition-all" onclick="selectSize(this)">${s}</button>`).join('') : '<span class="text-slate-400">ზომები არ არის</span>'}
+                    </div>
+                </div>
+
+                <button onclick="addToCart('${p.name}')" class="w-full bg-black text-white rounded-[22px] py-5 font-bold text-lg shadow-xl shadow-black/20 active:scale-95 transition-all">
+                    კალათაში დამატება
+                </button>
+            `;
+            
+            document.getElementById('bottom-sheet').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+            if(window.Telegram && Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }
+
+        function closeDetails() {
+            document.getElementById('bottom-sheet').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        function selectSize(btn) {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if(window.Telegram && Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.selectionChanged();
+        }
+
+        function addToCart(name) {
+            const selectedSize = document.querySelector('.size-btn.active');
+            if(!selectedSize) {
+                Telegram.WebApp.showAlert("გთხოვთ აირჩიოთ ზომა!");
+                return;
+            }
+            Telegram.WebApp.notificationOccurred('success');
+            closeDetails();
+            Telegram.WebApp.showPopup({ message: `${name} (${selectedSize.innerText}) დაემატა კალათაში!` });
         }
 
         function parseCSV(t) {
