@@ -107,15 +107,16 @@
         }
 
         // --- ახალი ფუნქცია: ნავიგაციის რენდერი შიტიდან ---
-        function renderNavigation(items) {
-            const nav = document.getElementById('bottom-nav');
-            nav.innerHTML = items.map((item, index) => `
-                <a href="#" class="nav-item ${index === 0 ? 'active' : ''}">
-                    <i class="${item.icon}"></i>
-                    <span>${item.name}</span>
-                </a>
-            `).join('');
-        }
+function renderNavigation(items) {
+    const nav = document.getElementById('bottom-nav');
+    // ვასუფთავებთ მენიუს და ვავსებთ შიტიდან წამოღებული მონაცემებით
+    nav.innerHTML = items.map((item, index) => `
+        <a href="#" class="nav-item ${index === 0 ? 'active' : ''}">
+            <i class="fa-solid ${item.icon}"></i> 
+            <span>${item.name}</span>
+        </a>
+    `).join('');
+}
 
         init();
     </script>
