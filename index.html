@@ -3,145 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store</title>
+    <title>Shoes Store Dynamic</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; }
-        
-        .promo-banner {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-radius: 40px; position: relative; overflow: hidden;
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
+
+        /* დინამიური ჰედერი */
+        #main-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; transition: 0.3s; z-index: 1000;
         }
 
-        /* პროდუქტის ბარათი ზუსტად დიზაინის მიხედვით */
-        .product-card {
-            background: white; border-radius: 35px; padding: 15px;
-            transition: all 0.2s; position: relative;
-        }
-        .product-card:active { transform: scale(0.95); }
-        
-        .discount-badge {
-            position: absolute; top: 15px; right: 15px;
-            background: #ff5f5f; color: white; padding: 4px 10px;
-            border-radius: 12px; font-size: 11px; font-weight: 800; z-index: 10;
+        /* ბანერის სტილი */
+        #hero-banner {
+            margin: 20px; border-radius: 35px; position: relative;
+            overflow: hidden; display: flex; align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        /* შავი ნავიგაცია - სქრინშოტის ანალოგი */
+        /* ნავიგაცია */
         #bottom-nav {
-            position: fixed; bottom: 25px; left: 20px; right: 20px;
-            height: 75px; background: #000; border-radius: 38px;
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 1000; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            position: fixed; bottom: 20px; left: 15px; right: 15px;
+            height: 80px; background: #000; border-radius: 30px;
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            align-items: center; z-index: 1000;
         }
 
-        .nav-item { color: #4b5563; transition: 0.3s; cursor: pointer; }
-        .nav-item.active { color: white; }
-        
-        .details-page { 
-            position: fixed; inset: 0; background: white; z-index: 2000; 
-            transform: translateY(100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            overflow-y: auto; 
-        }
-        .details-page.active { transform: translateY(0); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #555; }
+        .nav-item.active { color: #fff; }
+
+        .product-card { background: white; border-radius: 30px; padding: 15px; position: relative; border: 1px solid #f1f5f9; }
+        .badge { position: absolute; top: 10px; right: 10px; background: #ff5f5f; color: white; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 800; }
     </style>
 </head>
 <body>
 
-    <header class="p-6 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <img src="https://github.com/bingambini/real-estate-app/blob/main/shoes_logo.png?raw=true" class="w-10 h-10 object-contain">
-            <h1 class="font-extrabold text-xl">Shoes Store</h1>
-        </div>
-        <i class="fa-solid fa-bell text-slate-300 text-xl"></i>
-    </header>
+    <header id="main-header"></header>
 
-    <div class="px-6 mb-8">
-        <div class="promo-banner p-8 h-52 flex flex-col justify-center text-white">
-            <h2 class="text-2xl font-extrabold leading-tight mb-4">ექსკლუზიური<br>შეთავაზება</h2>
-            <button class="bg-blue-600 w-28 py-2.5 rounded-2xl font-bold text-xs">ნახვა</button>
-            <img src="https://i.postimg.cc/g0t38GT9/nike5-Photoroom.png" class="absolute -right-4 top-4 w-52 rotate-[-15deg]">
-        </div>
+    <div id="hero-banner"></div>
+
+    <div class="px-7 mb-4">
+        <h2 id="section-title" class="font-black text-xl text-slate-800"></h2>
     </div>
-
-    <div class="px-8 mb-5 text-[10px] uppercase tracking-[3px] font-black text-slate-400">ახალი კოლექცია</div>
-
     <div id="product-grid" class="grid grid-cols-2 gap-4 px-6"></div>
 
     <nav id="bottom-nav"></nav>
 
-    <div id="details-page" class="details-page">
-        <button onclick="closeDetails()" class="absolute top-6 left-6 bg-white w-10 h-10 rounded-full shadow-lg flex items-center justify-center z-[2001]"><i class="fa-solid fa-arrow-left"></i></button>
-        <div id="det-img-cont" class="h-[45vh] bg-slate-50 flex items-center justify-center p-12">
-            <img id="det-img" class="max-h-full object-contain">
-        </div>
-        <div class="p-8">
-            <h1 id="det-title" class="text-2xl font-black mb-2"></h1>
-            <p id="det-cat" class="text-slate-400 font-bold text-xs uppercase mb-4"></p>
-            <div id="det-price" class="text-3xl font-black text-blue-600 mb-6"></div>
-            <div id="det-desc" class="text-slate-500 leading-relaxed"></div>
-        </div>
-    </div>
-
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyLXPvQ12ZjDavvaPU5sjuUUk2OwUHT2fgtgorDBCtSJV7l5TfdUCPdmzhTZVfTfOMKkQ/exec";
-        const tg = window.Telegram.WebApp;
+        const API_URL = "https://script.google.com/macros/s/AKfycbx40aDt-cSil4iQV2y0Fe4jepNTQmYWvYeJiuItoHa-s14yuCOm9YQmOueP1OkVNas9gQ/exec";
 
         async function init() {
-            tg.expand();
             try {
                 const res = await fetch(API_URL);
                 const data = await res.json();
                 
-                if (data.products) renderProducts(data.products);
-                if (data.navigation) renderNavigation(data.navigation);
-            } catch (e) { console.error("Load failed", e); }
+                renderHeader(data.header);
+                renderBanner(data.banner);
+                renderProducts(data.latest);
+                renderNavigation(data.navigation);
+                
+            } catch (e) { console.error("Load error:", e); }
         }
 
-        function renderProducts(items) {
+        function renderHeader(h) {
+            const el = document.getElementById('main-header');
+            el.style.backgroundColor = h.bg;
+            el.style.height = h.height + "px";
+            el.style.color = h.textColor;
+            
+            el.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <img src="${h.logo}" style="height: ${h.height * 0.6}px">
+                    <span style="font-size: ${h.fontSize}; font-weight: 800">${h.name}</span>
+                </div>
+                <i class="fa-solid fa-bell opacity-50 text-xl"></i>
+            `;
+        }
+
+        function renderBanner(b) {
+            const el = document.getElementById('hero-banner');
+            el.style.height = b.height + "px";
+            el.style.background = b.gradient === "1" ? `linear-gradient(135deg, #1e293b, #334155)` : "#1e293b";
+            el.style.marginTop = b.marginTop + "px";
+
+            el.innerHTML = `
+                <div class="p-8 w-1/2 z-10">
+                    <p class="font-bold opacity-70" style="font-size: ${b.subSize}px; color: ${b.titleColor}">${b.subtitle}</p>
+                    <h2 class="font-black leading-tight mb-4" style="font-size: ${b.titleSize}px; color: ${b.titleColor}">${b.title}</h2>
+                    <button class="bg-white text-black px-6 py-2 rounded-2xl font-black text-xs uppercase">${b.btnText}</button>
+                </div>
+                <img src="${b.image}" class="absolute -right-5 w-52 rotate-[-15deg] drop-shadow-2xl">
+            `;
+        }
+
+        function renderProducts(latest) {
+            document.getElementById('section-title').innerText = latest.title;
             const grid = document.getElementById('product-grid');
-            grid.innerHTML = items.map(p => {
-                const discount = p.oldPrice ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : null;
-                return `
-                    <div class="product-card shadow-sm border border-slate-50" onclick='openDetails(${JSON.stringify(p)})'>
-                        ${discount ? `<div class="discount-badge">-${discount}%</div>` : ''}
-                        <div class="h-32 flex items-center justify-center mb-4">
-                            <img src="${p.images.split(',')[0]}" class="max-h-full object-contain drop-shadow-md">
-                        </div>
-                        <h4 class="font-bold text-sm truncate">${p.name}</h4>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="font-black text-blue-600">${p.price}₾</span>
-                            ${p.oldPrice ? `<span class="text-[10px] text-slate-300 line-through">${p.oldPrice}₾</span>` : ''}
-                        </div>
+            grid.innerHTML = latest.items.map(p => `
+                <div class="product-card">
+                    ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
+                    <div class="h-32 flex items-center justify-center mb-3">
+                        <img src="${p.images.split(',')[0]}" class="max-h-full object-contain">
                     </div>
-                `;
-            }).join('');
+                    <h4 class="font-bold text-xs truncate">${p.name}</h4>
+                    <p class="text-blue-600 font-black mt-1">${p.price}₾</p>
+                </div>
+            `).join('');
         }
 
         function renderNavigation(nav) {
             const container = document.getElementById('bottom-nav');
             container.innerHTML = nav.map(n => `
-                <div class="nav-item ${n.Status === 'active' ? 'active' : ''}" onclick="this.classList.add('active')">
-                    <i class="fa-solid ${n.Icon} text-xl"></i>
+                <div class="nav-item ${n.Status === 'active' ? 'active' : ''}">
+                    <i class="fa-solid ${n.Icon} text-xl mb-1"></i>
+                    <span class="text-[10px] font-bold">${n.Label}</span>
                 </div>
             `).join('');
-        }
-
-        function openDetails(p) {
-            document.getElementById('det-img').src = p.images.split(',')[0];
-            document.getElementById('det-title').innerText = p.name;
-            document.getElementById('det-price').innerText = p.price + "₾";
-            document.getElementById('det-desc').innerText = p.desc;
-            document.getElementById('det-cat').innerText = p.category;
-            document.getElementById('details-page').classList.add('active');
-        }
-
-        function closeDetails() {
-            document.getElementById('details-page').classList.remove('active');
         }
 
         init();
