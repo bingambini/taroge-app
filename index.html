@@ -279,29 +279,39 @@
                     </div>
                 </div>
 
-                <div id="buy-btn-container" class="fixed bottom-10 left-0 right-0 px-6 z-20 hidden-buy transition-all duration-300">
-                    <button onclick="handleBuy('${details.id}')" class="w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-2xl shadow-blue-300 active:scale-95 transition-all">
-                        ყიდვა
-                    </button>
-                </div>
+// ეს ნაწილი ჩასვი ძველი buy-btn-container-ის ადგილას
+<div id="buy-btn-container" class="fixed bottom-10 left-0 right-0 px-6 z-20 transition-all duration-300">
+    <button id="dynamic-buy-btn" disabled class="w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg shadow-none cursor-not-allowed transition-all duration-300">
+        აირჩიე ზომა
+    </button>
+</div>
             `;
             page.classList.remove('hidden');
         }
 
-        function selectOption(btn, type) {
-            const parentClass = type === 'size' ? '.size-opt' : '.color-opt';
-            document.querySelectorAll(parentClass).forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
+function selectOption(btn, type) {
+    const parentClass = type === 'size' ? '.size-opt' : '.color-opt';
+    document.querySelectorAll(parentClass).forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
 
-            const hasSize = document.querySelector('.size-opt.selected');
-            const hasColor = document.querySelector('.color-opt.selected');
-            const buyBtn = document.getElementById('buy-btn-container');
+    const hasSize = document.querySelector('.size-opt.selected');
+    const hasColor = document.querySelector('.color-opt.selected');
+    const buyBtn = document.getElementById('dynamic-buy-btn');
 
-            if (hasSize && hasColor) {
-                buyBtn.classList.remove('hidden-buy');
-                buyBtn.classList.add('visible-buy');
-            }
-        }
+    if (!hasSize) {
+        buyBtn.innerText = "აირჩიე ზომა";
+        buyBtn.classList.replace('bg-blue-600', 'bg-slate-300');
+        buyBtn.disabled = true;
+    } else if (hasSize && !hasColor) {
+        buyBtn.innerText = "აირჩიე ფერი";
+        buyBtn.classList.replace('bg-slate-300', 'bg-blue-600'); // ფერი უკვე ლურჯია, რომ მიიპყროს ყურადღება
+        buyBtn.disabled = true;
+    } else if (hasSize && hasColor) {
+        buyBtn.innerText = "კალათაში დამატება";
+        buyBtn.disabled = false;
+        buyBtn.classList.add('shadow-2xl', 'shadow-blue-300', 'active:scale-95');
+    }
+}
 
         function handleBuy(id) {
             const size = document.querySelector('.size-opt.selected').innerText;
