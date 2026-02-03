@@ -61,35 +61,24 @@
         .badge-new { background: #10b981; color: white; }
 
         .slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; scrollbar-width: none; border-radius: 35px; margin-top: -20px; }
-        .slider-container::-webkit-scrollbar { display: none; }
-        .slider-item { min-width: 100%; scroll-snap-align: start; }
         .slider-item img { width: 100%; aspect-ratio: 1/1; object-fit: contain; background: #fcfcfc; }
         
-        .options-scroll { 
-            display: flex; 
-            overflow-x: auto; 
-            gap: 8px; 
-            padding-bottom: 5px; 
-            scrollbar-width: none; 
-            -webkit-overflow-scrolling: touch;
-        }
+        .options-scroll { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .options-scroll::-webkit-scrollbar { display: none; }
         
-        .option-btn { 
-            border: 2px solid #f1f5f9; 
-            transition: all 0.2s; 
-            flex: 0 0 auto; 
-            white-space: nowrap;
-            outline: none !important;
-            -webkit-tap-highlight-color: transparent; 
-        }
-        .option-btn.selected { 
-            border-color: #2563eb; 
-            background: #2563eb; 
-            color: white !important; 
-            transform: scale(1.05); 
-            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
-        }
+        .option-btn { border: 2px solid #f1f5f9; transition: all 0.2s; flex: 0 0 auto; white-space: nowrap; outline: none !important; -webkit-tap-highlight-color: transparent; }
+        .option-btn.selected { border-color: #2563eb; background: #2563eb; color: white !important; transform: scale(1.05); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2); }
+
+        /* ახალი დიზაინი რაოდენობის ღილაკებისთვის */
+        .stepper-ui { display: flex; align-items: center; background: #f1f5f9; border-radius: 12px; padding: 3px; }
+        .stepper-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 9px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s; }
+        .stepper-btn:active { transform: scale(0.9); background: #e2e8f0; }
+        .stepper-count { padding: 0 10px; font-weight: 800; font-size: 13px; color: #1e293b; min-width: 25px; text-align: center; }
+
+        /* პრომოკოდის ველი */
+        .promo-box { background: white; border-radius: 20px; padding: 12px; border: 1px dashed #cbd5e1; display: flex; gap: 10px; margin-top: 15px; }
+        .promo-input { flex: 1; border: none; outline: none; font-weight: 700; font-size: 12px; color: #1e293b; background: transparent; }
+        .promo-btn { background: #000; color: white; padding: 8px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; }
     </style>
 </head>
 <body>
@@ -104,9 +93,21 @@
     <div id="cart-page" class="hidden page-fade px-6 pt-6">
         <h2 class="text-2xl font-black text-slate-800 mb-6">ჩემი კალათა</h2>
         <div id="cart-items" class="space-y-4"></div>
+        
+        <div id="promo-section" class="hidden">
+            <div class="promo-box">
+                <input type="text" id="promo-input" class="promo-input" placeholder="პრომო კოდი...">
+                <button onclick="applyPromo()" class="promo-btn">გამოყენება</button>
+            </div>
+            <p id="promo-msg" class="text-[10px] font-bold mt-2 px-2"></p>
+        </div>
+
         <div id="cart-summary" class="mt-8 border-t pt-6 hidden">
             <div class="flex justify-between items-center mb-6">
-                <span class="text-slate-500 font-bold">ჯამი:</span>
+                <div>
+                    <span class="text-slate-500 font-bold">ჯამი:</span>
+                    <div id="discount-label" class="text-[10px] text-green-600 font-black hidden">ფასდაკლება აქტიურია</div>
+                </div>
                 <span id="cart-total-price" class="text-2xl font-black text-blue-600">0₾</span>
             </div>
             <button class="w-full bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all shadow-xl">
@@ -151,6 +152,7 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbydQyFCnLnW-mK4CPeJrQ65JATTUszeB4zwW8myUiPW51M-uIa4f0t_FG-_AI9by_Ws6A/exec";
         let storeData = null;
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let activeDiscount = 0;
         
         async function init() {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -208,11 +210,12 @@
             grid.innerHTML = l.items.map((p, index) => {
                 const details = storeData.productDetails.find(d => d.id.toString() === p.id.toString());
                 const statusBadge = details && details.status ? `<span class="badge badge-${details.status.toLowerCase()}">${details.status}</span>` : '';
+                const mainImg = p.images ? p.images.split(',')[0] : '';
                 
                 return `
                 <div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all cursor-pointer relative overflow-hidden">
                     ${statusBadge}
-                    <img src="${p.images.split(',')[0]}" class="h-24 mx-auto object-contain">
+                    <img src="${mainImg}" class="h-24 mx-auto object-contain" onerror="this.src='https://placehold.co/200x200?text=Shoes'">
                     <h4 class="font-bold text-[11px] text-slate-700 truncate mt-3">${p.name}</h4>
                     <p class="text-blue-600 font-black text-sm mt-1">${p.price}₾</p>
                 </div>`;
@@ -228,7 +231,7 @@
             content.innerHTML = `
                 <div class="flex flex-col items-center">
                     <div class="w-full aspect-square bg-slate-50 rounded-[30px] flex items-center justify-center mb-6 overflow-hidden">
-                        <img src="${p.images.split(',')[0]}" class="w-4/5 h-4/5 object-contain">
+                        <img src="${p.images.split(',')[0]}" class="w-4/5 h-4/5 object-contain" onerror="this.src='https://placehold.co/400x400?text=Shoes'">
                     </div>
                     <h3 class="text-2xl font-black text-slate-800 text-center leading-tight">${p.name}</h3>
                     <p class="text-3xl font-black text-blue-600 mt-3">${p.price}₾</p>
@@ -268,7 +271,7 @@
                 <div class="relative mb-6">
                     ${details.status ? `<div class="badge badge-${details.status.toLowerCase()} !top-2 !left-4">${details.status}</div>` : ''}
                     <div class="slider-container shadow-sm">
-                        ${images.map(img => `<div class="slider-item"><img src="${img.trim()}"></div>`).join('')}
+                        ${images.map(img => `<div class="slider-item"><img src="${img.trim()}" onerror="this.src='https://placehold.co/400x400?text=No+Image'"></div>`).join('')}
                     </div>
                 </div>
 
@@ -333,12 +336,10 @@
                 buyBtn.innerText = "აირჩიე ზომა";
                 buyBtn.className = "w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg cursor-not-allowed transition-all duration-300";
                 buyBtn.disabled = true;
-                buyBtn.onclick = null;
             } else if (hasSize && !hasColor) {
                 buyBtn.innerText = "აირჩიე ფერი";
                 buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg cursor-not-allowed transition-all duration-300";
                 buyBtn.disabled = true;
-                buyBtn.onclick = null;
             } else if (hasSize && hasColor) {
                 buyBtn.innerText = "კალათაში დამატება";
                 buyBtn.disabled = false;
@@ -391,16 +392,19 @@
         function renderCart() {
             const el = document.getElementById('cart-items');
             const summary = document.getElementById('cart-summary');
+            const promoSection = document.getElementById('promo-section');
             const totalEl = document.getElementById('cart-total-price');
             
             if (cart.length === 0) {
                 el.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold italic">კალათა ცარიელია</div>`;
                 summary.classList.add('hidden');
+                promoSection.classList.add('hidden');
                 updateCartBadge();
                 return;
             }
 
             summary.classList.remove('hidden');
+            promoSection.classList.remove('hidden');
 
             const grouped = cart.reduce((acc, item) => {
                 const key = `${item.id}-${item.size}-${item.color}`;
@@ -412,34 +416,69 @@
                 return acc;
             }, {});
 
-            let total = 0;
+            let subtotal = 0;
             el.innerHTML = Object.values(grouped).map((item) => {
                 const price = parseFloat(item.price) || 0;
                 const itemTotal = price * item.quantity;
-                total += itemTotal;
+                subtotal += itemTotal;
                 return `
                 <div class="bg-white p-4 rounded-[25px] border border-slate-50 flex items-center gap-4">
-                    <img src="${item.image}" class="w-16 h-16 object-contain bg-slate-50 rounded-xl" onerror="this.src='https://placehold.co/100x100?text=No+Img'">
-                    <div class="flex-1">
-                        <h4 class="font-bold text-slate-800 text-xs truncate w-32">${item.name || 'პროდუქტი'}</h4>
+                    <img src="${item.image}" class="w-16 h-16 object-contain bg-slate-50 rounded-xl" onerror="this.src='https://placehold.co/100x100?text=Shoes'">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-slate-800 text-xs truncate">${item.name || 'პროდუქტი'}</h4>
                         <p class="text-[10px] text-slate-400 font-bold">${item.size || '-'} / ${item.color || '-'}</p>
                         <div class="flex items-center justify-between mt-2">
                             <p class="text-blue-600 font-black text-sm">${price}₾</p>
-                            <div class="flex items-center bg-slate-100 rounded-lg p-1 gap-2">
-                                <button onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', -1)" class="w-8 h-8 bg-white rounded-md flex items-center justify-center shadow-sm active:scale-75">
+                            
+                            <div class="stepper-ui">
+                                <div onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', -1)" class="stepper-btn">
                                     <i class="fa-solid fa-minus text-[10px] text-slate-600"></i>
-                                </button>
-                                <span class="text-sm font-black min-w-[15px] text-center">${item.quantity}</span>
-                                <button onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', 1)" class="w-8 h-8 bg-slate-800 text-white rounded-md flex items-center justify-center shadow-sm active:scale-75">
+                                </div>
+                                <span class="stepper-count">${item.quantity}</span>
+                                <div onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', 1)" class="stepper-btn !bg-slate-900 !text-white">
                                     <i class="fa-solid fa-plus text-[10px]"></i>
-                                </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>`;
             }).join('');
             
-            totalEl.innerText = total + "₾";
+            let finalTotal = subtotal;
+            if (activeDiscount > 0) {
+                finalTotal = subtotal - (subtotal * activeDiscount / 100);
+            }
+            
+            totalEl.innerText = Math.round(finalTotal) + "₾";
+        }
+
+        async function applyPromo() {
+            const input = document.getElementById('promo-input');
+            const msg = document.getElementById('promo-msg');
+            const code = input.value.trim().toUpperCase();
+            const label = document.getElementById('discount-label');
+
+            if (!code) return;
+            if (!storeData.promos) {
+                msg.innerText = "სისტემური შეცდომა: promos არ მოიძებნა";
+                return;
+            }
+
+            const promo = storeData.promos.find(p => p.code.toUpperCase() === code && p.active === "TRUE");
+
+            if (promo) {
+                activeDiscount = parseFloat(promo.discount);
+                msg.className = "text-[10px] font-bold mt-2 px-2 text-green-600";
+                msg.innerText = `პრომოკოდი გააქტიურდა: -${activeDiscount}%`;
+                label.classList.remove('hidden');
+                renderCart();
+            } else {
+                activeDiscount = 0;
+                msg.className = "text-[10px] font-bold mt-2 px-2 text-red-500";
+                msg.innerText = "არასწორი ან ვადაგასული კოდი";
+                label.classList.add('hidden');
+                renderCart();
+            }
         }
 
         function updateQuantity(id, size, color, change) {
