@@ -48,7 +48,18 @@
         .slider-item { min-width: 100%; scroll-snap-align: start; }
         .slider-item img { width: 100%; aspect-ratio: 1/1; object-fit: contain; background: #fcfcfc; }
         
-        .option-btn { border: 2px solid #f1f5f9; transition: all 0.2s; }
+        /* ჰორიზონტალური სქროლი ზომებისა და ფერებისთვის */
+        .options-scroll { 
+            display: flex; 
+            overflow-x: auto; 
+            gap: 8px; 
+            padding-bottom: 5px; 
+            scrollbar-width: none; 
+            -webkit-overflow-scrolling: touch;
+        }
+        .options-scroll::-webkit-scrollbar { display: none; }
+        
+        .option-btn { border: 2px solid #f1f5f9; transition: all 0.2s; flex: 0 0 auto; white-space: nowrap; }
         .option-btn.selected { border-color: #2563eb; background: #eff6ff; color: #2563eb; transform: scale(1.05); }
         .hidden-buy { opacity: 0; transform: translateY(20px); pointer-events: none; }
         .visible-buy { opacity: 1; transform: translateY(0); pointer-events: auto; }
@@ -243,15 +254,15 @@
 
                 <div class="mb-6">
                     <h4 class="text-[10px] font-black text-slate-400 uppercase mb-3 italic">აირჩიე ზომა</h4>
-                    <div class="flex flex-wrap gap-2">
-                        ${sizes.map(s => `<button onclick="selectOption(this, 'size')" class="option-btn size-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm">${s.trim()}</button>`).join('')}
+                    <div class="options-scroll">
+                        ${sizes.map(s => `<button onclick="selectOption(this, 'size')" class="option-btn size-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm bg-white">${s.trim()}</button>`).join('')}
                     </div>
                 </div>
 
                 <div class="mb-10">
                     <h4 class="text-[10px] font-black text-slate-400 uppercase mb-3 italic">აირჩიე ფერი</h4>
-                    <div class="flex flex-wrap gap-2">
-                        ${colors.map(c => `<button onclick="selectOption(this, 'color')" class="option-btn color-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm">${c.trim()}</button>`).join('')}
+                    <div class="options-scroll">
+                        ${colors.map(c => `<button onclick="selectOption(this, 'color')" class="option-btn color-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm bg-white">${c.trim()}</button>`).join('')}
                     </div>
                 </div>
 
