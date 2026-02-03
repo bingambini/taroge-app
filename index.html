@@ -118,7 +118,8 @@
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbydQyFCnLnW-mK4CPeJrQ65JATTUszeB4zwW8myUiPW51M-uIa4f0t_FG-_AI9by_Ws6A/exec";
         let storeData = null;
-
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
         async function init() {
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.ready();
@@ -312,11 +313,37 @@
             }
         }
 
-        function handleBuy(id) {
-            const size = document.querySelector('.size-opt.selected').innerText;
-            const color = document.querySelector('.color-opt.selected').innerText;
-            alert(`შეკვეთა მიღებულია!\nID: ${id}\nზომა: ${size}\nფერი: ${color}`);
-        }
+function handleBuy(id) {
+    const size = document.querySelector('.size-opt.selected').innerText;
+    const color = document.querySelector('.color-opt.selected').innerText;
+    const product = storeData.productDetails.find(d => d.id.toString() === id.toString());
+
+    const cartItem = {
+        cartId: Date.now(), // უნიკალური ID კალათისთვის
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        size: size,
+        color: color,
+        image: product.images.split(',')[0]
+    };
+
+    cart.push(cartItem);
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    // ვიზუალური ეფექტი ღილაკზე
+    const buyBtn = document.getElementById('dynamic-buy-btn');
+    const originalText = buyBtn.innerText;
+    
+    buyBtn.innerText = "✅ დაემატა კალათაში";
+    buyBtn.classList.replace('bg-blue-600', 'bg-green-600');
+    
+    setTimeout(() => {
+        buyBtn.innerText = originalText;
+        buyBtn.classList.replace('bg-green-600', 'bg-blue-600');
+        closeProductDetails(); // დამატების შემდეგ ვხურავთ პროდუქტის გვერდს
+    }, 1000);
+}
 
         function closeProductDetails() {
             document.getElementById('product-details-page').classList.add('hidden');
