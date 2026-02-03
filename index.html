@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store - Optimized 2.1</title>
+    <title>Shoes Store - Optimized 2.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -29,104 +29,148 @@
             display: flex; justify-content: space-around; align-items: center;
             z-index: 10000; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888888; text-decoration: none; transition: all 0.3s ease; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #888888; text-decoration: none; transition: all 0.3s ease; cursor: pointer; }
         .nav-item.active { color: #ffffff; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item span { font-size: 10px; font-weight: 700; }
+
+        .hidden { display: none; }
+        .page-fade { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <header id="main-header" class="flex items-center"></header>
-    <div id="hero-banner"></div>
-    <div id="product-grid" class="grid grid-cols-2 gap-4 px-6"></div>
+
+    <div id="home-page" class="page-fade">
+        <div id="hero-banner"></div>
+        <div id="product-grid" class="grid grid-cols-2 gap-4 px-6"></div>
+    </div>
+
+    <div id="profile-page" class="hidden page-fade"></div>
     
     <nav id="bottom-nav"></nav>
 
     <script>
-    // მნიშვნელოვანია: ვიყენებთ ბოლო სწორ API ლინკს
-    const API_URL = "https://script.google.com/macros/s/AKfycbynHBQqaREEBXj5UxLH3LSfi4dvLYU4o4oU3KYlDLtcXfaQlqffrr7HMmkHEbhaucCi8w/exec";
+        // შენი ბოლო მომუშავე API ლინკი
+        const API_URL = "https://script.google.com/macros/s/AKfycbwo3Ky-Czkoyke8GlVF13BbNQ_4g05tF95kzpWInkZgsiyaQr8AaCu2q4y8MLfva6IGOQ/exec";
+        let storeData = null;
 
-    async function init() {
-        try {
-            const res = await fetch(API_URL);
-            const data = await res.json();
-            
-            console.log("Data received:", data); // ტესტირებისთვის
-
-            if (data.header) renderHeader(data.header);
-            if (data.banner) renderBanner(data.banner);
-            if (data.latest) renderProducts(data.latest);
-            
-            // ნავიგაციის გამოძახება
-            if (data.navigation && data.navigation.length > 0) {
-                renderNavigation(data.navigation);
+        async function init() {
+            try {
+                const res = await fetch(API_URL);
+                storeData = await res.json();
+                
+                if (storeData.header) renderHeader(storeData.header);
+                if (storeData.banner) renderBanner(storeData.banner);
+                if (storeData.latest) renderProducts(storeData.latest);
+                if (storeData.navigation) renderNavigation(storeData.navigation);
+                if (storeData.user) renderProfile(storeData.user, storeData.profileMenu);
+            } catch (e) {
+                console.error("Error loading data:", e);
             }
-        } catch (e) {
-            console.error("Error loading data:", e);
         }
-    }
 
-    function renderHeader(h) {
-        const el = document.getElementById('main-header');
-        if (h.status !== 'active') return;
-        const isSmall = window.innerWidth < 370;
-        el.style.display = 'flex';
-        el.style.backgroundColor = h.bg || "#24afeb";
-        el.style.height = (parseInt(h.height) || 80) + "px";
-        el.style.color = h.textColor || "#ffffff";
-        if (h.style === 'floating') el.classList.add('header-floating');
-        el.innerHTML = `
-            <div class="header-container" style="justify-content: ${h.layout === 'center' ? 'center' : 'space-between'}">
-                <div class="flex items-center gap-3">
-                    <img src="${h.logo}" style="width: ${isSmall ? 40 : 50}px; border-radius: ${h.logoRadius}%" onerror="this.style.opacity='0'">
-                    <span style="font-weight: 800; font-size: ${isSmall ? '16px' : '18px'}">${h.name || ''}</span>
+        function renderHeader(h) {
+            const el = document.getElementById('main-header');
+            if (h.status !== 'active') return;
+            const isSmall = window.innerWidth < 370;
+            el.style.display = 'flex';
+            el.style.backgroundColor = h.bg || "#24afeb";
+            el.style.height = (parseInt(h.height) || 80) + "px";
+            el.style.color = h.textColor || "#ffffff";
+            if (h.style === 'floating') el.classList.add('header-floating');
+            el.innerHTML = `
+                <div class="header-container" style="justify-content: ${h.layout === 'center' ? 'center' : 'space-between'}">
+                    <div class="flex items-center gap-3">
+                        <img src="${h.logo}" style="width: ${isSmall ? 40 : 50}px; border-radius: ${h.logoRadius}%" onerror="this.style.opacity='0'">
+                        <span style="font-weight: 800; font-size: ${isSmall ? '16px' : '18px'}">${h.name || ''}</span>
+                    </div>
+                    ${h.layout !== 'center' ? '<div><i class="fa-solid fa-bell text-xl"></i></div>' : ''}
+                </div>`;
+        }
+
+        function renderBanner(b) {
+            const el = document.getElementById('hero-banner');
+            if (!el) return;
+            const isSmall = window.innerWidth < 370;
+            const scale = isSmall ? 0.85 : 1;
+            el.style.height = (parseInt(b.height) * scale || 180) + "px";
+            el.style.marginTop = (parseInt(b.marginTop) || 20) + "px";
+            el.style.background = b.gradient === "1" ? "linear-gradient(135deg, #1e293b 0%, #334155 100%)" : "#1e293b";
+            el.innerHTML = `
+                <div class="banner-content">
+                    <h2 style="font-size: ${parseInt(b.titleSize) * scale}px; color: white; font-weight: 900; line-height: 1.1;">${b.title}</h2>
+                    <p style="color: rgba(255,255,255,0.7); font-size: ${10 * scale}px; margin-top: 8px; font-weight: 700;">${b.subtitle || ''}</p>
+                    <button class="mt-5 bg-white text-black px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase shadow-2xl active:scale-95 transition-all">${b.btnText}</button>
                 </div>
-                ${h.layout !== 'center' ? '<div><i class="fa-solid fa-bell text-xl"></i></div>' : ''}
-            </div>`;
-    }
+                <img src="${b.image}" class="banner-img" onerror="this.style.opacity='0'">`;
+        }
 
-    function renderBanner(b) {
-        const el = document.getElementById('hero-banner');
-        if (!el) return;
-        const isSmall = window.innerWidth < 370;
-        const scale = isSmall ? 0.85 : 1;
-        el.style.height = (parseInt(b.height) * scale || 180) + "px";
-        el.style.marginTop = (parseInt(b.marginTop) || 20) + "px";
-        el.style.background = b.gradient === "1" ? "linear-gradient(135deg, #1e293b 0%, #334155 100%)" : "#1e293b";
-        el.innerHTML = `
-            <div class="banner-content">
-                <h2 style="font-size: ${parseInt(b.titleSize) * scale}px; color: white; font-weight: 900; line-height: 1.1;">${b.title}</h2>
-                <p style="color: rgba(255,255,255,0.7); font-size: ${10 * scale}px; margin-top: 8px; font-weight: 700;">${b.subtitle || ''}</p>
-                <button class="mt-5 bg-white text-black px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase shadow-2xl active:scale-95 transition-all">${b.btnText}</button>
-            </div>
-            <img src="${b.image}" class="banner-img" onerror="this.style.opacity='0'">`;
-    }
+        function renderProducts(l) {
+            const grid = document.getElementById('product-grid');
+            if (!grid) return;
+            grid.innerHTML = l.items.map(p => `
+                <div class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm">
+                    <img src="${p.images.split(',')[0]}" class="h-28 mx-auto object-contain">
+                    <h4 class="font-bold text-[11px] text-slate-700 truncate mt-2">${p.name}</h4>
+                    <p class="text-blue-600 font-black text-sm">${p.price}₾</p>
+                </div>`).join('');
+        }
 
-    function renderProducts(l) {
-        const grid = document.getElementById('product-grid');
-        if (!grid) return;
-        grid.innerHTML = l.items.map(p => `
-            <div class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm">
-                <img src="${p.images.split(',')[0]}" class="h-28 mx-auto object-contain">
-                <h4 class="font-bold text-[11px] text-slate-700 truncate mt-2">${p.name}</h4>
-                <p class="text-blue-600 font-black text-sm">${p.price}₾</p>
-            </div>`).join('');
-    }
+        function renderNavigation(items) {
+            const nav = document.getElementById('bottom-nav');
+            if (!nav) return;
+            nav.innerHTML = items.map((item, index) => `
+                <div onclick="switchPage('${item.action}', this)" class="nav-item ${index === 0 ? 'active' : ''}">
+                    <i class="fa-solid ${item.icon}"></i> 
+                    <span>${item.name}</span>
+                </div>
+            `).join('');
+        }
 
-    function renderNavigation(items) {
-        const nav = document.getElementById('bottom-nav');
-        if (!nav) return;
-        nav.innerHTML = items.map((item, index) => `
-            <a href="#" class="nav-item ${index === 0 ? 'active' : ''}">
-                <i class="fa-solid ${item.icon}"></i> 
-                <span>${item.name}</span>
-            </a>
-        `).join('');
-    }
+        function renderProfile(user, menu) {
+            const el = document.getElementById('profile-page');
+            const tgAvatar = `https://t.me/i/userpic/320/${user.tgUsername}.jpg`;
+            el.innerHTML = `
+                <div class="flex flex-col items-center pt-10 pb-8">
+                    <div class="relative">
+                        <img src="${tgAvatar}" class="w-28 h-28 rounded-full border-4 border-white shadow-xl object-cover" onerror="this.src='https://ui-avatars.com/api/?name=${user.name}'">
+                        <div class="absolute bottom-1 right-1 bg-blue-500 text-white p-1.5 rounded-full border-2 border-white text-[10px]"><i class="fa-brands fa-telegram"></i></div>
+                    </div>
+                    <h2 class="text-2xl font-black text-slate-800 mt-4">${user.name}</h2>
+                    <span class="bg-blue-100 text-blue-600 text-[10px] font-black px-4 py-1 rounded-full mt-1 uppercase">${user.status}</span>
+                </div>
+                <div class="px-6 space-y-3">
+                    ${menu.map(m => `
+                        <div class="bg-white p-5 rounded-[25px] flex items-center justify-between border border-slate-50 shadow-sm active:scale-95 transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-600"><i class="fa-solid ${m.icon}"></i></div>
+                                <span class="font-bold text-slate-700">${m.label}</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+                        </div>`).join('')}
+                </div>`;
+        }
 
-    init();
-</script>
- 
+        function switchPage(action, btn) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+
+            const home = document.getElementById('home-page');
+            const profile = document.getElementById('profile-page');
+
+            if (action === 'profile') {
+                home.classList.add('hidden');
+                profile.classList.remove('hidden');
+            } else {
+                home.classList.remove('hidden');
+                profile.classList.add('hidden');
+            }
+        }
+
+        init();
+    </script>
 </body>
 </html>
