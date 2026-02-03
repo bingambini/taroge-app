@@ -74,7 +74,7 @@
         /* Checkout Styles */
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px; margin-left: 4px; }
-        .checkout-input { width: 100%; background: white; border: 1px solid #f1f5f9; padding: 14px 18px; rounded: 18px; font-weight: 700; font-size: 13px; color: #1e293b; border-radius: 18px; outline: none; transition: border-color 0.2s; }
+        .checkout-input { width: 100%; background: white; border: 1px solid #f1f5f9; padding: 14px 18px; font-weight: 700; font-size: 13px; color: #1e293b; border-radius: 18px; outline: none; transition: border-color 0.2s; }
         .checkout-input:focus { border-color: #2563eb; }
     </style>
 </head>
@@ -141,10 +141,6 @@
                 </div>
             </div>
             <div class="input-group">
-                <label>ელ-ფოსტა (სურვილისამებრ)</label>
-                <input type="email" id="order-email" class="checkout-input" placeholder="example@mail.com">
-            </div>
-            <div class="input-group">
                 <label>დამატებითი შენიშვნა</label>
                 <textarea id="order-extra" class="checkout-input h-24 pt-3" placeholder="მაგ: კოდი, სართული..."></textarea>
             </div>
@@ -161,11 +157,54 @@
         </div>
     </div>
 
+    <div id="payment-page" class="hidden page-fade px-6 pt-6 pb-20">
+        <div class="flex items-center gap-3 mb-6">
+            <button onclick="switchPage('checkout')" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm active:scale-90 transition-all">
+                <i class="fa-solid fa-chevron-left text-slate-400"></i>
+            </button>
+            <h2 class="text-xl font-black text-slate-800">გადახდის მეთოდი</h2>
+        </div>
+
+        <div class="space-y-3">
+            <div onclick="selectPayment('Cash', 'კურიერთან გადახდა')" class="bg-white p-5 rounded-[25px] border border-slate-50 flex items-center gap-4 active:scale-95 transition-all cursor-pointer shadow-sm">
+                <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 text-lg"><i class="fa-solid fa-truck-fast"></i></div>
+                <div class="flex-1">
+                    <h4 class="font-black text-slate-800 text-[13px]">კურიერთან გადახდა</h4>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase italic">ნაღდი ან ტერმინალი</p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-200 text-[10px]"></i>
+            </div>
+
+            <div onclick="selectPayment('Card', 'ბარათით გადახდა')" class="bg-white p-5 rounded-[25px] border border-slate-50 flex items-center gap-4 active:scale-95 transition-all cursor-pointer shadow-sm">
+                <div class="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center text-green-500 text-lg"><i class="fa-solid fa-credit-card"></i></div>
+                <div class="flex-1">
+                    <h4 class="font-black text-slate-800 text-[13px]">ბარათით გადახდა</h4>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase italic">ონლაინ გადახდა</p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-200 text-[10px]"></i>
+            </div>
+
+            <div onclick="selectPayment('Transfer', 'თანხის გადარიცხვა')" class="bg-white p-5 rounded-[25px] border border-slate-50 flex items-center gap-4 active:scale-95 transition-all cursor-pointer shadow-sm">
+                <div class="w-11 h-11 bg-purple-50 rounded-xl flex items-center justify-center text-purple-500 text-lg"><i class="fa-solid fa-building-columns"></i></div>
+                <div class="flex-1">
+                    <h4 class="font-black text-slate-800 text-[13px]">თანხის გადარიცხვა</h4>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase italic">საბანკო რეკვიზიტებზე</p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-200 text-[10px]"></i>
+            </div>
+        </div>
+
+        <div class="mt-10 p-6 bg-slate-50 rounded-[30px] text-center border border-dashed border-slate-200">
+            <span class="text-slate-400 font-bold uppercase text-[9px] tracking-widest block mb-1">გადასახდელი ჯამი</span>
+            <span id="payment-final-total" class="text-3xl font-black text-blue-600">0₾</span>
+        </div>
+    </div>
+
     <div id="profile-page" class="hidden page-fade"></div>
 
     <div id="orders-page" class="hidden page-fade px-6 pt-6">
         <div class="flex items-center gap-3 mb-6">
-            <button onclick="switchPage('home', this)" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm active:scale-90 transition-all">
+            <button onclick="switchPage('home')" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm active:scale-90 transition-all">
                 <i class="fa-solid fa-chevron-left text-slate-400"></i>
             </button>
             <h2 class="text-xl font-black text-slate-800">ჩემი შეკვეთები</h2>
@@ -533,7 +572,7 @@
         }
 
         function switchPage(action, btn) {
-            const pages = { home: 'home-page', profile: 'profile-page', orders: 'orders-page', cart: 'cart-page', checkout: 'checkout-page' };
+            const pages = { home: 'home-page', profile: 'profile-page', orders: 'orders-page', cart: 'cart-page', checkout: 'checkout-page', payment: 'payment-page' };
             const header = document.getElementById('main-header');
             
             Object.values(pages).forEach(p => {
@@ -545,10 +584,10 @@
             
             if (pages[action]) document.getElementById(pages[action]).classList.remove('hidden');
             
-            // Activate nav item if it exists
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(ni => {
-                if(ni.getAttribute('onclick').includes(`'${action}'`)) ni.classList.add('active');
+                const clickAttr = ni.getAttribute('onclick');
+                if(clickAttr && clickAttr.includes(`'${action}'`)) ni.classList.add('active');
             });
             
             if (action === 'home') header.classList.remove('hidden');
@@ -573,8 +612,6 @@
                 </div>`).join('');
         }
 
-/* --- განახლებული ფუნქციები ჩექაუთისთვის --- */
-
         function placeOrder() {
             if (cart.length === 0) return;
             switchPage('checkout');
@@ -582,66 +619,65 @@
             document.getElementById('checkout-total-price').innerText = total;
         }
 
-        async function confirmFinalOrder() {
+        function confirmFinalOrder() {
             const name = document.getElementById('order-name').value.trim();
             const phone = document.getElementById('order-phone').value.trim();
             const city = document.getElementById('order-city').value.trim();
             const address = document.getElementById('order-address').value.trim();
-            const extra = document.getElementById('order-extra').value.trim();
 
             if (!name || !phone || !city || !address) {
                 alert("გთხოვთ შეავსოთ აუცილებელი ველები (*)");
                 return;
             }
 
-            const tg = window.Telegram.WebApp;
-            const itemsSummary = cart.map(i => `${i.name} (${i.size}, ${i.color})`).join(', ');
+            const total = document.getElementById('checkout-total-price').innerText;
+            document.getElementById('payment-final-total').innerText = total;
+            switchPage('payment');
+        }
+
+        async function selectPayment(methodId, methodTitle) {
+            const name = document.getElementById('order-name').value.trim();
+            const phone = document.getElementById('order-phone').value.trim();
+            const city = document.getElementById('order-city').value.trim();
+            const address = document.getElementById('order-address').value.trim();
+            const extra = document.getElementById('order-extra').value.trim();
             const total = document.getElementById('checkout-total-price').innerText.replace('₾', '').trim();
-            const promoUsed = (typeof activeDiscountData !== 'undefined' && activeDiscountData) ? activeDiscountData.code : "არა";
+            const itemsSummary = cart.map(i => `${i.name} (${i.size}, ${i.color})`).join(', ');
+            const promoUsed = activeDiscountData ? activeDiscountData.code : "არა";
+            
+            const tg = window.Telegram.WebApp;
             const userId = (tg.initDataUnsafe?.user?.id || "000000").toString();
 
-            // ვაწყობთ URL-ს პარამეტრებით (GET მეთოდისთვის)
             const finalParams = new URLSearchParams({
                 action: "placeOrder",
                 userId: userId,
                 customerName: name,
                 phone: phone,
-                address: `${city}, ${address}${extra ? ' (' + extra + ')' : ''}`,
+                address: `${city}, ${address}${extra ? ' (' + extra + ')' : ''} [გადახდა: ${methodTitle}]`,
                 items: itemsSummary,
                 total: total,
                 promo: promoUsed
             });
 
-            const finalUrl = `${API_URL}?${finalParams.toString()}`;
-
-            // მესიჯი ტელეგრამისთვის
             const message = `📦 ახალი შეკვეთა!\n\n` +
                           `👤 კლიენტი: ${name}\n` +
                           `📞 ტელეფონი: ${phone}\n` +
-                          `📍 მისამართი: ${city}, ${address}\n` +
+                          `💳 გადახდა: ${methodTitle}\n` +
                           `🛒 პროდუქტები: ${itemsSummary}\n` +
-                          `🎟️ პრომო: ${promoUsed}\n` +
                           `💰 ჯამი: ${total}₾`;
 
             try {
-                // შეკვეთის გაგზავნა Google Sheets-ში (GET-ით უფრო სტაბილურია)
-                fetch(finalUrl, { mode: 'no-cors' });
+                fetch(`${API_URL}?${finalParams.toString()}`, { mode: 'no-cors' });
+                tg.sendData(JSON.stringify({ action: "order", message: message }));
 
-                // შეკვეთის გაგზავნა Telegram-ში
-                tg.sendData(JSON.stringify({ 
-                    action: "order", 
-                    message: message 
-                }));
-                
                 localStorage.removeItem('cart');
                 cart = [];
+                updateCartBadge();
                 
                 alert("შეკვეთა მიღებულია!");
                 tg.close();
-                
             } catch (e) {
-                console.error("Error:", e);
-                alert("დაფიქსირდა შეცდომა. სცადეთ თავიდან.");
+                alert("შეცდომაა. სცადეთ თავიდან.");
             }
         }
 
