@@ -42,13 +42,11 @@
         .badge-hot { background: #f59e0b; color: white; }
         .badge-new { background: #10b981; color: white; }
 
-        /* განახლებული სლაიდერი და ფოტოები */
         .slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; scrollbar-width: none; border-radius: 35px; margin-top: -20px; }
         .slider-container::-webkit-scrollbar { display: none; }
         .slider-item { min-width: 100%; scroll-snap-align: start; }
         .slider-item img { width: 100%; aspect-ratio: 1/1; object-fit: contain; background: #fcfcfc; }
         
-        /* ჰორიზონტალური სქროლი ზომებისა და ფერებისთვის */
         .options-scroll { 
             display: flex; 
             overflow-x: auto; 
@@ -64,7 +62,7 @@
             transition: all 0.2s; 
             flex: 0 0 auto; 
             white-space: nowrap;
-            outline: none !important; /* აქრობს ცუდ კონტურს */
+            outline: none !important;
             -webkit-tap-highlight-color: transparent; 
         }
         .option-btn.selected { 
@@ -74,8 +72,6 @@
             transform: scale(1.05); 
             box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
         }
-        .hidden-buy { opacity: 0; transform: translateY(20px); pointer-events: none; }
-        .visible-buy { opacity: 1; transform: translateY(0); pointer-events: auto; }
     </style>
 </head>
 <body>
@@ -105,7 +101,8 @@
                 <i class="fa-solid fa-arrow-left text-slate-800"></i>
             </button>
             <h3 class="font-bold text-slate-800">პროდუქტი</h3>
-            <div class="w-12"></div> </div>
+            <div class="w-12"></div> 
+        </div>
         <div id="details-content" class="px-6 page-fade"></div>
     </div>
 
@@ -268,50 +265,52 @@
                 <div class="mb-6">
                     <h4 class="text-[10px] font-black text-slate-400 uppercase mb-3 italic">აირჩიე ზომა</h4>
                     <div class="options-scroll">
-                        ${sizes.map(s => `<button onclick="selectOption(this, 'size')" class="option-btn size-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm bg-white">${s.trim()}</button>`).join('')}
+                        ${sizes.map(s => `<button onclick="selectOption(this, 'size', '${details.id}')" class="option-btn size-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm bg-white">${s.trim()}</button>`).join('')}
                     </div>
                 </div>
 
                 <div class="mb-10">
                     <h4 class="text-[10px] font-black text-slate-400 uppercase mb-3 italic">აირჩიე ფერი</h4>
                     <div class="options-scroll">
-                        ${colors.map(c => `<button onclick="selectOption(this, 'color')" class="option-btn color-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm bg-white">${c.trim()}</button>`).join('')}
+                        ${colors.map(c => `<button onclick="selectOption(this, 'color', '${details.id}')" class="option-btn color-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm bg-white">${c.trim()}</button>`).join('')}
                     </div>
                 </div>
 
-// ეს ნაწილი ჩასვი ძველი buy-btn-container-ის ადგილას
-<div id="buy-btn-container" class="fixed bottom-10 left-0 right-0 px-6 z-20 transition-all duration-300">
-    <button id="dynamic-buy-btn" disabled class="w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg shadow-none cursor-not-allowed transition-all duration-300">
-        აირჩიე ზომა
-    </button>
-</div>
+                <div id="buy-btn-container" class="fixed bottom-10 left-0 right-0 px-6 z-20 transition-all duration-300">
+                    <button id="dynamic-buy-btn" disabled class="w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg shadow-none cursor-not-allowed transition-all duration-300">
+                        აირჩიე ზომა
+                    </button>
+                </div>
             `;
             page.classList.remove('hidden');
         }
 
-function selectOption(btn, type) {
-    const parentClass = type === 'size' ? '.size-opt' : '.color-opt';
-    document.querySelectorAll(parentClass).forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
+        function selectOption(btn, type, productId) {
+            const parentClass = type === 'size' ? '.size-opt' : '.color-opt';
+            document.querySelectorAll(parentClass).forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
 
-    const hasSize = document.querySelector('.size-opt.selected');
-    const hasColor = document.querySelector('.color-opt.selected');
-    const buyBtn = document.getElementById('dynamic-buy-btn');
+            const hasSize = document.querySelector('.size-opt.selected');
+            const hasColor = document.querySelector('.color-opt.selected');
+            const buyBtn = document.getElementById('dynamic-buy-btn');
 
-    if (!hasSize) {
-        buyBtn.innerText = "აირჩიე ზომა";
-        buyBtn.classList.replace('bg-blue-600', 'bg-slate-300');
-        buyBtn.disabled = true;
-    } else if (hasSize && !hasColor) {
-        buyBtn.innerText = "აირჩიე ფერი";
-        buyBtn.classList.replace('bg-slate-300', 'bg-blue-600'); // ფერი უკვე ლურჯია, რომ მიიპყროს ყურადღება
-        buyBtn.disabled = true;
-    } else if (hasSize && hasColor) {
-        buyBtn.innerText = "კალათაში დამატება";
-        buyBtn.disabled = false;
-        buyBtn.classList.add('shadow-2xl', 'shadow-blue-300', 'active:scale-95');
-    }
-}
+            if (!hasSize) {
+                buyBtn.innerText = "აირჩიე ზომა";
+                buyBtn.className = "w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg cursor-not-allowed transition-all duration-300";
+                buyBtn.disabled = true;
+                buyBtn.onclick = null;
+            } else if (hasSize && !hasColor) {
+                buyBtn.innerText = "აირჩიე ფერი";
+                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg cursor-not-allowed transition-all duration-300";
+                buyBtn.disabled = true;
+                buyBtn.onclick = null;
+            } else if (hasSize && hasColor) {
+                buyBtn.innerText = "კალათაში დამატება";
+                buyBtn.disabled = false;
+                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-2xl shadow-blue-300 active:scale-95 transition-all duration-300 cursor-pointer";
+                buyBtn.onclick = () => handleBuy(productId);
+            }
+        }
 
         function handleBuy(id) {
             const size = document.querySelector('.size-opt.selected').innerText;
