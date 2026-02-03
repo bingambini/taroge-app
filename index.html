@@ -43,7 +43,14 @@
         .badge-hot { background: #f59e0b; color: white; }
         .badge-new { background: #10b981; color: white; }
 
-        .size-btn.selected { background-color: #2563eb; color: white; border-color: #2563eb; transform: scale(1.05); }
+        /* ახალი სტილები პროდუქტის გვერდისთვის */
+        .slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; scrollbar-width: none; border-radius: 35px; }
+        .slider-container::-webkit-scrollbar { display: none; }
+        .slider-item { min-width: 100%; scroll-snap-align: start; }
+        .option-btn { border: 2px solid #f1f5f9; transition: all 0.2s; }
+        .option-btn.selected { border-color: #2563eb; background: #eff6ff; color: #2563eb; transform: scale(1.05); }
+        .hidden-buy { opacity: 0; transform: translateY(20px); pointer-events: none; }
+        .visible-buy { opacity: 1; transform: translateY(0); pointer-events: auto; }
     </style>
 </head>
 <body>
@@ -145,7 +152,6 @@
         function renderProducts(l) {
             const grid = document.getElementById('product-grid');
             grid.innerHTML = l.items.map((p, index) => {
-                // ვეძებთ დამატებით ინფორმაციას (ბეჯისთვის)
                 const details = storeData.productDetails.find(d => d.id.toString() === p.id.toString());
                 const statusBadge = details && details.status ? `<span class="badge badge-${details.status.toLowerCase()}">${details.status}</span>` : '';
                 
@@ -198,44 +204,55 @@
             const el = document.getElementById('details-content');
             const page = document.getElementById('product-details-page');
 
-            if (!details) {
-                alert("ამ პროდუქტის დეტალები ვერ მოიძებნა!");
-                return;
-            }
+            if (!details) return;
 
             const images = details.fullImages ? details.fullImages.split(',') : [details.images];
             const sizes = details.sizes ? details.sizes.toString().split(',') : [];
+            const colors = details.colors ? details.colors.toString().split(',') : [];
 
             el.innerHTML = `
-                <div class="mb-8 relative">
-                    ${details.status ? `<span class="badge badge-${details.status.toLowerCase()} !text-[11px] !py-1.5 !px-4 !top-4 !left-4">${details.status}</span>` : ''}
-                    <img src="${images[0].trim()}" class="w-full rounded-[40px] shadow-2xl shadow-slate-200 aspect-square object-cover bg-slate-50">
-                </div>
-                
-                <div class="flex justify-between items-start mb-6">
-                    <h1 class="text-3xl font-black text-slate-800 w-2/3 leading-tight">${details.name}</h1>
-                    <div class="text-right">
-                        ${details.oldPrice ? `<span class="block text-slate-400 line-through text-sm font-bold italic">${details.oldPrice}₾</span>` : ''}
-                        <span class="block text-3xl font-black text-blue-600">${details.price}₾</span>
+                <div class="relative mb-6">
+                    ${details.status ? `<div class="badge badge-${details.status.toLowerCase()} !top-4 !left-4">${details.status}</div>` : ''}
+                    <div class="slider-container shadow-xl">
+                        ${images.map(img => `<div class="slider-item"><img src="${img.trim()}" class="w-full aspect-square object-cover bg-slate-50"></div>`).join('')}
                     </div>
                 </div>
 
-                <div class="mb-8">
-                    <h4 class="font-bold text-slate-400 uppercase text-[10px] tracking-widest mb-3 italic">აღწერა</h4>
-                    <p class="text-slate-500 leading-relaxed text-sm font-medium">${details.description || 'აღწერა არ არის'}</p>
+                <div class="mb-4">
+                    <h1 class="text-2xl font-black text-slate-800 leading-tight">${details.name}</h1>
+                    <span class="text-[10px] font-bold text-slate-400">ID: ${details.id}</span>
                 </div>
 
-                ${sizes.length > 0 ? `
-                <div class="mb-8">
-                    <h4 class="font-bold text-slate-400 uppercase text-[10px] tracking-widest mb-4 italic">აირჩიე ზომა</h4>
-                    <div class="flex flex-wrap gap-3">
-                        ${sizes.map(s => `
-                            <button onclick="selectSize(this)" class="size-btn w-14 h-14 border-2 border-slate-100 rounded-2xl flex items-center justify-center font-bold text-slate-700 active:scale-90 transition-all">${s.trim()}</button>
-                        `).join('')}
-                    </div>
-                </div>` : ''}
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-3xl font-black text-blue-600">${details.price}₾</span>
+                    ${details.oldPrice ? `<span class="text-lg text-slate-300 line-through font-bold">${details.oldPrice}₾</span>` : ''}
+                </div>
 
-                <div class="fixed bottom-10 left-0 right-0 px-6 z-20">
+                <div class="mb-6 flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full ${details.inStock > 0 ? 'bg-green-500' : 'bg-red-500'}"></div>
+                    <span class="text-xs font-bold text-slate-500">${details.inStock > 0 ? 'მარაგშია' : 'ამოწურულია'}</span>
+                </div>
+
+                <div class="mb-8">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 italic">აღწერა</h4>
+                    <p class="text-slate-600 text-sm leading-relaxed font-medium">${details.description || 'აღწერა არ არის'}</p>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase mb-3 italic">აირჩიე ზომა</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${sizes.map(s => `<button onclick="selectOption(this, 'size')" class="option-btn size-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm">${s.trim()}</button>`).join('')}
+                    </div>
+                </div>
+
+                <div class="mb-10">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase mb-3 italic">აირჩიე ფერი</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${colors.map(c => `<button onclick="selectOption(this, 'color')" class="option-btn color-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm">${c.trim()}</button>`).join('')}
+                    </div>
+                </div>
+
+                <div id="buy-btn-container" class="fixed bottom-10 left-0 right-0 px-6 z-20 hidden-buy transition-all duration-300">
                     <button onclick="handleBuy('${details.id}')" class="w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-2xl shadow-blue-300 active:scale-95 transition-all">
                         ყიდვა
                     </button>
@@ -244,18 +261,25 @@
             page.classList.remove('hidden');
         }
 
-        function handleBuy(id) {
-            const selectedSize = document.querySelector('.size-btn.selected');
-            if (!selectedSize) {
-                alert("გთხოვთ აირჩიოთ ზომა!");
-                return;
+        function selectOption(btn, type) {
+            const parentClass = type === 'size' ? '.size-opt' : '.color-opt';
+            document.querySelectorAll(parentClass).forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            const hasSize = document.querySelector('.size-opt.selected');
+            const hasColor = document.querySelector('.color-opt.selected');
+            const buyBtn = document.getElementById('buy-btn-container');
+
+            if (hasSize && hasColor) {
+                buyBtn.classList.remove('hidden-buy');
+                buyBtn.classList.add('visible-buy');
             }
-            alert("შეკვეთა მიღებულია! ზომა: " + selectedSize.innerText);
         }
 
-        function selectSize(btn) {
-            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
+        function handleBuy(id) {
+            const size = document.querySelector('.size-opt.selected').innerText;
+            const color = document.querySelector('.color-opt.selected').innerText;
+            alert(`შეკვეთა მიღებულია!\nID: ${id}\nზომა: ${size}\nფერი: ${color}`);
         }
 
         function closeProductDetails() {
