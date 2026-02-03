@@ -33,7 +33,6 @@
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item span { font-size: 10px; font-weight: 700; }
 
-        /* Notification Badge Style */
         .cart-badge {
             position: absolute;
             top: -5px;
@@ -362,9 +361,9 @@
 
             const cartItem = {
                 cartId: Date.now(),
-                id: product.id,
+                id: product.id.toString(),
                 name: product.name,
-                price: parseFloat(product.price),
+                price: parseFloat(product.price) || 0,
                 size: size,
                 color: color,
                 image: (product.images || "").split(',')[0]
@@ -397,12 +396,12 @@
             if (cart.length === 0) {
                 el.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold italic">კალათა ცარიელია</div>`;
                 summary.classList.add('hidden');
+                updateCartBadge();
                 return;
             }
 
             summary.classList.remove('hidden');
 
-            // დაჯგუფება
             const grouped = cart.reduce((acc, item) => {
                 const key = `${item.id}-${item.size}-${item.color}`;
                 if (!acc[key]) {
@@ -415,23 +414,24 @@
 
             let total = 0;
             el.innerHTML = Object.values(grouped).map((item) => {
-                const itemTotal = item.price * item.quantity;
+                const price = parseFloat(item.price) || 0;
+                const itemTotal = price * item.quantity;
                 total += itemTotal;
                 return `
                 <div class="bg-white p-4 rounded-[25px] border border-slate-50 flex items-center gap-4">
-                    <img src="${item.image}" class="w-16 h-16 object-contain bg-slate-50 rounded-xl">
+                    <img src="${item.image}" class="w-16 h-16 object-contain bg-slate-50 rounded-xl" onerror="this.src='https://placehold.co/100x100?text=No+Img'">
                     <div class="flex-1">
-                        <h4 class="font-bold text-slate-800 text-xs truncate w-32">${item.name}</h4>
-                        <p class="text-[10px] text-slate-400 font-bold">${item.size} / ${item.color}</p>
+                        <h4 class="font-bold text-slate-800 text-xs truncate w-32">${item.name || 'პროდუქტი'}</h4>
+                        <p class="text-[10px] text-slate-400 font-bold">${item.size || '-'} / ${item.color || '-'}</p>
                         <div class="flex items-center justify-between mt-2">
-                            <p class="text-blue-600 font-black text-sm">${item.price}₾</p>
+                            <p class="text-blue-600 font-black text-sm">${price}₾</p>
                             <div class="flex items-center bg-slate-100 rounded-lg p-1 gap-2">
-                                <button onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', -1)" class="w-6 h-6 bg-white rounded flex items-center justify-center shadow-sm active:scale-90">
-                                    <i class="fa-solid fa-minus text-[8px]"></i>
+                                <button onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', -1)" class="w-8 h-8 bg-white rounded-md flex items-center justify-center shadow-sm active:scale-75">
+                                    <i class="fa-solid fa-minus text-[10px] text-slate-600"></i>
                                 </button>
-                                <span class="text-xs font-black min-w-[12px] text-center">${item.quantity}</span>
-                                <button onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', 1)" class="w-6 h-6 bg-slate-800 text-white rounded flex items-center justify-center shadow-sm active:scale-90">
-                                    <i class="fa-solid fa-plus text-[8px]"></i>
+                                <span class="text-sm font-black min-w-[15px] text-center">${item.quantity}</span>
+                                <button onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', 1)" class="w-8 h-8 bg-slate-800 text-white rounded-md flex items-center justify-center shadow-sm active:scale-75">
+                                    <i class="fa-solid fa-plus text-[10px]"></i>
                                 </button>
                             </div>
                         </div>
@@ -443,16 +443,23 @@
         }
 
         function updateQuantity(id, size, color, change) {
-            if (change === 1) {
-                const original = cart.find(i => i.id === id && i.size === size && i.color === color);
-                cart.push({ ...original, cartId: Date.now() });
-            } else {
-                const idx = cart.findIndex(i => i.id === id && i.size === size && i.color === color);
-                if (idx > -1) cart.splice(idx, 1);
+            const itemIndex = cart.findIndex(i => 
+                String(i.id) === String(id) && 
+                String(i.size) === String(size) && 
+                String(i.color) === String(color)
+            );
+
+            if (itemIndex > -1) {
+                if (change === 1) {
+                    const newItem = { ...cart[itemIndex], cartId: Date.now() };
+                    cart.push(newItem);
+                } else {
+                    cart.splice(itemIndex, 1);
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartBadge();
+                renderCart();
             }
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCartBadge();
-            renderCart();
         }
 
         function updateCartBadge() {
@@ -465,13 +472,6 @@
             } else {
                 badge.classList.add('hidden');
             }
-        }
-
-        function removeFromCart(cartId) {
-            cart = cart.filter(i => i.cartId !== cartId);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCartBadge();
-            renderCart();
         }
 
         function closeProductDetails() {
