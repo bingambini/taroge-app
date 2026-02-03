@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store - Optimized 2.6</title>
+    <title>Shoes Store - Optimized 2.8</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -119,32 +119,15 @@
             </button>
             <h2 class="text-xl font-black text-slate-800">მიწოდების მონაცემები</h2>
         </div>
-
         <div class="space-y-4">
-            <div class="input-group">
-                <label>სახელი და გვარი *</label>
-                <input type="text" id="order-name" class="checkout-input" placeholder="მაგ: გიორგი ბერიძე">
-            </div>
-            <div class="input-group">
-                <label>ტელეფონის ნომერი *</label>
-                <input type="tel" id="order-phone" class="checkout-input" placeholder="მაგ: 5XX XX XX XX">
-            </div>
+            <div class="input-group"><label>სახელი და გვარი *</label><input type="text" id="order-name" class="checkout-input" placeholder="მაგ: გიორგი ბერიძე"></div>
+            <div class="input-group"><label>ტელეფონის ნომერი *</label><input type="tel" id="order-phone" class="checkout-input" placeholder="მაგ: 5XX XX XX XX"></div>
             <div class="grid grid-cols-2 gap-3">
-                <div class="input-group">
-                    <label>ქალაქი *</label>
-                    <input type="text" id="order-city" class="checkout-input" placeholder="თბილისი">
-                </div>
-                <div class="input-group">
-                    <label>მისამართი *</label>
-                    <input type="text" id="order-address" class="checkout-input" placeholder="ქუჩა, კორპუსი">
-                </div>
+                <div class="input-group"><label>ქალაქი *</label><input type="text" id="order-city" class="checkout-input" placeholder="თბილისი"></div>
+                <div class="input-group"><label>მისამართი *</label><input type="text" id="order-address" class="checkout-input" placeholder="ქუჩა, კორპუსი"></div>
             </div>
-            <div class="input-group">
-                <label>დამატებითი შენიშვნა</label>
-                <textarea id="order-extra" class="checkout-input h-24 pt-3" placeholder="მაგ: კოდი, სართული..."></textarea>
-            </div>
+            <div class="input-group"><label>დამატებითი შენიშვნა</label><textarea id="order-extra" class="checkout-input h-24 pt-3" placeholder="მაგ: კოდი, სართული..."></textarea></div>
         </div>
-
         <div class="mt-8 border-t pt-6">
             <div class="flex justify-between items-center mb-6">
                 <span class="text-slate-500 font-bold uppercase text-xs">გადასახდელი ჯამი:</span>
@@ -163,10 +146,7 @@
             </button>
             <h2 class="text-xl font-black text-slate-800">გადახდის მეთოდი</h2>
         </div>
-
-        <div class="space-y-3">
-            </div>
-
+        <div class="space-y-3"></div>
         <div class="mt-10 p-6 bg-slate-50 rounded-[30px] text-center border border-dashed border-slate-200">
             <span class="text-slate-400 font-bold uppercase text-[9px] tracking-widest block mb-1">გადასახდელი ჯამი</span>
             <span id="payment-final-total" class="text-3xl font-black text-blue-600">0₾</span>
@@ -214,43 +194,40 @@
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let activeDiscountData = null;
         
-async function init() {
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
-    }
-    try {
-        // ძირითადი მონაცემების წამოღება (API_URL-დან)
-        const res = await fetch(API_URL);
-        storeData = await res.json();
-        
-        // გადახდის მეთოდების წამოღება CSV-დან
-        const payRes = await fetch(PAYMENT_CSV_URL);
-        const payText = await payRes.text();
-        const payRows = payText.replace(/\r/g, "").split('\n');
-        
-        // CSV-ს კონვერტაცია ობიექტებად
-        storeData.paymentMethods = payRows.slice(1).filter(r => r.trim() !== "").map(row => {
-            const cols = row.split(',');
-            return {
-                id: cols[0]?.trim(),
-                title: cols[1]?.trim(),
-                subtitle: cols[2]?.trim(),
-                icon: cols[3]?.trim(),
-                status: cols[4]?.trim().toLowerCase()
-            };
-        });
+        async function init() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+            }
+            try {
+                const res = await fetch(API_URL);
+                storeData = await res.json();
+                
+                // გადახდის მეთოდების წამოღება CSV-დან
+                const payRes = await fetch(PAYMENT_CSV_URL);
+                const payText = await payRes.text();
+                const payRows = payText.replace(/\r/g, "").split('\n');
+                
+                storeData.paymentMethods = payRows.slice(1).filter(r => r.trim() !== "").map(row => {
+                    const cols = row.split(',');
+                    return {
+                        id: cols[0]?.trim(),
+                        title: cols[1]?.trim(),
+                        subtitle: cols[2]?.trim(),
+                        icon: cols[3]?.trim(),
+                        status: cols[4]?.trim().toLowerCase()
+                    };
+                });
 
-        // რენდერი
-        if (storeData.header) renderHeader(storeData.header);
-        if (storeData.banner) renderBanner(storeData.banner);
-        if (storeData.latest) renderProducts(storeData.latest);
-        if (storeData.navigation) renderNavigation(storeData.navigation);
-        if (storeData.profileMenu) renderProfile(storeData.profileMenu);
-        
-        updateCartBadge();
-    } catch (e) { console.error("Error during init:", e); }
-}
+                if (storeData.header) renderHeader(storeData.header);
+                if (storeData.banner) renderBanner(storeData.banner);
+                if (storeData.latest) renderProducts(storeData.latest);
+                if (storeData.navigation) renderNavigation(storeData.navigation);
+                if (storeData.profileMenu) renderProfile(storeData.profileMenu);
+                
+                updateCartBadge();
+            } catch (e) { console.error("Init Error:", e); }
+        }
 
         function renderHeader(h) {
             const el = document.getElementById('main-header');
@@ -312,7 +289,7 @@ async function init() {
                     </div>
                     <h3 class="text-2xl font-black text-slate-800 text-center leading-tight">${p.name}</h3>
                     <p class="text-3xl font-black text-blue-600 mt-3">${p.price}₾</p>
-                    <button onclick="goToProductDetails('${p.id}')" class="w-full mt-10 bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-200">
+                    <button onclick="goToProductDetails('${p.id}')" class="w-full mt-10 bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all flex items-center justify-center gap-3 shadow-xl">
                         დეტალურად <i class="fa-solid fa-arrow-right text-sm"></i>
                     </button>
                 </div>`;
@@ -404,7 +381,7 @@ async function init() {
             } else {
                 buyBtn.innerText = "კალათაში დამატება";
                 buyBtn.disabled = false;
-                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-2xl shadow-blue-300 active:scale-95 transition-all cursor-pointer";
+                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-2xl active:scale-95 transition-all cursor-pointer";
                 buyBtn.onclick = () => handleBuy(productId);
             }
         }
@@ -412,7 +389,6 @@ async function init() {
         function handleBuy(id) {
             const sizeEl = document.querySelector('.size-opt.selected');
             const colorEl = document.querySelector('.color-opt.selected');
-            if (!sizeEl || !colorEl || !storeData) return;
             const product = storeData.productDetails.find(d => d.id.toString() === id.toString());
             const cartItem = {
                 cartId: Date.now(),
@@ -589,7 +565,6 @@ async function init() {
             
             if (action === 'cart') renderCart();
             if (action === 'orders') renderOrders();
-            
             window.scrollTo(0, 0);
         }
 
@@ -637,7 +612,6 @@ async function init() {
                         <i class="fa-solid fa-chevron-right text-slate-200 text-[10px]"></i>
                     </div>`).join('');
             }
-
             switchPage('payment');
         }
 
@@ -670,16 +644,12 @@ async function init() {
             try {
                 fetch(`${API_URL}?${finalParams.toString()}`, { mode: 'no-cors' });
                 if (tg.sendData) tg.sendData(JSON.stringify({ action: "order", message: message }));
-
                 localStorage.removeItem('cart');
                 cart = [];
                 updateCartBadge();
-                
                 alert("შეკვეთა მიღებულია!");
                 tg.close();
-            } catch (e) {
-                alert("შეცდომაა. სცადეთ თავიდან.");
-            }
+            } catch (e) { alert("შეცდომაა. სცადეთ თავიდან."); }
         }
 
         init();
