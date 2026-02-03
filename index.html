@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store - Dynamic Payment 2.7</title>
+    <title>Shoes Store - Final Version</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,39 +12,58 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
+        
         #main-header { width: 100%; z-index: 9999; position: relative; display: none; }
         .header-container { width: 100%; max-width: 600px; margin: 0 auto; display: flex; align-items: center; height: 100%; padding: 0 20px; }
         .header-floating { margin: 10px auto !important; border-radius: 20px !important; width: calc(100% - 30px) !important; max-width: 570px !important; overflow: hidden; }
+
         #hero-banner { margin: 20px auto; border-radius: 35px; overflow: hidden; position: relative; max-width: 600px; width: calc(100% - 40px); display: flex; align-items: center; }
         .banner-content { padding: 25px; width: 60%; z-index: 10; position: relative; }
         .banner-img { position: absolute; right: -15px; width: 50%; transform: rotate(-15deg); filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4)); z-index: 5; pointer-events: none; }
-        #bottom-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 500px; height: 70px; background: #000000; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 10000; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+
+        #bottom-nav {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 40px); max-width: 500px; height: 70px;
+            background: #000000; border-radius: 25px;
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 10000; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #888888; text-decoration: none; transition: all 0.3s ease; cursor: pointer; position: relative; }
         .nav-item.active { color: #ffffff; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item span { font-size: 10px; font-weight: 700; }
-        .cart-badge { position: absolute; top: -5px; right: -8px; background: #ef4444; color: white; font-size: 9px; font-weight: 800; min-width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #000; }
+
+        .cart-badge {
+            position: absolute; top: -5px; right: -8px;
+            background: #ef4444; color: white;
+            font-size: 9px; font-weight: 800;
+            min-width: 16px; height: 16px;
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            border: 2px solid #000;
+        }
+
         .hidden { display: none; }
         .page-fade { animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         .badge { position: absolute; top: 12px; left: 12px; padding: 4px 10px; border-radius: 10px; font-size: 9px; font-weight: 900; text-transform: uppercase; z-index: 10; }
         .badge-sale { background: #ef4444; color: white; }
         .badge-hot { background: #f59e0b; color: white; }
         .badge-new { background: #10b981; color: white; }
+
         .slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; scrollbar-width: none; border-radius: 35px; margin-top: -20px; }
         .slider-item { min-width: 100%; scroll-snap-align: start; }
         .slider-item img { width: 100%; aspect-ratio: 1/1; object-fit: contain; background: #fcfcfc; }
-        .options-scroll { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px; scrollbar-width: none; }
-        .option-btn { border: 2px solid #f1f5f9; transition: all 0.2s; flex: 0 0 auto; white-space: nowrap; border-radius: 18px; padding: 12px 20px; font-weight: 700; font-size: 14px; background: white; }
+        
+        .options-scroll { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .option-btn { border: 2px solid #f1f5f9; transition: all 0.2s; flex: 0 0 auto; white-space: nowrap; outline: none; padding: 12px 20px; border-radius: 18px; font-weight: 700; font-size: 14px; background: white; color: #334155; }
         .option-btn.selected { border-color: #2563eb; background: #2563eb; color: white !important; transform: scale(1.05); }
+
         .stepper-ui { display: flex; align-items: center; background: #f1f5f9; border-radius: 12px; padding: 3px; }
         .stepper-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 9px; cursor: pointer; }
         .stepper-count { padding: 0 10px; font-weight: 800; font-size: 13px; min-width: 25px; text-align: center; }
-        .promo-box { background: white; border-radius: 20px; padding: 12px; border: 1px dashed #cbd5e1; display: flex; gap: 10px; margin-top: 15px; }
-        .promo-input { flex: 1; border: none; outline: none; font-weight: 700; font-size: 12px; background: transparent; }
-        .promo-btn { background: #000; color: white; padding: 8px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; }
-        .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px; margin-left: 4px; }
+
         .checkout-input { width: 100%; background: white; border: 1px solid #f1f5f9; padding: 14px 18px; font-weight: 700; font-size: 13px; color: #1e293b; border-radius: 18px; outline: none; }
     </style>
 </head>
@@ -60,39 +79,28 @@
     <div id="cart-page" class="hidden page-fade px-6 pt-6">
         <h2 class="text-2xl font-black text-slate-800 mb-6">ჩემი კალათა</h2>
         <div id="cart-items" class="space-y-4"></div>
-        <div id="promo-section" class="hidden">
-            <div class="promo-box">
-                <input type="text" id="promo-input" class="promo-input" placeholder="პრომო კოდი...">
-                <button onclick="applyPromo()" class="promo-btn">გამოყენება</button>
-            </div>
-            <p id="promo-msg" class="text-[10px] font-bold mt-2 px-2"></p>
-        </div>
         <div id="cart-summary" class="mt-8 border-t pt-6 hidden">
             <div class="flex justify-between items-center mb-6">
-                <div><span class="text-slate-500 font-bold">ჯამი:</span><div id="discount-label" class="text-[10px] text-green-600 font-black hidden">ფასდაკლება აქტიურია</div></div>
+                <span class="text-slate-500 font-bold">ჯამი:</span>
                 <span id="cart-total-price" class="text-2xl font-black text-blue-600">0₾</span>
             </div>
-            <button onclick="placeOrder()" class="w-full bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all">შეკვეთის გაფორმება</button>
+            <button onclick="placeOrder()" class="w-full bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all shadow-xl">შეკვეთის გაფორმება</button>
         </div>
     </div>
 
     <div id="checkout-page" class="hidden page-fade px-6 pt-6 pb-20">
         <div class="flex items-center gap-3 mb-6">
-            <button onclick="switchPage('cart')" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm active:scale-90"><i class="fa-solid fa-chevron-left text-slate-400"></i></button>
+            <button onclick="switchPage('cart')" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm active:scale-90 transition-all"><i class="fa-solid fa-chevron-left text-slate-400"></i></button>
             <h2 class="text-xl font-black text-slate-800">მიწოდების მონაცემები</h2>
         </div>
         <div class="space-y-4">
-            <div class="input-group"><label>სახელი და გვარი *</label><input type="text" id="order-name" class="checkout-input" placeholder="მაგ: გიორგი ბერიძე"></div>
-            <div class="input-group"><label>ტელეფონის ნომერი *</label><input type="tel" id="order-phone" class="checkout-input" placeholder="მაგ: 5XX XX XX XX"></div>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="input-group"><label>ქალაქი *</label><input type="text" id="order-city" class="checkout-input" placeholder="თბილისი"></div>
-                <div class="input-group"><label>მისამართი *</label><input type="text" id="order-address" class="checkout-input" placeholder="ქუჩა, კორპუსი"></div>
-            </div>
-            <div class="input-group"><label>შენიშვნა</label><textarea id="order-extra" class="checkout-input h-24 pt-3" placeholder="მაგ: კოდი, სართული..."></textarea></div>
+            <input type="text" id="order-name" class="checkout-input" placeholder="სახელი და გვარი *">
+            <input type="tel" id="order-phone" class="checkout-input" placeholder="ტელეფონის ნომერი *">
+            <input type="text" id="order-city" class="checkout-input" placeholder="ქალაქი *">
+            <input type="text" id="order-address" class="checkout-input" placeholder="მისამართი *">
         </div>
         <div class="mt-8 border-t pt-6">
-            <div class="flex justify-between items-center mb-6"><span class="text-slate-500 font-bold uppercase text-xs">ჯამი:</span><span id="checkout-total-price" class="text-2xl font-black text-blue-600">0₾</span></div>
-            <button onclick="confirmFinalOrder()" class="w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-xl shadow-blue-100">გაგრძელება</button>
+            <button onclick="confirmFinalOrder()" class="w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-xl">გაგრძელება</button>
         </div>
     </div>
 
@@ -102,18 +110,13 @@
             <h2 class="text-xl font-black text-slate-800">გადახდის მეთოდი</h2>
         </div>
         <div id="payment-methods-list" class="space-y-3"></div>
-        <div class="mt-10 p-6 bg-slate-50 rounded-[30px] text-center border border-dashed border-slate-200">
-            <span class="text-slate-400 font-bold uppercase text-[9px] block mb-1">გადასახდელი ჯამი</span>
+        <div class="mt-10 p-6 bg-slate-50 rounded-[30px] text-center">
             <span id="payment-final-total" class="text-3xl font-black text-blue-600">0₾</span>
         </div>
     </div>
 
     <div id="profile-page" class="hidden page-fade"></div>
     <div id="orders-page" class="hidden page-fade px-6 pt-6">
-        <div class="flex items-center gap-3 mb-6">
-            <button onclick="switchPage('home')" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-chevron-left text-slate-400"></i></button>
-            <h2 class="text-xl font-black text-slate-800">ჩემი შეკვეთები</h2>
-        </div>
         <div id="orders-list" class="space-y-3"></div>
     </div>
 
@@ -127,7 +130,6 @@
 
     <div id="product-sheet-overlay" class="fixed inset-0 bg-black/60 z-[20000] hidden opacity-0" onclick="closeProductSheet()">
         <div id="product-sheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[40px] p-8 transform translate-y-full transition-transform duration-300" onclick="event.stopPropagation()">
-            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-8"></div>
             <div id="sheet-content"></div>
         </div>
     </div>
@@ -135,12 +137,10 @@
     <nav id="bottom-nav"></nav>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzlFXWDikCWQFa1FhMMbN0DtaKArKyK6-NoJqN0zK3k4gDsSPz6YK57Hd_B63bOyofPMg/exec";
-        const PROMO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?output=csv";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwfzXStOW1p33X5no56p346BEmrcTJWqiW9W_DDT0ITs-wO3QOtqOTpIXIx060YHG0qRw/exec";
         
         let storeData = null;
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        let activeDiscountData = null;
         
         async function init() {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -157,7 +157,7 @@
                 if (storeData.navigation) renderNavigation(storeData.navigation);
                 if (storeData.profileMenu) renderProfile(storeData.profileMenu);
                 if (storeData.paymentMethods) renderPaymentMethods(storeData.paymentMethods);
-
+                
                 updateCartBadge();
             } catch (e) { console.error("Error:", e); }
         }
@@ -170,23 +170,20 @@
             el.style.height = (parseInt(h.height) || 80) + "px";
             el.style.color = h.textColor || "#ffffff";
             if (h.style === 'floating') el.classList.add('header-floating');
-            el.innerHTML = `<div class="header-container" style="justify-content: ${h.layout === 'center' ? 'center' : 'space-between'}"><div class="flex items-center gap-3"><img src="${h.logo}" style="width: 45px; border-radius: ${h.logoRadius}%"><span style="font-weight: 800; font-size: 18px">${h.name || ''}</span></div>${h.layout !== 'center' ? '<div><i class="fa-solid fa-bell text-xl"></i></div>' : ''}</div>`;
+            el.innerHTML = `<div class="header-container" style="justify-content: ${h.layout === 'center' ? 'center' : 'space-between'}"><div class="flex items-center gap-3"><img src="${h.logo}" style="width: 45px; border-radius: ${h.logoRadius}%"><span style="font-weight: 800; font-size: 18px">${h.name || ''}</span></div></div>`;
         }
 
         function renderBanner(b) {
             const el = document.getElementById('hero-banner');
             el.style.height = (parseInt(b.height) || 180) + "px";
-            el.style.marginTop = (parseInt(b.marginTop) || 20) + "px";
             el.style.background = b.gradient === "1" ? "linear-gradient(135deg, #1e293b 0%, #334155 100%)" : "#1e293b";
-            el.innerHTML = `<div class="banner-content"><h2 style="font-size: ${parseInt(b.titleSize)}px; color: white; font-weight: 900; line-height: 1.1;">${b.title}</h2><p style="color: rgba(255,255,255,0.7); font-size: 10px; margin-top: 8px; font-weight: 700;">${b.subtitle || ''}</p><button class="mt-5 bg-white text-black px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase">${b.btnText}</button></div><img src="${b.image}" class="banner-img">`;
+            el.innerHTML = `<div class="banner-content"><h2 style="font-size: ${parseInt(b.titleSize)}px; color: white; font-weight: 900;">${b.title}</h2><p style="color: rgba(255,255,255,0.7); font-size: 10px;">${b.subtitle || ''}</p></div><img src="${b.image}" class="banner-img">`;
         }
 
         function renderProducts(l) {
             const grid = document.getElementById('product-grid');
             grid.innerHTML = l.items.map((p, index) => {
-                const details = storeData.productDetails.find(d => d.id.toString() === p.id.toString());
-                const statusBadge = details && details.status ? `<span class="badge badge-${details.status.toLowerCase()}">${details.status}</span>` : '';
-                return `<div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all relative overflow-hidden">${statusBadge}<img src="${p.images.split(',')[0]}" class="h-24 mx-auto object-contain"><h4 class="font-bold text-[11px] text-slate-700 truncate mt-3">${p.name}</h4><p class="text-blue-600 font-black text-sm mt-1">${p.price}₾</p></div>`;
+                return `<div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all"><img src="${p.images.split(',')[0]}" class="h-24 mx-auto object-contain"><h4 class="font-bold text-[11px] text-slate-700 truncate mt-3">${p.name}</h4><p class="text-blue-600 font-black text-sm">${p.price}₾</p></div>`;
             }).join('');
         }
 
@@ -194,16 +191,9 @@
             const p = storeData.latest.items[index];
             const overlay = document.getElementById('product-sheet-overlay');
             const sheet = document.getElementById('product-sheet');
-            document.getElementById('sheet-content').innerHTML = `<div class="flex flex-col items-center"><div class="w-full aspect-square bg-slate-50 rounded-[30px] flex items-center justify-center mb-6 overflow-hidden"><img src="${p.images.split(',')[0]}" class="w-4/5 h-4/5 object-contain"></div><h3 class="text-2xl font-black text-slate-800 text-center leading-tight">${p.name}</h3><p class="text-3xl font-black text-blue-600 mt-3">${p.price}₾</p><button onclick="goToProductDetails('${p.id}')" class="w-full mt-10 bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg shadow-xl">დეტალურად <i class="fa-solid fa-arrow-right text-sm"></i></button></div>`;
+            document.getElementById('sheet-content').innerHTML = `<div class="flex flex-col items-center"><h3 class="text-xl font-black text-slate-800">${p.name}</h3><button onclick="goToProductDetails('${p.id}')" class="w-full mt-6 bg-slate-900 text-white py-4 rounded-[20px] font-black">დეტალურად</button></div>`;
             overlay.classList.remove('hidden');
             setTimeout(() => { overlay.classList.add('opacity-100'); sheet.classList.remove('translate-y-full'); }, 10);
-        }
-
-        function closeProductSheet() {
-            const overlay = document.getElementById('product-sheet-overlay');
-            document.getElementById('product-sheet').classList.add('translate-y-full');
-            overlay.classList.remove('opacity-100');
-            setTimeout(() => overlay.classList.add('hidden'), 300);
         }
 
         function goToProductDetails(id) {
@@ -213,13 +203,14 @@
             const images = details.fullImages ? details.fullImages.split(',') : [details.images];
             const sizes = details.sizes ? details.sizes.toString().split(',') : [];
             const colors = details.colors ? details.colors.toString().split(',') : [];
+            
             document.getElementById('details-content').innerHTML = `
-                <div class="relative mb-6">${details.status ? `<div class="badge badge-${details.status.toLowerCase()} !top-2 !left-4">${details.status}</div>` : ''}<div class="slider-container">${images.map(img => `<div class="slider-item"><img src="${img.trim()}"></div>`).join('')}</div></div>
-                <div class="flex justify-between items-start mb-6 gap-4"><div class="flex-1 min-w-0"><h1 class="text-2xl font-black text-slate-800 leading-tight">${details.name}</h1><span class="text-[10px] font-bold text-slate-400">ID: ${details.id}</span></div><div class="text-right"><span class="text-2xl font-black text-blue-600">${details.price}₾</span></div></div>
-                <div class="mb-8"><h4 class="text-[10px] font-black text-slate-400 uppercase italic">აღწერა</h4><p class="text-slate-600 text-sm font-medium">${details.description || ''}</p></div>
-                <div class="mb-6"><h4 class="text-[10px] font-black text-slate-400 uppercase italic">ზომა</h4><div class="options-scroll">${sizes.map(s => `<button onclick="selectOption(this, 'size')" class="option-btn size-opt">${s.trim()}</button>`).join('')}</div></div>
-                <div class="mb-10"><h4 class="text-[10px] font-black text-slate-400 uppercase italic">ფერი</h4><div class="options-scroll">${colors.map(c => `<button onclick="selectOption(this, 'color')" class="option-btn color-opt">${c.trim()}</button>`).join('')}</div></div>
-                <div class="fixed bottom-10 left-0 right-0 px-6 z-20"><button id="dynamic-buy-btn" disabled class="w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg cursor-not-allowed transition-all" onclick="handleBuy('${details.id}')">აირჩიე ზომა</button></div>`;
+                <div class="slider-container mb-6">${images.map(img => `<div class="slider-item"><img src="${img.trim()}"></div>`).join('')}</div>
+                <h1 class="text-2xl font-black text-slate-800">${details.name}</h1>
+                <p class="text-blue-600 font-black text-2xl mt-2">${details.price}₾</p>
+                <div class="mt-6"><h4 class="text-xs font-black text-slate-400 mb-2">ზომა</h4><div class="options-scroll">${sizes.map(s => `<button onclick="selectOption(this, 'size')" class="option-btn size-opt">${s.trim()}</button>`).join('')}</div></div>
+                <div class="mt-6"><h4 class="text-xs font-black text-slate-400 mb-2">ფერი</h4><div class="options-scroll">${colors.map(c => `<button onclick="selectOption(this, 'color')" class="option-btn color-opt">${c.trim()}</button>`).join('')}</div></div>
+                <div class="fixed bottom-10 left-0 right-0 px-6"><button id="dynamic-buy-btn" disabled onclick="handleBuy('${details.id}')" class="w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg">აირჩიე ზომა</button></div>`;
             document.getElementById('product-details-page').classList.remove('hidden');
         }
 
@@ -234,10 +225,11 @@
         }
 
         function handleBuy(id) {
-            const size = document.querySelector('.size-opt.selected').innerText;
-            const color = document.querySelector('.color-opt.selected').innerText;
+            const sizeEl = document.querySelector('.size-opt.selected');
+            const colorEl = document.querySelector('.color-opt.selected');
+            if (!sizeEl || !colorEl) return;
             const product = storeData.productDetails.find(d => d.id.toString() === id.toString());
-            cart.push({ cartId: Date.now(), id: product.id, name: product.name, price: product.price, size, color, image: product.images.split(',')[0] });
+            cart.push({ cartId: Date.now(), id: product.id, name: product.name, price: product.price, size: sizeEl.innerText, color: colorEl.innerText, image: product.fullImages.split(',')[0] });
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCartBadge();
             document.getElementById('dynamic-buy-btn').innerText = "✅ დაემატა";
@@ -248,103 +240,67 @@
             const el = document.getElementById('cart-items');
             if (cart.length === 0) { el.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold italic">კალათა ცარიელია</div>`; document.getElementById('cart-summary').classList.add('hidden'); return; }
             document.getElementById('cart-summary').classList.remove('hidden');
-            document.getElementById('promo-section').classList.remove('hidden');
-            
-            let subtotal = 0;
+            let total = 0;
             el.innerHTML = cart.map((item, idx) => {
-                subtotal += parseFloat(item.price);
+                total += parseFloat(item.price);
                 return `<div class="bg-white p-4 rounded-[25px] border border-slate-50 flex items-center gap-4"><img src="${item.image}" class="w-16 h-16 object-contain rounded-xl"><div class="flex-1"><h4 class="font-bold text-slate-800 text-xs">${item.name}</h4><p class="text-[10px] text-slate-400 font-bold">${item.size} / ${item.color}</p><div class="flex justify-between items-center mt-2"><p class="text-blue-600 font-black text-sm">${item.price}₾</p><button onclick="removeItem(${idx})" class="text-red-400 text-[10px] font-bold">წაშლა</button></div></div></div>`;
             }).join('');
-            
-            let final = subtotal;
-            if (activeDiscountData) final = activeDiscountData.type === 'percent' ? subtotal * (1 - activeDiscountData.value/100) : subtotal - activeDiscountData.value;
-            document.getElementById('cart-total-price').innerText = Math.round(final) + "₾";
+            document.getElementById('cart-total-price').innerText = total + "₾";
         }
 
         function removeItem(idx) { cart.splice(idx, 1); localStorage.setItem('cart', JSON.stringify(cart)); updateCartBadge(); renderCart(); }
 
-// იპოვნე შენს ინდექს ფაილში renderPaymentMethods ფუნქცია და დარწმუნდი, რომ ასე გამოიყურება:
+        function renderPaymentMethods(methods) {
+            const el = document.getElementById('payment-methods-list');
+            const activeMethods = methods.filter(m => m.status === 'active');
+            el.innerHTML = activeMethods.map(m => `
+                <div onclick="selectPayment('${m.id}', '${m.title}')" class="bg-white p-5 rounded-[25px] border border-slate-50 flex items-center gap-4 active:scale-95 transition-all cursor-pointer shadow-sm">
+                    <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 text-lg"><i class="fa-solid ${m.icon}"></i></div>
+                    <div class="flex-1"><h4 class="font-black text-slate-800 text-[13px]">${m.title}</h4><p class="text-[9px] font-bold text-slate-400 uppercase italic">${m.subtitle}</p></div>
+                    <i class="fa-solid fa-chevron-right text-slate-200 text-[10px]"></i>
+                </div>`).join('');
+        }
 
-function renderPaymentMethods(methods) {
-    const el = document.getElementById('payment-methods-list');
-    
-    // თუ შიტიდან მონაცემები ვერ წამოვიდა, გამოვიყენოთ სტანდარტული (Fallback)
-    const activeMethods = (methods && methods.length > 0) 
-        ? methods.filter(m => m.status === 'active')
-        : [
-            {id: 'Cash', title: 'კურიერთან გადახდა', subtitle: 'ნაღდი ან ტერმინალი', icon: 'fa-truck-fast'},
-            {id: 'Card', title: 'ბარათით გადახდა', subtitle: 'ონლაინ გადახდა', icon: 'fa-credit-card'}
-          ];
+        function switchPage(action) {
+            ['home-page', 'profile-page', 'orders-page', 'cart-page', 'checkout-page', 'payment-page'].forEach(p => document.getElementById(p).classList.add('hidden'));
+            document.getElementById(action + '-page').classList.remove('hidden');
+            if (action === 'cart') renderCart();
+            window.scrollTo(0, 0);
+        }
 
-    el.innerHTML = activeMethods.map(m => `
-        <div onclick="selectPayment('${m.id}', '${m.title}')" class="bg-white p-5 rounded-[25px] border border-slate-50 flex items-center gap-4 active:scale-95 transition-all cursor-pointer shadow-sm">
-            <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 text-lg">
-                <i class="fa-solid ${m.icon}"></i>
-            </div>
-            <div class="flex-1">
-                <h4 class="font-black text-slate-800 text-[13px]">${m.title}</h4>
-                <p class="text-[9px] font-bold text-slate-400 uppercase italic">${m.subtitle}</p>
-            </div>
-            <i class="fa-solid fa-chevron-right text-slate-200 text-[10px]"></i>
-        </div>`).join('');
-}
+        function placeOrder() { switchPage('checkout'); }
+        function confirmFinalOrder() { switchPage('payment'); document.getElementById('payment-final-total').innerText = document.getElementById('cart-total-price').innerText; }
+
+        async function selectPayment(id, title) {
+            const tg = window.Telegram.WebApp;
+            const params = new URLSearchParams({
+                action: "placeOrder",
+                userId: tg.initDataUnsafe?.user?.id || "0",
+                customerName: document.getElementById('order-name').value,
+                phone: document.getElementById('order-phone').value,
+                address: document.getElementById('order-city').value + " " + document.getElementById('order-address').value + " [გადახდა: " + title + "]",
+                items: cart.map(i => `${i.name} (${i.size})`).join(', '),
+                total: document.getElementById('payment-final-total').innerText.replace('₾','')
+            });
+            fetch(`${API_URL}?${params.toString()}`, { mode: 'no-cors' });
+            tg.sendData(JSON.stringify({ action: "order" }));
+            localStorage.removeItem('cart'); cart = []; tg.close();
+        }
+
+        function renderNavigation(items) {
+            document.getElementById('bottom-nav').innerHTML = items.map((item, index) => `<div onclick="switchPage('${item.action}')" class="nav-item ${index === 0 ? 'active' : ''}"><div class="relative"><i class="fa-solid ${item.icon}"></i>${item.action === 'cart' ? `<div id="cart-count-badge" class="cart-badge hidden">0</div>` : ''}</div><span>${item.name}</span></div>`).join('');
+            updateCartBadge();
+        }
 
         function updateCartBadge() {
             const badge = document.getElementById('cart-count-badge');
             if (badge) { if (cart.length > 0) { badge.innerText = cart.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
         }
 
-        function renderNavigation(items) {
-            document.getElementById('bottom-nav').innerHTML = items.map((item, index) => `<div onclick="switchPage('${item.action}', this)" class="nav-item ${index === 0 ? 'active' : ''}"><div class="relative"><i class="fa-solid ${item.icon}"></i>${item.action === 'cart' ? `<div id="cart-count-badge" class="cart-badge hidden">0</div>` : ''}</div><span>${item.name}</span></div>`).join('');
-            updateCartBadge();
-        }
-
-        function switchPage(action) {
-            const pages = ['home-page', 'profile-page', 'orders-page', 'cart-page', 'checkout-page', 'payment-page'];
-            pages.forEach(p => document.getElementById(p).classList.add('hidden'));
-            document.getElementById(action + '-page').classList.remove('hidden');
-            document.getElementById('main-header').style.display = action === 'home' ? 'flex' : 'none';
-            if (action === 'cart') renderCart();
-            window.scrollTo(0, 0);
-        }
-
-        function placeOrder() { switchPage('checkout'); document.getElementById('checkout-total-price').innerText = document.getElementById('cart-total-price').innerText; }
-        
-        function confirmFinalOrder() {
-            if (!document.getElementById('order-name').value || !document.getElementById('order-phone').value) return alert("შეავსეთ ველები");
-            document.getElementById('payment-final-total').innerText = document.getElementById('checkout-total-price').innerText;
-            switchPage('payment');
-        }
-
-        async function selectPayment(id, title) {
-            const tg = window.Telegram.WebApp;
-            const name = document.getElementById('order-name').value;
-            const items = cart.map(i => `${i.name} (${i.size})`).join(', ');
-            const total = document.getElementById('payment-final-total').innerText;
-            
-            const params = new URLSearchParams({
-                action: "placeOrder",
-                userId: tg.initDataUnsafe?.user?.id || "0",
-                customerName: name,
-                phone: document.getElementById('order-phone').value,
-                address: document.getElementById('order-city').value + " " + document.getElementById('order-address').value + " [გადახდა: " + title + "]",
-                items: items,
-                total: total.replace('₾','')
-            });
-
-            try {
-                fetch(`${API_URL}?${params.toString()}`, { mode: 'no-cors' });
-                tg.sendData(JSON.stringify({ action: "order", message: `ახალი შეკვეთა: ${name}\nჯამი: ${total}\nგადახდა: ${title}` }));
-                localStorage.removeItem('cart'); cart = []; tg.close();
-            } catch (e) { alert("შეცდომა"); }
-        }
-
-        function renderProfile(menu) {
-            const user = window.Telegram?.WebApp?.initDataUnsafe?.user || { first_name: "სტუმარი" };
-            document.getElementById('profile-page').innerHTML = `<div class="p-6 flex items-center gap-4"><div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-black">${user.first_name[0]}</div><div><h2 class="text-lg font-black">${user.first_name}</h2></div></div><div class="px-6 space-y-2">${menu.map(m => `<div onclick="switchPage('${m.action}')" class="bg-white p-4 rounded-[22px] flex justify-between border border-slate-50"><div class="flex items-center gap-3"><i class="fa-solid ${m.icon} text-slate-400"></i><span class="font-bold text-sm text-slate-700">${m.label}</span></div><i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i></div>`).join('')}</div>`;
-        }
-
+        function closeProductSheet() { document.getElementById('product-sheet-overlay').classList.add('hidden'); }
         function closeProductDetails() { document.getElementById('product-details-page').classList.add('hidden'); }
+        function renderProfile() {}
+
         init();
     </script>
 </body>
