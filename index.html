@@ -60,7 +60,13 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbwo3Ky-Czkoyke8GlVF13BbNQ_4g05tF95kzpWInkZgsiyaQr8AaCu2q4y8MLfva6IGOQ/exec";
         let storeData = null;
 
-        async function init() {
+async function init() {
+            // Telegram WebApp-ის მომზადება
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+            }
+
             try {
                 const res = await fetch(API_URL);
                 storeData = await res.json();
@@ -69,7 +75,9 @@
                 if (storeData.banner) renderBanner(storeData.banner);
                 if (storeData.latest) renderProducts(storeData.latest);
                 if (storeData.navigation) renderNavigation(storeData.navigation);
-                if (storeData.user) (storeData.user, storeData.profileMenu);
+                
+                // აი აქ გასწორდა - დაემატა renderProfile
+                if (storeData.profileMenu) renderProfile(storeData.user, storeData.profileMenu);
             } catch (e) {
                 console.error("Error loading data:", e);
             }
