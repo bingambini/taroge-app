@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store - Optimized 2.3</title>
+    <title>Shoes Store - Optimized 2.4</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -48,6 +48,16 @@
     </div>
 
     <div id="profile-page" class="hidden page-fade"></div>
+
+    <div id="orders-page" class="hidden page-fade px-6 pt-6">
+        <div class="flex items-center gap-3 mb-6">
+            <button onclick="switchPage('profile', this)" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm active:scale-90 transition-all">
+                <i class="fa-solid fa-chevron-left text-slate-400"></i>
+            </button>
+            <h2 class="text-xl font-black text-slate-800">ჩემი შეკვეთები</h2>
+        </div>
+        <div id="orders-list" class="space-y-3"></div>
+    </div>
     
     <nav id="bottom-nav"></nav>
 
@@ -143,7 +153,7 @@
 
                 <div class="px-6 space-y-2">
                     ${menu.map(m => `
-                        <div class="bg-white p-3.5 rounded-[22px] flex items-center justify-between border border-slate-50 shadow-sm active:scale-95 transition-all cursor-pointer">
+                        <div onclick="switchPage('${m.action}', this)" class="bg-white p-3.5 rounded-[22px] flex items-center justify-between border border-slate-50 shadow-sm active:scale-95 transition-all cursor-pointer">
                             <div class="flex items-center gap-3">
                                 <div class="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500 text-sm">
                                     <i class="fa-solid ${m.icon}"></i>
@@ -155,21 +165,59 @@
                 </div>`;
         }
 
+        function renderOrders() {
+            const el = document.getElementById('orders-list');
+            const tg = window.Telegram.WebApp;
+            const currentUserId = (tg.initDataUnsafe?.user?.id || "00000000").toString();
+
+            if (!storeData.orders) return;
+
+            const myOrders = storeData.orders.filter(o => o.userId.toString() === currentUserId);
+
+            if (myOrders.length === 0) {
+                el.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold">შეკვეთები არ მოიძებნა</div>`;
+                return;
+            }
+
+            el.innerHTML = myOrders.map(o => `
+                <div class="bg-white p-4 rounded-[25px] border border-slate-50 shadow-sm">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="text-[9px] font-black text-blue-500 uppercase tracking-tighter">#${o.orderNum}</span>
+                            <h3 class="font-bold text-slate-700 text-[12px] mt-0.5">${new Date(o.date).toLocaleDateString('ka-GE')}</h3>
+                        </div>
+                        <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[9px] font-black rounded-full uppercase">${o.status}</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-slate-50">
+                        <span class="text-slate-400 text-[10px] font-bold uppercase">ჯამი:</span>
+                        <span class="text-md font-black text-slate-800">${o.total}₾</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function switchPage(action, btn) {
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            btn.classList.add('active');
             const home = document.getElementById('home-page');
             const profile = document.getElementById('profile-page');
+            const orders = document.getElementById('orders-page');
             const header = document.getElementById('main-header');
 
+            // გვერდების დამალვა
+            [home, profile, orders].forEach(p => p.classList.add('hidden'));
+
             if (action === 'profile') {
-                home.classList.add('hidden');
                 profile.classList.remove('hidden');
-                header.classList.add('hidden'); // პროფილზე ჰედერი არ გვინდა
+                header.classList.add('hidden');
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            } else if (action === 'orders') {
+                orders.classList.remove('hidden');
+                header.classList.add('hidden');
+                renderOrders();
             } else {
                 home.classList.remove('hidden');
-                profile.classList.add('hidden');
                 header.classList.remove('hidden');
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                if (btn && btn.classList.contains('nav-item')) btn.classList.add('active');
             }
         }
 
