@@ -59,8 +59,21 @@
         }
         .options-scroll::-webkit-scrollbar { display: none; }
         
-        .option-btn { border: 2px solid #f1f5f9; transition: all 0.2s; flex: 0 0 auto; white-space: nowrap; }
-        .option-btn.selected { border-color: #2563eb; background: #eff6ff; color: #2563eb; transform: scale(1.05); }
+        .option-btn { 
+            border: 2px solid #f1f5f9; 
+            transition: all 0.2s; 
+            flex: 0 0 auto; 
+            white-space: nowrap;
+            outline: none !important; /* აქრობს ცუდ კონტურს */
+            -webkit-tap-highlight-color: transparent; 
+        }
+        .option-btn.selected { 
+            border-color: #2563eb; 
+            background: #2563eb; 
+            color: white !important; 
+            transform: scale(1.05); 
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
+        }
         .hidden-buy { opacity: 0; transform: translateY(20px); pointer-events: none; }
         .visible-buy { opacity: 1; transform: translateY(0); pointer-events: auto; }
     </style>
@@ -227,15 +240,15 @@
                     </div>
                 </div>
 
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <h1 class="text-2xl font-black text-slate-800 leading-tight">${details.name}</h1>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">ID: ${details.id}</span>
+                <div class="flex justify-between items-start mb-6 gap-4">
+                    <div class="flex-1 min-w-0">
+                        <h1 class="text-2xl font-black text-slate-800 leading-tight break-words">${details.name}</h1>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">ID: ${details.id}</span>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right flex-shrink-0">
                         <div class="flex flex-col items-end">
-                            <span class="text-2xl font-black text-blue-600">${details.price}₾</span>
-                            ${details.oldPrice ? `<span class="text-sm text-slate-300 line-through font-bold">${details.oldPrice}₾</span>` : ''}
+                            <span class="text-2xl font-black text-blue-600 whitespace-nowrap">${details.price}₾</span>
+                            ${details.oldPrice ? `<span class="text-sm text-slate-300 line-through font-bold whitespace-nowrap">${details.oldPrice}₾</span>` : ''}
                         </div>
                     </div>
                 </div>
