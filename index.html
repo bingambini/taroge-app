@@ -37,16 +37,17 @@
         .page-fade { animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* ბეჯების სტილები */
         .badge { position: absolute; top: 12px; left: 12px; padding: 4px 10px; border-radius: 10px; font-size: 9px; font-weight: 900; text-transform: uppercase; z-index: 10; }
         .badge-sale { background: #ef4444; color: white; }
         .badge-hot { background: #f59e0b; color: white; }
         .badge-new { background: #10b981; color: white; }
 
-        /* ახალი სტილები პროდუქტის გვერდისთვის */
-        .slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; scrollbar-width: none; border-radius: 35px; }
+        /* განახლებული სლაიდერი და ფოტოები */
+        .slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; scrollbar-width: none; border-radius: 35px; margin-top: -20px; }
         .slider-container::-webkit-scrollbar { display: none; }
         .slider-item { min-width: 100%; scroll-snap-align: start; }
+        .slider-item img { width: 100%; aspect-ratio: 1/1; object-fit: contain; background: #fcfcfc; }
+        
         .option-btn { border: 2px solid #f1f5f9; transition: all 0.2s; }
         .option-btn.selected { border-color: #2563eb; background: #eff6ff; color: #2563eb; transform: scale(1.05); }
         .hidden-buy { opacity: 0; transform: translateY(20px); pointer-events: none; }
@@ -80,10 +81,7 @@
                 <i class="fa-solid fa-arrow-left text-slate-800"></i>
             </button>
             <h3 class="font-bold text-slate-800">პროდუქტი</h3>
-            <button class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center">
-                <i class="fa-solid fa-heart text-slate-400"></i>
-            </button>
-        </div>
+            <div class="w-12"></div> </div>
         <div id="details-content" class="px-6 page-fade"></div>
     </div>
 
@@ -212,25 +210,30 @@
 
             el.innerHTML = `
                 <div class="relative mb-6">
-                    ${details.status ? `<div class="badge badge-${details.status.toLowerCase()} !top-4 !left-4">${details.status}</div>` : ''}
-                    <div class="slider-container shadow-xl">
-                        ${images.map(img => `<div class="slider-item"><img src="${img.trim()}" class="w-full aspect-square object-cover bg-slate-50"></div>`).join('')}
+                    ${details.status ? `<div class="badge badge-${details.status.toLowerCase()} !top-2 !left-4">${details.status}</div>` : ''}
+                    <div class="slider-container shadow-sm">
+                        ${images.map(img => `<div class="slider-item"><img src="${img.trim()}"></div>`).join('')}
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <h1 class="text-2xl font-black text-slate-800 leading-tight">${details.name}</h1>
-                    <span class="text-[10px] font-bold text-slate-400">ID: ${details.id}</span>
-                </div>
-
-                <div class="flex items-center gap-3 mb-4">
-                    <span class="text-3xl font-black text-blue-600">${details.price}₾</span>
-                    ${details.oldPrice ? `<span class="text-lg text-slate-300 line-through font-bold">${details.oldPrice}₾</span>` : ''}
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h1 class="text-2xl font-black text-slate-800 leading-tight">${details.name}</h1>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">ID: ${details.id}</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="flex flex-col items-end">
+                            <span class="text-2xl font-black text-blue-600">${details.price}₾</span>
+                            ${details.oldPrice ? `<span class="text-sm text-slate-300 line-through font-bold">${details.oldPrice}₾</span>` : ''}
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mb-6 flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full ${details.inStock > 0 ? 'bg-green-500' : 'bg-red-500'}"></div>
-                    <span class="text-xs font-bold text-slate-500">${details.inStock > 0 ? 'მარაგშია' : 'ამოწურულია'}</span>
+                    <div class="w-2 h-2 rounded-full ${details.inStock === 'Yes' ? 'bg-green-500' : 'bg-red-500'}"></div>
+                    <span class="text-xs font-bold text-slate-500">
+                        ${details.inStock === 'Yes' ? 'მარაგშია' : 'ამოწურულია'}
+                    </span>
                 </div>
 
                 <div class="mb-8">
