@@ -70,6 +70,12 @@
         .promo-box { background: white; border-radius: 20px; padding: 12px; border: 1px dashed #cbd5e1; display: flex; gap: 10px; margin-top: 15px; }
         .promo-input { flex: 1; border: none; outline: none; font-weight: 700; font-size: 12px; color: #1e293b; background: transparent; }
         .promo-btn { background: #000; color: white; padding: 8px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; }
+
+        /* Checkout Styles */
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px; margin-left: 4px; }
+        .checkout-input { width: 100%; background: white; border: 1px solid #f1f5f9; padding: 14px 18px; rounded: 18px; font-weight: 700; font-size: 13px; color: #1e293b; border-radius: 18px; outline: none; transition: border-color 0.2s; }
+        .checkout-input:focus { border-color: #2563eb; }
     </style>
 </head>
 <body>
@@ -103,6 +109,54 @@
             </div>
             <button onclick="placeOrder()" class="w-full bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all shadow-xl">
                 შეკვეთის გაფორმება
+            </button>
+        </div>
+    </div>
+
+    <div id="checkout-page" class="hidden page-fade px-6 pt-6 pb-20">
+        <div class="flex items-center gap-3 mb-6">
+            <button onclick="switchPage('cart')" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm active:scale-90 transition-all">
+                <i class="fa-solid fa-chevron-left text-slate-400"></i>
+            </button>
+            <h2 class="text-xl font-black text-slate-800">მიწოდების მონაცემები</h2>
+        </div>
+
+        <div class="space-y-4">
+            <div class="input-group">
+                <label>სახელი და გვარი *</label>
+                <input type="text" id="order-name" class="checkout-input" placeholder="მაგ: გიორგი ბერიძე">
+            </div>
+            <div class="input-group">
+                <label>ტელეფონის ნომერი *</label>
+                <input type="tel" id="order-phone" class="checkout-input" placeholder="მაგ: 5XX XX XX XX">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="input-group">
+                    <label>ქალაქი *</label>
+                    <input type="text" id="order-city" class="checkout-input" placeholder="თბილისი">
+                </div>
+                <div class="input-group">
+                    <label>მისამართი *</label>
+                    <input type="text" id="order-address" class="checkout-input" placeholder="ქუჩა, კორპუსი">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>ელ-ფოსტა (სურვილისამებრ)</label>
+                <input type="email" id="order-email" class="checkout-input" placeholder="example@mail.com">
+            </div>
+            <div class="input-group">
+                <label>დამატებითი შენიშვნა</label>
+                <textarea id="order-extra" class="checkout-input h-24 pt-3" placeholder="მაგ: კოდი, სართული..."></textarea>
+            </div>
+        </div>
+
+        <div class="mt-8 border-t pt-6">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-slate-500 font-bold uppercase text-xs">გადასახდელი ჯამი:</span>
+                <span id="checkout-total-price" class="text-2xl font-black text-blue-600">0₾</span>
+            </div>
+            <button onclick="confirmFinalOrder()" class="w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all shadow-xl shadow-blue-100">
+                შეკვეთის დადასტურება
             </button>
         </div>
     </div>
@@ -479,19 +533,31 @@
         }
 
         function switchPage(action, btn) {
-            const pages = { home: 'home-page', profile: 'profile-page', orders: 'orders-page', cart: 'cart-page' };
+            const pages = { home: 'home-page', profile: 'profile-page', orders: 'orders-page', cart: 'cart-page', checkout: 'checkout-page' };
             const header = document.getElementById('main-header');
-            Object.values(pages).forEach(p => document.getElementById(p).classList.add('hidden'));
+            
+            Object.values(pages).forEach(p => {
+                const el = document.getElementById(p);
+                if(el) el.classList.add('hidden');
+            });
+            
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             
             if (pages[action]) document.getElementById(pages[action]).classList.remove('hidden');
-            if (btn) btn.classList.add('active');
+            
+            // Activate nav item if it exists
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(ni => {
+                if(ni.getAttribute('onclick').includes(`'${action}'`)) ni.classList.add('active');
+            });
             
             if (action === 'home') header.classList.remove('hidden');
             else header.classList.add('hidden');
             
             if (action === 'cart') renderCart();
             if (action === 'orders') renderOrders();
+            
+            window.scrollTo(0, 0);
         }
 
         function renderOrders() {
@@ -507,13 +573,52 @@
                 </div>`).join('');
         }
 
+        /* --- ახალი ფუნქციები ჩექაუთისთვის --- */
+
         function placeOrder() {
             if (cart.length === 0) return;
-            const tg = window.Telegram.WebApp;
-            const orderText = cart.map(i => `${i.name} (${i.size}, ${i.color})`).join('\n');
+            switchPage('checkout');
             const total = document.getElementById('cart-total-price').innerText;
-            const message = `ახალი შეკვეთა:\n${orderText}\n\nჯამი: ${total}`;
-            tg.sendData(JSON.stringify({ action: "order", message: message }));
+            document.getElementById('checkout-total-price').innerText = total;
+        }
+
+        function confirmFinalOrder() {
+            const name = document.getElementById('order-name').value.trim();
+            const phone = document.getElementById('order-phone').value.trim();
+            const city = document.getElementById('order-city').value.trim();
+            const address = document.getElementById('order-address').value.trim();
+            const email = document.getElementById('order-email').value.trim();
+            const extra = document.getElementById('order-extra').value.trim();
+
+            if (!name || !phone || !city || !address) {
+                alert("გთხოვთ შეავსოთ აუცილებელი ველები (*)");
+                return;
+            }
+
+            const tg = window.Telegram.WebApp;
+            const orderText = cart.map(i => `- ${i.name} (${i.size}, ${i.color})`).join('\n');
+            const total = document.getElementById('checkout-total-price').innerText;
+            
+            const message = `📦 ახალი შეკვეთა!\n\n` +
+                          `👤 კლიენტი: ${name}\n` +
+                          `📞 ტელეფონი: ${phone}\n` +
+                          `🏙️ ქალაქი: ${city}\n` +
+                          `📍 მისამართი: ${address}\n` +
+                          `📧 ელ-ფოსტა: ${email || 'არ არის'}\n` +
+                          `📝 დამატებითი: ${extra || 'არ არის'}\n\n` +
+                          `🛒 პროდუქტები:\n${orderText}\n\n` +
+                          `💰 ჯამი: ${total}`;
+
+            tg.sendData(JSON.stringify({ 
+                action: "order", 
+                message: message,
+                customer: { name, phone, city, address }
+            }));
+            
+            // კალათის გასუფთავება წარმატებული გაგზავნის შემდეგ
+            localStorage.removeItem('cart');
+            cart = [];
+            
             tg.close();
         }
 
