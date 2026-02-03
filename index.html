@@ -573,7 +573,7 @@
                 </div>`).join('');
         }
 
-        /* --- ახალი ფუნქციები ჩექაუთისთვის --- */
+/* --- ახალი ფუნქციები ჩექაუთისთვის --- */
 
         function placeOrder() {
             if (cart.length === 0) return;
@@ -582,7 +582,7 @@
             document.getElementById('checkout-total-price').innerText = total;
         }
 
-        function confirmFinalOrder() {
+        async function confirmFinalOrder() {
             const name = document.getElementById('order-name').value.trim();
             const phone = document.getElementById('order-phone').value.trim();
             const city = document.getElementById('order-city').value.trim();
@@ -596,30 +596,58 @@
             }
 
             const tg = window.Telegram.WebApp;
-            const orderText = cart.map(i => `- ${i.name} (${i.size}, ${i.color})`).join('\n');
-            const total = document.getElementById('checkout-total-price').innerText;
-            
+            const itemsSummary = cart.map(i => `${i.name} (${i.size}, ${i.color})`).join(', ');
+            const total = document.getElementById('checkout-total-price').innerText.replace('₾', '').trim();
+            const promoUsed = (typeof activeDiscountData !== 'undefined' && activeDiscountData) ? activeDiscountData.code : "არა";
+            const userId = (tg.initDataUnsafe?.user?.id || "000000").toString();
+
+            // 1. მონაცემები ცხრილისთვის
+            const orderPayload = {
+                action: "placeOrder",
+                userId: userId,
+                customerName: name,
+                phone: phone,
+                address: `${city}, ${address}${extra ? ' (' + extra + ')' : ''}`,
+                items: itemsSummary,
+                total: total,
+                promo: promoUsed
+            };
+
+            // 2. ტექსტური მესიჯი ტელეგრამისთვის
             const message = `📦 ახალი შეკვეთა!\n\n` +
                           `👤 კლიენტი: ${name}\n` +
                           `📞 ტელეფონი: ${phone}\n` +
-                          `🏙️ ქალაქი: ${city}\n` +
-                          `📍 მისამართი: ${address}\n` +
-                          `📧 ელ-ფოსტა: ${email || 'არ არის'}\n` +
-                          `📝 დამატებითი: ${extra || 'არ არის'}\n\n` +
-                          `🛒 პროდუქტები:\n${orderText}\n\n` +
-                          `💰 ჯამი: ${total}`;
+                          `📍 მისამართი: ${city}, ${address}\n` +
+                          `🛒 პროდუქტები: ${itemsSummary}\n` +
+                          `🎟️ პრომო: ${promoUsed}\n` +
+                          `💰 ჯამი: ${total}₾`;
 
-            tg.sendData(JSON.stringify({ 
-                action: "order", 
-                message: message,
-                customer: { name, phone, city, address }
-            }));
-            
-            // კალათის გასუფთავება წარმატებული გაგზავნის შემდეგ
-            localStorage.removeItem('cart');
-            cart = [];
-            
-            tg.close();
+            try {
+                // შეკვეთის გაგზავნა Google Sheets-ში
+                fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderPayload)
+                });
+
+                // შეკვეთის გაგზავნა Telegram-ში
+                tg.sendData(JSON.stringify({ 
+                    action: "order", 
+                    message: message 
+                }));
+                
+                localStorage.removeItem('cart');
+                cart = [];
+                
+                alert("შეკვეთა მიღებულია!");
+                tg.close();
+                
+            } catch (e) {
+                console.error("Error:", e);
+                alert("დაფიქსირდა შეცდომა. სცადეთ თავიდან.");
+            }
         }
 
         init();
