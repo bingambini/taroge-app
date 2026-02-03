@@ -69,13 +69,11 @@
         .option-btn { border: 2px solid #f1f5f9; transition: all 0.2s; flex: 0 0 auto; white-space: nowrap; outline: none !important; -webkit-tap-highlight-color: transparent; }
         .option-btn.selected { border-color: #2563eb; background: #2563eb; color: white !important; transform: scale(1.05); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2); }
 
-        /* ახალი დიზაინი რაოდენობის ღილაკებისთვის */
         .stepper-ui { display: flex; align-items: center; background: #f1f5f9; border-radius: 12px; padding: 3px; }
         .stepper-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 9px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s; }
         .stepper-btn:active { transform: scale(0.9); background: #e2e8f0; }
         .stepper-count { padding: 0 10px; font-weight: 800; font-size: 13px; color: #1e293b; min-width: 25px; text-align: center; }
 
-        /* პრომოკოდის ველი */
         .promo-box { background: white; border-radius: 20px; padding: 12px; border: 1px dashed #cbd5e1; display: flex; gap: 10px; margin-top: 15px; }
         .promo-input { flex: 1; border: none; outline: none; font-weight: 700; font-size: 12px; color: #1e293b; background: transparent; }
         .promo-btn { background: #000; color: white; padding: 8px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; }
@@ -150,9 +148,12 @@
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbydQyFCnLnW-mK4CPeJrQ65JATTUszeB4zwW8myUiPW51M-uIa4f0t_FG-_AI9by_Ws6A/exec";
+        // თქვენი Google Sheet CSV ბმული
+        const PROMO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?output=csv";
+        
         let storeData = null;
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        let activeDiscount = 0;
+        let activeDiscountData = null; // ობიექტი ტიპის და მნიშვნელობის შესანახად
         
         async function init() {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -445,13 +446,18 @@
             }).join('');
             
             let finalTotal = subtotal;
-            if (activeDiscount > 0) {
-                finalTotal = subtotal - (subtotal * activeDiscount / 100);
+            if (activeDiscountData) {
+                if (activeDiscountData.type === 'percent') {
+                    finalTotal = subtotal * (1 - activeDiscountData.value / 100);
+                } else if (activeDiscountData.type === 'flat') {
+                    finalTotal = subtotal - activeDiscountData.value;
+                }
             }
             
-            totalEl.innerText = Math.round(finalTotal) + "₾";
+            totalEl.innerText = Math.round(finalTotal > 0 ? finalTotal : 0) + "₾";
         }
 
+        // განახლებული applyPromo ფუნქცია გუგლ შიტიდან CSV წაკითხვით
         async function applyPromo() {
             const input = document.getElementById('promo-input');
             const msg = document.getElementById('promo-msg');
@@ -459,25 +465,39 @@
             const label = document.getElementById('discount-label');
 
             if (!code) return;
-            if (!storeData.promos) {
-                msg.innerText = "სისტემური შეცდომა: promos არ მოიძებნა";
-                return;
-            }
+            msg.innerText = "მოწმდება...";
+            msg.className = "text-[10px] font-bold mt-2 px-2 text-blue-500";
 
-            const promo = storeData.promos.find(p => p.code.toUpperCase() === code && p.active === "TRUE");
+            try {
+                const response = await fetch(PROMO_CSV_URL);
+                const csvText = await response.text();
+                
+                // CSV დამუშავება სტრიქონებად
+                const rows = csvText.split('\n').map(row => row.split(','));
+                const promoCodes = rows.slice(1).map(row => ({
+                    code: row[0]?.trim().toUpperCase(),
+                    type: row[1]?.trim().toLowerCase(),
+                    value: parseFloat(row[2])
+                }));
 
-            if (promo) {
-                activeDiscount = parseFloat(promo.discount);
-                msg.className = "text-[10px] font-bold mt-2 px-2 text-green-600";
-                msg.innerText = `პრომოკოდი გააქტიურდა: -${activeDiscount}%`;
-                label.classList.remove('hidden');
-                renderCart();
-            } else {
-                activeDiscount = 0;
-                msg.className = "text-[10px] font-bold mt-2 px-2 text-red-500";
-                msg.innerText = "არასწორი ან ვადაგასული კოდი";
-                label.classList.add('hidden');
-                renderCart();
+                const promo = promoCodes.find(p => p.code === code);
+
+                if (promo && !isNaN(promo.value)) {
+                    activeDiscountData = promo;
+                    msg.className = "text-[10px] font-bold mt-2 px-2 text-green-600";
+                    msg.innerText = `პრომოკოდი გააქტიურდა: ${promo.type === 'percent' ? '-' + promo.value + '%' : '-' + promo.value + '₾'}`;
+                    label.classList.remove('hidden');
+                    renderCart();
+                } else {
+                    activeDiscountData = null;
+                    msg.className = "text-[10px] font-bold mt-2 px-2 text-red-500";
+                    msg.innerText = "არასწორი ან ვადაგასული კოდი";
+                    label.classList.add('hidden');
+                    renderCart();
+                }
+            } catch (error) {
+                console.error("Promo Error:", error);
+                msg.innerText = "სერვერთან კავშირი ვერ მოხერხდა";
             }
         }
 
@@ -600,20 +620,17 @@
                 el.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold italic">შეკვეთები არ გაქვთ</div>`;
                 return;
             }
+            
             el.innerHTML = myOrders.map(o => `
                 <div class="bg-white p-4 rounded-[25px] border border-slate-50 shadow-sm">
                     <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <span class="text-[9px] font-black text-blue-500 uppercase tracking-tighter">#${o.orderNum}</span>
-                            <h3 class="font-bold text-slate-700 text-[12px] mt-0.5">${new Date(o.date).toLocaleDateString('ka-GE')}</h3>
-                        </div>
-                        <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[9px] font-black rounded-full uppercase">${o.status}</span>
+                        <span class="text-[10px] font-black text-blue-600">ID: ${o.orderId}</span>
+                        <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[9px] font-black uppercase">${o.status}</span>
                     </div>
-                    <div class="flex justify-between items-center pt-3 border-t border-slate-50">
-                        <span class="text-slate-400 text-[10px] font-bold uppercase">ჯამი:</span>
-                        <span class="text-md font-black text-slate-800">${o.total}₾</span>
-                    </div>
-                </div>`).join('');
+                    <p class="text-xs font-bold text-slate-700 mb-1">${o.items}</p>
+                    <p class="text-lg font-black text-slate-900">${o.total}₾</p>
+                </div>
+            `).join('');
         }
 
         init();
