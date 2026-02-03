@@ -34,22 +34,14 @@
         .nav-item span { font-size: 10px; font-weight: 700; }
 
         .cart-badge {
-            position: absolute;
-            top: -5px;
-            right: -8px;
-            background: #ef4444;
-            color: white;
-            font-size: 9px;
-            font-weight: 800;
-            min-width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: absolute; top: -5px; right: -8px;
+            background: #ef4444; color: white;
+            font-size: 9px; font-weight: 800;
+            min-width: 16px; height: 16px;
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
             border: 2px solid #000;
         }
-        .cart-badge.hidden { display: none; }
 
         .hidden { display: none; }
         .page-fade { animation: fadeIn 0.3s ease; }
@@ -61,6 +53,7 @@
         .badge-new { background: #10b981; color: white; }
 
         .slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; scrollbar-width: none; border-radius: 35px; margin-top: -20px; }
+        .slider-item { min-width: 100%; scroll-snap-align: start; }
         .slider-item img { width: 100%; aspect-ratio: 1/1; object-fit: contain; background: #fcfcfc; }
         
         .options-scroll { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
@@ -108,7 +101,7 @@
                 </div>
                 <span id="cart-total-price" class="text-2xl font-black text-blue-600">0₾</span>
             </div>
-            <button class="w-full bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all shadow-xl">
+            <button onclick="placeOrder()" class="w-full bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all shadow-xl">
                 შეკვეთის გაფორმება
             </button>
         </div>
@@ -148,12 +141,11 @@
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbydQyFCnLnW-mK4CPeJrQ65JATTUszeB4zwW8myUiPW51M-uIa4f0t_FG-_AI9by_Ws6A/exec";
-        // თქვენი Google Sheet CSV ბმული
         const PROMO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?output=csv";
         
         let storeData = null;
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        let activeDiscountData = null; // ობიექტი ტიპის და მნიშვნელობის შესანახად
+        let activeDiscountData = null;
         
         async function init() {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -212,7 +204,6 @@
                 const details = storeData.productDetails.find(d => d.id.toString() === p.id.toString());
                 const statusBadge = details && details.status ? `<span class="badge badge-${details.status.toLowerCase()}">${details.status}</span>` : '';
                 const mainImg = p.images ? p.images.split(',')[0] : '';
-                
                 return `
                 <div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all cursor-pointer relative overflow-hidden">
                     ${statusBadge}
@@ -228,7 +219,6 @@
             const overlay = document.getElementById('product-sheet-overlay');
             const sheet = document.getElementById('product-sheet');
             const content = document.getElementById('sheet-content');
-
             content.innerHTML = `
                 <div class="flex flex-col items-center">
                     <div class="w-full aspect-square bg-slate-50 rounded-[30px] flex items-center justify-center mb-6 overflow-hidden">
@@ -239,13 +229,9 @@
                     <button onclick="goToProductDetails('${p.id}')" class="w-full mt-10 bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-200">
                         დეტალურად <i class="fa-solid fa-arrow-right text-sm"></i>
                     </button>
-                </div>
-            `;
+                </div>`;
             overlay.classList.remove('hidden');
-            setTimeout(() => {
-                overlay.classList.add('opacity-100');
-                sheet.classList.remove('translate-y-full');
-            }, 10);
+            setTimeout(() => { overlay.classList.add('opacity-100'); sheet.classList.remove('translate-y-full'); }, 10);
         }
 
         function closeProductSheet() {
@@ -261,9 +247,7 @@
             const details = storeData.productDetails.find(d => d.id.toString() === id.toString());
             const el = document.getElementById('details-content');
             const page = document.getElementById('product-details-page');
-
             if (!details) return;
-
             const images = details.fullImages ? details.fullImages.split(',') : [details.images];
             const sizes = details.sizes ? details.sizes.toString().split(',') : [];
             const colors = details.colors ? details.colors.toString().split(',') : [];
@@ -275,52 +259,41 @@
                         ${images.map(img => `<div class="slider-item"><img src="${img.trim()}" onerror="this.src='https://placehold.co/400x400?text=No+Image'"></div>`).join('')}
                     </div>
                 </div>
-
                 <div class="flex justify-between items-start mb-6 gap-4">
                     <div class="flex-1 min-w-0">
                         <h1 class="text-2xl font-black text-slate-800 leading-tight break-words">${details.name}</h1>
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">ID: ${details.id}</span>
                     </div>
                     <div class="text-right flex-shrink-0">
-                        <div class="flex flex-col items-end">
-                            <span class="text-2xl font-black text-blue-600 whitespace-nowrap">${details.price}₾</span>
-                            ${details.oldPrice ? `<span class="text-sm text-slate-300 line-through font-bold whitespace-nowrap">${details.oldPrice}₾</span>` : ''}
-                        </div>
+                        <span class="text-2xl font-black text-blue-600 whitespace-nowrap">${details.price}₾</span>
+                        ${details.oldPrice ? `<div class="text-sm text-slate-300 line-through font-bold">${details.oldPrice}₾</div>` : ''}
                     </div>
                 </div>
-
                 <div class="mb-6 flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full ${details.inStock === 'Yes' ? 'bg-green-500' : 'bg-red-500'}"></div>
-                    <span class="text-xs font-bold text-slate-500">
-                        ${details.inStock === 'Yes' ? 'მარაგშია' : 'ამოწურულია'}
-                    </span>
+                    <span class="text-xs font-bold text-slate-500">${details.inStock === 'Yes' ? 'მარაგშია' : 'ამოწურულია'}</span>
                 </div>
-
                 <div class="mb-8">
-                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 italic">აღწერა</h4>
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase mb-2 italic tracking-widest">აღწერა</h4>
                     <p class="text-slate-600 text-sm leading-relaxed font-medium">${details.description || 'აღწერა არ არის'}</p>
                 </div>
-
                 <div class="mb-6">
                     <h4 class="text-[10px] font-black text-slate-400 uppercase mb-3 italic">აირჩიე ზომა</h4>
                     <div class="options-scroll">
                         ${sizes.map(s => `<button onclick="selectOption(this, 'size', '${details.id}')" class="option-btn size-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm bg-white">${s.trim()}</button>`).join('')}
                     </div>
                 </div>
-
                 <div class="mb-10">
                     <h4 class="text-[10px] font-black text-slate-400 uppercase mb-3 italic">აირჩიე ფერი</h4>
                     <div class="options-scroll">
                         ${colors.map(c => `<button onclick="selectOption(this, 'color', '${details.id}')" class="option-btn color-opt px-5 py-3 rounded-2xl font-bold text-slate-700 text-sm bg-white">${c.trim()}</button>`).join('')}
                     </div>
                 </div>
-
-                <div id="buy-btn-container" class="fixed bottom-10 left-0 right-0 px-6 z-20 transition-all duration-300">
-                    <button id="dynamic-buy-btn" disabled class="w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg shadow-none cursor-not-allowed transition-all duration-300">
+                <div id="buy-btn-container" class="fixed bottom-10 left-0 right-0 px-6 z-20">
+                    <button id="dynamic-buy-btn" disabled class="w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg cursor-not-allowed transition-all">
                         აირჩიე ზომა
                     </button>
-                </div>
-            `;
+                </div>`;
             page.classList.remove('hidden');
         }
 
@@ -335,16 +308,16 @@
 
             if (!hasSize) {
                 buyBtn.innerText = "აირჩიე ზომა";
-                buyBtn.className = "w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg cursor-not-allowed transition-all duration-300";
+                buyBtn.className = "w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg cursor-not-allowed transition-all";
                 buyBtn.disabled = true;
-            } else if (hasSize && !hasColor) {
+            } else if (!hasColor) {
                 buyBtn.innerText = "აირჩიე ფერი";
-                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg cursor-not-allowed transition-all duration-300";
+                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg transition-all";
                 buyBtn.disabled = true;
-            } else if (hasSize && hasColor) {
+            } else {
                 buyBtn.innerText = "კალათაში დამატება";
                 buyBtn.disabled = false;
-                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-2xl shadow-blue-300 active:scale-95 transition-all duration-300 cursor-pointer";
+                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-2xl shadow-blue-300 active:scale-95 transition-all cursor-pointer";
                 buyBtn.onclick = () => handleBuy(productId);
             }
         }
@@ -352,42 +325,24 @@
         function handleBuy(id) {
             const sizeEl = document.querySelector('.size-opt.selected');
             const colorEl = document.querySelector('.color-opt.selected');
-            
             if (!sizeEl || !colorEl || !storeData) return;
-
-            const size = sizeEl.innerText;
-            const color = colorEl.innerText;
             const product = storeData.productDetails.find(d => d.id.toString() === id.toString());
-
-            if (!product) return;
-
             const cartItem = {
                 cartId: Date.now(),
                 id: product.id.toString(),
                 name: product.name,
                 price: parseFloat(product.price) || 0,
-                size: size,
-                color: color,
+                size: sizeEl.innerText,
+                color: colorEl.innerText,
                 image: (product.images || "").split(',')[0]
             };
-
             cart.push(cartItem);
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCartBadge();
-
             const buyBtn = document.getElementById('dynamic-buy-btn');
-            const originalText = buyBtn.innerText;
-            
             buyBtn.innerText = "✅ დაემატა კალათაში";
             buyBtn.classList.replace('bg-blue-600', 'bg-green-600');
-            buyBtn.disabled = true;
-            
-            setTimeout(() => {
-                buyBtn.innerText = originalText;
-                buyBtn.classList.replace('bg-green-600', 'bg-blue-600');
-                buyBtn.disabled = false;
-                closeProductDetails();
-            }, 1000);
+            setTimeout(() => { closeProductDetails(); }, 800);
         }
 
         function renderCart() {
@@ -395,126 +350,86 @@
             const summary = document.getElementById('cart-summary');
             const promoSection = document.getElementById('promo-section');
             const totalEl = document.getElementById('cart-total-price');
-            
             if (cart.length === 0) {
                 el.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold italic">კალათა ცარიელია</div>`;
                 summary.classList.add('hidden');
                 promoSection.classList.add('hidden');
-                updateCartBadge();
                 return;
             }
-
             summary.classList.remove('hidden');
             promoSection.classList.remove('hidden');
 
             const grouped = cart.reduce((acc, item) => {
                 const key = `${item.id}-${item.size}-${item.color}`;
-                if (!acc[key]) {
-                    acc[key] = { ...item, quantity: 1 };
-                } else {
-                    acc[key].quantity += 1;
-                }
+                if (!acc[key]) acc[key] = { ...item, quantity: 1 };
+                else acc[key].quantity += 1;
                 return acc;
             }, {});
 
             let subtotal = 0;
-            el.innerHTML = Object.values(grouped).map((item) => {
+            el.innerHTML = Object.values(grouped).map(item => {
                 const price = parseFloat(item.price) || 0;
-                const itemTotal = price * item.quantity;
-                subtotal += itemTotal;
+                subtotal += price * item.quantity;
                 return `
                 <div class="bg-white p-4 rounded-[25px] border border-slate-50 flex items-center gap-4">
-                    <img src="${item.image}" class="w-16 h-16 object-contain bg-slate-50 rounded-xl" onerror="this.src='https://placehold.co/100x100?text=Shoes'">
+                    <img src="${item.image}" class="w-16 h-16 object-contain bg-slate-50 rounded-xl">
                     <div class="flex-1 min-w-0">
-                        <h4 class="font-bold text-slate-800 text-xs truncate">${item.name || 'პროდუქტი'}</h4>
-                        <p class="text-[10px] text-slate-400 font-bold">${item.size || '-'} / ${item.color || '-'}</p>
+                        <h4 class="font-bold text-slate-800 text-xs truncate">${item.name}</h4>
+                        <p class="text-[10px] text-slate-400 font-bold">${item.size} / ${item.color}</p>
                         <div class="flex items-center justify-between mt-2">
                             <p class="text-blue-600 font-black text-sm">${price}₾</p>
-                            
                             <div class="stepper-ui">
-                                <div onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', -1)" class="stepper-btn">
-                                    <i class="fa-solid fa-minus text-[10px] text-slate-600"></i>
-                                </div>
+                                <div onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', -1)" class="stepper-btn"><i class="fa-solid fa-minus text-[10px]"></i></div>
                                 <span class="stepper-count">${item.quantity}</span>
-                                <div onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', 1)" class="stepper-btn !bg-slate-900 !text-white">
-                                    <i class="fa-solid fa-plus text-[10px]"></i>
-                                </div>
+                                <div onclick="updateQuantity('${item.id}', '${item.size}', '${item.color}', 1)" class="stepper-btn !bg-slate-900 !text-white"><i class="fa-solid fa-plus text-[10px]"></i></div>
                             </div>
                         </div>
                     </div>
                 </div>`;
             }).join('');
-            
+
             let finalTotal = subtotal;
             if (activeDiscountData) {
-                if (activeDiscountData.type === 'percent') {
-                    finalTotal = subtotal * (1 - activeDiscountData.value / 100);
-                } else if (activeDiscountData.type === 'flat') {
-                    finalTotal = subtotal - activeDiscountData.value;
-                }
+                if (activeDiscountData.type === 'percent') finalTotal = subtotal * (1 - activeDiscountData.value / 100);
+                else if (activeDiscountData.type === 'flat') finalTotal = subtotal - activeDiscountData.value;
             }
-            
             totalEl.innerText = Math.round(finalTotal > 0 ? finalTotal : 0) + "₾";
         }
 
-        // განახლებული applyPromo ფუნქცია გუგლ შიტიდან CSV წაკითხვით
         async function applyPromo() {
             const input = document.getElementById('promo-input');
             const msg = document.getElementById('promo-msg');
             const code = input.value.trim().toUpperCase();
-            const label = document.getElementById('discount-label');
-
             if (!code) return;
             msg.innerText = "მოწმდება...";
-            msg.className = "text-[10px] font-bold mt-2 px-2 text-blue-500";
-
             try {
                 const response = await fetch(PROMO_CSV_URL);
                 const csvText = await response.text();
-                
-                // CSV დამუშავება სტრიქონებად
-                const rows = csvText.split('\n').map(row => row.split(','));
-                const promoCodes = rows.slice(1).map(row => ({
-                    code: row[0]?.trim().toUpperCase(),
-                    type: row[1]?.trim().toLowerCase(),
-                    value: parseFloat(row[2])
-                }));
-
+                const rows = csvText.replace(/\r/g, "").split('\n');
+                const promoCodes = rows.slice(1).filter(r => r.trim() !== "").map(row => {
+                    const cols = row.split(',');
+                    return { code: cols[0]?.trim().toUpperCase(), type: cols[1]?.trim().toLowerCase(), value: parseFloat(cols[2]) };
+                });
                 const promo = promoCodes.find(p => p.code === code);
-
                 if (promo && !isNaN(promo.value)) {
                     activeDiscountData = promo;
                     msg.className = "text-[10px] font-bold mt-2 px-2 text-green-600";
-                    msg.innerText = `პრომოკოდი გააქტიურდა: ${promo.type === 'percent' ? '-' + promo.value + '%' : '-' + promo.value + '₾'}`;
-                    label.classList.remove('hidden');
-                    renderCart();
+                    msg.innerText = `გააქტიურდა: ${promo.type === 'percent' ? '-' + promo.value + '%' : '-' + promo.value + '₾'}`;
+                    document.getElementById('discount-label').classList.remove('hidden');
                 } else {
                     activeDiscountData = null;
                     msg.className = "text-[10px] font-bold mt-2 px-2 text-red-500";
-                    msg.innerText = "არასწორი ან ვადაგასული კოდი";
-                    label.classList.add('hidden');
-                    renderCart();
+                    msg.innerText = "არასწორი კოდი";
                 }
-            } catch (error) {
-                console.error("Promo Error:", error);
-                msg.innerText = "სერვერთან კავშირი ვერ მოხერხდა";
-            }
+                renderCart();
+            } catch (e) { msg.innerText = "შეცდომაა"; }
         }
 
         function updateQuantity(id, size, color, change) {
-            const itemIndex = cart.findIndex(i => 
-                String(i.id) === String(id) && 
-                String(i.size) === String(size) && 
-                String(i.color) === String(color)
-            );
-
-            if (itemIndex > -1) {
-                if (change === 1) {
-                    const newItem = { ...cart[itemIndex], cartId: Date.now() };
-                    cart.push(newItem);
-                } else {
-                    cart.splice(itemIndex, 1);
-                }
+            const idx = cart.findIndex(i => String(i.id) === String(id) && String(i.size) === String(size) && String(i.color) === String(color));
+            if (idx > -1) {
+                if (change === 1) cart.push({ ...cart[idx], cartId: Date.now() });
+                else cart.splice(idx, 1);
                 localStorage.setItem('cart', JSON.stringify(cart));
                 updateCartBadge();
                 renderCart();
@@ -524,28 +439,20 @@
         function updateCartBadge() {
             const badge = document.getElementById('cart-count-badge');
             if (!badge) return;
-            const count = cart.length;
-            if (count > 0) {
-                badge.innerText = count;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
+            if (cart.length > 0) { badge.innerText = cart.length; badge.classList.remove('hidden'); }
+            else badge.classList.add('hidden');
         }
 
-        function closeProductDetails() {
-            document.getElementById('product-details-page').classList.add('hidden');
-        }
+        function closeProductDetails() { document.getElementById('product-details-page').classList.add('hidden'); }
 
         function renderNavigation(items) {
             const nav = document.getElementById('bottom-nav');
             nav.innerHTML = items.map((item, index) => {
-                const isCart = item.action === 'cart';
                 return `
                 <div onclick="switchPage('${item.action}', this)" class="nav-item ${index === 0 ? 'active' : ''}">
                     <div class="relative">
                         <i class="fa-solid ${item.icon}"></i>
-                        ${isCart ? `<div id="cart-count-badge" class="cart-badge hidden">0</div>` : ''}
+                        ${item.action === 'cart' ? `<div id="cart-count-badge" class="cart-badge hidden">0</div>` : ''}
                     </div>
                     <span>${item.name}</span>
                 </div>`;
@@ -555,82 +462,59 @@
 
         function renderProfile(menu) {
             const el = document.getElementById('profile-page');
-            const tg = window.Telegram.WebApp;
-            const user = tg.initDataUnsafe?.user || { first_name: "სტუმარი", id: "00000000" };
-            const photoUrl = user.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.first_name)}&background=random`;
-
+            const user = window.Telegram?.WebApp?.initDataUnsafe?.user || { first_name: "სტუმარი", id: "000000" };
+            const photo = user.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.first_name)}`;
             el.innerHTML = `
-                <div class="flex items-center gap-4 pt-6 pb-6 px-6">
-                    <img src="${photoUrl}" class="w-16 h-16 rounded-full border-4 border-white shadow-lg object-cover">
-                    <div>
-                        <h2 class="text-lg font-black text-slate-800 leading-tight">${user.first_name}</h2>
-                        <p class="text-slate-400 text-[10px] font-bold mt-0.5">ID: ${user.id}</p>
-                    </div>
+                <div class="flex items-center gap-4 p-6">
+                    <img src="${photo}" class="w-16 h-16 rounded-full border-4 border-white shadow-lg">
+                    <div><h2 class="text-lg font-black text-slate-800">${user.first_name}</h2><p class="text-slate-400 text-[10px] font-bold">ID: ${user.id}</p></div>
                 </div>
                 <div class="px-6 space-y-2">
                     ${menu.map(m => `
-                        <div onclick="switchPage('${m.action}', this)" class="bg-white p-3.5 rounded-[22px] flex items-center justify-between border border-slate-50 shadow-sm active:scale-95 cursor-pointer transition-all">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500 text-sm">
-                                    <i class="fa-solid ${m.icon}"></i>
-                                </div>
-                                <span class="font-bold text-slate-700 text-sm">${m.label}</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-slate-300 text-[10px] mr-1"></i>
+                        <div onclick="switchPage('${m.action}', this)" class="bg-white p-3.5 rounded-[22px] flex items-center justify-between border border-slate-50 active:scale-95 transition-all">
+                            <div class="flex items-center gap-3"><div class="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500"><i class="fa-solid ${m.icon}"></i></div><span class="font-bold text-slate-700 text-sm">${m.label}</span></div>
+                            <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
                         </div>`).join('')}
                 </div>`;
         }
 
         function switchPage(action, btn) {
-            const home = document.getElementById('home-page');
-            const profile = document.getElementById('profile-page');
-            const orders = document.getElementById('orders-page');
-            const cartPage = document.getElementById('cart-page');
+            const pages = { home: 'home-page', profile: 'profile-page', orders: 'orders-page', cart: 'cart-page' };
             const header = document.getElementById('main-header');
-            
-            [home, profile, orders, cartPage].forEach(p => p.classList.add('hidden'));
+            Object.values(pages).forEach(p => document.getElementById(p).classList.add('hidden'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
-            if (action === 'profile') {
-                profile.classList.remove('hidden');
-                header.classList.add('hidden');
-            } else if (action === 'orders') {
-                orders.classList.remove('hidden');
-                header.classList.add('hidden');
-                renderOrders();
-            } else if (action === 'cart') {
-                cartPage.classList.remove('hidden');
-                header.classList.add('hidden');
-                renderCart();
-            } else {
-                home.classList.remove('hidden');
-                header.classList.remove('hidden');
-            }
+            
+            if (pages[action]) document.getElementById(pages[action]).classList.remove('hidden');
             if (btn) btn.classList.add('active');
+            
+            if (action === 'home') header.classList.remove('hidden');
+            else header.classList.add('hidden');
+            
+            if (action === 'cart') renderCart();
+            if (action === 'orders') renderOrders();
         }
 
         function renderOrders() {
             const el = document.getElementById('orders-list');
-            const tg = window.Telegram.WebApp;
-            const currentUserId = (tg.initDataUnsafe?.user?.id || "00000000").toString();
-            if (!storeData || !storeData.orders) return;
-            const myOrders = storeData.orders.filter(o => o.userId.toString() === currentUserId);
-            
-            if (myOrders.length === 0) {
-                el.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold italic">შეკვეთები არ გაქვთ</div>`;
-                return;
-            }
-            
+            const userId = (window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "000000").toString();
+            if (!storeData?.orders) return;
+            const myOrders = storeData.orders.filter(o => o.userId.toString() === userId);
+            if (myOrders.length === 0) { el.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold italic">შეკვეთები არ გაქვთ</div>`; return; }
             el.innerHTML = myOrders.map(o => `
                 <div class="bg-white p-4 rounded-[25px] border border-slate-50 shadow-sm">
-                    <div class="flex justify-between items-start mb-3">
-                        <span class="text-[10px] font-black text-blue-600">ID: ${o.orderId}</span>
-                        <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[9px] font-black uppercase">${o.status}</span>
-                    </div>
-                    <p class="text-xs font-bold text-slate-700 mb-1">${o.items}</p>
-                    <p class="text-lg font-black text-slate-900">${o.total}₾</p>
-                </div>
-            `).join('');
+                    <div class="flex justify-between items-start mb-3"><span class="text-[10px] font-black text-blue-600">ID: ${o.orderId}</span><span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[9px] font-black uppercase">${o.status}</span></div>
+                    <p class="text-xs font-bold text-slate-700 mb-1">${o.items}</p><p class="text-lg font-black text-slate-900">${o.total}₾</p>
+                </div>`).join('');
+        }
+
+        function placeOrder() {
+            if (cart.length === 0) return;
+            const tg = window.Telegram.WebApp;
+            const orderText = cart.map(i => `${i.name} (${i.size}, ${i.color})`).join('\n');
+            const total = document.getElementById('cart-total-price').innerText;
+            const message = `ახალი შეკვეთა:\n${orderText}\n\nჯამი: ${total}`;
+            tg.sendData(JSON.stringify({ action: "order", message: message }));
+            tg.close();
         }
 
         init();
