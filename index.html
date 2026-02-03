@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store - Optimized 2.5</title>
+    <title>Shoes Store - Optimized 2.6</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -37,11 +37,13 @@
         .page-fade { animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        #product-sheet-overlay { transition: opacity 0.3s ease; }
-        #product-sheet { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* ბეჯების სტილები */
+        .badge { position: absolute; top: 12px; left: 12px; padding: 4px 10px; border-radius: 10px; font-size: 9px; font-weight: 900; text-transform: uppercase; z-index: 10; }
+        .badge-sale { background: #ef4444; color: white; }
+        .badge-hot { background: #f59e0b; color: white; }
+        .badge-new { background: #10b981; color: white; }
 
-        /* ზომის ღილაკის სტილი */
-        .size-btn.selected { background-color: #2563eb; color: white; border-color: #2563eb; }
+        .size-btn.selected { background-color: #2563eb; color: white; border-color: #2563eb; transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -79,7 +81,7 @@
     </div>
 
     <div id="product-sheet-overlay" class="fixed inset-0 bg-black/60 z-[20000] hidden opacity-0" onclick="closeProductSheet()">
-        <div id="product-sheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[40px] p-8 transform translate-y-full" onclick="event.stopPropagation()">
+        <div id="product-sheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[40px] p-8 transform translate-y-full transition-transform duration-300" onclick="event.stopPropagation()">
             <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-8"></div>
             <div id="sheet-content"></div>
         </div>
@@ -142,12 +144,19 @@
 
         function renderProducts(l) {
             const grid = document.getElementById('product-grid');
-            grid.innerHTML = l.items.map((p, index) => `
-                <div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all cursor-pointer">
+            grid.innerHTML = l.items.map((p, index) => {
+                // ვეძებთ დამატებით ინფორმაციას (ბეჯისთვის)
+                const details = storeData.productDetails.find(d => d.id.toString() === p.id.toString());
+                const statusBadge = details && details.status ? `<span class="badge badge-${details.status.toLowerCase()}">${details.status}</span>` : '';
+                
+                return `
+                <div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all cursor-pointer relative overflow-hidden">
+                    ${statusBadge}
                     <img src="${p.images.split(',')[0]}" class="h-24 mx-auto object-contain">
                     <h4 class="font-bold text-[11px] text-slate-700 truncate mt-3">${p.name}</h4>
                     <p class="text-blue-600 font-black text-sm mt-1">${p.price}₾</p>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         }
 
         function openProductSheet(index) {
@@ -163,7 +172,7 @@
                     </div>
                     <h3 class="text-2xl font-black text-slate-800 text-center leading-tight">${p.name}</h3>
                     <p class="text-3xl font-black text-blue-600 mt-3">${p.price}₾</p>
-                    <button onclick="goToProductDetails('${p.name}')" class="w-full mt-10 bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-200">
+                    <button onclick="goToProductDetails('${p.id}')" class="w-full mt-10 bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-200">
                         დეტალურად <i class="fa-solid fa-arrow-right text-sm"></i>
                     </button>
                 </div>
@@ -183,31 +192,31 @@
             setTimeout(() => overlay.classList.add('hidden'), 300);
         }
 
-        /* გადასვლა პროდუქტის დეტალურ გვერდზე */
-        function goToProductDetails(name) {
+        function goToProductDetails(id) {
             closeProductSheet();
-            const details = storeData.productDetails.find(d => d.name === name);
-            const basic = storeData.latest.items.find(p => p.name === name);
+            const details = storeData.productDetails.find(d => d.id.toString() === id.toString());
             const el = document.getElementById('details-content');
             const page = document.getElementById('product-details-page');
 
             if (!details) {
-                alert("ამ პროდუქტის დეტალები არ მოიძებნა Product_Details შიტში");
+                alert("ამ პროდუქტის დეტალები ვერ მოიძებნა!");
                 return;
             }
 
-            const images = details.fullImages ? details.fullImages.split(',') : [basic.images.split(',')[0]];
+            const images = details.fullImages ? details.fullImages.split(',') : [details.images];
             const sizes = details.sizes ? details.sizes.toString().split(',') : [];
 
             el.innerHTML = `
                 <div class="mb-8 relative">
-                    <img src="${images[0]}" class="w-full rounded-[40px] shadow-2xl shadow-slate-200 aspect-square object-cover bg-slate-50">
+                    ${details.status ? `<span class="badge badge-${details.status.toLowerCase()} !text-[11px] !py-1.5 !px-4 !top-4 !left-4">${details.status}</span>` : ''}
+                    <img src="${images[0].trim()}" class="w-full rounded-[40px] shadow-2xl shadow-slate-200 aspect-square object-cover bg-slate-50">
                 </div>
                 
                 <div class="flex justify-between items-start mb-6">
                     <h1 class="text-3xl font-black text-slate-800 w-2/3 leading-tight">${details.name}</h1>
                     <div class="text-right">
-                        <span class="block text-3xl font-black text-blue-600">${basic.price}₾</span>
+                        ${details.oldPrice ? `<span class="block text-slate-400 line-through text-sm font-bold italic">${details.oldPrice}₾</span>` : ''}
+                        <span class="block text-3xl font-black text-blue-600">${details.price}₾</span>
                     </div>
                 </div>
 
@@ -221,18 +230,27 @@
                     <h4 class="font-bold text-slate-400 uppercase text-[10px] tracking-widest mb-4 italic">აირჩიე ზომა</h4>
                     <div class="flex flex-wrap gap-3">
                         ${sizes.map(s => `
-                            <button onclick="selectSize(this)" class="size-btn w-14 h-14 border-2 border-slate-100 rounded-2xl flex items-center justify-center font-bold text-slate-700 active:scale-90 transition-all">${s}</button>
+                            <button onclick="selectSize(this)" class="size-btn w-14 h-14 border-2 border-slate-100 rounded-2xl flex items-center justify-center font-bold text-slate-700 active:scale-90 transition-all">${s.trim()}</button>
                         `).join('')}
                     </div>
                 </div>` : ''}
 
                 <div class="fixed bottom-10 left-0 right-0 px-6 z-20">
-                    <button class="w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-2xl shadow-blue-300 active:scale-95 transition-all">
+                    <button onclick="handleBuy('${details.id}')" class="w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-2xl shadow-blue-300 active:scale-95 transition-all">
                         ყიდვა
                     </button>
                 </div>
             `;
             page.classList.remove('hidden');
+        }
+
+        function handleBuy(id) {
+            const selectedSize = document.querySelector('.size-btn.selected');
+            if (!selectedSize) {
+                alert("გთხოვთ აირჩიოთ ზომა!");
+                return;
+            }
+            alert("შეკვეთა მიღებულია! ზომა: " + selectedSize.innerText);
         }
 
         function selectSize(btn) {
@@ -256,14 +274,14 @@
         function renderProfile(menu) {
             const el = document.getElementById('profile-page');
             const tg = window.Telegram.WebApp;
-            const user = tg.initDataUnsafe?.user || { first_name: "სტუმარი", id: "00000000", photo_url: "" };
+            const user = tg.initDataUnsafe?.user || { first_name: "სტუმარი", id: "00000000" };
             const photoUrl = user.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.first_name)}&background=random`;
 
             el.innerHTML = `
                 <div class="flex items-center gap-4 pt-6 pb-6 px-6">
                     <img src="${photoUrl}" class="w-16 h-16 rounded-full border-4 border-white shadow-lg object-cover">
                     <div>
-                        <h2 class="text-lg font-black text-slate-800 leading-tight">${user.first_name} ${user.last_name || ''}</h2>
+                        <h2 class="text-lg font-black text-slate-800 leading-tight">${user.first_name}</h2>
                         <p class="text-slate-400 text-[10px] font-bold mt-0.5">ID: ${user.id}</p>
                     </div>
                 </div>
@@ -281,14 +299,40 @@
                 </div>`;
         }
 
+        function switchPage(action, btn) {
+            const home = document.getElementById('home-page');
+            const profile = document.getElementById('profile-page');
+            const orders = document.getElementById('orders-page');
+            const header = document.getElementById('main-header');
+            [home, profile, orders].forEach(p => p.classList.add('hidden'));
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            if (action === 'profile') {
+                profile.classList.remove('hidden');
+                header.classList.add('hidden');
+                if (btn) btn.classList.add('active');
+            } else if (action === 'orders') {
+                orders.classList.remove('hidden');
+                header.classList.add('hidden');
+                renderOrders();
+                if (btn) btn.classList.add('active');
+            } else {
+                home.classList.remove('hidden');
+                header.classList.remove('hidden');
+                if (btn) btn.classList.add('active');
+            }
+        }
+
         function renderOrders() {
             const el = document.getElementById('orders-list');
             const tg = window.Telegram.WebApp;
             const currentUserId = (tg.initDataUnsafe?.user?.id || "00000000").toString();
             if (!storeData.orders) return;
             const myOrders = storeData.orders.filter(o => o.userId.toString() === currentUserId);
+            
             if (myOrders.length === 0) {
-                el.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold">შეკვეთები არ მოიძებნა</div>`;
+                el.innerHTML = `<div class="text-center py-20 text-slate-400 font-bold italic">შეკვეთები არ გაქვთ</div>`;
                 return;
             }
             el.innerHTML = myOrders.map(o => `
@@ -305,28 +349,6 @@
                         <span class="text-md font-black text-slate-800">${o.total}₾</span>
                     </div>
                 </div>`).join('');
-        }
-
-        function switchPage(action, btn) {
-            const home = document.getElementById('home-page');
-            const profile = document.getElementById('profile-page');
-            const orders = document.getElementById('orders-page');
-            const header = document.getElementById('main-header');
-            [home, profile, orders].forEach(p => p.classList.add('hidden'));
-            if (action === 'profile') {
-                profile.classList.remove('hidden');
-                header.classList.add('hidden');
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            } else if (action === 'orders') {
-                orders.classList.remove('hidden');
-                header.classList.add('hidden');
-                renderOrders();
-            } else {
-                home.classList.remove('hidden');
-                header.classList.remove('hidden');
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                if (btn && btn.classList.contains('nav-item')) btn.classList.add('active');
-            }
         }
 
         init();
