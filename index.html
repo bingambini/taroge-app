@@ -13,6 +13,12 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
         
+        /* --- Preloader Styles --- */
+        #app-preloader { position: fixed; inset: 0; z-index: 999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-out; }
+        .loader-spin { border: 4px solid #f1f5f9; border-top: 4px solid #2563eb; border-radius: 50%; width: 100px; height: 100px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* ------------------------ */
+
         #main-header { width: 100%; z-index: 9999; position: relative; display: none; }
         .header-container { width: 100%; max-width: 600px; margin: 0 auto; display: flex; align-items: center; height: 100%; padding: 0 20px; }
         .header-floating { margin: 10px auto !important; border-radius: 20px !important; width: calc(100% - 30px) !important; max-width: 570px !important; overflow: hidden; }
@@ -78,6 +84,11 @@
     </style>
 </head>
 <body>
+
+    <div id="app-preloader">
+        <div class="loader-spin"></div>
+        <p style="margin-top: 20px; font-weight: 800; color: #1e293b; font-size: 14px;">იტვირთება...</p>
+    </div>
 
     <header id="main-header" class="flex items-center"></header>
 
@@ -255,7 +266,16 @@
                 if (storeData.profileMenu) renderProfile(storeData.profileMenu);
                 
                 updateCartBadge();
-            } catch (e) { console.error("Error:", e); }
+
+                // Preloader hide logic
+                const preloader = document.getElementById('app-preloader');
+                preloader.style.opacity = '0';
+                setTimeout(() => preloader.style.display = 'none', 500);
+
+            } catch (e) { 
+                console.error("Error:", e); 
+                document.getElementById('app-preloader').style.display = 'none';
+            }
         }
 
         function renderHeader(h) {
