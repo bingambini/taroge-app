@@ -174,18 +174,40 @@ function closeProductDetails() {
 }
 
 function selectOption(btn, type) {
+    // მონიშვნის ვიზუალი
     const parentClass = type === 'size' ? '.size-opt' : '.color-opt';
-    document.querySelectorAll(parentClass).forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
+    document.querySelectorAll(parentClass).forEach(b => {
+        b.classList.remove('selected', 'border-blue-600', 'bg-blue-50');
+        b.classList.add('border-slate-100');
+    });
+    
+    btn.classList.add('selected', 'border-blue-600', 'bg-blue-50');
+    btn.classList.remove('border-slate-100');
 
+    // ლოგიკა: რა გვაქვს არჩეული
     const hasSize = document.querySelector('.size-opt.selected');
     const hasColor = document.querySelector('.color-opt.selected');
     const buyBtn = document.getElementById('dynamic-buy-btn');
 
     if (hasSize && hasColor) {
+        // ორივე არჩეულია
         buyBtn.disabled = false;
         buyBtn.innerText = "კალათაში დამატება";
-        buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-xl shadow-blue-200 active:scale-95 transition-all";
+        buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-xl shadow-blue-100 active:scale-95 transition-all";
+    } else if (hasSize && !hasColor) {
+        // მხოლოდ ზომაა
+        buyBtn.disabled = true;
+        buyBtn.innerText = "აირჩიე ფერი";
+        buyBtn.className = "w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg cursor-not-allowed";
+    } else if (!hasSize && hasColor) {
+        // მხოლოდ ფერია
+        buyBtn.disabled = true;
+        buyBtn.innerText = "აირჩიე ზომა";
+        buyBtn.className = "w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg cursor-not-allowed";
+    } else {
+        // არცერთი
+        buyBtn.disabled = true;
+        buyBtn.innerText = "აირჩიე ზომა და ფერი";
     }
 }
 
