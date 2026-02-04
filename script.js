@@ -248,8 +248,24 @@ function handleBuy(id) {
 
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartBadge();
-    tg.HapticFeedback.notificationOccurred('success');
-    closeProductDetails();
+    
+    // ვიბრაცია
+    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+
+    // ვიზუალური დასტური ღილაკზე
+    const buyBtn = document.getElementById('dynamic-buy-btn');
+    buyBtn.innerText = "✅ დაემატა";
+    buyBtn.style.backgroundColor = "#10b981"; // მწვანე ფერი
+    buyBtn.disabled = true;
+
+    // მცირე დაყოვნება და დახურვა
+    setTimeout(() => {
+        closeProductDetails();
+        // ვაბრუნებთ ღილაკს საწყის მდგომარეობაში შემდეგი პროდუქტისთვის
+        buyBtn.innerText = "აირჩიე ზომა და ფერი";
+        buyBtn.style.backgroundColor = ""; 
+        buyBtn.disabled = true;
+    }, 800);
 }
 
 function renderCart() {
@@ -312,4 +328,4 @@ async function init() {
     }
 }
 
-init(); // აი აქ ვიძახებთ მთავარ ფუნქციას
+init();
