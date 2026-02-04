@@ -354,16 +354,21 @@ function confirmFinalOrder() {
     }
     
     document.getElementById('payment-final-total').innerText = document.getElementById('checkout-total-price').innerText;
-    
     const pList = document.getElementById('payment-methods-list');
     
-    // ვამოწმებთ არსებობს თუ არა paymentMethods მონაცემებში
+    // ვამოწმებთ არსებობს თუ არა მონაცემები
     if (!storeData.paymentMethods || storeData.paymentMethods.length === 0) {
-        pList.innerHTML = `<div class="text-center py-10 text-red-500 font-bold">გადახდის მეთოდები ვერ მოიძებნა</div>`;
+        pList.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold italic">გადახდის მეთოდები ვერ მოიძებნა</div>`;
     } else {
-        pList.innerHTML = storeData.paymentMethods
-            .filter(m => m.status === 'active' || m.status === 'Active')
-            .map(m => `
+        // ფილტრაცია ხდება უფრო მოქნილად (trim აშორებს ზედმეტ სფეისებს)
+        const activeMethods = storeData.paymentMethods.filter(m => 
+            m.status && m.status.toString().trim().toLowerCase() === 'active'
+        );
+
+        if (activeMethods.length === 0) {
+            pList.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold italic">აქტიური გადახდის მეთოდი არ არის</div>`;
+        } else {
+            pList.innerHTML = activeMethods.map(m => `
                 <div onclick="selectPayment('${m.id}', '${m.title}')" class="bg-white p-5 rounded-[25px] border border-slate-50 flex items-center gap-4 active:scale-95 cursor-pointer mb-3">
                     <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500">
                         <i class="fa-solid ${m.icon || 'fa-credit-card'}"></i>
@@ -374,9 +379,11 @@ function confirmFinalOrder() {
                     </div>
                     <i class="fa-solid fa-chevron-right text-slate-200 text-[10px]"></i>
                 </div>`).join('');
+        }
     }
     switchPage('payment');
 }
+ 
 
         async function selectPayment(mid, mtitle) {
             const tg = window.Telegram?.WebApp;
