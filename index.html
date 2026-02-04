@@ -3,29 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store</title>
+    <title>Shoes Store v2.0</title>
+    
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div id="app-preloader"><div class="loader-spin"></div></div>
-    <header id="main-header"></header>
-    <div id="home-page" class="page-fade">
-        <div id="hero-banner"></div>
-        <div id="product-grid" class="grid grid-cols-2 gap-4 px-6 mt-4"></div>
+<body class="bg-slate-50">
+
+    <div id="app-preloader">
+        <div class="loader-spin"></div>
     </div>
-    <div id="cart-page" class="hidden page-fade px-6 pt-6">
-        <h2 class="text-2xl font-black text-slate-800 mb-6">კალათა</h2>
-        <div id="cart-items" class="space-y-4"></div>
-        <div id="cart-summary" class="mt-8 border-t pt-6 hidden">
-            <span id="cart-total-price" class="text-2xl font-black text-blue-600">0₾</span>
-            <button onclick="placeOrder()" class="w-full bg-black text-white py-5 rounded-[25px] mt-4">შეკვეთა</button>
+
+    <main id="main-content">
+        <div id="home-page" class="page-fade px-4 pt-4">
+            <div id="hero-banner" class="mb-6"></div>
+            <div id="product-grid" class="grid grid-cols-2 gap-4"></div>
         </div>
-    </div>
-    <div id="product-details-page" class="hidden fixed inset-0 bg-white z-[30000] overflow-y-auto"></div>
-    <nav id="bottom-nav"></nav>
+
+        <div id="cart-page" class="hidden page-fade px-6 pt-6">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">შენი კალათა</h2>
+            <div id="cart-items" class="space-y-4"></div>
+            <div id="cart-empty" class="text-center py-20 text-slate-400 hidden">
+                <i class="fa-solid fa-cart-shopping text-4xl mb-4"></i>
+                <p>კალათა ცარიელია</p>
+            </div>
+            <div id="cart-summary" class="mt-8 border-t pt-6 hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-slate-500 font-bold">ჯამი:</span>
+                    <span id="cart-total-price" class="text-2xl font-black text-blue-600">0₾</span>
+                </div>
+                <button onclick="placeOrder()" class="w-full bg-black text-white py-5 rounded-[25px] font-bold shadow-lg shadow-black/20 active:scale-95 transition-transform">
+                    შეკვეთის გაფორმება
+                </button>
+            </div>
+        </div>
+
+        <div id="product-details-page" class="hidden fixed inset-0 bg-white z-[30000] overflow-y-auto"></div>
+    </main>
+
+    <nav id="bottom-nav">
+        <div class="nav-item active" onclick="showPage('home')">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[10px] mt-1 font-bold">მთავარი</span>
+        </div>
+        <div class="nav-item relative" onclick="showPage('cart')">
+            <i class="fa-solid fa-cart-shopping text-xl"></i>
+            <span class="text-[10px] mt-1 font-bold">კალათა</span>
+            <div id="cart-badge" class="cart-badge hidden">0</div>
+        </div>
+        <div class="nav-item" onclick="tg.close()">
+            <i class="fa-solid fa-xmark text-xl"></i>
+            <span class="text-[10px] mt-1 font-bold">დახურვა</span>
+        </div>
+    </nav>
+
     <script src="script.js"></script>
 </body>
 </html>
