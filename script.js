@@ -8,39 +8,60 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 async function init() {
     tg.ready();
     tg.expand();
+    
     try {
         const res = await fetch(API_URL);
-        storeData = await res.json();
+        if (!res.ok) throw new Error("Network response was not ok");
         
-        // რენდერინგი
+        storeData = await res.json();
+        console.log("ჩატვირთული მონაცემები:", storeData); // დალოგე, რომ ნახო რა მოდის
+
         if (storeData.header) renderHeader(storeData.header);
         if (storeData.banner) renderBanner(storeData.banner);
-        if (storeData.latest) renderProducts(storeData.latest);
+        
+        // მთავარია ეს ნაწილი:
+        if (storeData.latest) {
+            renderProducts(storeData.latest);
+        } else {
+            console.error("Latest items are missing in API response");
+        }
+
         if (storeData.navigation) renderNavigation(storeData.navigation);
         
-        updateCartBadge();
-        document.getElementById('app-preloader').style.display = 'none';
     } catch (e) {
-        console.error("Error:", e);
+        console.error("ჩატვირთვის შეცდომა:", e);
+        // თუ შეცდომაა, მაინც ვმალავთ პრელოადერს, რომ ცარიელი ეკრანი არ დარჩეს
+    } finally {
+        const loader = document.getElementById('app-preloader');
+        if (loader) loader.style.display = 'none';
     }
 }
 
 // --- 2. პროდუქტების გამოჩენა მთავარზე ---
 function renderProducts(l) {
     const grid = document.getElementById('product-grid');
-    if (!grid) return;
+    if (!grid || !l || !l.items) return;
+
     grid.innerHTML = l.items.map((p, index) => {
-        // ვეძებთ დეტალებს Image_URLs-ისთვის
-        const d = storeData.productDetails.find(det => String(det.ID) === String(p.id));
-        const img = d && d.Image_URLs ? d.Image_URLs.split(',')[0] : p.images;
+        // ვეძებთ დეტალებს Image_URLs-ისთვის (ვითვალისწინებთ ID-საც და id-საც)
+        const d = storeData.productDetails.find(det => String(det.ID || det.id) === String(p.id || p.ID));
+        
+        // სურათის აღება: ჯერ Image_URLs, მერე images, ბოლოს placeholder
+        let img = "https://via.placeholder.com/150";
+        if (d && d.Image_URLs) img = d.Image_URLs.split(',')[0];
+        else if (p.images) img = p.images.split(',')[0];
+
+        // სახელის და ფასის აღება (დიდი/პატარა ასოების შემოწმებით)
+        const name = p.Name || p.name || "უსახელო";
+        const price = p.Price || p.price || "0";
 
         return `
-            <div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] shadow-sm border border-slate-100">
+            <div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] shadow-sm border border-slate-100 active:scale-95 transition-all">
                 <div class="h-28 flex items-center justify-center mb-3">
-                    <img src="${img}" class="max-h-full object-contain">
+                    <img src="${img}" class="max-h-full object-contain" onerror="this.src='https://via.placeholder.com/150'">
                 </div>
-                <h4 class="font-bold text-[11px] truncate">${p.name}</h4>
-                <p class="text-blue-600 font-black text-sm">${p.price}₾</p>
+                <h4 class="font-bold text-[11px] truncate text-slate-700">${name}</h4>
+                <p class="text-blue-600 font-black text-sm mt-1">${price}₾</p>
             </div>`;
     }).join('');
 }
