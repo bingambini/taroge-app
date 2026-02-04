@@ -1,153 +1,296 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwnpjMaHc_bs2b4aNLU60lStAsebby6K32ECbgv35WV_uBvmX3Uo3Q3PDkxB9bALCMPHQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzlFXWDikCWQFa1FhMMbN0DtaKArKyK6-NoJqN0zK3k4gDsSPz6YK57Hd_B63bOyofPMg/exec";
+const PROMO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?output=csv";
+
 const tg = window.Telegram.WebApp;
 let storeData = null;
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let activeDiscountData = null;
 
 async function init() {
-    tg.expand();
     tg.ready();
+    tg.expand();
+    
     try {
-        const response = await fetch(API_URL, { redirect: 'follow' });
-        storeData = await response.json();
+        // მნიშვნელოვანია: Google Scripts-ისთვის გვჭირდება redirect: 'follow'
+        const res = await fetch(API_URL, { redirect: 'follow' });
+        storeData = await res.json();
         
-        console.log("მონაცემები ჩაიტვირთა:", storeData); // დიაგნოსტიკისთვის
-
-        renderBanner();
-        renderProducts();
+        if (storeData.header) renderHeader(storeData.header);
+        if (storeData.banner) renderBanner(storeData.banner);
+        if (storeData.latest) renderProducts(storeData.latest);
+        if (storeData.navigation) renderNavigation(storeData.navigation);
+        if (storeData.profileMenu) renderProfile(storeData.profileMenu);
+        
         updateCartBadge();
         hidePreloader();
     } catch (e) {
-        console.error("შეცდომა:", e);
-        document.getElementById('product-grid').innerHTML = "<p class='col-span-2 text-center text-red-500'>მონაცემების ჩატვირთვა ვერ მოხერხდა</p>";
+        console.error("ჩატვირთვის შეცდომა:", e);
+        hidePreloader();
     }
 }
 
-// 1. ბანერის რენდერი
-function renderBanner() {
-    const banner = storeData.banner;
-    const bannerContainer = document.getElementById('hero-banner');
-    if (banner && banner.image) {
-        bannerContainer.innerHTML = `
-            <div class="relative w-full rounded-[30px] overflow-hidden shadow-lg h-48 bg-slate-200">
-                <img src="${banner.image}" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
-                    <h1 class="text-white text-xl font-black">${banner.title || ''}</h1>
-                    <p class="text-white/80 text-sm">${banner.subtitle || ''}</p>
-                </div>
+function renderHeader(h) {
+    const el = document.getElementById('main-header');
+    if (h.status !== 'active') { el.style.display = 'none'; return; }
+    el.style.backgroundColor = h.bg || "#2563eb";
+    el.style.height = (h.height || 80) + "px";
+    el.style.color = h.textColor || "#ffffff";
+    if (h.style === 'floating') el.classList.add('header-floating');
+    el.innerHTML = `
+        <div class="header-container" style="justify-content: ${h.layout === 'center' ? 'center' : 'space-between'}">
+            <div class="flex items-center gap-3">
+                <img src="${h.logo}" style="width: ${h.logoSize || 40}px; border-radius: ${h.logoRadius}%">
+                <span class="font-black text-lg">${h.name || ''}</span>
             </div>
-        `;
-    }
+            ${h.layout !== 'center' ? '<i class="fa-solid fa-bell text-xl opacity-50"></i>' : ''}
+        </div>`;
 }
 
-// 2. პროდუქტების რენდერი (მორგებული შენს სტრუქტურაზე: latest.items)
-function renderProducts() {
+function renderBanner(b) {
+    const el = document.getElementById('hero-banner');
+    el.style.height = (b.height || 180) + "px";
+    el.style.background = b.gradient === "1" ? "linear-gradient(135deg, #1e293b 0%, #334155 100%)" : (b.bgColor || "#1e293b");
+    el.innerHTML = `
+        <div class="banner-content">
+            <h2 style="font-size: ${b.titleSize}px; color: ${b.titleColor || 'white'}; font-weight: 900;">${b.title}</h2>
+            <p class="text-white/60 text-[10px] mt-2 font-bold">${b.subtitle || ''}</p>
+            <button class="mt-5 bg-white text-black px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase shadow-lg">${b.btnText}</button>
+        </div>
+        <img src="${b.image}" class="banner-img">`;
+}
+
+function renderProducts(l) {
     const grid = document.getElementById('product-grid');
-    // შენს JSON-ში პროდუქტები არის აქ: storeData.latest.items
-    const products = storeData.latest.items;
-
-    if (!products || products.length === 0) {
-        grid.innerHTML = "<p class='col-span-2 text-center'>პროდუქტები ვერ მოიძებნა</p>";
-        return;
-    }
-
-    grid.innerHTML = products.map(product => `
-        <div class="bg-white p-4 rounded-[25px] shadow-sm border border-slate-100 flex flex-col items-center transition-transform active:scale-95">
-            <div class="w-full h-32 bg-slate-50 rounded-2xl p-2 mb-3">
-                <img src="${product.images}" class="w-full h-full object-contain" onerror="this.src='https://via.placeholder.com/150'">
-            </div>
-            <h3 class="font-bold text-xs text-slate-700 text-center line-clamp-2 h-8">${product.name}</h3>
-            <p class="text-blue-600 font-black mt-2">${product.price}₾</p>
-            <button onclick="showDetails('${product.id}')" 
-                class="w-full mt-3 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-wider">
-                ნახვა
-            </button>
-        </div>
-    `).join('');
-}
-
-// 3. დეტალური გვერდი (იყენებს productDetails მასივს)
-function showDetails(productId) {
-    const product = storeData.productDetails.find(p => String(p.id) === String(productId));
-    if (!product) return;
-
-    const detailsPage = document.getElementById('product-details-page');
-    // ზომების დამუშავება
-    const sizes = product.sizes ? String(product.sizes).split(',') : [];
-
-    detailsPage.innerHTML = `
-        <div class="p-6 pb-32">
-            <button onclick="closeDetails()" class="mb-4 text-slate-400 p-2"><i class="fa-solid fa-arrow-left text-xl"></i></button>
-            <div class="w-full h-64 bg-slate-50 rounded-3xl p-6 mb-6">
-                <img src="${product.fullImages || product.images}" class="w-full h-full object-contain">
-            </div>
-            <h2 class="text-2xl font-black mb-2 text-slate-800">${product.name}</h2>
-            <p class="text-blue-600 text-2xl font-black mb-6">${product.price}₾</p>
-            
-            ${product.description ? `<p class="text-slate-500 text-sm mb-6 leading-relaxed">${product.description}</p>` : ''}
-
-            <div class="mb-8">
-                <p class="font-bold mb-3 text-slate-400 text-[10px] uppercase tracking-widest">აირჩიე ზომა</p>
-                <div class="flex flex-wrap gap-2">
-                    ${sizes.map(size => `
-                        <button onclick="selectSize(this, '${size.trim()}')" 
-                            class="size-btn border-2 border-slate-100 py-3 px-5 rounded-xl font-black transition-all">
-                            ${size.trim()}
-                        </button>
-                    `).join('')}
+    grid.innerHTML = l.items.map((p, index) => {
+        const details = storeData.productDetails.find(d => String(d.id) === String(p.id));
+        const badge = details?.status ? `<span class="badge badge-${details.status.toLowerCase()}">${details.status}</span>` : '';
+        return `
+            <div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all relative overflow-hidden">
+                ${badge}
+                <div class="h-28 flex items-center justify-center mb-3">
+                    <img src="${p.images.split(',')[0]}" class="max-h-full object-contain">
                 </div>
+                <h4 class="font-bold text-[11px] text-slate-700 truncate">${p.name}</h4>
+                <p class="text-blue-600 font-black text-sm mt-1">${p.price}₾</p>
+            </div>`;
+    }).join('');
+}
+
+function openProductSheet(index) {
+    const p = storeData.latest.items[index];
+    const overlay = document.getElementById('product-sheet-overlay');
+    const sheet = document.getElementById('product-sheet');
+    document.getElementById('sheet-content').innerHTML = `
+        <div class="flex flex-col items-center">
+            <div class="w-full aspect-square bg-slate-50 rounded-[30px] flex items-center justify-center mb-6"><img src="${p.images.split(',')[0]}" class="w-4/5 object-contain"></div>
+            <h3 class="text-2xl font-black text-slate-800 text-center">${p.name}</h3>
+            <p class="text-3xl font-black text-blue-600 mt-2">${p.price}₾</p>
+            <button onclick="goToProductDetails('${p.id}')" class="w-full mt-8 bg-black text-white py-5 rounded-[25px] font-black text-lg shadow-xl">დეტალურად</button>
+        </div>`;
+    overlay.classList.remove('hidden');
+    setTimeout(() => { overlay.classList.add('opacity-100'); sheet.classList.remove('translate-y-full'); }, 10);
+}
+
+function closeProductSheet() {
+    const overlay = document.getElementById('product-sheet-overlay');
+    const sheet = document.getElementById('product-sheet');
+    sheet.classList.add('translate-y-full');
+    overlay.classList.remove('opacity-100');
+    setTimeout(() => overlay.classList.add('hidden'), 300);
+}
+
+function goToProductDetails(id) {
+    closeProductSheet();
+    const details = storeData.productDetails.find(d => String(d.id) === String(id));
+    if (!details) return;
+    const images = details.fullImages ? details.fullImages.split(',') : [details.images];
+    const sizes = details.sizes ? String(details.sizes).split(',') : [];
+    const colors = details.colors ? String(details.colors).split(',') : [];
+
+    document.getElementById('details-content').innerHTML = `
+        <div class="slider-container mt-4">
+            ${images.map(img => `<div class="slider-item"><img src="${img.trim()}"></div>`).join('')}
+        </div>
+        <div class="mt-6">
+            <h1 class="text-2xl font-black text-slate-800">${details.name}</h1>
+            <div class="flex items-center justify-between mt-2">
+                <span class="text-3xl font-black text-blue-600">${details.price}₾</span>
+                <span class="text-[10px] font-black py-1 px-3 bg-slate-100 rounded-full text-slate-400">ID: ${details.id}</span>
+            </div>
+            <p class="text-slate-500 text-sm mt-6 leading-relaxed">${details.description || 'აღწერა არ არის'}</p>
+            
+            <div class="mt-8"><h4 class="text-[10px] font-black text-slate-400 uppercase italic mb-3">ზომა</h4>
+                <div class="options-scroll">${sizes.map(s => `<button onclick="selectOption(this, 'size')" class="option-btn size-opt">${s.trim()}</button>`).join('')}</div>
+            </div>
+            
+            <div class="mt-6 mb-10"><h4 class="text-[10px] font-black text-slate-400 uppercase italic mb-3">ფერი</h4>
+                <div class="options-scroll">${colors.map(c => `<button onclick="selectOption(this, 'color')" class="option-btn color-opt">${c.trim()}</button>`).join('')}</div>
             </div>
 
-            <button id="add-to-cart-btn" disabled onclick="handleAddToCart('${product.id}')" 
-                class="w-full py-5 bg-black text-white rounded-[25px] font-bold opacity-50 shadow-xl shadow-black/20">
-                კალათაში დამატება
-            </button>
-        </div>
-    `;
-    detailsPage.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+            <button id="dynamic-buy-btn" disabled onclick="handleBuy('${details.id}')" class="w-full bg-slate-200 text-white py-5 rounded-[25px] font-black text-lg transition-all">აირჩიე ზომა და ფერი</button>
+        </div>`;
+    document.getElementById('product-details-page').classList.remove('hidden');
 }
 
-// --- დამხმარე ფუნქციები ---
-let selectedSize = null;
-function selectSize(btn, size) {
-    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('bg-black', 'text-white', 'border-black'));
-    btn.classList.add('bg-black', 'text-white', 'border-black');
-    selectedSize = size;
-    const addBtn = document.getElementById('add-to-cart-btn');
-    addBtn.disabled = false;
-    addBtn.classList.remove('opacity-50');
+function selectOption(btn, type) {
+    const parentClass = type === 'size' ? '.size-opt' : '.color-opt';
+    document.querySelectorAll(parentClass).forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    const hasSize = document.querySelector('.size-opt.selected');
+    const hasColor = document.querySelector('.color-opt.selected');
+    const buyBtn = document.getElementById('dynamic-buy-btn');
+
+    if (hasSize && hasColor) {
+        buyBtn.disabled = false;
+        buyBtn.innerText = "კალათაში დამატება";
+        buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-xl shadow-blue-200 active:scale-95 transition-all";
+    }
 }
 
-function handleAddToCart(productId) {
-    const product = storeData.productDetails.find(p => String(p.id) === String(productId));
-    cart.push({ ...product, selectedSize: selectedSize, cartId: Date.now() });
+function handleBuy(id) {
+    const product = storeData.productDetails.find(d => String(d.id) === String(id));
+    const size = document.querySelector('.size-opt.selected').innerText;
+    const color = document.querySelector('.color-opt.selected').innerText;
+
+    cart.push({
+        cartId: Date.now(),
+        id: product.id,
+        name: product.name,
+        price: parseFloat(product.price),
+        size: size,
+        color: color,
+        image: product.images.split(',')[0]
+    });
+
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartBadge();
-    closeDetails();
     tg.HapticFeedback.notificationOccurred('success');
+    closeProductDetails();
+}
+
+function renderCart() {
+    const el = document.getElementById('cart-items');
+    const summary = document.getElementById('cart-summary');
+    if (cart.length === 0) {
+        el.innerHTML = `<div class="text-center py-20 opacity-30 font-bold">კალათა ცარიელია</div>`;
+        summary.classList.add('hidden');
+        return;
+    }
+    summary.classList.remove('hidden');
+    let total = 0;
+    el.innerHTML = cart.map((item, idx) => {
+        total += item.price;
+        return `
+            <div class="bg-white p-4 rounded-[25px] flex items-center gap-4 shadow-sm border border-slate-50">
+                <img src="${item.image}" class="w-16 h-16 object-contain bg-slate-50 rounded-xl">
+                <div class="flex-1">
+                    <h4 class="font-bold text-xs">${item.name}</h4>
+                    <p class="text-[10px] text-slate-400 font-bold">${item.size} / ${item.color}</p>
+                    <p class="text-blue-600 font-black mt-1">${item.price}₾</p>
+                </div>
+                <button onclick="removeFromCart(${idx})" class="text-red-400 p-2"><i class="fa-solid fa-trash-can"></i></button>
+            </div>`;
+    }).join('');
+    
+    document.getElementById('cart-total-price').innerText = total + "₾";
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartBadge();
+    renderCart();
 }
 
 function updateCartBadge() {
-    const badge = document.getElementById('cart-badge');
+    const badge = document.getElementById('cart-count-badge');
+    if (!badge) return;
     badge.innerText = cart.length;
     cart.length > 0 ? badge.classList.remove('hidden') : badge.classList.add('hidden');
 }
 
-function closeDetails() {
-    document.getElementById('product-details-page').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-    selectedSize = null;
+function renderNavigation(items) {
+    const nav = document.getElementById('bottom-nav');
+    nav.innerHTML = items.map((item, index) => `
+        <div onclick="switchPage('${item.action}', this)" class="nav-item ${index === 0 ? 'active' : ''}">
+            <div class="relative"><i class="fa-solid ${item.icon}"></i>
+                ${item.action === 'cart' ? '<div id="cart-count-badge" class="cart-badge hidden">0</div>' : ''}
+            </div>
+            <span class="text-[9px] font-bold mt-1 uppercase">${item.name}</span>
+        </div>`).join('');
+    updateCartBadge();
+}
+
+function switchPage(page, btn) {
+    const pages = ['home-page', 'cart-page', 'checkout-page', 'profile-page', 'orders-page', 'payment-page'];
+    pages.forEach(p => document.getElementById(p)?.classList.add('hidden'));
+    
+    const target = page === 'home' ? 'home-page' : page + '-page';
+    document.getElementById(target)?.classList.remove('hidden');
+    
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    
+    if (page === 'cart') renderCart();
+    window.scrollTo(0,0);
+}
+
+function placeOrder() { switchPage('checkout'); document.getElementById('checkout-total-price').innerText = document.getElementById('cart-total-price').innerText; }
+
+function confirmFinalOrder() {
+    const name = document.getElementById('order-name').value;
+    const phone = document.getElementById('order-phone').value;
+    if(!name || !phone) { alert("შეავსეთ სახელი და ტელეფონი"); return; }
+    
+    // გადახდის მეთოდების რენდერი შენს სტილში
+    document.getElementById('payment-options').innerHTML = `
+        <div onclick="finishOrder('ნაღდი')" class="bg-white p-5 rounded-[25px] shadow-sm flex items-center gap-4">
+            <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-money-bill"></i></div>
+            <span class="font-black text-sm">ნაღდი ანგარიშსწორება</span>
+        </div>
+        <div onclick="finishOrder('ბარათი')" class="bg-white p-5 rounded-[25px] shadow-sm flex items-center gap-4">
+            <div class="w-10 h-10 bg-green-50 text-green-500 rounded-xl flex items-center justify-center"><i class="fa-solid fa-credit-card"></i></div>
+            <span class="font-black text-sm">ბარათით გადახდა</span>
+        </div>
+    `;
+    document.getElementById('payment-final-total').innerText = document.getElementById('checkout-total-price').innerText;
+    switchPage('payment');
+}
+
+async function finishOrder(method) {
+    const name = document.getElementById('order-name').value;
+    const total = document.getElementById('payment-final-total').innerText;
+    const items = cart.map(i => `${i.name} (${i.size})`).join(', ');
+
+    const params = new URLSearchParams({
+        action: "placeOrder",
+        userId: tg.initDataUnsafe?.user?.id || "guest",
+        customerName: name,
+        items: items,
+        total: total,
+        address: document.getElementById('order-address').value + " [მეთოდი: " + method + "]"
+    });
+
+    try {
+        // აქ ვიყენებთ fetch-ს Google Script-ში ჩასაწერად
+        fetch(`${API_URL}?${params.toString()}`, { mode: 'no-cors' });
+        
+        tg.sendData(JSON.stringify({ action: "order_complete", total: total }));
+        localStorage.removeItem('cart');
+        alert("მადლობა! შეკვეთა მიღებულია.");
+        tg.close();
+    } catch (e) {
+        alert("შეცდომაა, სცადეთ მოგვიანებით.");
+    }
 }
 
 function hidePreloader() {
-    const loader = document.getElementById('app-preloader');
-    loader.style.opacity = '0';
-    setTimeout(() => loader.style.display = 'none', 500);
+    const p = document.getElementById('app-preloader');
+    p.style.opacity = '0';
+    setTimeout(() => p.style.display = 'none', 500);
 }
 
-function showPage(pageId) {
-    document.getElementById('home-page').classList.toggle('hidden', pageId !== 'home');
-    document.getElementById('cart-page').classList.toggle('hidden', pageId !== 'cart');
-}
+function closeProductDetails() { document.getElementById('product-details-page').classList.add('hidden'); }
 
 init();
