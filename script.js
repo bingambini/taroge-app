@@ -63,12 +63,15 @@ function renderProducts(l) {
     const grid = document.getElementById('product-grid');
     if (!grid) return;
     grid.innerHTML = l.items.map((p, index) => {
-        // მოვძებნოთ შესაბამისი დეტალები ID-ით
+        // მოძებნა ID-ით (მხარდაჭერა d.ID და d.id)
         const details = storeData.productDetails.find(d => String(d.ID || d.id) === String(p.id));
         const badge = details?.Status ? `<span class="badge badge-${details.Status.toLowerCase()}">${details.Status}</span>` : '';
         
-        // სურათის უსაფრთხო აღება
-        const firstImg = (details && details.Image_URLs) ? details.Image_URLs.split(',')[0] : p.images.split(',')[0];
+        // სურათის აღება Image_URLs-დან
+        let firstImg = p.images ? p.images.split(',')[0] : "";
+        if (details && details.Image_URLs) {
+            firstImg = details.Image_URLs.split(',')[0];
+        }
 
         return `
             <div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all relative overflow-hidden">
@@ -123,8 +126,6 @@ function openProductSheet(index) {
     const p = storeData.latest.items[index];
     const overlay = document.getElementById('product-sheet-overlay');
     const sheet = document.getElementById('product-sheet');
-    
-    // ვიყენებთ ID-ს დეტალური გვერდისთვის
     document.getElementById('sheet-content').innerHTML = `
         <div class="flex flex-col items-center">
             <div class="w-full aspect-square bg-slate-50 rounded-[30px] flex items-center justify-center mb-6">
@@ -141,21 +142,19 @@ function openProductSheet(index) {
 function closeProductSheet() {
     const overlay = document.getElementById('product-sheet-overlay');
     const sheet = document.getElementById('product-sheet');
-    if (!sheet) return;
-    sheet.classList.add('translate-y-full');
-    overlay.classList.remove('opacity-100');
-    setTimeout(() => overlay.classList.add('hidden'), 300);
+    if (sheet) sheet.classList.add('translate-y-full');
+    if (overlay) overlay.classList.remove('opacity-100');
+    setTimeout(() => overlay && overlay.classList.add('hidden'), 300);
 }
 
 function goToProductDetails(id) {
     closeProductSheet();
-    // ვეძებთ ProductDetails შიტში ID-ის მიხედვით
     const details = storeData.productDetails.find(d => String(d.ID || d.id) === String(id));
     if (!details) return;
 
-    // შენი შიტის ველები: Image_URLs, Name, Price, Description, Sizes, Colors
-    const rawImages = details.Image_URLs || "";
-    const images = typeof rawImages === 'string' ? rawImages.split(',') : [String(rawImages)];
+    // შენი შიტის ველების გამოყენება: Image_URLs, Name, Price, Sizes, Colors
+    const imageVal = details.Image_URLs || "";
+    const images = typeof imageVal === 'string' ? imageVal.split(',') : [String(imageVal)];
     const sizes = details.Sizes ? String(details.Sizes).split(',') : [];
     const colors = details.Colors ? String(details.Colors).split(',') : [];
 
@@ -173,15 +172,12 @@ function goToProductDetails(id) {
                 <span class="text-[10px] font-black py-1 px-3 bg-slate-100 rounded-full text-slate-400">ID: ${details.ID || details.id}</span>
             </div>
             <p class="text-slate-500 text-sm mt-6 leading-relaxed">${details.Description || 'აღწერა არ არის'}</p>
-            
             <div class="mt-8"><h4 class="text-[10px] font-black text-slate-400 uppercase italic mb-3">ზომა</h4>
                 <div class="options-scroll">${sizes.map(s => `<button onclick="selectOption(this, 'size')" class="option-btn size-opt">${s.trim()}</button>`).join('')}</div>
             </div>
-            
             <div class="mt-6 mb-10"><h4 class="text-[10px] font-black text-slate-400 uppercase italic mb-3">ფერი</h4>
                 <div class="options-scroll">${colors.map(c => `<button onclick="selectOption(this, 'color')" class="option-btn color-opt">${c.trim()}</button>`).join('')}</div>
             </div>
-            
             <div class="py-6">
                 <button id="dynamic-buy-btn" disabled onclick="handleBuy('${details.ID || details.id}')" class="w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg transition-all">აირჩიე ზომა და ფერი</button>
             </div>
@@ -292,10 +288,10 @@ function renderCart() {
     if (!el) return;
     if (cart.length === 0) {
         el.innerHTML = `<div class="text-center py-20 opacity-30 font-bold">კალათა ცარიელია</div>`;
-        if(summary) summary.classList.add('hidden');
+        if (summary) summary.classList.add('hidden');
         return;
     }
-    if(summary) summary.classList.remove('hidden');
+    if (summary) summary.classList.remove('hidden');
     let total = 0;
     el.innerHTML = cart.map((item, idx) => {
         total += item.price;
@@ -312,7 +308,7 @@ function renderCart() {
     }).join('');
     
     const totalEl = document.getElementById('cart-total-price');
-    if(totalEl) totalEl.innerText = total + "₾";
+    if (totalEl) totalEl.innerText = total + "₾";
 }
 
 function removeFromCart(index) {
