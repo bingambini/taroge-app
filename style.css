@@ -3,9 +3,56 @@
 body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
 /* --- Preloader --- */
-#app-preloader { position: fixed; inset: 0; z-index: 999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-out; }
-.loader-spin { border: 4px solid #f1f5f9; border-top: 4px solid #2563eb; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+#app-preloader { 
+    position: fixed; 
+    inset: 0; 
+    z-index: 999999; 
+    background: #ffffff; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+.loader-wrapper {
+    text-align: center;
+}
+
+.footsteps {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 20px;
+    font-size: 40px;
+    color: #2563eb; /* შენი ლურჯი */
+}
+
+/* პირველი ნაბიჯი (მარცხენა) */
+.step-1 {
+    transform: rotate(-10deg);
+    animation: walk 1.2s infinite;
+}
+
+/* მეორე ნაბიჯი (მარჯვენა) */
+.step-2 {
+    transform: rotate(10deg) translateY(15px);
+    animation: walk 1.2s infinite;
+    animation-delay: 0.6s; /* იწყებს მაშინ, როცა პირველი ქრება */
+}
+
+@keyframes walk {
+    0% { opacity: 0; transform: scale(0.8) rotate(inherit); }
+    50% { opacity: 1; transform: scale(1.1) rotate(inherit); }
+    100% { opacity: 0; transform: scale(1) rotate(inherit); }
+}
+
+.loader-text {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
 
 /* --- Header --- */
 #main-header { width: 100%; z-index: 9999; position: relative; }
