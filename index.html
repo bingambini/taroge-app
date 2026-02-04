@@ -345,24 +345,38 @@
             document.getElementById('checkout-total-price').innerText = document.getElementById('cart-total-price').innerText;
         }
 
-        function confirmFinalOrder() {
-            const name = document.getElementById('order-name').value;
-            const phone = document.getElementById('order-phone').value;
-            if (!name || !phone) { alert("შეავსეთ სახელი და ნომერი"); return; }
-            
-            document.getElementById('payment-final-total').innerText = document.getElementById('checkout-total-price').innerText;
-            const pList = document.getElementById('payment-methods-list');
-            pList.innerHTML = (storeData.paymentMethods || []).filter(m => m.status === 'active').map(m => `
-                <div onclick="selectPayment('${m.id}', '${m.title}')" class="bg-white p-5 rounded-[25px] border border-slate-50 flex items-center gap-4 active:scale-95 cursor-pointer">
-                    <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500"><i class="fa-solid ${m.icon}"></i></div>
+function confirmFinalOrder() {
+    const name = document.getElementById('order-name').value;
+    const phone = document.getElementById('order-phone').value;
+    if (!name || !phone) { 
+        alert("შეავსეთ სახელი და ნომერი"); 
+        return; 
+    }
+    
+    document.getElementById('payment-final-total').innerText = document.getElementById('checkout-total-price').innerText;
+    
+    const pList = document.getElementById('payment-methods-list');
+    
+    // ვამოწმებთ არსებობს თუ არა paymentMethods მონაცემებში
+    if (!storeData.paymentMethods || storeData.paymentMethods.length === 0) {
+        pList.innerHTML = `<div class="text-center py-10 text-red-500 font-bold">გადახდის მეთოდები ვერ მოიძებნა</div>`;
+    } else {
+        pList.innerHTML = storeData.paymentMethods
+            .filter(m => m.status === 'active' || m.status === 'Active')
+            .map(m => `
+                <div onclick="selectPayment('${m.id}', '${m.title}')" class="bg-white p-5 rounded-[25px] border border-slate-50 flex items-center gap-4 active:scale-95 cursor-pointer mb-3">
+                    <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500">
+                        <i class="fa-solid ${m.icon || 'fa-credit-card'}"></i>
+                    </div>
                     <div class="flex-1">
                         <h4 class="font-black text-slate-800 text-[13px]">${m.title}</h4>
-                        <p class="text-[9px] text-slate-400 uppercase">${m.subtitle}</p>
+                        <p class="text-[9px] text-slate-400 uppercase">${m.subtitle || ''}</p>
                     </div>
                     <i class="fa-solid fa-chevron-right text-slate-200 text-[10px]"></i>
                 </div>`).join('');
-            switchPage('payment');
-        }
+    }
+    switchPage('payment');
+}
 
         async function selectPayment(mid, mtitle) {
             const tg = window.Telegram?.WebApp;
