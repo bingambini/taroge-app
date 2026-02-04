@@ -78,14 +78,29 @@
         .page-fade { animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- Product Sheet Half-Modal Styles --- */
-        #product-sheet { 
-            position: fixed; bottom: 0; left: 0; right: 0; 
-            background: white; border-top-left-radius: 40px; border-top-right-radius: 40px; 
-            padding: 25px; max-height: 65vh; 
-            transform: translateY(100%); 
-            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
-            z-index: 20001; box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+/* --- Product Sheet Half-Modal Styles --- */
+#product-sheet { 
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    right: 0; 
+    background: white; 
+    border-top-left-radius: 40px; 
+    border-top-right-radius: 40px; 
+    padding: 25px; 
+    
+    /* ოპტიმიზირებული სიმაღლე მობაილისთვის */
+    max-height: 80vh; 
+    overflow-y: auto; 
+    
+    transform: translateY(100%); 
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
+    z-index: 20001; 
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+    
+    /* დამატებითი დაშორება ქვემოდან (iOS და Android-ის ზოლისთვის) */
+    padding-bottom: calc(30px + env(safe-area-inset-bottom)); 
+}
         }
         #product-sheet-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.4);
@@ -243,22 +258,23 @@
         }
 
         /* --- Updated openProductSheet for Half-Modal --- */
-        function openProductSheet(index) {
+function openProductSheet(index) {
             const p = storeData.latest.items[index];
             const overlay = document.getElementById('product-sheet-overlay');
             const sheet = document.getElementById('product-sheet');
             const content = document.getElementById('sheet-content');
             
+            // შევამცირეთ h-44-დან h-40-მდე და padding-ები
             content.innerHTML = `
-                <div class="flex flex-col items-center">
-                    <div class="w-full h-44 bg-slate-50 rounded-[30px] flex items-center justify-center mb-6 overflow-hidden">
-                        <img src="${p.images.split(',')[0]}" class="h-full object-contain p-4" onerror="this.src='https://placehold.co/400x400?text=Shoes'">
+                <div class="flex flex-col items-center pb-4">
+                    <div class="w-full h-40 bg-slate-50 rounded-[25px] flex items-center justify-center mb-4 overflow-hidden">
+                        <img src="${p.images.split(',')[0]}" class="h-full object-contain p-2" onerror="this.src='https://placehold.co/400x400?text=Shoes'">
                     </div>
-                    <h3 class="text-xl font-black text-slate-800 text-center leading-tight px-4">${p.name}</h3>
-                    <p class="text-2xl font-black text-blue-600 mt-2">${p.price}₾</p>
+                    <h3 class="text-lg font-black text-slate-800 text-center leading-tight px-2">${p.name}</h3>
+                    <p class="text-xl font-black text-blue-600 mt-1">${p.price}₾</p>
                     
-                    <button onclick="goToProductDetails('${p.id}')" class="w-full mt-8 bg-slate-900 text-white py-4 rounded-[22px] font-black text-md active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
-                        დეტალურად ნახვა <i class="fa-solid fa-arrow-right text-xs"></i>
+                    <button onclick="goToProductDetails('${p.id}')" class="w-full mt-6 bg-slate-900 text-white py-4 rounded-[20px] font-black text-sm active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2 mb-2">
+                        დეტალურად ნახვა <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </button>
                 </div>`;
 
