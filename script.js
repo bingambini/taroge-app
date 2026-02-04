@@ -63,13 +63,18 @@ function renderProducts(l) {
     const grid = document.getElementById('product-grid');
     if (!grid) return;
     grid.innerHTML = l.items.map((p, index) => {
-        const details = storeData.productDetails.find(d => String(d.id) === String(p.id));
-        const badge = details?.status ? `<span class="badge badge-${details.status.toLowerCase()}">${details.status}</span>` : '';
+        // მოვძებნოთ შესაბამისი დეტალები ID-ით
+        const details = storeData.productDetails.find(d => String(d.ID || d.id) === String(p.id));
+        const badge = details?.Status ? `<span class="badge badge-${details.Status.toLowerCase()}">${details.Status}</span>` : '';
+        
+        // სურათის უსაფრთხო აღება
+        const firstImg = (details && details.Image_URLs) ? details.Image_URLs.split(',')[0] : p.images.split(',')[0];
+
         return `
             <div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all relative overflow-hidden">
                 ${badge}
                 <div class="h-28 flex items-center justify-center mb-3">
-                    <img src="${p.images.split(',')[0]}" class="max-h-full object-contain">
+                    <img src="${firstImg}" class="max-h-full object-contain">
                 </div>
                 <h4 class="font-bold text-[11px] text-slate-700 truncate">${p.name}</h4>
                 <p class="text-blue-600 font-black text-sm mt-1">${p.price}₾</p>
@@ -112,12 +117,14 @@ function renderProfile(menu) {
         </div>`;
 }
 
-// --- 3. ინტერაქციის ფუნქციები (Open Sheet, Switch Page და ა.შ.) ---
+// --- 3. ინტერაქციის ფუნქციები ---
 
 function openProductSheet(index) {
     const p = storeData.latest.items[index];
     const overlay = document.getElementById('product-sheet-overlay');
     const sheet = document.getElementById('product-sheet');
+    
+    // ვიყენებთ ID-ს დეტალური გვერდისთვის
     document.getElementById('sheet-content').innerHTML = `
         <div class="flex flex-col items-center">
             <div class="w-full aspect-square bg-slate-50 rounded-[30px] flex items-center justify-center mb-6">
@@ -134,6 +141,7 @@ function openProductSheet(index) {
 function closeProductSheet() {
     const overlay = document.getElementById('product-sheet-overlay');
     const sheet = document.getElementById('product-sheet');
+    if (!sheet) return;
     sheet.classList.add('translate-y-full');
     overlay.classList.remove('opacity-100');
     setTimeout(() => overlay.classList.add('hidden'), 300);
@@ -141,31 +149,41 @@ function closeProductSheet() {
 
 function goToProductDetails(id) {
     closeProductSheet();
-    const details = storeData.productDetails.find(d => String(d.id) === String(id));
+    // ვეძებთ ProductDetails შიტში ID-ის მიხედვით
+    const details = storeData.productDetails.find(d => String(d.ID || d.id) === String(id));
     if (!details) return;
-    const images = details.fullImages ? details.fullImages.split(',') : [details.images];
-    const sizes = details.sizes ? String(details.sizes).split(',') : [];
-    const colors = details.colors ? String(details.colors).split(',') : [];
+
+    // შენი შიტის ველები: Image_URLs, Name, Price, Description, Sizes, Colors
+    const rawImages = details.Image_URLs || "";
+    const images = typeof rawImages === 'string' ? rawImages.split(',') : [String(rawImages)];
+    const sizes = details.Sizes ? String(details.Sizes).split(',') : [];
+    const colors = details.Colors ? String(details.Colors).split(',') : [];
 
     document.getElementById('details-content').innerHTML = `
         <div class="slider-container mt-4">
             ${images.map(img => `<div class="slider-item"><img src="${img.trim()}"></div>`).join('')}
         </div>
         <div class="mt-6 px-4">
-            <h1 class="text-2xl font-black text-slate-800">${details.name}</h1>
+            <h1 class="text-2xl font-black text-slate-800">${details.Name || details.name}</h1>
             <div class="flex items-center justify-between mt-2">
-                <span class="text-3xl font-black text-blue-600">${details.price}₾</span>
-                <span class="text-[10px] font-black py-1 px-3 bg-slate-100 rounded-full text-slate-400">ID: ${details.id}</span>
+                <div class="flex flex-col">
+                    <span class="text-3xl font-black text-blue-600">${details.Price || details.price}₾</span>
+                    ${details.Old_Price ? `<span class="text-sm text-slate-400 line-through">${details.Old_Price}₾</span>` : ''}
+                </div>
+                <span class="text-[10px] font-black py-1 px-3 bg-slate-100 rounded-full text-slate-400">ID: ${details.ID || details.id}</span>
             </div>
-            <p class="text-slate-500 text-sm mt-6 leading-relaxed">${details.description || 'აღწერა არ არის'}</p>
+            <p class="text-slate-500 text-sm mt-6 leading-relaxed">${details.Description || 'აღწერა არ არის'}</p>
+            
             <div class="mt-8"><h4 class="text-[10px] font-black text-slate-400 uppercase italic mb-3">ზომა</h4>
                 <div class="options-scroll">${sizes.map(s => `<button onclick="selectOption(this, 'size')" class="option-btn size-opt">${s.trim()}</button>`).join('')}</div>
             </div>
+            
             <div class="mt-6 mb-10"><h4 class="text-[10px] font-black text-slate-400 uppercase italic mb-3">ფერი</h4>
                 <div class="options-scroll">${colors.map(c => `<button onclick="selectOption(this, 'color')" class="option-btn color-opt">${c.trim()}</button>`).join('')}</div>
             </div>
+            
             <div class="py-6">
-                <button id="dynamic-buy-btn" disabled onclick="handleBuy('${details.id}')" class="w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg transition-all">აირჩიე ზომა და ფერი</button>
+                <button id="dynamic-buy-btn" disabled onclick="handleBuy('${details.ID || details.id}')" class="w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg transition-all">აირჩიე ზომა და ფერი</button>
             </div>
         </div>`;
     document.getElementById('product-details-page').classList.remove('hidden');
@@ -194,13 +212,9 @@ function selectOption(btn, type) {
         buyBtn.disabled = false;
         buyBtn.innerText = "კალათაში დამატება";
         buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-xl active:scale-95 transition-all";
-    } else if (hasSize && !hasColor) {
+    } else {
         buyBtn.disabled = true;
-        buyBtn.innerText = "აირჩიე ფერი";
-        buyBtn.className = "w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg";
-    } else if (!hasSize && hasColor) {
-        buyBtn.disabled = true;
-        buyBtn.innerText = "აირჩიე ზომა";
+        buyBtn.innerText = !hasSize ? "აირჩიე ზომა" : "აირჩიე ფერი";
         buyBtn.className = "w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg";
     }
 }
@@ -226,58 +240,50 @@ function switchPage(page, btn) {
 // --- 4. კალათის და შეკვეთის ლოგიკა ---
 
 function handleBuy(id) {
-    // 1. ვპოულობთ არჩეულ ელემენტებს
-    const selectedSizeEl = document.querySelector('.size-opt.selected');
-    const selectedColorEl = document.querySelector('.color-opt.selected');
-    
-    if (!selectedSizeEl || !selectedColorEl) return;
+    try {
+        const selectedSizeEl = document.querySelector('.size-opt.selected');
+        const selectedColorEl = document.querySelector('.color-opt.selected');
+        if (!selectedSizeEl || !selectedColorEl) return;
 
-    // 2. ვეძებთ პროდუქტს storeData-ში (id-ს ვადარებთ როგორც სტრინგს)
-    const product = storeData.productDetails.find(d => String(d.id) === String(id));
-    
-    // თუ პროდუქტი ვერ მოიძებნა, რომ Error არ ამოვარდეს:
-    if (!product) {
-        console.error("პროდუქტი ვერ მოიძებნა ID-ით:", id);
-        return;
-    }
+        const product = storeData.productDetails.find(d => String(d.ID || d.id) === String(id));
+        if (!product) return;
 
-    const size = selectedSizeEl.innerText;
-    const color = selectedColorEl.innerText;
+        let productImg = "https://via.placeholder.com/150";
+        const imgVal = product.Image_URLs || product.images;
+        if (imgVal && typeof imgVal === 'string') {
+            productImg = imgVal.split(',')[0].trim();
+        }
 
-    // 3. სურათის უსაფრთხო აღება
-    let productImg = "";
-    if (product.images) {
-        productImg = product.images.split(',')[0];
-    } else if (product.fullImages) {
-        productImg = product.fullImages.split(',')[0];
-    }
+        cart.push({
+            cartId: Date.now(),
+            id: product.ID || product.id,
+            name: product.Name || product.name,
+            price: parseFloat(product.Price || product.price),
+            size: selectedSizeEl.innerText,
+            color: selectedColorEl.innerText,
+            image: productImg
+        });
 
-    cart.push({
-        cartId: Date.now(),
-        id: product.id,
-        name: product.name,
-        price: parseFloat(product.price),
-        size: size,
-        color: color,
-        image: productImg
-    });
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartBadge();
+        
+        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartBadge();
-    
-    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-
-    const buyBtn = document.getElementById('dynamic-buy-btn');
-    buyBtn.innerText = "✅ დაემატა";
-    buyBtn.style.backgroundColor = "#10b981";
-    buyBtn.disabled = true;
-
-    setTimeout(() => {
-        closeProductDetails();
-        buyBtn.innerText = "აირჩიე ზომა და ფერი";
-        buyBtn.style.backgroundColor = "";
+        const buyBtn = document.getElementById('dynamic-buy-btn');
+        buyBtn.innerText = "✅ დაემატა";
+        buyBtn.style.backgroundColor = "#10b981";
+        buyBtn.style.color = "white";
         buyBtn.disabled = true;
-    }, 800);
+
+        setTimeout(() => {
+            closeProductDetails();
+            buyBtn.innerText = "აირჩიე ზომა და ფერი";
+            buyBtn.style.backgroundColor = "";
+            buyBtn.disabled = true;
+        }, 800);
+    } catch (e) {
+        console.error("HandleBuy Error:", e);
+    }
 }
 
 function renderCart() {
@@ -286,10 +292,10 @@ function renderCart() {
     if (!el) return;
     if (cart.length === 0) {
         el.innerHTML = `<div class="text-center py-20 opacity-30 font-bold">კალათა ცარიელია</div>`;
-        summary?.classList.add('hidden');
+        if(summary) summary.classList.add('hidden');
         return;
     }
-    summary?.classList.remove('hidden');
+    if(summary) summary.classList.remove('hidden');
     let total = 0;
     el.innerHTML = cart.map((item, idx) => {
         total += item.price;
