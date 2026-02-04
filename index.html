@@ -14,9 +14,66 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
         
         /* --- Preloader Styles --- */
-        #app-preloader { position: fixed; inset: 0; z-index: 999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-out; }
-        .loader-spin { border: 4px solid #f1f5f9; border-top: 4px solid #2563eb; border-radius: 50%; width: 100px; height: 100px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+/* --- Kinetic Shoe Preloader Styles --- */
+#app-preloader { 
+    position: fixed; 
+    inset: 0; 
+    z-index: 999999; 
+    background: #ffffff; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    transition: opacity 0.5s ease-out; 
+}
+
+.loader-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.shoe-icon {
+    font-size: 50px;
+    color: #2563eb;
+    animation: kineticShoe 1.2s ease-in-out infinite;
+    filter: drop-shadow(0 5px 15px rgba(37, 99, 235, 0.2));
+}
+
+.shoe-shadow {
+    width: 40px;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    margin-top: 15px;
+    animation: shadowPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes kineticShoe {
+    0%, 100% { transform: translateY(0) rotate(-10deg); }
+    50% { transform: translateY(-30px) rotate(15deg); }
+}
+
+@keyframes shadowPulse {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.8); opacity: 0.1; }
+}
+
+.loader-text {
+    margin-top: 30px;
+    font-weight: 800;
+    color: #1e293b;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: textFade 1.2s infinite;
+}
+
+@keyframes textFade {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
         /* ------------------------ */
 
         #main-header { width: 100%; z-index: 9999; position: relative; display: none; }
@@ -81,17 +138,19 @@
         .input-group label { display: block; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px; margin-left: 4px; }
         .checkout-input { width: 100%; background: white; border: 1px solid #f1f5f9; padding: 14px 18px; font-weight: 700; font-size: 13px; color: #1e293b; border-radius: 18px; outline: none; transition: border-color 0.2s; }
         .checkout-input:focus { border-color: #2563eb; }
-    </style>
+</style>
 </head>
-<body>
-
-    <div id="app-preloader">
-        <div class="loader-spin"></div>
-        <p style="margin-top: 20px; font-weight: 800; color: #1e293b; font-size: 14px;">იტვირთება...</p>
+<body class="bg-[#f8f9fc]"> <div id="app-preloader">
+        <div class="loader-container">
+            <div class="shoe-icon">
+                <i class="fa-solid fa-shoe-prints"></i>
+            </div>
+            <div class="shoe-shadow"></div>
+        </div>
+        <p class="loader-text">ვამზადებთ კოლექციას...</p>
     </div>
 
     <header id="main-header" class="flex items-center"></header>
-
     <div id="home-page" class="page-fade">
         <div id="hero-banner"></div>
         <div id="product-grid" class="grid grid-cols-2 gap-4 px-6 mt-4"></div>
