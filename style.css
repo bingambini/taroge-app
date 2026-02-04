@@ -1,99 +1,53 @@
-/* 1. სპეციალური ფონტის შემოტანა */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
 
-body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background-color: #f8f9fc;
-    margin: 0;
-    padding-bottom: 120px; /* რომ ბოლო ნივთი მენიუმ არ დაფაროს */
-}
+body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
-/* 2. პრელოადერის (ჩატვირთვის) სტილი */
-#app-preloader {
-    position: fixed;
-    inset: 0;
-    z-index: 999999;
-    background: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.5s ease;
-}
+/* --- Preloader --- */
+#app-preloader { position: fixed; inset: 0; z-index: 999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-out; }
+.loader-spin { border: 4px solid #f1f5f9; border-top: 4px solid #2563eb; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-.loader-spin {
-    border: 4px solid #f1f5f9;
-    border-top: 4px solid #2563eb;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-}
+/* --- Header --- */
+#main-header { width: 100%; z-index: 9999; position: relative; }
+.header-container { width: 100%; max-width: 600px; margin: 0 auto; display: flex; align-items: center; height: 100%; padding: 0 20px; }
+.header-floating { margin: 10px auto !important; border-radius: 20px !important; width: calc(100% - 30px) !important; max-width: 570px !important; overflow: hidden; }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+/* --- Banner --- */
+#hero-banner { margin: 20px auto; border-radius: 35px; overflow: hidden; position: relative; max-width: 600px; width: calc(100% - 40px); display: flex; align-items: center; }
+.banner-content { padding: 25px; width: 60%; z-index: 10; position: relative; }
+.banner-img { position: absolute; right: -15px; width: 50%; transform: rotate(-15deg); filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4)); z-index: 5; pointer-events: none; }
 
-/* 3. ქვედა მენიუს (Navigation) დიზაინი */
-#bottom-nav {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 40px);
-    max-width: 500px;
-    height: 70px;
-    background: #000000;
-    border-radius: 25px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 10000;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
+/* --- Navigation --- */
+#bottom-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 500px; height: 70px; background: #000000; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 10000; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+.nav-item { display: flex; flex-direction: column; align-items: center; color: #666; text-decoration: none; transition: 0.3s; cursor: pointer; position: relative; }
+.nav-item.active { color: #ffffff; }
+.cart-badge { position: absolute; top: -5px; right: -8px; background: #ef4444; color: white; font-size: 9px; font-weight: 800; min-width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #000; }
 
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #888888;
-    cursor: pointer;
-    transition: all 0.2s;
-}
+/* --- Products --- */
+.badge { position: absolute; top: 12px; left: 12px; padding: 4px 10px; border-radius: 10px; font-size: 9px; font-weight: 900; text-transform: uppercase; z-index: 10; }
+.badge-sale { background: #ef4444; color: white; }
+.badge-new { background: #10b981; color: white; }
 
-.nav-item.active {
-    color: #ffffff;
-}
+.slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; scrollbar-width: none; border-radius: 35px; }
+.slider-container::-webkit-scrollbar { display: none; }
+.slider-item { min-width: 100%; scroll-snap-align: start; }
+.slider-item img { width: 100%; aspect-ratio: 1/1; object-fit: contain; }
 
-/* 4. კალათის ნიშანი (Badge) */
-.cart-badge {
-    position: absolute;
-    top: -5px;
-    right: -8px;
-    background: #ef4444;
-    color: white;
-    font-size: 10px;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #000;
-    font-weight: bold;
-}
+.options-scroll { display: flex; overflow-x: auto; gap: 8px; padding: 5px 0; scrollbar-width: none; }
+.option-btn { border: 2px solid #f1f5f9; transition: 0.2s; flex: 0 0 auto; padding: 12px 20px; border-radius: 15px; font-weight: 800; background: white; }
+.option-btn.selected { border-color: #2563eb; background: #2563eb; color: white !important; }
 
-/* 5. გვერდების გადასვლის ანიმაცია */
-.page-fade {
-    animation: fadeIn 0.4s ease-out;
-}
+.checkout-input { width: 100%; background: white; border: 1px solid #f1f5f9; padding: 14px 18px; font-weight: 700; font-size: 13px; border-radius: 18px; outline: none; }
+.input-group label { display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; margin-left: 5px; }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+.stepper-ui { display: flex; align-items: center; background: #f1f5f9; border-radius: 12px; padding: 3px; }
+.stepper-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 9px; cursor: pointer; }
+.stepper-count { padding: 0 10px; font-weight: 800; font-size: 13px; }
 
-/* 6. დამალვის კლასი */
-.hidden {
-    display: none !important;
-}
+.promo-box { background: white; border-radius: 20px; padding: 10px; border: 1px dashed #cbd5e1; display: flex; margin-top: 15px; }
+.promo-input { flex: 1; border: none; outline: none; font-weight: 700; padding: 0 10px; }
+.promo-btn { background: #000; color: white; padding: 10px 20px; border-radius: 12px; font-size: 11px; font-weight: 800; }
+
+.hidden { display: none !important; }
+.page-fade { animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
