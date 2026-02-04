@@ -28,14 +28,26 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; 
 .badge-sale { background: #ef4444; color: white; }
 .badge-new { background: #10b981; color: white; }
 
-.slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; scrollbar-width: none; border-radius: 35px; }
+/* სლაიდერის გაუმჯობესებული სტილი */
+.slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; scrollbar-width: none; border-radius: 35px; padding: 10px 0; }
 .slider-container::-webkit-scrollbar { display: none; }
-.slider-item { min-width: 100%; scroll-snap-align: start; }
-.slider-item img { width: 100%; aspect-ratio: 1/1; object-fit: contain; }
+.slider-item { min-width: 90%; scroll-snap-align: center; background: #f1f5f9; border-radius: 30px; display: flex; align-items: center; justify-content: center; }
+.slider-item img { width: 100%; aspect-ratio: 1/1; object-fit: contain; padding: 20px; }
 
+/* ოფციების სტილი */
 .options-scroll { display: flex; overflow-x: auto; gap: 8px; padding: 5px 0; scrollbar-width: none; }
+.options-scroll::-webkit-scrollbar { display: none; }
 .option-btn { border: 2px solid #f1f5f9; transition: 0.2s; flex: 0 0 auto; padding: 12px 20px; border-radius: 15px; font-weight: 800; background: white; }
-.option-btn.selected { border-color: #2563eb; background: #2563eb; color: white !important; }
+.option-btn.selected { border-color: #2563eb; background: #ebf2ff; color: #2563eb !important; }
+
+/* ყიდვის ღილაკის Sticky ეფექტი */
+#dynamic-buy-btn { 
+    position: sticky; 
+    bottom: 0; 
+    z-index: 50; 
+    margin-top: 20px;
+    box-shadow: 0 -10px 20px rgba(255,255,255,0.8);
+}
 
 .checkout-input { width: 100%; background: white; border: 1px solid #f1f5f9; padding: 14px 18px; font-weight: 700; font-size: 13px; border-radius: 18px; outline: none; }
 .input-group label { display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; margin-left: 5px; }
