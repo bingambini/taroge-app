@@ -4,36 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shoes Store v2.0</title>
-    
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8f9fc; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
-        
-        /* Header & Nav Styles */
         #main-header { width: 100%; z-index: 9999; position: relative; display: none; }
         .header-container { width: 100%; max-width: 600px; margin: 0 auto; display: flex; align-items: center; height: 100%; padding: 0 20px; }
         .header-floating { margin: 10px auto !important; border-radius: 20px !important; width: calc(100% - 30px) !important; max-width: 570px !important; }
-
         #bottom-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 500px; height: 70px; background: #000; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 10000; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; transition: 0.3s; cursor: pointer; }
         .nav-item.active { color: #fff; }
         .nav-item i { font-size: 20px; }
         .nav-item span { font-size: 10px; font-weight: 700; margin-top: 4px; }
-
-        /* Product UI */
         .cart-badge { position: absolute; top: -5px; right: -8px; background: #ef4444; color: white; font-size: 9px; font-weight: 800; min-width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #000; }
         .slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
         .slider-item { min-width: 100%; scroll-snap-align: start; }
         .option-btn.selected { border-color: #2563eb; background: #2563eb; color: white !important; }
-        
-        /* Stepper */
         .stepper-ui { display: flex; align-items: center; background: #f1f5f9; border-radius: 12px; padding: 3px; }
         .stepper-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 9px; cursor: pointer; }
-        
         .hidden { display: none; }
         .page-fade { animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -56,7 +46,7 @@
                 <input type="text" id="promo-input" class="flex-1 bg-slate-50 border-none rounded-xl px-4 text-sm font-bold outline-none" placeholder="პრომო კოდი">
                 <button onclick="applyPromo()" class="bg-black text-white px-4 py-3 rounded-xl text-xs font-bold">გამოყენება</button>
             </div>
-            <p id="promo-msg"></p>
+            <p id="promo-msg" class="text-[10px] mt-2"></p>
         </div>
         <div id="cart-summary" class="mt-8 border-t pt-6 hidden">
             <div class="flex justify-between items-center mb-6">
@@ -125,11 +115,11 @@
             try {
                 const res = await fetch(API_URL);
                 storeData = await res.json();
-                renderHeader(storeData.header);
-                renderBanner(storeData.banner);
-                renderProducts(storeData.latest);
-                renderNavigation(storeData.navigation);
-                renderProfile(storeData.profileMenu);
+                if(storeData.header) renderHeader(storeData.header);
+                if(storeData.banner) renderBanner(storeData.banner);
+                if(storeData.latest) renderProducts(storeData.latest);
+                if(storeData.navigation) renderNavigation(storeData.navigation);
+                if(storeData.profileMenu) renderProfile(storeData.profileMenu);
                 updateCartBadge();
             } catch (e) { console.error(e); }
         }
@@ -153,13 +143,12 @@
 
         function renderProducts(l) {
             const grid = document.getElementById('product-grid');
-            grid.innerHTML = l.items.map(p => {
-                const details = storeData.productDetails.find(d => d.id.toString() === p.id.toString());
-                return `<div onclick="openProductDetails('${p.id}')" class="bg-white p-4 rounded-[30px] border border-slate-50 shadow-sm active:scale-95 transition-all">
+            grid.innerHTML = l.items.map(p => `
+                <div onclick="openProductDetails('${p.id}')" class="bg-white p-4 rounded-[30px] border border-slate-50 shadow-sm active:scale-95 transition-all">
                     <img src="${p.images.split(',')[0]}" class="h-24 mx-auto object-contain">
                     <h4 class="font-bold text-[11px] mt-3 truncate">${p.name}</h4>
-                    <p class="text-blue-600 font-black text-sm">${p.price}₾</p></div>`;
-            }).join('');
+                    <p class="text-blue-600 font-black text-sm">${p.price}₾</p>
+                </div>`).join('');
         }
 
         function openProductDetails(id) {
@@ -177,13 +166,13 @@
                     <div class="flex gap-2 overflow-x-auto pb-2">${sizes.map(s => `<button onclick="selectOption(this, 'size', '${id}')" class="size-opt border-2 border-slate-100 px-5 py-3 rounded-2xl font-bold bg-white">${s.trim()}</button>`).join('')}</div></div>
                 <div class="mt-6"><p class="text-[10px] font-black text-slate-400 mb-3 uppercase">ფერი</p>
                     <div class="flex gap-2 overflow-x-auto pb-2">${colors.map(c => `<button onclick="selectOption(this, 'color', '${id}')" class="color-opt border-2 border-slate-100 px-5 py-3 rounded-2xl font-bold bg-white">${c.trim()}</button>`).join('')}</div></div>
-                <div class="fixed bottom-10 left-0 right-0 px-6"><button id="dynamic-buy-btn" disabled class="w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg">აირჩიე პარამეტრები</button></div>`;
+                <div class="fixed bottom-10 left-0 right-0 px-6"><button id="dynamic-buy-btn" disabled class="w-full bg-slate-300 text-white py-5 rounded-[25px] font-black text-lg">აირჩიე ზომა</button></div>`;
             document.getElementById('product-details-page').classList.remove('hidden');
         }
 
         function selectOption(btn, type, productId) {
             const parentClass = type === 'size' ? '.size-opt' : '.color-opt';
-            document.querySelectorAll(parentClass).forEach(b => b.classList.remove('selected', 'border-blue-600', 'bg-blue-600', 'text-white'));
+            document.querySelectorAll(parentClass).forEach(b => b.classList.remove('selected', 'bg-blue-600', 'text-white', 'border-blue-600'));
             btn.classList.add('selected', 'bg-blue-600', 'text-white', 'border-blue-600');
 
             const hasSize = document.querySelector('.size-opt.selected');
@@ -197,32 +186,35 @@
             } else if (!hasColor) {
                 buyBtn.innerText = "აირჩიე ფერი";
                 buyBtn.disabled = false;
-                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black";
+                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black shadow-xl";
                 buyBtn.onclick = () => alert("გთხოვთ აირჩიოთ ფერი");
             } else {
                 buyBtn.innerText = "კალათაში დამატება";
                 buyBtn.disabled = false;
-                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black shadow-xl";
+                buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black shadow-2xl active:scale-95";
                 buyBtn.onclick = () => handleBuy(productId);
             }
         }
 
         function handleBuy(id) {
+            const sizeEl = document.querySelector('.size-opt.selected');
+            const colorEl = document.querySelector('.color-opt.selected');
             const product = storeData.productDetails.find(d => d.id.toString() === id.toString());
+            
             cart.push({
                 cartId: Date.now(),
                 id: product.id.toString(),
                 name: product.name,
                 price: parseFloat(product.price),
-                size: document.querySelector('.size-opt.selected').innerText,
-                color: document.querySelector('.color-opt.selected').innerText,
+                size: sizeEl.innerText,
+                color: colorEl.innerText,
                 image: product.images.split(',')[0]
             });
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCartBadge();
-            const btn = document.getElementById('dynamic-buy-btn');
-            btn.innerText = "✅ დაემატა კალათაში";
-            btn.className = "w-full bg-green-600 text-white py-5 rounded-[25px] font-black";
+            const buyBtn = document.getElementById('dynamic-buy-btn');
+            buyBtn.innerText = "✅ დაემატა კალათაში";
+            buyBtn.className = "w-full bg-green-600 text-white py-5 rounded-[25px] font-black";
             setTimeout(closeProductDetails, 800);
         }
 
@@ -248,9 +240,9 @@
             el.innerHTML = Object.values(grouped).map(item => {
                 subtotal += item.price * item.quantity;
                 return `<div class="bg-white p-4 rounded-[25px] flex items-center gap-4">
-                    <img src="${item.image}" class="w-16 h-16 object-contain">
-                    <div class="flex-1">
-                        <h4 class="font-bold text-xs truncate">${item.name}</h4>
+                    <img src="${item.image}" class="w-16 h-16 object-contain bg-slate-50 rounded-xl">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-slate-800 text-xs truncate">${item.name}</h4>
                         <p class="text-[10px] text-slate-400 font-bold">${item.size} / ${item.color}</p>
                         <div class="flex items-center justify-between mt-2">
                             <p class="text-blue-600 font-black text-sm">${item.price}₾</p>
@@ -290,7 +282,7 @@
             const promo = (storeData.promoCodes || []).find(p => p.code.toUpperCase() === code);
             if (promo) {
                 activeDiscountData = promo;
-                msg.innerText = `აქტიურია: -${promo.value}${promo.type === 'percent' ? '%' : '₾'}`;
+                msg.innerText = `გააქტიურდა: -${promo.value}${promo.type === 'percent' ? '%' : '₾'}`;
                 msg.className = "text-green-600 font-bold text-[10px] mt-2";
             } else {
                 activeDiscountData = null;
@@ -326,7 +318,7 @@
         function confirmFinalOrder() {
             const name = document.getElementById('order-name').value;
             const phone = document.getElementById('order-phone').value;
-            if (!name || !phone) return alert("შეავსეთ აუცილებელი ველები");
+            if (!name || !phone) return alert("შეავსეთ სახელი და ნომერი");
             document.getElementById('payment-final-total').innerText = document.getElementById('checkout-total-price').innerText;
             const pList = document.querySelector('#payment-page .space-y-3');
             pList.innerHTML = (storeData.paymentMethods || []).filter(m => m.status === 'active').map(m => `
@@ -352,6 +344,7 @@
             try {
                 fetch(`${API_URL}?${params.toString()}`, { mode: 'no-cors' });
                 localStorage.removeItem('cart'); cart = [];
+                updateCartBadge();
                 alert("შეკვეთა მიღებულია!");
                 tg?.close();
             } catch(e) { alert("შეცდომაა"); }
