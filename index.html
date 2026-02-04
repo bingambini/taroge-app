@@ -3,63 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store v2.0</title>
+    <title>Shoes Store - Optimized</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50">
+<body>
 
     <div id="app-preloader">
         <div class="loader-spin"></div>
+        <p class="mt-5 font-black text-slate-800 text-sm italic">იტვირთება...</p>
     </div>
 
-    <main id="main-content">
-        <div id="home-page" class="page-fade px-4 pt-4">
-            <div id="hero-banner" class="mb-6"></div>
-            <div id="product-grid" class="grid grid-cols-2 gap-4"></div>
+    <header id="main-header" class="flex items-center"></header>
+
+    <main id="app-content">
+        <div id="home-page" class="page-fade">
+            <div id="hero-banner"></div>
+            <div id="product-grid" class="grid grid-cols-2 gap-4 px-6 mt-4"></div>
         </div>
 
         <div id="cart-page" class="hidden page-fade px-6 pt-6">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">შენი კალათა</h2>
+            <h2 class="text-2xl font-black text-slate-800 mb-6 font-primary">ჩემი კალათა</h2>
             <div id="cart-items" class="space-y-4"></div>
-            <div id="cart-empty" class="text-center py-20 text-slate-400 hidden">
-                <i class="fa-solid fa-cart-shopping text-4xl mb-4"></i>
-                <p>კალათა ცარიელია</p>
+            
+            <div id="promo-section" class="hidden">
+                <div class="promo-box">
+                    <input type="text" id="promo-input" class="promo-input" placeholder="პრომო კოდი...">
+                    <button onclick="applyPromo()" class="promo-btn">გამოყენება</button>
+                </div>
+                <p id="promo-msg" class="text-[10px] font-bold mt-2 px-2"></p>
             </div>
+
             <div id="cart-summary" class="mt-8 border-t pt-6 hidden">
                 <div class="flex justify-between items-center mb-6">
-                    <span class="text-slate-500 font-bold">ჯამი:</span>
+                    <div>
+                        <span class="text-slate-500 font-bold">ჯამი:</span>
+                        <div id="discount-label" class="text-[10px] text-green-600 font-black hidden">ფასდაკლება აქტიურია</div>
+                    </div>
                     <span id="cart-total-price" class="text-2xl font-black text-blue-600">0₾</span>
                 </div>
-                <button onclick="placeOrder()" class="w-full bg-black text-white py-5 rounded-[25px] font-bold shadow-lg shadow-black/20 active:scale-95 transition-transform">
+                <button onclick="placeOrder()" class="w-full bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all shadow-xl">
                     შეკვეთის გაფორმება
                 </button>
             </div>
         </div>
 
-        <div id="product-details-page" class="hidden fixed inset-0 bg-white z-[30000] overflow-y-auto"></div>
+        <div id="checkout-page" class="hidden page-fade px-6 pt-6 pb-20">
+            <div class="flex items-center gap-3 mb-6">
+                <button onclick="switchPage('cart')" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-chevron-left text-slate-400"></i>
+                </button>
+                <h2 class="text-xl font-black text-slate-800">მიწოდება</h2>
+            </div>
+            <div class="space-y-4">
+                <div class="input-group">
+                    <label>სახელი და გვარი *</label>
+                    <input type="text" id="order-name" class="checkout-input" placeholder="მაგ: გიორგი">
+                </div>
+                <div class="input-group">
+                    <label>ტელეფონი *</label>
+                    <input type="tel" id="order-phone" class="checkout-input" placeholder="5xx xx xx xx">
+                </div>
+                <div class="input-group">
+                    <label>ქალაქი და მისამართი *</label>
+                    <input type="text" id="order-address" class="checkout-input" placeholder="თბილისი, ქუჩა...">
+                </div>
+                <div class="input-group">
+                    <label>შენიშვნა</label>
+                    <textarea id="order-extra" class="checkout-input h-24 pt-3"></textarea>
+                </div>
+            </div>
+            <div class="mt-8 border-t pt-6">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-slate-500 font-bold uppercase text-xs">ჯამი:</span>
+                    <span id="checkout-total-price" class="text-2xl font-black text-blue-600">0₾</span>
+                </div>
+                <button onclick="confirmFinalOrder()" class="w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-xl shadow-blue-100">
+                    გაგრძელება
+                </button>
+            </div>
+        </div>
+
+        <div id="payment-page" class="hidden page-fade px-6 pt-6">
+             <div id="payment-options" class="space-y-3"></div>
+             <div class="mt-10 p-6 bg-slate-50 rounded-[30px] text-center border border-dashed border-slate-200">
+                <span class="text-slate-400 font-bold uppercase text-[9px] tracking-widest block mb-1">გადასახდელი ჯამი</span>
+                <span id="payment-final-total" class="text-3xl font-black text-blue-600">0₾</span>
+            </div>
+        </div>
+
+        <div id="profile-page" class="hidden page-fade"></div>
+        <div id="orders-page" class="hidden page-fade px-6 pt-6"><div id="orders-list" class="space-y-3"></div></div>
     </main>
 
-    <nav id="bottom-nav">
-        <div class="nav-item active" onclick="showPage('home')">
-            <i class="fa-solid fa-house text-xl"></i>
-            <span class="text-[10px] mt-1 font-bold">მთავარი</span>
+    <div id="product-details-page" class="hidden fixed inset-0 bg-white z-[30000] overflow-y-auto pb-40">
+        <div class="sticky top-0 bg-white/90 backdrop-blur-md z-10 flex justify-between items-center p-6">
+            <button onclick="closeProductDetails()" class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button>
+            <h3 class="font-black text-slate-800 uppercase text-xs">პროდუქტი</h3>
+            <div class="w-12"></div> 
         </div>
-        <div class="nav-item relative" onclick="showPage('cart')">
-            <i class="fa-solid fa-cart-shopping text-xl"></i>
-            <span class="text-[10px] mt-1 font-bold">კალათა</span>
-            <div id="cart-badge" class="cart-badge hidden">0</div>
+        <div id="details-content" class="px-6"></div>
+    </div>
+
+    <div id="product-sheet-overlay" class="fixed inset-0 bg-black/60 z-[20000] hidden opacity-0 transition-opacity duration-300" onclick="closeProductSheet()">
+        <div id="product-sheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[40px] p-8 transform translate-y-full transition-transform duration-300" onclick="event.stopPropagation()">
+            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-8"></div>
+            <div id="sheet-content"></div>
         </div>
-        <div class="nav-item" onclick="tg.close()">
-            <i class="fa-solid fa-xmark text-xl"></i>
-            <span class="text-[10px] mt-1 font-bold">დახურვა</span>
-        </div>
-    </nav>
+    </div>
+    
+    <nav id="bottom-nav"></nav>
 
     <script src="script.js"></script>
 </body>
