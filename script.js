@@ -226,17 +226,31 @@ function switchPage(page, btn) {
 // --- 4. კალათის და შეკვეთის ლოგიკა ---
 
 function handleBuy(id) {
-    // უსაფრთხოების შემოწმება
+    // 1. ვპოულობთ არჩეულ ელემენტებს
     const selectedSizeEl = document.querySelector('.size-opt.selected');
     const selectedColorEl = document.querySelector('.color-opt.selected');
     
     if (!selectedSizeEl || !selectedColorEl) return;
 
+    // 2. ვეძებთ პროდუქტს storeData-ში (id-ს ვადარებთ როგორც სტრინგს)
     const product = storeData.productDetails.find(d => String(d.id) === String(id));
-    if (!product) return;
+    
+    // თუ პროდუქტი ვერ მოიძებნა, რომ Error არ ამოვარდეს:
+    if (!product) {
+        console.error("პროდუქტი ვერ მოიძებნა ID-ით:", id);
+        return;
+    }
 
     const size = selectedSizeEl.innerText;
     const color = selectedColorEl.innerText;
+
+    // 3. სურათის უსაფრთხო აღება
+    let productImg = "";
+    if (product.images) {
+        productImg = product.images.split(',')[0];
+    } else if (product.fullImages) {
+        productImg = product.fullImages.split(',')[0];
+    }
 
     cart.push({
         cartId: Date.now(),
@@ -245,7 +259,7 @@ function handleBuy(id) {
         price: parseFloat(product.price),
         size: size,
         color: color,
-        image: product.images.split(',')[0]
+        image: productImg
     });
 
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -260,7 +274,6 @@ function handleBuy(id) {
 
     setTimeout(() => {
         closeProductDetails();
-        // რესეტი შემდეგისთვის
         buyBtn.innerText = "აირჩიე ზომა და ფერი";
         buyBtn.style.backgroundColor = "";
         buyBtn.disabled = true;
