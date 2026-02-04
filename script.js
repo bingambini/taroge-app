@@ -151,7 +151,7 @@ function goToProductDetails(id) {
         <div class="slider-container mt-4">
             ${images.map(img => `<div class="slider-item"><img src="${img.trim()}"></div>`).join('')}
         </div>
-        <div class="mt-6">
+        <div class="mt-6 px-4">
             <h1 class="text-2xl font-black text-slate-800">${details.name}</h1>
             <div class="flex items-center justify-between mt-2">
                 <span class="text-3xl font-black text-blue-600">${details.price}₾</span>
@@ -164,9 +164,12 @@ function goToProductDetails(id) {
             <div class="mt-6 mb-10"><h4 class="text-[10px] font-black text-slate-400 uppercase italic mb-3">ფერი</h4>
                 <div class="options-scroll">${colors.map(c => `<button onclick="selectOption(this, 'color')" class="option-btn color-opt">${c.trim()}</button>`).join('')}</div>
             </div>
-            <button id="dynamic-buy-btn" disabled onclick="handleBuy('${details.id}')" class="w-full bg-slate-200 text-white py-5 rounded-[25px] font-black text-lg">აირჩიე ზომა და ფერი</button>
+            <div class="py-6">
+                <button id="dynamic-buy-btn" disabled onclick="handleBuy('${details.id}')" class="w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg transition-all">აირჩიე ზომა და ფერი</button>
+            </div>
         </div>`;
     document.getElementById('product-details-page').classList.remove('hidden');
+    window.scrollTo(0, 0);
 }
 
 function closeProductDetails() {
@@ -174,7 +177,6 @@ function closeProductDetails() {
 }
 
 function selectOption(btn, type) {
-    // მონიშვნის ვიზუალი
     const parentClass = type === 'size' ? '.size-opt' : '.color-opt';
     document.querySelectorAll(parentClass).forEach(b => {
         b.classList.remove('selected', 'border-blue-600', 'bg-blue-50');
@@ -184,30 +186,22 @@ function selectOption(btn, type) {
     btn.classList.add('selected', 'border-blue-600', 'bg-blue-50');
     btn.classList.remove('border-slate-100');
 
-    // ლოგიკა: რა გვაქვს არჩეული
     const hasSize = document.querySelector('.size-opt.selected');
     const hasColor = document.querySelector('.color-opt.selected');
     const buyBtn = document.getElementById('dynamic-buy-btn');
 
     if (hasSize && hasColor) {
-        // ორივე არჩეულია
         buyBtn.disabled = false;
         buyBtn.innerText = "კალათაში დამატება";
-        buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-xl shadow-blue-100 active:scale-95 transition-all";
+        buyBtn.className = "w-full bg-blue-600 text-white py-5 rounded-[25px] font-black text-lg shadow-xl active:scale-95 transition-all";
     } else if (hasSize && !hasColor) {
-        // მხოლოდ ზომაა
         buyBtn.disabled = true;
         buyBtn.innerText = "აირჩიე ფერი";
-        buyBtn.className = "w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg cursor-not-allowed";
+        buyBtn.className = "w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg";
     } else if (!hasSize && hasColor) {
-        // მხოლოდ ფერია
         buyBtn.disabled = true;
         buyBtn.innerText = "აირჩიე ზომა";
-        buyBtn.className = "w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg cursor-not-allowed";
-    } else {
-        // არცერთი
-        buyBtn.disabled = true;
-        buyBtn.innerText = "აირჩიე ზომა და ფერი";
+        buyBtn.className = "w-full bg-slate-200 text-slate-400 py-5 rounded-[25px] font-black text-lg";
     }
 }
 
@@ -232,9 +226,17 @@ function switchPage(page, btn) {
 // --- 4. კალათის და შეკვეთის ლოგიკა ---
 
 function handleBuy(id) {
+    // უსაფრთხოების შემოწმება
+    const selectedSizeEl = document.querySelector('.size-opt.selected');
+    const selectedColorEl = document.querySelector('.color-opt.selected');
+    
+    if (!selectedSizeEl || !selectedColorEl) return;
+
     const product = storeData.productDetails.find(d => String(d.id) === String(id));
-    const size = document.querySelector('.size-opt.selected').innerText;
-    const color = document.querySelector('.color-opt.selected').innerText;
+    if (!product) return;
+
+    const size = selectedSizeEl.innerText;
+    const color = selectedColorEl.innerText;
 
     cart.push({
         cartId: Date.now(),
@@ -249,21 +251,18 @@ function handleBuy(id) {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartBadge();
     
-    // ვიბრაცია
     if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
-    // ვიზუალური დასტური ღილაკზე
     const buyBtn = document.getElementById('dynamic-buy-btn');
     buyBtn.innerText = "✅ დაემატა";
-    buyBtn.style.backgroundColor = "#10b981"; // მწვანე ფერი
+    buyBtn.style.backgroundColor = "#10b981";
     buyBtn.disabled = true;
 
-    // მცირე დაყოვნება და დახურვა
     setTimeout(() => {
         closeProductDetails();
-        // ვაბრუნებთ ღილაკს საწყის მდგომარეობაში შემდეგი პროდუქტისთვის
+        // რესეტი შემდეგისთვის
         buyBtn.innerText = "აირჩიე ზომა და ფერი";
-        buyBtn.style.backgroundColor = ""; 
+        buyBtn.style.backgroundColor = "";
         buyBtn.disabled = true;
     }, 800);
 }
@@ -304,7 +303,7 @@ function removeFromCart(index) {
     renderCart();
 }
 
-// --- 5. ინიციალიზაცია (სულ ბოლოს) ---
+// --- 5. ინიციალიზაცია ---
 
 async function init() {
     tg.ready();
