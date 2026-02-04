@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shoes Store - Version 3.0 (Full Manual Recovery)</title>
+    <title>Shoes Store - Fixed & Full</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,353 +27,102 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- Full Kinetic Preloader --- */
-        #app-preloader { 
-            position: fixed; 
-            inset: 0; 
-            z-index: 999999; 
-            background: #ffffff; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            transition: opacity 0.5s ease-out; 
-        }
-        .loader-container { position: relative; display: flex; flex-direction: column; align-items: center; }
-        .shoe-icon { 
-            font-size: 60px; 
-            color: var(--main-blue); 
-            animation: kineticShoe 1.2s ease-in-out infinite; 
-            filter: drop-shadow(0 15px 20px rgba(37, 99, 235, 0.25)); 
-        }
-        .shoe-shadow { 
-            width: 50px; 
-            height: 10px; 
-            background: rgba(0, 0, 0, 0.08); 
-            border-radius: 50%; 
-            margin-top: 25px; 
-            animation: shadowPulse 1.2s ease-in-out infinite; 
-        }
-        @keyframes kineticShoe { 
-            0%, 100% { transform: translateY(0) rotate(-15deg); } 
-            50% { transform: translateY(-40px) rotate(20deg); } 
-        }
-        @keyframes shadowPulse { 
-            0%, 100% { transform: scale(1); opacity: 0.4; } 
-            50% { transform: scale(2); opacity: 0.1; } 
-        }
-        .loader-text { 
-            margin-top: 40px; 
-            font-weight: 900; 
-            color: #1e293b; 
-            font-size: 14px; 
-            text-transform: uppercase; 
-            letter-spacing: 4px; 
-            animation: textFade 1.5s infinite; 
-        }
-        @keyframes textFade { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        /* Preloader */
+        #app-preloader { position: fixed; inset: 0; z-index: 999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-out; }
+        .shoe-icon { font-size: 60px; color: var(--main-blue); animation: kineticShoe 1.2s ease-in-out infinite; }
+        @keyframes kineticShoe { 0%, 100% { transform: translateY(0) rotate(-15deg); } 50% { transform: translateY(-40px) rotate(20deg); } }
 
-        /* --- Luxury Header --- */
-        #main-header { 
-            width: 100%; 
-            z-index: 9999; 
-            position: sticky; 
-            top: 0; 
-            display: none; 
-            align-items: center;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .header-container { 
-            width: 100%; 
-            max-width: 600px; 
-            margin: 0 auto; 
-            display: flex; 
-            align-items: center; 
-            padding: 0 25px; 
-        }
-        .header-floating { 
-            margin: 20px auto !important; 
-            border-radius: 30px !important; 
-            width: calc(100% - 32px) !important; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        /* --- Hero Banner --- */
-        #hero-banner { 
-            margin: 25px auto; 
-            border-radius: 40px; 
-            overflow: hidden; 
-            position: relative; 
-            max-width: 600px; 
-            width: calc(100% - 40px); 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
-        }
-        .banner-content { padding: 35px; width: 65%; z-index: 10; position: relative; }
-        .banner-img { 
-            position: absolute; 
-            right: -25px; 
-            bottom: -15px;
-            width: 60%; 
-            transform: rotate(-15deg); 
-            filter: drop-shadow(0 25px 35px rgba(0,0,0,0.4)); 
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        #hero-banner:hover .banner-img { transform: rotate(-5deg) scale(1.1); }
-
-        /* --- Product Cards & Badges --- */
-        .product-card {
-            background: white;
-            padding: 20px;
-            border-radius: 38px;
-            border: 1px solid #f1f5f9;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-        .product-card:active { transform: scale(0.96); }
-        .badge { 
-            position: absolute; 
-            top: 18px; 
-            left: 18px; 
-            padding: 6px 14px; 
-            border-radius: 14px; 
-            font-size: 9px; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            z-index: 10; 
-            letter-spacing: 1px;
-        }
-        .badge-sale { background: #ff4757; color: white; }
-        .badge-new { background: #2ed573; color: white; }
-        .badge-hot { background: #ffa502; color: white; }
-
-        /* --- Half-Modal (Product Sheet) --- */
-        #product-sheet-overlay { 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(15, 23, 42, 0.7); 
-            backdrop-filter: blur(8px); 
-            z-index: 20000; 
-            display: none; 
-            opacity: 0; 
-            transition: opacity 0.4s ease; 
-        }
-        #product-sheet { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            background: white; 
-            border-top-left-radius: 50px; 
-            border-top-right-radius: 50px; 
-            padding: 40px 30px; 
-            transform: translateY(100%); 
-            transition: transform 0.5s cubic-bezier(0.2, 1, 0.3, 1); 
-            z-index: 20001; 
-            box-shadow: 0 -20px 60px rgba(0,0,0,0.2);
-        }
-        .sheet-handle { width: 45px; height: 6px; background: #e2e8f0; border-radius: 10px; margin: -15px auto 25px auto; }
-
-        /* --- Full Page Details & Slider --- */
-        #product-details-page { 
-            position: fixed; 
-            inset: 0; 
-            background: white; 
-            z-index: 30000; 
-            overflow-y: auto; 
-            display: none;
-        }
-        .slider-container { 
-            display: flex; 
-            overflow-x: auto; 
-            scroll-snap-type: x mandatory; 
-            scrollbar-width: none; 
-            margin: 0 -24px;
-            padding: 0 24px;
-        }
-        .slider-container::-webkit-scrollbar { display: none; }
-        .slider-item { 
-            min-width: 100%; 
-            scroll-snap-align: start; 
-            padding: 10px;
-        }
-        .slider-item img { 
-            width: 100%; 
-            aspect-ratio: 1/1; 
-            object-fit: contain; 
-            background: #f8fafc; 
-            border-radius: 40px; 
-        }
-        
-        /* --- Options & Steppers --- */
-        .option-btn { 
-            padding: 18px 28px;
-            border-radius: 22px;
-            font-weight: 800;
-            font-size: 14px;
-            border: 2px solid #f1f5f9;
-            background: white;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-        .option-btn.selected { 
-            border-color: var(--main-blue); 
-            background: var(--main-blue); 
-            color: white !important; 
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
-        }
-        
-        .stepper-ui { 
-            display: flex; 
-            align-items: center; 
-            background: #f1f5f9; 
-            border-radius: 20px; 
-            padding: 6px; 
-        }
-        .stepper-btn { 
-            width: 36px; 
-            height: 36px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background: white; 
-            border-radius: 15px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
-        /* --- Bottom Navigation --- */
-        #bottom-nav { 
-            position: fixed; 
-            bottom: 30px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            width: calc(100% - 48px); 
-            max-width: 500px; 
-            height: 85px; 
-            background: #0f172a; 
-            border-radius: 32px; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            z-index: 10000; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
-        }
-        .nav-item { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            color: #64748b; 
-            transition: all 0.3s; 
-        }
+        /* Navigation */
+        #bottom-nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: calc(100% - 48px); max-width: 500px; height: 85px; background: #0f172a; border-radius: 32px; display: flex; justify-content: space-around; align-items: center; z-index: 10000; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; transition: 0.3s; }
         .nav-item.active { color: #ffffff; transform: translateY(-5px); }
         .nav-item i { font-size: 24px; margin-bottom: 6px; }
-        .nav-item span { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .cart-badge { position: absolute; top: -8px; right: -12px; background: #ff4757; color: white; font-size: 10px; font-weight: 900; min-width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #0f172a; }
 
-        .cart-badge { 
-            position: absolute; 
-            top: -8px; 
-            right: -12px; 
-            background: #ff4757; 
-            color: white; 
-            font-size: 10px; 
-            font-weight: 900; 
-            min-width: 20px; 
-            height: 20px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            border: 2px solid #0f172a; 
-        }
+        /* Product Styles */
+        .product-card { background: white; padding: 20px; border-radius: 38px; border: 1px solid #f1f5f9; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-card:active { transform: scale(0.96); }
+        
+        #product-details-page { position: fixed; inset: 0; background: white; z-index: 30000; overflow-y: auto; display: none; }
+        .slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 0 -24px; padding: 0 24px; }
+        .slider-item { min-width: 100%; scroll-snap-align: start; padding: 10px; }
+        .slider-item img { width: 100%; aspect-ratio: 1/1; object-fit: contain; background: #f8fafc; border-radius: 40px; }
+
+        .option-btn { padding: 18px 28px; border-radius: 22px; font-weight: 800; border: 2px solid #f1f5f9; background: white; transition: 0.3s; }
+        .option-btn.selected { border-color: var(--main-blue); background: var(--main-blue); color: white !important; }
+
+        /* Sheets */
+        #product-sheet-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); z-index: 20000; display: none; }
+        #product-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top-left-radius: 50px; border-top-right-radius: 50px; padding: 40px 30px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1); z-index: 20001; }
 
         .hidden { display: none !important; }
-        .page-fade { animation: pageIn 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
-        @keyframes pageIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
     </style>
 </head>
 <body>
 
     <div id="app-preloader">
-        <div class="loader-container">
-            <div class="shoe-icon"><i class="fa-solid fa-shoe-prints"></i></div>
-            <div class="shoe-shadow"></div>
-        </div>
-        <p class="loader-text">იტვირთება</p>
+        <div class="shoe-icon"><i class="fa-solid fa-shoe-prints"></i></div>
+        <p class="mt-8 font-black text-slate-900 tracking-widest uppercase text-xs">იტვირთება</p>
     </div>
 
-    <header id="main-header"></header>
+    <header id="main-header" class="sticky top-0 z-[9999] flex items-center px-6"></header>
 
     <main id="app-content">
-        <div id="home-page" class="page-fade">
-            <div id="hero-banner"></div>
-            <div id="product-grid" class="grid grid-cols-2 gap-5 px-6 mt-6"></div>
+        <div id="home-page">
+            <div id="hero-banner" class="mx-auto mt-6 rounded-[40px] overflow-hidden relative shadow-2xl w-[calc(100%-40px)]"></div>
+            <div id="product-grid" class="grid grid-cols-2 gap-5 px-6 mt-8"></div>
         </div>
 
-        <div id="cart-page" class="hidden page-fade px-6 pt-8">
-            <h2 class="text-3xl font-black text-slate-900 mb-8">კალათა</h2>
+        <div id="cart-page" class="hidden px-6 pt-8">
+            <h2 class="text-3xl font-black mb-8">კალათა</h2>
             <div id="cart-items" class="space-y-5"></div>
-            
             <div id="promo-section" class="mt-10 hidden">
-                <div class="bg-white p-5 rounded-[32px] border border-slate-50 shadow-sm flex gap-3">
-                    <input id="promo-input" type="text" placeholder="პრომო კოდი" class="flex-1 bg-slate-50 border-none rounded-2xl px-5 text-sm font-bold h-14 outline-none">
-                    <button onclick="applyPromo()" class="bg-slate-900 text-white px-8 rounded-2xl font-black text-xs uppercase">OK</button>
+                <div class="bg-white p-5 rounded-[30px] border border-slate-50 shadow-sm flex gap-3">
+                    <input id="promo-input" type="text" placeholder="პრომო კოდი" class="flex-1 bg-slate-50 border-none rounded-2xl px-5 font-bold h-14 outline-none">
+                    <button onclick="applyPromo()" class="bg-black text-white px-8 rounded-2xl font-black text-xs uppercase">OK</button>
                 </div>
                 <div id="promo-msg" class="text-[11px] font-bold mt-3 px-2"></div>
             </div>
-
-            <div id="cart-summary" class="mt-8 mb-32 bg-white p-8 rounded-[40px] shadow-xl hidden">
+            <div id="cart-summary" class="mt-8 mb-32 bg-white p-8 rounded-[40px] shadow-2xl hidden">
                 <div class="flex justify-between items-center mb-6">
-                    <span class="text-slate-400 font-bold text-lg">სულ:</span>
+                    <span class="text-slate-400 font-bold">ჯამი:</span>
                     <span id="cart-total-price" class="text-2xl font-black text-blue-600">0₾</span>
                 </div>
-                <button onclick="goToCheckout()" class="w-full bg-slate-900 text-white py-6 rounded-[28px] font-black text-lg active:scale-95 transition-all">გაფორმება</button>
+                <button onclick="switchPage('checkout')" class="w-full bg-slate-900 text-white py-6 rounded-[28px] font-black text-lg">გაფორმება</button>
             </div>
         </div>
 
-        <div id="orders-page" class="hidden page-fade px-6 pt-8 pb-20">
-            <h2 class="text-3xl font-black text-slate-900 mb-8">შეკვეთები</h2>
+        <div id="orders-page" class="hidden px-6 pt-8 pb-24">
+            <h2 class="text-3xl font-black mb-8">შეკვეთები</h2>
             <div id="orders-list" class="space-y-5"></div>
         </div>
 
-        <div id="profile-page" class="hidden page-fade"></div>
+        <div id="profile-page" class="hidden"></div>
 
-        <div id="checkout-page" class="hidden page-fade px-6 pt-8 pb-20">
-            <h2 class="text-2xl font-black mb-8">მიწოდების მისამართი</h2>
+        <div id="checkout-page" class="hidden px-6 pt-8 pb-24">
+            <h2 class="text-2xl font-black mb-8">მონაცემები</h2>
             <div class="space-y-4">
-                <input id="order-name" type="text" placeholder="სახელი გვარი" class="w-full p-6 rounded-2xl border border-slate-100 font-bold text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100">
-                <input id="order-phone" type="tel" placeholder="ტელეფონის ნომერი" class="w-full p-6 rounded-2xl border border-slate-100 font-bold text-sm bg-white outline-none focus:ring-2 focus:ring-blue-100">
-                <div class="grid grid-cols-2 gap-4">
-                    <input id="order-city" type="text" placeholder="ქალაქი" class="p-6 rounded-2xl border border-slate-100 font-bold text-sm bg-white">
-                    <input id="order-zip" type="text" placeholder="ინდექსი" class="p-6 rounded-2xl border border-slate-100 font-bold text-sm bg-white">
-                </div>
-                <input id="order-address" type="text" placeholder="ზუსტი მისამართი" class="w-full p-6 rounded-2xl border border-slate-100 font-bold text-sm bg-white">
-                <textarea id="order-extra" placeholder="დამატებითი ინფორმაცია..." class="w-full p-6 rounded-2xl border border-slate-100 font-bold text-sm bg-white h-28"></textarea>
-                
+                <input id="order-name" type="text" placeholder="სახელი გვარი" class="w-full p-6 rounded-2xl border border-slate-100 font-bold bg-white">
+                <input id="order-phone" type="tel" placeholder="ტელეფონი" class="w-full p-6 rounded-2xl border border-slate-100 font-bold bg-white">
+                <input id="order-address" type="text" placeholder="მისამართი" class="w-full p-6 rounded-2xl border border-slate-100 font-bold bg-white">
                 <div class="p-8 bg-blue-50 rounded-[32px] mt-6 flex justify-between items-center">
-                    <span class="font-bold text-blue-900">გადასახდელი:</span>
+                    <span class="font-bold text-blue-900">სულ:</span>
                     <span id="checkout-total-price" class="text-3xl font-black text-blue-600">0₾</span>
                 </div>
-                <button onclick="goToPayment()" class="w-full bg-blue-600 text-white py-6 rounded-[28px] font-black text-lg shadow-xl mt-4">გადახდაზე გადასვლა</button>
+                <button onclick="switchPage('payment')" class="w-full bg-blue-600 text-white py-6 rounded-[28px] font-black text-lg shadow-xl">გადახდა</button>
             </div>
         </div>
 
-        <div id="payment-page" class="hidden page-fade px-6 pt-10 text-center pb-20">
+        <div id="payment-page" class="hidden px-6 pt-10 text-center">
             <h2 class="text-2xl font-black mb-10">გადახდის მეთოდი</h2>
-            <div class="space-y-4">
-                <div onclick="processFinalOrder('card', 'ონლაინ ბარათით')" class="bg-white p-8 rounded-[35px] border border-slate-50 flex items-center justify-between shadow-sm active:scale-95 transition-all">
-                    <div class="flex items-center gap-6">
-                        <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 text-2xl"><i class="fa-solid fa-credit-card"></i></div>
-                        <span class="font-black text-slate-800">ბარათით გადახდა</span>
-                    </div>
-                    <i class="fa-solid fa-chevron-right text-slate-300"></i>
+            <div class="space-y-4" id="payment-methods">
+                <div onclick="processFinalOrder('card', 'ბარათით')" class="bg-white p-8 rounded-[35px] border border-slate-50 flex items-center justify-between shadow-sm">
+                    <span class="font-black text-slate-800">ონლაინ ბარათით</span>
+                    <i class="fa-solid fa-credit-card text-blue-600"></i>
                 </div>
-                <div onclick="processFinalOrder('cash', 'კურიერთან ნაღდი')" class="bg-white p-8 rounded-[35px] border border-slate-50 flex items-center justify-between shadow-sm active:scale-95 transition-all">
-                    <div class="flex items-center gap-6">
-                        <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 text-2xl"><i class="fa-solid fa-truck"></i></div>
-                        <span class="font-black text-slate-800">ნაღდი კურიერთან</span>
-                    </div>
-                    <i class="fa-solid fa-chevron-right text-slate-300"></i>
+                <div onclick="processFinalOrder('cash', 'ნაღდი')" class="bg-white p-8 rounded-[35px] border border-slate-50 flex items-center justify-between shadow-sm">
+                    <span class="font-black text-slate-800">კურიერთან ნაღდი</span>
+                    <i class="fa-solid fa-truck text-green-600"></i>
                 </div>
             </div>
         </div>
@@ -381,15 +130,11 @@
 
     <div id="product-details-page"></div>
     <div id="product-sheet-overlay" onclick="closeProductSheet()"></div>
-    <div id="product-sheet">
-        <div class="sheet-handle"></div>
-        <div id="sheet-content"></div>
-    </div>
+    <div id="product-sheet"><div id="sheet-content"></div></div>
     
     <nav id="bottom-nav"></nav>
 
     <script>
-        // --- Globals & API ---
         const API_URL = "https://script.google.com/macros/s/AKfycbzlFXWDikCWQFa1FhMMbN0DtaKArKyK6-NoJqN0zK3k4gDsSPz6YK57Hd_B63bOyofPMg/exec";
         const PROMO_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH2mZB4PnZn6hJJRPgC_Ry0HTt7BvKiNmcNGyx7PVOMHY0rNFqhM4MneVoRI3kT00y6vxMMOoHbipA/pub?output=csv";
         
@@ -397,223 +142,118 @@
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let activeDiscount = null;
 
-        // --- Init Function ---
-        async function initApp() {
-            const tg = window.Telegram.WebApp;
-            tg.ready();
-            tg.expand();
-
+        async function init() {
             try {
                 const res = await fetch(API_URL);
                 storeData = await res.json();
-                
                 renderUI();
-                
-                // Finalize Preloader
-                setTimeout(() => {
-                    document.getElementById('app-preloader').style.opacity = '0';
-                    setTimeout(() => document.getElementById('app-preloader').style.display = 'none', 500);
-                }, 800);
-            } catch (err) {
-                console.error("Critical Boot Error:", err);
-            }
+                document.getElementById('app-preloader').style.opacity = '0';
+                setTimeout(() => document.getElementById('app-preloader').style.display = 'none', 500);
+            } catch (e) { console.error(e); }
         }
 
-        // --- UI Rendering Engines ---
         function renderUI() {
-            if (storeData.header) renderHeader(storeData.header);
-            if (storeData.banner) renderHero(storeData.banner);
-            if (storeData.latest) renderGrid(storeData.latest.items);
-            if (storeData.navigation) renderNav(storeData.navigation);
-            if (storeData.profileMenu) renderProfile(storeData.profileMenu);
+            renderHeader(storeData.header);
+            renderHero(storeData.banner);
+            renderGrid(storeData.latest.items);
+            renderNav(storeData.navigation);
+            renderProfile(storeData.profileMenu);
             updateCartBadge();
         }
 
         function renderHeader(h) {
             const el = document.getElementById('main-header');
-            if (h.status !== 'active') return;
-            el.style.display = 'flex';
             el.style.backgroundColor = h.bg;
             el.style.height = h.height + "px";
-            el.style.color = h.textColor;
-            if (h.style === 'floating') el.classList.add('header-floating');
-            
-            el.innerHTML = `
-                <div class="header-container" style="justify-content: ${h.layout === 'center' ? 'center' : 'space-between'}">
-                    <div class="flex items-center gap-4">
-                        <img src="${h.logo}" class="w-12 h-12 rounded-2xl object-cover shadow-lg border-2 border-white/20">
-                        <span class="font-black text-xl tracking-tight">${h.name}</span>
-                    </div>
-                </div>`;
+            el.innerHTML = `<div class="flex items-center gap-4"><img src="${h.logo}" class="w-10 h-10 rounded-full"><span class="font-black text-white text-lg">${h.name}</span></div>`;
         }
 
         function renderHero(b) {
             const el = document.getElementById('hero-banner');
             el.style.height = "220px";
-            el.style.background = b.gradient === "1" ? "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)" : "#0f172a";
+            el.style.background = "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)";
             el.innerHTML = `
-                <div class="banner-content">
-                    <h2 style="font-size: ${b.titleSize}px; color: white; font-weight: 900; line-height: 1.1;">${b.title}</h2>
-                    <p class="text-slate-400 font-bold text-[10px] mt-4 uppercase tracking-[3px]">${b.subtitle}</p>
-                    <button class="mt-8 bg-white text-slate-900 px-8 py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl">${b.btnText}</button>
+                <div class="p-8 relative z-10 w-2/3">
+                    <h2 class="text-white font-black text-2xl leading-tight">${b.title}</h2>
+                    <button class="mt-6 bg-white text-black px-6 py-3 rounded-2xl font-black text-[10px] uppercase">${b.btnText}</button>
                 </div>
-                <img src="${b.image}" class="banner-img">`;
+                <img src="${b.image}" class="absolute right-[-20px] bottom-[-10px] w-1/2 transform rotate-[-12deg]">`;
         }
 
         function renderGrid(items) {
-            const grid = document.getElementById('product-grid');
-            grid.innerHTML = items.map((p, i) => {
-                const d = storeData.productDetails.find(x => x.id == p.id);
-                const badge = d && d.status ? `<span class="badge badge-${d.status.toLowerCase()}">${d.status}</span>` : '';
-                return `
-                <div onclick="openSheet(${i})" class="product-card group">
-                    ${badge}
-                    <div class="h-32 bg-slate-50 rounded-[28px] flex items-center justify-center mb-5 overflow-hidden">
-                        <img src="${p.images.split(',')[0]}" class="h-24 object-contain group-hover:scale-110 transition-transform duration-500">
+            document.getElementById('product-grid').innerHTML = items.map((p, i) => `
+                <div onclick="openSheet(${i})" class="product-card">
+                    <div class="h-32 bg-slate-50 rounded-[28px] flex items-center justify-center mb-4 overflow-hidden">
+                        <img src="${p.images.split(',')[0]}" class="h-24 object-contain">
                     </div>
-                    <h4 class="font-extrabold text-[13px] text-slate-800 truncate">${p.name}</h4>
-                    <p class="text-blue-600 font-black text-lg mt-2">${p.price}₾</p>
-                </div>`;
-            }).join('');
+                    <h4 class="font-black text-xs text-slate-800 truncate">${p.name}</h4>
+                    <p class="text-blue-600 font-black text-lg mt-1">${p.price}₾</p>
+                </div>`).join('');
         }
 
-        // --- Page Navigation ---
-        function switchPage(page) {
-            const pages = ['home', 'cart', 'orders', 'profile', 'checkout', 'payment'];
-            pages.forEach(p => document.getElementById(p + '-page').classList.add('hidden'));
-            document.getElementById(page + '-page').classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('nav-' + page)?.classList.add('active');
-
-            if (page === 'home') document.getElementById('main-header').classList.remove('hidden');
-            else document.getElementById('main-header').classList.add('hidden');
-
-            if (page === 'cart') renderCartItems();
-            if (page === 'orders') renderOrdersList();
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function renderNav(items) {
-            const nav = document.getElementById('bottom-nav');
-            nav.innerHTML = items.map(it => `
-                <div id="nav-${it.action}" onclick="switchPage('${it.action}')" class="nav-item ${it.action === 'home' ? 'active' : ''}">
-                    <div class="relative">
-                        <i class="fa-solid ${it.icon}"></i>
-                        ${it.action === 'cart' ? `<div id="cart-count" class="cart-badge hidden">0</div>` : ''}
-                    </div>
-                    <span>${it.name}</span>
-                </div>
-            `).join('');
-        }
-
-        // --- Product Interaction (Sheet & Details) ---
         function openSheet(idx) {
             const p = storeData.latest.items[idx];
-            const sheet = document.getElementById('product-sheet');
-            const overlay = document.getElementById('product-sheet-overlay');
-            
             document.getElementById('sheet-content').innerHTML = `
-                <div class="flex flex-col items-center text-center">
-                    <div class="w-full h-52 bg-slate-50 rounded-[40px] flex items-center justify-center mb-8">
-                        <img src="${p.images.split(',')[0]}" class="h-40 object-contain">
-                    </div>
-                    <h3 class="text-2xl font-black text-slate-900 px-4 leading-tight">${p.name}</h3>
+                <div class="text-center">
+                    <div class="h-48 bg-slate-50 rounded-[40px] flex items-center justify-center mb-8"><img src="${p.images.split(',')[0]}" class="h-36 object-contain"></div>
+                    <h3 class="text-2xl font-black text-slate-900">${p.name}</h3>
                     <p class="text-3xl font-black text-blue-600 mt-4">${p.price}₾</p>
-                    <button onclick="showFullDetails('${p.id}')" class="w-full mt-10 bg-slate-900 text-white py-6 rounded-[28px] font-black text-sm active:scale-95 transition-all shadow-2xl flex items-center justify-center gap-4">
-                        დეტალურად ნახვა <i class="fa-solid fa-arrow-right-long"></i>
-                    </button>
+                    <button onclick="showDetails('${p.id}')" class="w-full mt-8 bg-slate-900 text-white py-6 rounded-[28px] font-black">დეტალურად ნახვა</button>
                 </div>`;
-                
-            overlay.style.display = 'block';
-            setTimeout(() => { overlay.style.opacity = '1'; sheet.style.transform = 'translateY(0)'; }, 50);
+            document.getElementById('product-sheet-overlay').style.display = 'block';
+            setTimeout(() => document.getElementById('product-sheet').style.transform = 'translateY(0)', 50);
         }
 
         function closeProductSheet() {
             document.getElementById('product-sheet').style.transform = 'translateY(100%)';
-            document.getElementById('product-sheet-overlay').style.opacity = '0';
-            setTimeout(() => document.getElementById('product-sheet-overlay').style.display = 'none', 500);
+            setTimeout(() => document.getElementById('product-sheet-overlay').style.display = 'none', 400);
         }
 
-        function showFullDetails(id) {
+        function showDetails(id) {
             closeProductSheet();
             const p = storeData.productDetails.find(x => x.id == id);
-            const page = document.getElementById('product-details-page');
-            
             const imgs = (p.fullImages || p.images).split(',');
-            const sizes = p.sizes ? p.sizes.toString().split(',') : [];
-            const colors = p.colors ? p.colors.toString().split(',') : [];
+            const sizes = (p.sizes || "").toString().split(',').filter(x=>x);
+            const colors = (p.colors || "").toString().split(',').filter(x=>x);
 
-            page.innerHTML = `
+            document.getElementById('product-details-page').innerHTML = `
                 <div class="px-6 pt-8 pb-32">
-                    <div class="flex items-center justify-between mb-8">
-                        <button onclick="hideFullDetails()" class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-800">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-                        <span class="font-black text-xs uppercase tracking-widest text-slate-400">პროდუქტის აღწერა</span>
-                        <div class="w-12"></div>
+                    <button onclick="hideDetails()" class="mb-8 font-black text-slate-400"><i class="fa-solid fa-arrow-left"></i> უკან</button>
+                    <div class="slider-container mb-10">${imgs.map(img => `<div class="slider-item"><img src="${img.trim()}"></div>`).join('')}</div>
+                    <h1 class="text-3xl font-black text-slate-900">${p.name}</h1>
+                    <p class="text-3xl font-black text-blue-600 mt-4">${p.price}₾</p>
+                    <p class="text-slate-500 mt-6 text-sm">${p.description || 'მაღალი ხარისხის მოდელი.'}</p>
+                    <div class="mt-8">
+                        <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">ზომა</p>
+                        <div class="flex flex-wrap gap-3">${sizes.map(s => `<button onclick="selectOpt(this, 'size')" class="option-btn size-opt">${s.trim()}</button>`).join('')}</div>
                     </div>
-
-                    <div class="slider-container mb-10">
-                        ${imgs.map(img => `<div class="slider-item"><img src="${img.trim()}"></div>`).join('')}
-                    </div>
-
-                    <div class="flex justify-between items-start gap-6 mb-6">
-                        <h1 class="text-3xl font-black text-slate-900 leading-tight">${p.name}</h1>
-                        <div class="text-right">
-                            <p class="text-3xl font-black text-blue-600">${p.price}₾</p>
-                            <p class="text-[10px] font-bold text-slate-400 mt-1">მარაგშია</p>
-                        </div>
-                    </div>
-                    
-                    <p class="text-slate-500 font-medium leading-relaxed mb-10 text-sm">${p.description || 'მაღალი ხარისხის მასალა და დახვეწილი დიზაინი.'}</p>
-
-                    <div class="mb-10">
-                        <h4 class="text-[11px] font-black text-slate-400 uppercase mb-5 tracking-widest">აირჩიეთ ზომა</h4>
-                        <div class="flex flex-wrap gap-3">
-                            ${sizes.map(s => `<button onclick="selectOption(this, 'size')" class="option-btn size-opt">${s.trim()}</button>`).join('')}
-                        </div>
-                    </div>
-
-                    <div class="mb-12">
-                        <h4 class="text-[11px] font-black text-slate-400 uppercase mb-5 tracking-widest">აირჩიეთ ფერი</h4>
-                        <div class="flex flex-wrap gap-3">
-                            ${colors.map(c => `<button onclick="selectOption(this, 'color')" class="option-btn color-opt">${c.trim()}</button>`).join('')}
-                        </div>
+                    <div class="mt-8">
+                        <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">ფერი</p>
+                        <div class="flex flex-wrap gap-3">${colors.map(c => `<button onclick="selectOpt(this, 'color')" class="option-btn color-opt">${c.trim()}</button>`).join('')}</div>
                     </div>
                 </div>
-
-                <div class="fixed bottom-10 left-0 right-0 px-8 z-[30005]">
-                    <button id="add-to-cart-btn" disabled class="w-full bg-slate-200 text-slate-400 py-6 rounded-[30px] font-black text-lg transition-all">
-                        აირჩიეთ პარამეტრები
-                    </button>
-                </div>`;
-            
-            page.style.display = 'block';
+                <div class="fixed bottom-10 left-0 right-0 px-8"><button id="add-btn" disabled class="w-full bg-slate-200 text-slate-400 py-6 rounded-[30px] font-black text-lg">აირჩიეთ პარამეტრები</button></div>`;
+            document.getElementById('product-details-page').style.display = 'block';
             window.scrollTo(0,0);
         }
 
-        function hideFullDetails() { document.getElementById('product-details-page').style.display = 'none'; }
+        function hideDetails() { document.getElementById('product-details-page').style.display = 'none'; }
 
-        function selectOption(btn, type) {
-            document.querySelectorAll('.' + type + '-opt').forEach(el => el.classList.remove('selected'));
+        function selectOpt(btn, type) {
+            document.querySelectorAll(`.${type}-opt`).forEach(el => el.classList.remove('selected'));
             btn.classList.add('selected');
-            
             const s = document.querySelector('.size-opt.selected');
             const c = document.querySelector('.color-opt.selected');
-            const mainBtn = document.getElementById('add-to-cart-btn');
-            
+            const addBtn = document.getElementById('add-btn');
             if (s && c) {
-                mainBtn.disabled = false;
-                mainBtn.innerText = "კალათაში დამატება";
-                mainBtn.className = "w-full bg-blue-600 text-white py-6 rounded-[30px] font-black text-lg shadow-2xl shadow-blue-200 active:scale-95 transition-all";
-                mainBtn.onclick = () => performAddToCart();
+                addBtn.disabled = false;
+                addBtn.innerText = "კალათაში დამატება";
+                addBtn.className = "w-full bg-blue-600 text-white py-6 rounded-[30px] font-black text-lg shadow-xl";
+                addBtn.onclick = handleAddToCart; // აქ იყო შეცდომა
             }
         }
 
-        // --- Cart Logic ---
-        function performAddToCart() {
+        function handleAddToCart() {
             const name = document.querySelector('h1').innerText;
             const price = parseFloat(document.querySelector('.text-blue-600').innerText);
             const size = document.querySelector('.size-opt.selected').innerText;
@@ -624,187 +264,104 @@
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCartBadge();
 
-            const b = document.getElementById('add-to-cart-btn');
-            b.innerText = "✅ დაემატა კალათაში";
+            const b = document.getElementById('add-btn');
+            b.innerText = "✅ დაემატა";
             b.className = "w-full bg-green-500 text-white py-6 rounded-[30px] font-black text-lg";
-            setTimeout(hideFullDetails, 800);
+            setTimeout(hideDetails, 800);
         }
 
         function renderCartItems() {
             const container = document.getElementById('cart-items');
             if (cart.length === 0) {
-                container.innerHTML = `<div class="text-center py-20 text-slate-300 font-bold italic">კალათა ცარიელია</div>`;
+                container.innerHTML = `<div class="text-center py-20 text-slate-300 font-bold">კალათა ცარიელია</div>`;
                 document.getElementById('cart-summary').classList.add('hidden');
                 document.getElementById('promo-section').classList.add('hidden');
                 return;
             }
-
             document.getElementById('cart-summary').classList.remove('hidden');
             document.getElementById('promo-section').classList.remove('hidden');
-
             let total = 0;
             container.innerHTML = cart.map((item, idx) => {
                 total += item.price;
                 return `
-                <div class="bg-white p-5 rounded-[32px] flex items-center gap-5 shadow-sm border border-slate-50">
-                    <img src="${item.img}" class="w-24 h-24 object-contain bg-slate-50 rounded-[22px] p-2">
+                <div class="bg-white p-5 rounded-[32px] flex items-center gap-5 shadow-sm">
+                    <img src="${item.img}" class="w-20 h-20 object-contain bg-slate-50 rounded-2xl p-2">
                     <div class="flex-1">
-                        <h4 class="font-black text-slate-900 text-sm leading-tight">${item.name}</h4>
-                        <p class="text-[10px] text-slate-400 font-black mt-2 uppercase tracking-widest">${item.size} / ${item.color}</p>
-                        <div class="flex justify-between items-center mt-3">
+                        <h4 class="font-black text-slate-900 text-sm">${item.name}</h4>
+                        <p class="text-[10px] text-slate-400 font-black mt-1 uppercase">${item.size} / ${item.color}</p>
+                        <div class="flex justify-between items-center mt-2">
                             <span class="text-blue-600 font-black text-lg">${item.price}₾</span>
-                            <button onclick="removeFromCart(${idx})" class="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center">
-                                <i class="fa-solid fa-trash-can text-sm"></i>
-                            </button>
+                            <button onclick="removeFromCart(${idx})" class="text-red-500 font-black text-xs">წაშლა</button>
                         </div>
                     </div>
                 </div>`;
             }).join('');
-
-            let finalPrice = total;
-            if (activeDiscount) {
-                finalPrice = activeDiscount.type === 'percent' ? total * (1 - activeDiscount.val / 100) : total - activeDiscount.val;
-            }
-            document.getElementById('cart-total-price').innerText = Math.round(Math.max(0, finalPrice)) + "₾";
+            let final = total;
+            if (activeDiscount) final = activeDiscount.type === 'percent' ? total * (1 - activeDiscount.val / 100) : total - activeDiscount.val;
+            document.getElementById('cart-total-price').innerText = Math.round(final) + "₾";
+            document.getElementById('checkout-total-price').innerText = Math.round(final) + "₾";
         }
 
-        function removeFromCart(idx) {
-            cart.splice(idx, 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCartBadge();
-            renderCartItems();
+        function removeFromCart(idx) { cart.splice(idx, 1); localStorage.setItem('cart', JSON.stringify(cart)); updateCartBadge(); renderCartItems(); }
+
+        function switchPage(p) {
+            ['home', 'cart', 'orders', 'profile', 'checkout', 'payment'].forEach(id => document.getElementById(id+'-page').classList.add('hidden'));
+            document.getElementById(p+'-page').classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('nav-'+p)?.classList.add('active');
+            if(p === 'cart') renderCartItems();
+            if(p === 'orders') renderOrders();
+            window.scrollTo(0,0);
         }
 
-        async function applyPromo() {
-            const code = document.getElementById('promo-input').value.trim().toUpperCase();
-            if (!code) return;
-            try {
-                const res = await fetch(PROMO_URL);
-                const csv = await res.text();
-                const rows = csv.split('\n').slice(1);
-                const promos = rows.map(r => {
-                    const c = r.split(',');
-                    return { code: c[0].trim().toUpperCase(), type: c[1].trim(), val: parseFloat(c[2]) };
-                });
-                const found = promos.find(p => p.code === code);
-                const msg = document.getElementById('promo-msg');
-                if (found) {
-                    activeDiscount = { ...found };
-                    msg.innerText = "პრომო კოდი გააქტიურებულია!";
-                    msg.className = "text-[11px] font-black mt-3 text-green-600";
-                } else {
-                    activeDiscount = null;
-                    msg.innerText = "არასწორი კოდი";
-                    msg.className = "text-[11px] font-black mt-3 text-red-500";
-                }
-                renderCartItems();
-            } catch (e) { console.error(e); }
-        }
-
-        function updateCartBadge() {
-            const el = document.getElementById('cart-count');
-            if (el) {
-                el.innerText = cart.length;
-                cart.length > 0 ? el.classList.remove('hidden') : el.classList.add('hidden');
-            }
-        }
-
-        // --- Orders List Rendering ---
-        function renderOrdersList() {
+        function renderOrders() {
             const list = document.getElementById('orders-list');
             const uid = (window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "0").toString();
-            
-            if (!storeData.orders) return;
-            const myOrders = storeData.orders.filter(o => o.userId.toString() === uid);
-            
-            if (myOrders.length === 0) {
-                list.innerHTML = `<div class="text-center py-24 text-slate-300 font-bold italic">შეკვეთები არ გაქვთ</div>`;
-                return;
-            }
-
-            list.innerHTML = myOrders.map(o => `
-                <div class="bg-white p-7 rounded-[40px] border border-slate-50 shadow-sm relative overflow-hidden">
-                    <div class="flex justify-between items-start mb-5">
-                        <div>
-                            <span class="text-[10px] font-black text-blue-600 uppercase tracking-tighter">შეკვეთა #${o.orderId}</span>
-                            <p class="text-[11px] text-slate-400 font-bold mt-1">${o.date || 'ახლახანს'}</p>
-                        </div>
-                        <span class="bg-blue-50 text-blue-600 px-5 py-2 rounded-full text-[10px] font-black uppercase">${o.status}</span>
-                    </div>
-                    <p class="text-sm font-bold text-slate-800 mb-5 leading-relaxed">${o.items}</p>
-                    <div class="pt-5 border-t border-slate-50 flex justify-between items-center">
-                        <span class="text-slate-400 text-xs font-bold">ჯამური თანხა:</span>
-                        <span class="text-2xl font-black text-slate-900">${o.total}₾</span>
-                    </div>
+            const my = (storeData.orders || []).filter(o => o.userId.toString() === uid);
+            if(my.length === 0) { list.innerHTML = `<div class="text-center py-20 text-slate-300 font-bold">შეკვეთები არ არის</div>`; return; }
+            list.innerHTML = my.map(o => `
+                <div class="bg-white p-7 rounded-[40px] border border-slate-50 shadow-sm">
+                    <div class="flex justify-between mb-4"><span class="text-[10px] font-black text-blue-600">ID: ${o.orderId}</span><span class="bg-blue-50 text-blue-600 px-4 py-1 rounded-full text-[10px] font-black uppercase">${o.status}</span></div>
+                    <p class="text-sm font-bold text-slate-800 mb-4">${o.items}</p>
+                    <div class="pt-4 border-t flex justify-between items-center"><span class="text-slate-400 text-xs font-bold">ჯამი:</span><span class="text-xl font-black">${o.total}₾</span></div>
                 </div>`).join('');
         }
 
-        // --- Profile Rendering ---
+        function renderNav(items) {
+            document.getElementById('bottom-nav').innerHTML = items.map(it => `
+                <div id="nav-${it.action}" onclick="switchPage('${it.action}')" class="nav-item ${it.action === 'home' ? 'active' : ''}">
+                    <div class="relative"><i class="fa-solid ${it.icon}"></i>${it.action === 'cart' ? `<div id="cart-count" class="cart-badge hidden">0</div>` : ''}</div>
+                    <span>${it.name}</span>
+                </div>`).join('');
+        }
+
         function renderProfile(menu) {
             const user = window.Telegram?.WebApp?.initDataUnsafe?.user || { first_name: "სტუმარი", id: "0" };
-            const el = document.getElementById('profile-page');
-            el.innerHTML = `
-                <div class="p-12 text-center bg-white mb-8 rounded-b-[60px] shadow-sm">
-                    <div class="w-28 h-28 bg-slate-100 rounded-[40px] mx-auto mb-6 flex items-center justify-center text-4xl font-black text-slate-300 shadow-inner">
-                        ${user.first_name[0]}
-                    </div>
-                    <h2 class="font-black text-3xl text-slate-900">${user.first_name}</h2>
-                    <p class="text-slate-400 text-xs font-bold mt-2 uppercase tracking-widest">ID: ${user.id}</p>
-                </div>
-                <div class="px-8 space-y-4">
-                    ${menu.map(m => `
-                        <div onclick="switchPage('${m.action}')" class="bg-white p-7 rounded-[35px] flex items-center justify-between border border-slate-50 shadow-sm active:scale-95 transition-all">
-                            <div class="flex items-center gap-6">
-                                <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 text-lg">
-                                    <i class="fa-solid ${m.icon}"></i>
-                                </div>
-                                <span class="font-black text-slate-700 text-sm">${m.label}</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-[12px] text-slate-200"></i>
-                        </div>`).join('')}
-                </div>`;
+            document.getElementById('profile-page').innerHTML = `
+                <div class="p-12 text-center bg-white mb-8 rounded-b-[60px] shadow-sm"><div class="w-24 h-24 bg-slate-100 rounded-[35px] mx-auto mb-6 flex items-center justify-center text-4xl font-black text-slate-300">${user.first_name[0]}</div><h2 class="font-black text-2xl">${user.first_name}</h2><p class="text-slate-400 text-xs font-bold mt-2">ID: ${user.id}</p></div>
+                <div class="px-8 space-y-4">${menu.map(m => `<div onclick="switchPage('${m.action}')" class="bg-white p-6 rounded-[30px] flex items-center justify-between shadow-sm"><div class="flex items-center gap-4"><i class="fa-solid ${m.icon} text-slate-400"></i><span class="font-black text-sm text-slate-700">${m.label}</span></div><i class="fa-solid fa-chevron-right text-[10px] text-slate-200"></i></div>`).join('')}</div>`;
         }
 
-        // --- Final Checkout Flow ---
-        function goToCheckout() {
-            switchPage('checkout');
-            document.getElementById('checkout-total-price').innerText = document.getElementById('cart-total-price').innerText;
-        }
+        function updateCartBadge() { const el = document.getElementById('cart-count'); if(el) { el.innerText = cart.length; cart.length > 0 ? el.classList.remove('hidden') : el.classList.add('hidden'); } }
 
-        function goToPayment() {
-            const name = document.getElementById('order-name').value;
-            const phone = document.getElementById('order-phone').value;
-            if (!name || !phone) { alert("შეავსეთ სახელი და ტელეფონი"); return; }
-            switchPage('payment');
-        }
-
-        async function processFinalOrder(methodId, methodTitle) {
-            const tg = window.Telegram.WebApp;
-            const itemsText = cart.map(i => `${i.name} (${i.size}, ${i.color})`).join(', ');
-            
+        async function processFinalOrder(id, title) {
             const params = new URLSearchParams({
                 action: "placeOrder",
-                userId: (tg.initDataUnsafe?.user?.id || "0").toString(),
+                userId: (window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "0").toString(),
                 customerName: document.getElementById('order-name').value,
                 phone: document.getElementById('order-phone').value,
-                address: `${document.getElementById('order-city').value}, ${document.getElementById('order-address').value} [${methodTitle}]`,
-                items: itemsText,
+                address: `${document.getElementById('order-address').value} [${title}]`,
+                items: cart.map(i => `${i.name} (${i.size})`).join(', '),
                 total: document.getElementById('checkout-total-price').innerText.replace('₾',''),
                 promo: activeDiscount ? activeDiscount.code : "არა"
             });
-
             try {
                 fetch(`${API_URL}?${params.toString()}`, { mode: 'no-cors' });
-                localStorage.removeItem('cart');
-                cart = [];
-                updateCartBadge();
-                alert("შეკვეთა წარმატებით გაიგზავნა!");
-                tg.close();
-            } catch (e) { alert("შეცდომაა. სცადეთ მოგვიანებით."); }
+                localStorage.removeItem('cart'); cart = []; updateCartBadge(); alert("შეკვეთა მიღებულია!"); window.Telegram.WebApp.close();
+            } catch (e) { alert("შეცდომაა"); }
         }
 
-        // --- Start App ---
-        initApp();
+        init();
     </script>
 </body>
 </html>
