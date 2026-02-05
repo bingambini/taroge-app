@@ -22,7 +22,6 @@ async function init() {
         if (storeData.latest) renderProducts(storeData.latest.items);
         if (storeData.navigation) renderNavigation(storeData.navigation);
         
-        // პრელოადერის გათიშვა
         const preloader = document.getElementById('app-preloader');
         if (preloader) preloader.style.display = 'none';
 
@@ -37,12 +36,50 @@ async function init() {
     }
 }
 
+// ჰედერის ჩაკეტილი ფუნქცია (ეს აკლდა შენს კოდს)
+function renderHeader(h) {
+    const el = document.getElementById('main-header');
+    const content = document.getElementById('app-content');
+    
+    if (!el || h.status !== 'active') {
+        if (el) el.style.display = 'none';
+        return;
+    }
 
+    Object.assign(el.style, {
+        display: 'flex',
+        alignItems: 'center',
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        right: '0',
+        zIndex: '10000',
+        backgroundColor: h.bg || "#ffffff",
+        color: h.textColor || "#000000",
+        height: (h.height || 70) + "px",
+        padding: '0 24px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        boxSizing: 'border-box'
+    });
+
+    if (content) content.style.paddingTop = el.style.height;
+
+    const isSplit = h.layout === 'split';
+    el.innerHTML = `
+        <div style="display: flex; align-items: center; width: 100%; height: 100%; position: relative; isolation: isolate;">
+            <img src="${h.logo}" style="width: ${h.logoSize || 40}px; height: ${h.logoSize || 40}px; border-radius: ${h.logoRadius || 50}%; object-fit: cover;">
+            <span style="font-weight: 900; font-size: 18px; position: ${isSplit ? 'absolute' : 'relative'}; left: ${isSplit ? '50%' : '12px'}; transform: ${isSplit ? 'translateX(-50%)' : 'none'}; white-space: nowrap;">
+                ${h.name || ''}
+            </span>
+        </div>
+    `;
+}
+
+// ბანერის ჩაკეტილი ფუნქცია
 function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
 
-    // ბანერის მთავარი კონტეინერის "ჩაკეტილი" სტილები
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
@@ -50,85 +87,36 @@ function renderBanner(b) {
         overflow: 'hidden',
         borderRadius: '30px',
         padding: '25px',
-        margin: '0 24px', // გვერდებიდან დაშორება
+        margin: '0 24px',
         height: (b.height || 180) + 'px',
         marginTop: (b.marginTop || 20) + 'px',
         background: b.gradient || '#1e293b',
         boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-        transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
         boxSizing: 'border-box',
         isolation: 'isolate'
     });
 
     const textColor = b.titleColor || '#ffffff';
-
     el.innerHTML = `
         <div style="z-index: 10; position: relative; width: 60%; pointer-events: none;">
-            <h2 style="
-                margin: 0;
-                font-weight: 900;
-                line-height: 1.1;
-                font-size: ${b.titleSize || 22}px;
-                color: ${textColor};
-            ">
+            <h2 style="margin: 0; font-weight: 900; line-height: 1.1; font-size: ${b.titleSize || 22}px; color: ${textColor};">
                 ${b.title || ''}
             </h2>
-            <p style="
-                margin-top: 8px;
-                font-weight: 600;
-                opacity: 0.85;
-                font-size: ${b.subSize || 12}px;
-                color: ${textColor};
-            ">
+            <p style="margin-top: 8px; font-weight: 600; opacity: 0.85; font-size: ${b.subSize || 12}px; color: ${textColor};">
                 ${b.subtitle || ''}
             </p>
-            
-            ${b.btnText ? `
-                <button style="
-                    margin-top: 15px;
-                    padding: 8px 20px;
-                    background: ${textColor};
-                    color: ${b.gradient?.includes('#') ? b.gradient.split(' ')[0] : '#000'};
-                    filter: invert(1);
-                    border: none;
-                    border-radius: 15px;
-                    font-weight: 900;
-                    font-size: 10px;
-                    text-transform: uppercase;
-                    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-                ">${b.btnText}</button>
-            ` : ''}
+            ${b.btnText ? `<button style="margin-top: 15px; padding: 8px 20px; background: ${textColor}; color: #000; filter: invert(1); border: none; border-radius: 15px; font-weight: 900; font-size: 10px; text-transform: uppercase;">${b.btnText}</button>` : ''}
         </div>
-
-        ${b.image ? `
-            <img src="${b.image}" style="
-                position: absolute;
-                right: -15px;
-                bottom: -10px;
-                width: 55%;
-                height: auto;
-                object-fit: contain;
-                transform: rotate(-15deg);
-                z-index: 5;
-                filter: drop-shadow(0 15px 15px rgba(0,0,0,0.3));
-                pointer-events: none;
-            ">
-        ` : ''}
+        ${b.image ? `<img src="${b.image}" style="position: absolute; right: -15px; bottom: -10px; width: 55%; height: auto; object-fit: contain; transform: rotate(-15deg); z-index: 5; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.3)); pointer-events: none;">` : ''}
     `;
 }
 
 function renderProducts(items) {
     const grid = document.getElementById('product-grid');
     if (!grid) return;
-
     grid.innerHTML = items.map(p => {
-        // სურათების დამუშავება
         let img = "https://via.placeholder.com/150";
-        if (p.images) {
-            const imgArray = p.images.split(',');
-            img = imgArray[0].trim();
-        }
-
+        if (p.images) img = p.images.split(',')[0].trim();
         return `
             <div onclick="showDetails('${p.id}')" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all flex flex-col items-center text-center">
                 <div class="h-32 w-full flex items-center justify-center">
@@ -149,9 +137,7 @@ function renderProducts(items) {
 function renderNavigation(items) {
     const nav = document.getElementById('bottom-nav');
     if (!nav) return;
-
     nav.className = "fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-slate-100 flex justify-around items-center py-4 px-6 z-[5000]";
-    
     nav.innerHTML = items.map(i => `
         <div onclick="switchPage('${i.action}')" class="flex flex-col items-center text-slate-400 active:text-blue-600 transition-colors cursor-pointer">
             <i class="fa-solid ${i.icon} text-xl"></i>
@@ -164,10 +150,6 @@ function switchPage(pageId) {
     document.querySelectorAll('.page-fade').forEach(p => p.classList.add('hidden'));
     const target = document.getElementById(pageId + '-page');
     if (target) target.classList.remove('hidden');
-    
-    // ნავიგაციის ფერების შეცვლა
-    console.log("Switched to:", pageId);
 }
 
-// აპლიკაციის გაშვება
 init();
