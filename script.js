@@ -16,7 +16,6 @@ async function init() {
         storeData = await response.json();
         console.log("Data received:", storeData);
 
-        // მონაცემების ასახვა
         if (storeData.header) renderHeader(storeData.header);
         if (storeData.banner) renderBanner(storeData.banner);
         if (storeData.latest) renderProducts(storeData.latest.items);
@@ -36,23 +35,16 @@ async function init() {
     }
 }
 
-// ჰედერის ჩაკეტილი ფუნქცია
 function renderHeader(h) {
     const el = document.getElementById('main-header');
     const content = document.getElementById('app-content');
-    
-    if (!el || h.status !== 'active') {
-        if (el) el.style.display = 'none';
-        return;
-    }
+    if (!el || h.status !== 'active') return;
 
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
         position: 'fixed',
-        top: '0',
-        left: '0',
-        right: '0',
+        top: '0', left: '0', right: '0',
         zIndex: '10000',
         backgroundColor: h.bg || "#ffffff",
         color: h.textColor || "#000000",
@@ -66,7 +58,7 @@ function renderHeader(h) {
 
     const isSplit = h.layout === 'split';
     el.innerHTML = `
-        <div style="display: flex; align-items: center; width: 100%; height: 100%; position: relative; isolation: isolate;">
+        <div style="display: flex; align-items: center; width: 100%; height: 100%; position: relative;">
             <img src="${h.logo}" style="width: ${h.logoSize || 40}px; height: ${h.logoSize || 40}px; border-radius: ${h.logoRadius || 50}%; object-fit: cover;">
             <span style="font-weight: 900; font-size: 18px; position: ${isSplit ? 'absolute' : 'relative'}; left: ${isSplit ? '50%' : '12px'}; transform: ${isSplit ? 'translateX(-50%)' : 'none'}; white-space: nowrap;">
                 ${h.name || ''}
@@ -75,99 +67,58 @@ function renderHeader(h) {
     `;
 }
 
-// ბანერის ჩაკეტილი ფუნქცია - განახლებული შენს მიერ მოწოდებული სვეტებით
 function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
 
-    // კონსოლში ვნახოთ რას იღებს რეალურად ბანერი
-    console.log("Banner Data Received:", b);
-
-    // ბანერის ძირითადი სტილი
+    // Apps Script-ის გასაღებების გამოყენება: title, subtitle, image, და ა.შ.
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
-        overflow: 'visible', 
+        overflow: 'visible', // სურათის "ამოსახტომად"
         borderRadius: '30px',
         margin: '60px 24px 20px 24px', 
-        height: (b.B_Height || 180) + 'px',
-        marginTop: (b.B_Margin_Top || 60) + 'px',
-        background: b.B_Gradient || '#1e293b',
+        height: (b.height || 180) + 'px',
+        marginTop: (b.marginTop || 60) + 'px',
+        background: b.gradient || '#1e293b',
         boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
         boxSizing: 'border-box',
-        zIndex: '1'
+        zIndex: '10'
     });
 
-    // თუ შიტიდან ფერი არ მოვიდა, იყოს თეთრი
-    const textColor = b.B_Title_Color || '#ffffff';
+    const textColor = b.titleColor || '#ffffff';
 
     el.innerHTML = `
-        <div style="
-            position: absolute; 
-            inset: 0; 
-            padding: 25px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            z-index: 10; 
-            pointer-events: none;
-        ">
-            <h2 style="
-                margin: 0; 
-                font-weight: 900; 
-                line-height: 1.1; 
-                font-size: ${b.B_Title_Size || 22}px; 
-                color: ${textColor};
-            ">
-                ${b.B_Title || 'სათაური არ მოიძებნა'}
+        <div style="position: relative; z-index: 30; padding: 25px; width: 60%; pointer-events: none;">
+            <h2 style="margin: 0; font-weight: 900; line-height: 1.1; font-size: ${b.titleSize || 22}px; color: ${textColor};">
+                ${b.title || ''}
             </h2>
-            <p style="
-                margin-top: 8px; 
-                font-weight: 600; 
-                opacity: 0.9; 
-                font-size: ${b.B_Sub_Size || 12}px; 
-                color: ${textColor};
-            ">
-                ${b.B_Subtitle || 'ქვესათაური არ მოიძებნა'}
+            <p style="margin-top: 8px; font-weight: 600; opacity: 0.9; font-size: ${b.subSize || 12}px; color: ${textColor};">
+                ${b.subtitle || ''}
             </p>
-            
-            ${b.B_Btn_Text ? `
+            ${b.btnText ? `
                 <div style="margin-top: 15px; pointer-events: auto;">
-                    <button onclick="switchPage('${b.B_Action_Value}')" style="
-                        padding: 10px 20px; 
-                        background: ${textColor}; 
-                        color: #000; 
-                        filter: invert(1); 
-                        border: none; 
-                        border-radius: 12px; 
-                        font-weight: 900; 
-                        font-size: 11px; 
-                        text-transform: uppercase;
-                    ">${b.B_Btn_Text}</button>
+                    <button onclick="switchPage('${b.actionValue}')" style="padding: 10px 22px; background: ${textColor}; color: #000; filter: invert(1); border: none; border-radius: 15px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer;">
+                        ${b.btnText}
+                    </button>
                 </div>` : ''}
         </div>
 
-        <div style="
-            position: absolute;
-            right: -10px;
-            top: -50px;
-            width: 60%;
-            height: 130%;
-            z-index: 20;
-            pointer-events: none;
-            display: flex;
-            align-items: flex-end;
-            justify-content: flex-end;
-        ">
-            <img src="${b.B_Image || 'https://via.placeholder.com/200'}" style="
-                width: 100%;
+        ${b.image ? `
+            <img src="${b.image}" style="
+                position: absolute;
+                right: -10px;
+                top: -45px; /* სურათის აწევა ზემოთ */
+                width: 65%;
                 height: auto;
                 object-fit: contain;
+                z-index: 40;
                 transform: rotate(-10deg);
                 filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+                pointer-events: none;
             ">
-        </div>
+        ` : ''}
     `;
 }
 
@@ -185,7 +136,7 @@ function renderProducts(items) {
                 <h4 class="font-bold text-slate-700 text-sm mt-3 leading-tight h-10 overflow-hidden line-clamp-2">${p.name}</h4>
                 <div class="flex justify-between items-center w-full mt-3">
                     <span class="text-blue-600 font-black text-lg">${p.price}₾</span>
-                    <button class="bg-slate-100 w-10 h-10 rounded-full flex items-center justify-center text-slate-900 active:bg-blue-600 active:text-white transition-colors">
+                    <button class="bg-slate-100 w-10 h-10 rounded-full flex items-center justify-center text-slate-900">
                         <i class="fa-solid fa-plus text-xs"></i>
                     </button>
                 </div>
