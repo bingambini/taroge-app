@@ -24,47 +24,71 @@ async function init() {
     }
 }
 
-function renderHeader(h) {
-    const el = document.getElementById('main-header');
-    
-    if (h.status !== 'active') {
-        el.style.display = 'none';
-        return;
-    }
+
+function renderBanner(b) {
+    const el = document.getElementById('hero-banner');
+    if (!el || !b) return;
 
     el.style.display = 'flex';
-    el.style.alignItems = 'center';
-    el.style.position = 'relative'; // საჭიროა ტექსტის ცენტრირებისთვის
-    el.style.width = '100%';
-    el.style.padding = '0 20px';
+    el.style.position = 'relative';
+    el.style.overflow = 'hidden';
+    el.style.borderRadius = '30px';
     
-    el.style.backgroundColor = h.bg || "#2563eb";
-    el.style.color = h.textColor || "#ffffff";
-    el.style.height = (h.height || 70) + "px";
+    // მონაცემები შენი Main_Banner შიტიდან
+    el.style.height = (b.height || 180) + "px";           // D სვეტი: B_Height
+    el.style.marginTop = (b.marginTop || 20) + "px";      // H სვეტი: B_MarginTop
+    el.style.background = b.gradient || "#1e293b";        // L სვეტი: B_Gradient
     
-    // თუ შიტში E სვეტში გიწერია "split"
-    const isSplit = h.layout === 'split';
+    const tColor = b.titleColor || '#ffffff';             // M სვეტი: B_Title_Color
 
     el.innerHTML = `
-        <img src="${h.logo}" style="
-            width: ${h.logoSize || 40}px; 
-            height: ${h.logoSize || 40}px; 
-            border-radius: ${h.logoRadius || 50}%;
-            object-fit: cover;
-            z-index: 10;
+        <div style="z-index: 10; position: relative; padding: 25px; max-width: 65%;">
+            <h2 style="
+                font-size: ${b.titleSize || 24}px; 
+                color: ${tColor}; 
+                font-weight: 800;
+                line-height: 1.1;
+                margin: 0;
+            ">
+                ${b.title || ''}
+            </h2>
+            <p style="
+                font-size: ${b.subSize || 12}px; 
+                color: ${tColor}; 
+                opacity: 0.8; 
+                margin-top: 8px;
+                font-weight: 600;
+            ">
+                ${b.subtitle || ''}
+            </p>
+            ${b.btnText ? `
+                <button style="
+                    margin-top: 15px;
+                    padding: 10px 22px;
+                    background: ${tColor};
+                    color: ${b.gradient && b.gradient.includes('#ffffff') ? '#000' : '#fff'};
+                    filter: invert(1);
+                    border-radius: 20px;
+                    font-weight: 900;
+                    font-size: 10px;
+                    text-transform: uppercase;
+                    border: none;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                ">
+                    ${b.btnText}
+                </button>
+            ` : ''}
+        </div>
+        <img src="${b.image}" style="
+            position: absolute;
+            right: -15px;
+            bottom: -10px;
+            width: 55%;
+            transform: rotate(-15deg);
+            pointer-events: none;
+            z-index: 5;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.2));
         ">
-        
-        <span style="
-            font-weight: 800; 
-            font-size: 18px;
-            position: ${isSplit ? 'absolute' : 'relative'};
-            left: ${isSplit ? '50%' : '12px'};
-            transform: ${isSplit ? 'translateX(-50%)' : 'none'};
-            width: ${isSplit ? 'auto' : 'auto'};
-            white-space: nowrap;
-        ">
-            ${h.name || ''}
-        </span>
     `;
 }
 
