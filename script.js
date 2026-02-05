@@ -90,23 +90,12 @@ function renderBanner(b) {
 
     el.innerHTML = `
         <div style="position: relative; z-index: 30; width: 50%; padding-left: 20px; display: flex; flex-direction: column; justify-content: center; pointer-events: none;">
-            <h2 style="margin: 0; font-weight: 900; line-height: 1.1; font-size: ${b.titleSize || 20}px; color: ${textColor}; text-transform: uppercase;">
-                ${b.title || ''}
-            </h2>
-            <p style="margin-top: 6px; font-weight: 600; opacity: 0.85; font-size: ${b.subSize || 11}px; color: ${textColor};">
-                ${b.subtitle || ''}
-            </p>
-            ${b.btnText ? `
-                <div style="margin-top: 15px; pointer-events: auto;">
-                    <button onclick="switchPage('${b.actionValue}')" style="padding: 10px 22px; background: ${textColor}; color: #000; filter: invert(1); border: none; border-radius: 14px; font-weight: 900; font-size: 10px; text-transform: uppercase; cursor: pointer;">
-                        ${b.btnText}
-                    </button>
-                </div>` : ''}
+            <h2 style="margin: 0; font-weight: 900; font-size: ${b.titleSize || 20}px; color: ${textColor}; text-transform: uppercase;">${b.title || ''}</h2>
+            <p style="margin-top: 6px; font-weight: 600; opacity: 0.85; font-size: ${b.subSize || 11}px; color: ${textColor};">${b.subtitle || ''}</p>
+            ${b.btnText ? `<div style="margin-top: 15px; pointer-events: auto;"><button onclick="switchPage('${b.actionValue}')" style="padding: 10px 22px; background: ${textColor}; color: #000; filter: invert(1); border: none; border-radius: 14px; font-weight: 900; font-size: 10px; text-transform: uppercase;">${b.btnText}</button></div>` : ''}
         </div>
         <div style="position: absolute; right: 0; top: 0; width: 50%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: visible; z-index: 40;">
-            ${b.image ? `
-                <img src="${b.image}" style="width: 120%; height: auto; object-fit: contain; transform: rotate(-12deg) translateY(-15%); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)); pointer-events: none;">
-            ` : ''}
+            ${b.image ? `<img src="${b.image}" style="width: 120%; height: auto; object-fit: contain; transform: rotate(-12deg) translateY(-15%); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4));">` : ''}
         </div>
     `;
 }
@@ -115,26 +104,20 @@ function renderProducts(items) {
     const grid = document.getElementById('product-grid');
     if (!grid) return;
     
-    // ვიყენებთ შენს სვეტებს: ID, Name, Price, Old_Price, Image_URLs, Status
+    // ვიყენებთ შენს სვეტებს: ID, Name, Price, Image (სქრინის მიხედვით)
     grid.innerHTML = items.map(p => {
-        if (p.Status !== 'Active') return '';
-        
         let img = "https://via.placeholder.com/150";
-        if (p.Image_URLs) img = p.Image_URLs.split(',')[0].trim();
+        if (p.Image) img = p.Image.split(',')[0].trim();
         
         return `
-            <div onclick="showDetails('${p.ID}')" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all flex flex-col items-center text-center relative">
-                ${p.Old_Price ? `<div style="position: absolute; top: 12px; left: 12px; background: #ef4444; color: white; font-size: 9px; font-weight: 900; padding: 4px 8px; border-radius: 8px; z-index: 5;">SALE</div>` : ''}
-                <div class="h-32 w-full flex items-center justify-center">
-                    <img src="${img}" class="max-h-full max-w-full object-contain drop-shadow-md">
+            <div onclick="showDetails('${p.ID}')" class="bg-white p-4 rounded-[35px] border border-slate-50 shadow-sm active:scale-95 transition-all flex flex-col items-center text-center relative">
+                <div class="h-36 w-full flex items-center justify-center">
+                    <img src="${img}" class="max-h-full max-w-full object-contain drop-shadow-xl">
                 </div>
-                <h4 class="font-bold text-slate-700 text-sm mt-3 leading-tight h-10 overflow-hidden line-clamp-2">${p.Name}</h4>
-                <div class="flex justify-between items-center w-full mt-3">
-                    <div class="flex flex-col items-start">
-                        ${p.Old_Price ? `<span class="text-[10px] text-slate-400 line-through font-bold">${p.Old_Price}₾</span>` : ''}
-                        <span class="text-blue-600 font-black text-lg">${p.Price}₾</span>
-                    </div>
-                    <button class="bg-slate-900 w-10 h-10 rounded-full flex items-center justify-center text-white">
+                <h4 class="font-bold text-slate-800 text-[13px] mt-4 leading-tight h-10 overflow-hidden line-clamp-2">${p.Name}</h4>
+                <div class="flex justify-between items-center w-full mt-4">
+                    <span class="text-blue-600 font-black text-lg">${p.Price}₾</span>
+                    <button class="bg-slate-100 w-10 h-10 rounded-full flex items-center justify-center text-slate-900">
                         <i class="fa-solid fa-plus text-xs"></i>
                     </button>
                 </div>
@@ -144,49 +127,28 @@ function renderProducts(items) {
 }
 
 function showDetails(productId) {
-    const product = storeData.latest.items.find(p => p.ID === productId);
+    const product = storeData.latest.items.find(p => p.ID.toString() === productId.toString());
     if (!product) return;
 
     const detailsPage = document.getElementById('details-page');
     if (!detailsPage) return;
 
-    let images = product.Image_URLs ? product.Image_URLs.split(',').map(img => img.trim()) : ["https://via.placeholder.com/300"];
-    const sizes = product.Sizes ? product.Sizes.split(',') : [];
-
+    let images = product.Image ? product.Image.split(',').map(img => img.trim()) : ["https://via.placeholder.com/300"];
+    
     detailsPage.innerHTML = `
-        <div style="padding: 20px; padding-bottom: 120px; background: #fdfdfd; min-height: 100vh;">
-            <button onclick="switchPage('main')" style="background: white; border: none; width: 45px; height: 45px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.07); margin-bottom: 20px;">
-                <i class="fa-solid fa-arrow-left"></i>
-            </button>
-            <div style="width: 100%; height: 300px; background: white; border-radius: 40px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
-                <img src="${images[0]}" style="max-width: 85%; max-height: 85%; object-fit: contain;">
-            </div>
+        <div style="padding: 20px; padding-bottom: 120px; background: #ffffff; min-height: 100vh;">
+            <button onclick="switchPage('main')" style="background: #f8fafc; border: none; width: 45px; height: 45px; border-radius: 15px; margin-bottom: 20px;"><i class="fa-solid fa-arrow-left"></i></button>
+            <div style="width: 100%; height: 320px; display: flex; align-items: center; justify-content: center;"><img src="${images[0]}" style="max-width: 90%; max-height: 90%; object-fit: contain;"></div>
             <div style="margin-top: 30px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <h1 style="font-size: 24px; font-weight: 900; color: #0f172a; width: 70%;">${product.Name}</h1>
-                    <div style="text-align: right;">
-                        ${product.Old_Price ? `<span style="display: block; text-decoration: line-through; color: #94a3b8; font-size: 14px;">${product.Old_Price}₾</span>` : ''}
-                        <span style="font-size: 24px; font-weight: 900; color: #2563eb;">${product.Price}₾</span>
-                    </div>
-                </div>
-                <p style="color: #64748b; font-weight: 700; font-size: 12px; margin-top: 5px; text-transform: uppercase;">${product.Category}</p>
-                
-                ${sizes.length > 0 ? `
-                    <div style="margin-top: 25px;">
-                        <p style="font-weight: 800; font-size: 14px; margin-bottom: 10px;">ზომა</p>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            ${sizes.map(s => `<div style="padding: 10px 15px; border: 2px solid #f1f5f9; border-radius: 12px; font-weight: 700; font-size: 13px;">${s.trim()}</div>`).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-
-                <div style="margin-top: 30px;">
+                <h1 style="font-size: 26px; font-weight: 900; color: #0f172a;">${product.Name}</h1>
+                <p style="font-size: 28px; font-weight: 900; color: #2563eb; margin-top: 10px;">${product.Price}₾</p>
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
                     <p style="font-weight: 800; font-size: 14px; margin-bottom: 10px;">აღწერა</p>
-                    <p style="color: #64748b; font-size: 14px; line-height: 1.6;">${product.Description || ''}</p>
+                    <p style="color: #64748b; font-size: 15px; line-height: 1.6;">${product.Description || 'პროდუქტის აღწერა მალე დაემატება.'}</p>
                 </div>
             </div>
-            <div style="position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 20px; border-top: 1px solid #f1f5f9; display: flex; z-index: 10000;">
-                <button onclick="addToCart('${product.ID}')" style="flex: 1; background: #0f172a; color: white; border: none; padding: 18px; border-radius: 20px; font-weight: 800; font-size: 16px;">კალათაში დამატება</button>
+            <div style="position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 25px; border-top: 1px solid #f1f5f9; z-index: 10000;">
+                <button onclick="addToCart('${product.ID}')" style="width: 100%; background: #0f172a; color: white; border: none; padding: 20px; border-radius: 20px; font-weight: 800; font-size: 16px;">კალათაში დამატება</button>
             </div>
         </div>
     `;
@@ -212,7 +174,6 @@ function switchPage(pageId) {
 }
 
 function addToCart(id) {
-    // კალათის ლოგიკას შემდეგ ეტაპზე გავმართავთ
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
     }
