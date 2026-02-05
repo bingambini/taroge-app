@@ -4,21 +4,14 @@ let cart = [];
 
 async function init() {
     console.log("App starting...");
-    
     if (window.Telegram && window.Telegram.WebApp) {
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-
-        // ვამოწმებთ, უჭერს თუ არა მხარს ვერსია ამ ფუნქციებს
         if (tg.isVersionAtLeast('6.1')) {
             tg.setHeaderColor('bg_color');
-        }
-        
-        if (tg.isVersionAtLeast('6.1')) {
             tg.setBackgroundColor('bg_color');
         }
-
         if (tg.isVersionAtLeast('6.2')) {
             tg.isClosingConfirmationEnabled = true;
         }
@@ -27,10 +20,8 @@ async function init() {
     try {
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error('Network response was not ok');
-        
         storeData = await response.json();
-        console.log("Data received:", storeData);
-
+        
         if (storeData.header) renderHeader(storeData.header);
         if (storeData.banner) renderBanner(storeData.banner);
         if (storeData.latest) renderProducts(storeData.latest.items);
@@ -38,18 +29,8 @@ async function init() {
         
         const preloader = document.getElementById('app-preloader');
         if (preloader) preloader.style.display = 'none';
-
     } catch (e) {
         console.error("Critical Error:", e);
-        const preloader = document.getElementById('app-preloader');
-        if (preloader) {
-            preloader.innerHTML = `
-                <div class="text-center p-10">
-                    <p class="text-red-500 font-bold">ვერ მოხერხდა მონაცემების ჩატვირთვა</p>
-                    <button onclick="location.reload()" class="mt-4 bg-slate-800 text-white px-6 py-2 rounded-xl">თავიდან ცდა</button>
-                </div>
-            `;
-        }
     }
 }
 
@@ -58,22 +39,19 @@ function renderHeader(h) {
     const content = document.getElementById('app-content');
     if (!el || h.status !== 'active') return;
 
-// 1. ბანერის მთავარი კონტეინერი - იდეალური ცენტრირება
+    // ჰედერის სწორი სტილები (მთელ სიგანეზე)
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
-        position: 'relative',
-        overflow: 'visible', 
-        borderRadius: '35px',
-        // ავტომატური გაცენტრვა: ზევით 50px, გვერდებზე ავტო, ქვევით 20px
-        margin: '50px auto 20px auto', 
-        width: 'calc(100% - 48px)', // ეკრანის 100%-ს გამოკლებული გვერდითა დაშორებები
-        height: (b.height || 180) + 'px',
-        marginTop: (b.marginTop || 50) + 'px',
-        background: b.gradient || '#1e293b',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
-        boxSizing: 'border-box',
-        zIndex: '10'
+        position: 'fixed',
+        top: '0', left: '0', right: '0',
+        zIndex: '10000',
+        backgroundColor: h.bg || "#ffffff",
+        color: h.textColor || "#000000",
+        height: (h.height || 70) + "px",
+        padding: '0 24px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        boxSizing: 'border-box'
     });
 
     if (content) content.style.paddingTop = el.style.height;
@@ -93,14 +71,15 @@ function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
 
-    // 1. ბანერის მთავარი კონტეინერი
+    // ბანერის იდეალური ცენტრირება
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
         overflow: 'visible', 
         borderRadius: '35px',
-        margin: '50px 24px 20px 24px', 
+        margin: '50px auto 20px auto', 
+        width: 'calc(100% - 48px)', // ზუსტი დაშორება კიდეებიდან
         height: (b.height || 180) + 'px',
         marginTop: (b.marginTop || 50) + 'px',
         background: b.gradient || '#1e293b',
@@ -112,74 +91,23 @@ function renderBanner(b) {
     const textColor = b.titleColor || '#ffffff';
 
     el.innerHTML = `
-        <div style="
-            position: relative; 
-            z-index: 30; 
-            width: 50%; 
-            padding-left: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center;
-            pointer-events: none;
-        ">
-            <h2 style="
-                margin: 0; 
-                font-weight: 900; 
-                line-height: 1.1; 
-                font-size: ${b.titleSize || 20}px; 
-                color: ${textColor};
-                text-transform: uppercase;
-            ">
+        <div style="position: relative; z-index: 30; width: 50%; padding-left: 20px; display: flex; flex-direction: column; justify-content: center; pointer-events: none;">
+            <h2 style="margin: 0; font-weight: 900; line-height: 1.1; font-size: ${b.titleSize || 20}px; color: ${textColor}; text-transform: uppercase;">
                 ${b.title || ''}
             </h2>
-            <p style="
-                margin-top: 6px; 
-                font-weight: 600; 
-                opacity: 0.85; 
-                font-size: ${b.subSize || 11}px; 
-                color: ${textColor};
-            ">
+            <p style="margin-top: 6px; font-weight: 600; opacity: 0.85; font-size: ${b.subSize || 11}px; color: ${textColor};">
                 ${b.subtitle || ''}
             </p>
             ${b.btnText ? `
                 <div style="margin-top: 15px; pointer-events: auto;">
-                    <button onclick="switchPage('${b.actionValue}')" style="
-                        padding: 10px 22px; 
-                        background: ${textColor}; 
-                        color: #000; 
-                        filter: invert(1); 
-                        border: none; 
-                        border-radius: 14px; 
-                        font-weight: 900; 
-                        font-size: 10px; 
-                        text-transform: uppercase;
-                    ">
+                    <button onclick="switchPage('${b.actionValue}')" style="padding: 10px 22px; background: ${textColor}; color: #000; filter: invert(1); border: none; border-radius: 14px; font-weight: 900; font-size: 10px; text-transform: uppercase; cursor: pointer;">
                         ${b.btnText}
                     </button>
                 </div>` : ''}
         </div>
-
-        <div style="
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 50%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: visible;
-            z-index: 40;
-        ">
+        <div style="position: absolute; right: 0; top: 0; width: 50%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: visible; z-index: 40;">
             ${b.image ? `
-                <img src="${b.image}" style="
-                    width: 120%; /* ფოტო ოდნავ დიდია რომ გამოვიდეს ჩარჩოდან */
-                    height: auto;
-                    object-fit: contain;
-                    transform: rotate(-12deg) translateY(-15%); /* ზემოთ აწევა და დახრა */
-                    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4));
-                    pointer-events: none;
-                ">
+                <img src="${b.image}" style="width: 120%; height: auto; object-fit: contain; transform: rotate(-12deg) translateY(-15%); filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)); pointer-events: none;">
             ` : ''}
         </div>
     `;
