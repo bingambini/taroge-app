@@ -27,39 +27,45 @@ async function init() {
 function renderHeader(h) {
     const el = document.getElementById('main-header');
     
-    // M სვეტი (status) - თუ არ არის active, ჰედერი იმალება
     if (h.status !== 'active') {
         el.style.display = 'none';
         return;
     }
 
-    // ძირითადი სტილები შიტიდან
     el.style.display = 'flex';
     el.style.alignItems = 'center';
+    el.style.position = 'relative'; // საჭიროა ტექსტის ცენტრირებისთვის
     el.style.width = '100%';
+    el.style.padding = '0 20px';
     
-    el.style.backgroundColor = h.bg || "#2563eb";        // C სვეტი (H_BG)
-    el.style.color = h.textColor || "#ffffff";          // D სვეტი (H_Text)
-    el.style.height = (h.height || 70) + "px";          // H სვეტი (H_Height)
+    el.style.backgroundColor = h.bg || "#2563eb";
+    el.style.color = h.textColor || "#ffffff";
+    el.style.height = (h.height || 70) + "px";
     
-    // ჰედერის შიგთავსი
-    el.innerHTML = `
-        <div class="flex items-center px-5 w-full" style="justify-content: ${h.layout === 'center' ? 'center' : 'flex-start'}">
-            <img src="${h.logo}" id="header-logo" style="
-                width: ${h.logoSize || 40}px; 
-                height: ${h.logoSize || 40}px; 
-                border-radius: ${h.logoRadius || 50}%;
-                margin-right: 12px;
-                object-fit: cover;
-            ">
-            <span style="font-weight: 800; font-size: 18px;">${h.name || ''}</span>
-        </div>
-    `;
+    // თუ შიტში E სვეტში გიწერია "split"
+    const isSplit = h.layout === 'split';
 
-    // თუ layout არის center, მოვაშოროთ მარჯვენა margin ლოგოს
-    if (h.layout === 'center') {
-        document.getElementById('header-logo').style.marginRight = "10px";
-    }
+    el.innerHTML = `
+        <img src="${h.logo}" style="
+            width: ${h.logoSize || 40}px; 
+            height: ${h.logoSize || 40}px; 
+            border-radius: ${h.logoRadius || 50}%;
+            object-fit: cover;
+            z-index: 10;
+        ">
+        
+        <span style="
+            font-weight: 800; 
+            font-size: 18px;
+            position: ${isSplit ? 'absolute' : 'relative'};
+            left: ${isSplit ? '50%' : '12px'};
+            transform: ${isSplit ? 'translateX(-50%)' : 'none'};
+            width: ${isSplit ? 'auto' : 'auto'};
+            white-space: nowrap;
+        ">
+            ${h.name || ''}
+        </span>
+    `;
 }
 
 function renderBanner(b) {
