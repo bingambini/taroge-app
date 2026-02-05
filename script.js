@@ -71,18 +71,18 @@ function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
 
-    // Apps Script-ის გასაღებების გამოყენება: title, subtitle, image, და ა.შ.
+    // 1. ბანერის მთავარი კონტეინერი (პროპორციები და დაშორება)
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
         overflow: 'visible', // სურათის "ამოსახტომად"
-        borderRadius: '30px',
-        margin: '60px 24px 20px 24px', 
-        height: (b.height || 180) + 'px',
-        marginTop: (b.marginTop || 60) + 'px',
-        background: b.gradient || '#1e293b',
-        boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+        borderRadius: '35px',
+        margin: '50px 24px 20px 24px', 
+        height: (b.height || 200) + 'px', // ოდნავ გავზარდე სიმაღლე
+        marginTop: (b.marginTop || 50) + 'px',
+        background: b.gradient || 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
         boxSizing: 'border-box',
         zIndex: '10'
     });
@@ -90,34 +90,79 @@ function renderBanner(b) {
     const textColor = b.titleColor || '#ffffff';
 
     el.innerHTML = `
-        <div style="position: relative; z-index: 30; padding: 25px; width: 60%; pointer-events: none;">
-            <h2 style="margin: 0; font-weight: 900; line-height: 1.1; font-size: ${b.titleSize || 22}px; color: ${textColor};">
+        <div style="
+            position: relative; 
+            z-index: 30; 
+            width: 55%; 
+            padding: 20px 0 20px 25px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center;
+            pointer-events: none;
+        ">
+            <h2 style="
+                margin: 0; 
+                font-weight: 900; 
+                line-height: 1.1; 
+                font-size: ${b.titleSize || 24}px; 
+                color: ${textColor};
+                text-transform: uppercase;
+                letter-spacing: -0.5px;
+            ">
                 ${b.title || ''}
             </h2>
-            <p style="margin-top: 8px; font-weight: 600; opacity: 0.9; font-size: ${b.subSize || 12}px; color: ${textColor};">
+            <p style="
+                margin-top: 10px; 
+                font-weight: 500; 
+                opacity: 0.8; 
+                font-size: ${b.subSize || 13}px; 
+                color: ${textColor};
+                line-height: 1.4;
+            ">
                 ${b.subtitle || ''}
             </p>
             ${b.btnText ? `
-                <div style="margin-top: 15px; pointer-events: auto;">
-                    <button onclick="switchPage('${b.actionValue}')" style="padding: 10px 22px; background: ${textColor}; color: #000; filter: invert(1); border: none; border-radius: 15px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer;">
+                <div style="margin-top: 20px; pointer-events: auto;">
+                    <button onclick="switchPage('${b.actionValue}')" style="
+                        padding: 12px 25px; 
+                        background: ${textColor}; 
+                        color: #000; 
+                        filter: invert(1); 
+                        border: none; 
+                        border-radius: 18px; 
+                        font-weight: 900; 
+                        font-size: 11px; 
+                        text-transform: uppercase;
+                        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+                        cursor: pointer;
+                        transition: transform 0.2s;
+                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                         ${b.btnText}
                     </button>
                 </div>` : ''}
         </div>
 
         ${b.image ? `
-            <img src="${b.image}" style="
+            <div style="
                 position: absolute;
-                right: -10px;
-                top: -45px; /* სურათის აწევა ზემოთ */
-                width: 65%;
-                height: auto;
-                object-fit: contain;
+                right: -15px;
+                top: -40px; 
+                width: 60%;
+                height: 140%;
                 z-index: 40;
-                transform: rotate(-10deg);
-                filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
                 pointer-events: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             ">
+                <img src="${b.image}" style="
+                    width: 110%;
+                    height: auto;
+                    object-fit: contain;
+                    transform: rotate(-15deg) scale(1.1);
+                    filter: drop-shadow(0 25px 35px rgba(0,0,0,0.5));
+                ">
+            </div>
         ` : ''}
     `;
 }
