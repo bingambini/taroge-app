@@ -36,7 +36,7 @@ async function init() {
     }
 }
 
-// ჰედერის ჩაკეტილი ფუნქცია (ეს აკლდა შენს კოდს)
+// ჰედერის ჩაკეტილი ფუნქცია
 function renderHeader(h) {
     const el = document.getElementById('main-header');
     const content = document.getElementById('app-content');
@@ -75,7 +75,7 @@ function renderHeader(h) {
     `;
 }
 
-// ბანერის ჩაკეტილი ფუნქცია
+// ბანერის ჩაკეტილი ფუნქცია - განახლებული შენს მიერ მოწოდებული სვეტებით
 function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
@@ -88,26 +88,29 @@ function renderBanner(b) {
         borderRadius: '30px',
         padding: '25px',
         margin: '0 24px',
-        height: (b.height || 180) + 'px',
-        marginTop: (b.marginTop || 20) + 'px',
-        background: b.gradient || '#1e293b',
+        height: (b.B_Height || 180) + 'px',
+        marginTop: (b.B_Margin_Top || 20) + 'px',
+        background: b.B_Gradient || '#1e293b',
         boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
         boxSizing: 'border-box',
         isolation: 'isolate'
     });
 
-    const textColor = b.titleColor || '#ffffff';
+    const textColor = b.B_Title_Color || '#ffffff';
     el.innerHTML = `
         <div style="z-index: 10; position: relative; width: 60%; pointer-events: none;">
-            <h2 style="margin: 0; font-weight: 900; line-height: 1.1; font-size: ${b.titleSize || 22}px; color: ${textColor};">
-                ${b.title || ''}
+            <h2 style="margin: 0; font-weight: 900; line-height: 1.1; font-size: ${b.B_Title_Size || 22}px; color: ${textColor};">
+                ${b.B_Title || ''}
             </h2>
-            <p style="margin-top: 8px; font-weight: 600; opacity: 0.85; font-size: ${b.subSize || 12}px; color: ${textColor};">
-                ${b.subtitle || ''}
+            <p style="margin-top: 8px; font-weight: 600; opacity: 0.85; font-size: ${b.B_Sub_Size || 12}px; color: ${textColor};">
+                ${b.B_Subtitle || ''}
             </p>
-            ${b.btnText ? `<button style="margin-top: 15px; padding: 8px 20px; background: ${textColor}; color: #000; filter: invert(1); border: none; border-radius: 15px; font-weight: 900; font-size: 10px; text-transform: uppercase;">${b.btnText}</button>` : ''}
+            ${b.B_Btn_Text ? `
+                <button onclick="switchPage('${b.B_Action_Value}')" style="margin-top: 15px; padding: 8px 20px; background: ${textColor}; color: #000; filter: invert(1); border: none; border-radius: 15px; font-weight: 900; font-size: 10px; text-transform: uppercase; pointer-events: auto;">
+                    ${b.B_Btn_Text}
+                </button>` : ''}
         </div>
-        ${b.image ? `<img src="${b.image}" style="position: absolute; right: -15px; bottom: -10px; width: 55%; height: auto; object-fit: contain; transform: rotate(-15deg); z-index: 5; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.3)); pointer-events: none;">` : ''}
+        ${b.B_Image ? `<img src="${b.B_Image}" style="position: absolute; right: -15px; bottom: -10px; width: 55%; height: auto; object-fit: contain; transform: rotate(-15deg); z-index: 5; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.3)); pointer-events: none;">` : ''}
     `;
 }
 
