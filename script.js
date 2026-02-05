@@ -80,85 +80,91 @@ function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
 
-    // ბანერის მთავარი კონტეინერი
+    // 1. ბანერის მთავარი კონტეინერი
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
-        overflow: 'visible', // სურათის გამოსასვლელად
+        overflow: 'visible', // რომ სურათი გამოვიდეს კიდიდან
         borderRadius: '30px',
-        padding: '25px',
-        margin: '50px 24px 30px 24px', // გავზარდეთ მარჟინები
+        margin: '60px 24px 20px 24px', // ზემოდან მეტი დაშორება სურათისთვის
         height: (b.B_Height || 180) + 'px',
-        marginTop: (b.B_Margin_Top || 50) + 'px',
+        marginTop: (b.B_Margin_Top || 60) + 'px',
         background: b.B_Gradient || '#1e293b',
         boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
         boxSizing: 'border-box',
-        zIndex: '1' // რომ სხვა ელემენტებს ხელი არ შეუშალოს
+        zIndex: '10' // ბანერი და მისი შიგთავსი იყოს წინ
     });
 
     const textColor = b.B_Title_Color || '#ffffff';
 
+    // 2. შიდა სტრუქტურა
     el.innerHTML = `
-        <div style="z-index: 10; position: relative; width: 60%; pointer-events: none;">
+        <div style="
+            position: relative; 
+            z-index: 30; 
+            width: 100%; 
+            height: 100%; 
+            padding: 25px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center;
+            pointer-events: none;
+        ">
             <h2 style="
                 margin: 0; 
                 font-weight: 900; 
                 line-height: 1.1; 
                 font-size: ${b.B_Title_Size || 22}px; 
                 color: ${textColor};
+                text-shadow: 0 2px 4px rgba(0,0,0,0.2);
             ">
                 ${b.B_Title || ''}
             </h2>
+            
             <p style="
                 margin-top: 8px; 
                 font-weight: 600; 
-                opacity: 0.85; 
+                opacity: 0.9; 
                 font-size: ${b.B_Sub_Size || 12}px; 
                 color: ${textColor};
             ">
                 ${b.B_Subtitle || ''}
             </p>
+
             ${b.B_Btn_Text ? `
-                <button onclick="switchPage('${b.B_Action_Value}')" style="
-                    margin-top: 15px; 
-                    padding: 8px 20px; 
-                    background: ${textColor}; 
-                    color: #000; 
-                    filter: invert(1); 
-                    border: none; 
-                    border-radius: 15px; 
-                    font-weight: 900; 
-                    font-size: 10px; 
-                    text-transform: uppercase; 
-                    pointer-events: auto;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-                ">
-                    ${b.B_Btn_Text}
-                </button>` : ''}
+                <div style="margin-top: 15px; pointer-events: auto;">
+                    <button onclick="switchPage('${b.B_Action_Value}')" style="
+                        padding: 10px 22px; 
+                        background: ${textColor}; 
+                        color: #000; 
+                        filter: invert(1); 
+                        border: none; 
+                        border-radius: 15px; 
+                        font-weight: 900; 
+                        font-size: 11px; 
+                        text-transform: uppercase; 
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                        cursor: pointer;
+                    ">
+                        ${b.B_Btn_Text}
+                    </button>
+                </div>` : ''}
         </div>
 
         ${b.B_Image ? `
-            <div style="
-                position: absolute; 
-                right: -10px; 
-                top: 0; 
-                width: 55%; 
-                height: 100%; 
+            <img src="${b.B_Image}" style="
+                position: absolute;
+                right: -10px;
+                top: -40px; /* სურათის აწევა ზემოთ კიდიდან */
+                width: 60%;
+                max-height: 140%; /* ზომის გაზრდა ბანერზე მეტად */
+                object-fit: contain;
+                z-index: 40; /* ყველაზე წინ */
+                filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4));
                 pointer-events: none;
-                z-index: 20;
+                transform: rotate(-5deg);
             ">
-                <img src="${b.B_Image}" style="
-                    width: 110%; /* ოდნავ დიდი რომ გამოჩნდეს */
-                    height: auto;
-                    object-fit: contain;
-                    position: absolute;
-                    bottom: 0;
-                    right: 0;
-                    transform: translateY(-20%) rotate(-10deg); /* აქედან ვმართავთ ამოვარდნას */
-                    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
-                ">
-            </div>
         ` : ''}
     `;
 }
