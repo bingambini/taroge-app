@@ -70,13 +70,47 @@ function renderHeader(h) {
 
 function renderBanner(b) {
     const el = document.getElementById('hero-banner');
-    el.style.backgroundColor = b.gradient || "#1e293b";
+    
+    // M2 უჯრა - თუ სტატუსი არ არის active, ბანერი ქრება
+    if (b.status !== 'active') {
+        el.style.display = 'none';
+        return;
+    }
+
+    el.style.display = 'flex';
+    
+    // სტილები შიტიდან
+    el.style.height = (b.height || 180) + "px";           // D სვეტი (B_Height)
+    el.style.marginTop = (b.marginTop || 20) + "px";      // H სვეტი (B_MarginTop)
+    el.style.background = b.gradient || "#1e293b";        // L სვეტი (B_Gradient)
+    
+    // შიგთავსის აწყობა
     el.innerHTML = `
-        <div class="z-10 relative text-white">
-            <h2 class="text-xl font-black">${b.title}</h2>
-            <p class="text-xs opacity-80">${b.subtitle || ''}</p>
+        <div class="banner-content" style="z-index: 10; position: relative;">
+            <h2 style="
+                font-size: ${b.titleSize || 24}px; 
+                color: ${b.titleColor || '#ffffff'}; 
+                font-weight: 800;
+                line-height: 1.1;
+            ">
+                ${b.title}
+            </h2>
+            <p style="
+                font-size: ${b.subSize || 12}px; 
+                color: ${b.titleColor || '#ffffff'}; 
+                opacity: 0.8; 
+                margin-top: 8px;
+                font-weight: 600;
+            ">
+                ${b.subtitle || ''}
+            </p>
+            ${b.btnText ? `
+                <button class="mt-4 px-6 py-2 bg-white text-black rounded-full font-black text-[10px] uppercase shadow-lg">
+                    ${b.btnText}
+                </button>
+            ` : ''}
         </div>
-        <img src="${b.image}" class="banner-img">
+        <img src="${b.image}" class="banner-img" style="pointer-events: none;">
     `;
 }
 
