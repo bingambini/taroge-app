@@ -25,70 +25,47 @@ async function init() {
 }
 
 
+
 function renderBanner(b) {
     const el = document.getElementById('hero-banner');
-    if (!el || !b) return;
+    if (!el) return;
+
+    // დიაგნოსტიკა: დაგვიწერს ეკრანზე, საერთოდ მოდის თუ არა ბანერის მონაცემები
+    if (!b) {
+        console.error("ბანერის მონაცემები არ მოვიდა!");
+        el.innerHTML = "<p style='color:red; padding:20px;'>მონაცემები ვერ მოიძებნა</p>";
+        return;
+    }
 
     el.style.display = 'flex';
     el.style.position = 'relative';
     el.style.overflow = 'hidden';
     el.style.borderRadius = '30px';
     
-    // მონაცემები შენი Main_Banner შიტიდან
-    el.style.height = (b.height || 180) + "px";           // D სვეტი: B_Height
-    el.style.marginTop = (b.marginTop || 20) + "px";      // H სვეტი: B_MarginTop
-    el.style.background = b.gradient || "#1e293b";        // L სვეტი: B_Gradient
-    
-    const tColor = b.titleColor || '#ffffff';             // M სვეტი: B_Title_Color
+    // მონაცემები შენი Apps Script-ის მიხედვით (A=0, B=1, C=2 და ა.შ.)
+    // ყოველი შემთხვევისთვის ვიყენებთ პირდაპირ ველებს, რაც შენს Google Script-ში გაქვს გაწერილი
+    const height = b.height || 180;
+    const marginTop = b.marginTop || 20;
+    const bg = b.gradient || "#1e293b";
+    const tColor = b.titleColor || "#ffffff";
+    const title = b.title || "სათაური ცარიელია";
+    const image = b.image || "";
+
+    el.style.height = height + "px";
+    el.style.marginTop = marginTop + "px";
+    el.style.background = bg;
 
     el.innerHTML = `
-        <div style="z-index: 10; position: relative; padding: 25px; max-width: 65%;">
-            <h2 style="
-                font-size: ${b.titleSize || 24}px; 
-                color: ${tColor}; 
-                font-weight: 800;
-                line-height: 1.1;
-                margin: 0;
-            ">
-                ${b.title || ''}
+        <div style="z-index: 10; position: relative; padding: 25px; width: 100%;">
+            <h2 style="font-size: ${b.titleSize || 24}px; color: ${tColor}; font-weight: 800; margin: 0;">
+                ${title}
             </h2>
-            <p style="
-                font-size: ${b.subSize || 12}px; 
-                color: ${tColor}; 
-                opacity: 0.8; 
-                margin-top: 8px;
-                font-weight: 600;
-            ">
+            <p style="font-size: ${b.subSize || 12}px; color: ${tColor}; opacity: 0.8; margin-top: 8px;">
                 ${b.subtitle || ''}
             </p>
-            ${b.btnText ? `
-                <button style="
-                    margin-top: 15px;
-                    padding: 10px 22px;
-                    background: ${tColor};
-                    color: ${b.gradient && b.gradient.includes('#ffffff') ? '#000' : '#fff'};
-                    filter: invert(1);
-                    border-radius: 20px;
-                    font-weight: 900;
-                    font-size: 10px;
-                    text-transform: uppercase;
-                    border: none;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                ">
-                    ${b.btnText}
-                </button>
-            ` : ''}
+            ${b.btnText ? `<button style="margin-top: 15px; padding: 8px 20px; background: ${tColor}; color: ${bg}; filter: invert(1); border-radius: 20px; border: none; font-weight: 900;">${b.btnText}</button>` : ''}
         </div>
-        <img src="${b.image}" style="
-            position: absolute;
-            right: -15px;
-            bottom: -10px;
-            width: 55%;
-            transform: rotate(-15deg);
-            pointer-events: none;
-            z-index: 5;
-            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.2));
-        ">
+        ${image ? `<img src="${image}" style="position: absolute; right: -15px; bottom: -10px; width: 55%; transform: rotate(-15deg); z-index: 5;">` : ''}
     `;
 }
 
