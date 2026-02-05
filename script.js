@@ -146,31 +146,81 @@ function addToCart(id) {
     }, 1500);
 }
 
-// სხვა დამხმარე ფუნქციები (renderHeader, renderBanner, renderNavigation, switchPage)
+// --- ჰედერის რენდერი ---
 function renderHeader(h) { 
-  const el = document.getElementById('main-header');
-  if (!el || h.status !== 'active') return;
-  // ... შენი არსებული ჰედერის კოდი
+    const el = document.getElementById('main-header');
+    if (!el || h.status !== 'active') return;
+
+    el.style.background = h.bg || '#ffffff';
+    el.style.height = (h.height || 60) + 'px';
+    
+    el.innerHTML = `
+        <div class="flex items-center justify-between px-5 h-full" style="color: ${h.textColor}">
+            ${h.logo ? `<img src="${h.logo}" style="height: ${h.logoSize || 40}px; border-radius: ${h.logoRadius || 0}px;">` : '<div></div>'}
+            <h1 class="font-black text-lg">${h.name || ''}</h1>
+            <div onclick="switchPage('cart')" class="relative">
+                <i class="fa-solid fa-cart-shopping text-xl"></i>
+                ${cart.length > 0 ? `<span class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">${cart.length}</span>` : ''}
+            </div>
+        </div>
+    `;
 }
+
+// --- ბანერის რენდერი ---
 function renderBanner(b) { 
-  const el = document.getElementById('hero-banner');
-  if (!el) return;
-  // ... შენი არსებული ბანერის კოდი
+    const el = document.getElementById('hero-banner');
+    if (!el) return;
+
+    el.innerHTML = `
+        <div class="relative w-full overflow-hidden rounded-[35px] mt-4" style="height: ${b.height || 200}px;">
+            <img src="${b.image}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 p-6 flex flex-col justify-center bg-black/20">
+                <h2 style="color: ${b.titleColor || '#fff'}; font-size: ${b.titleSize || 24}px;" class="font-black leading-tight">${b.title}</h2>
+                <p class="text-white/90 text-sm mt-1">${b.subtitle || ''}</p>
+                <button class="mt-4 bg-white text-black px-6 py-2 rounded-full font-bold text-sm w-fit active:scale-95 transition-all">
+                    ${b.btnText || 'ნახვა'}
+                </button>
+            </div>
+        </div>
+    `;
 }
+
+// --- ნავიგაციის რენდერი ---
 function renderNavigation(items) {
     const nav = document.getElementById('bottom-nav');
     if (!nav) return;
     nav.innerHTML = items.map(i => `
-        <div onclick="switchPage('${i.action}')" class="flex flex-col items-center text-slate-400 active:text-blue-600">
-            <i class="fa-solid ${i.icon} text-xl"></i>
-            <span class="text-[10px] font-bold mt-1">${i.name}</span>
+        <div onclick="switchPage('${i.action}')" class="flex flex-col items-center flex-1 py-2 active:scale-90 transition-all cursor-pointer">
+            <i class="fa-solid ${i.icon} text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">${i.name}</span>
         </div>
     `).join('');
 }
+
+// --- გვერდების გადართვა ---
 function switchPage(pageId) {
-    document.querySelectorAll('.page-fade').forEach(p => p.classList.add('hidden'));
+    // ვმალავთ ყველა გვერდს
+    document.querySelectorAll('.page-fade').forEach(p => {
+        p.classList.add('hidden');
+        p.style.display = 'none';
+    });
+
+    // ვაჩენთ საჭირო გვერდს
     const target = document.getElementById(pageId + '-page');
-    if (target) target.classList.remove('hidden');
+    if (target) {
+        target.classList.remove('hidden');
+        target.style.display = 'block';
+    }
+
+    // თუ კალათაა, თავიდან ვხატავთ
+    if (pageId === 'cart' || pageId === 'main') {
+        if (pageId === 'cart') renderCart();
+        // ჰედერის განახლება კალათის ნიშნულისთვის
+        if (storeData && storeData.header) renderHeader(storeData.header);
+    }
+
+    // ვსქროლავთ თავში
+    window.scrollTo(0, 0);
 }
 
 init();
