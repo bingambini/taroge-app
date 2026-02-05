@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxJXqd8EKqq1o0G82R5DisTuBekWs5KArUEI4K2UEEtf7bkmc5Sc2yX8iI_Gxtf3zvYuA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwuUoh7dSasq18fEkJtFFq948F2NONk-6GWoUCCNDrnNpAwWUSn7Pq9xVShBeYAUOVBUw/exec";
 let storeData = null;
 let cart = [];
 let selectedSize = null;
