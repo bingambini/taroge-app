@@ -80,23 +80,25 @@ function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
 
+    // ბანერის მთავარი კონტეინერი
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
-        overflow: 'hidden',
+        // overflow: 'visible' - აუცილებელია, რომ სურათი ჩარჩოდან გამოვიდეს
+        overflow: 'visible', 
         borderRadius: '30px',
         padding: '25px',
-        margin: '0 24px',
+        margin: '40px 24px 20px 24px', // ზემოდან მეტი ადგილი, რომ ამოწეული სურათი არ დაიმალოს
         height: (b.B_Height || 180) + 'px',
-        marginTop: (b.B_Margin_Top || 20) + 'px',
+        marginTop: (b.B_Margin_Top || 40) + 'px',
         background: b.B_Gradient || '#1e293b',
         boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-        boxSizing: 'border-box',
-        isolation: 'isolate'
+        boxSizing: 'border-box'
     });
 
     const textColor = b.B_Title_Color || '#ffffff';
+
     el.innerHTML = `
         <div style="z-index: 10; position: relative; width: 60%; pointer-events: none;">
             <h2 style="margin: 0; font-weight: 900; line-height: 1.1; font-size: ${b.B_Title_Size || 22}px; color: ${textColor};">
@@ -106,11 +108,39 @@ function renderBanner(b) {
                 ${b.B_Subtitle || ''}
             </p>
             ${b.B_Btn_Text ? `
-                <button onclick="switchPage('${b.B_Action_Value}')" style="margin-top: 15px; padding: 8px 20px; background: ${textColor}; color: #000; filter: invert(1); border: none; border-radius: 15px; font-weight: 900; font-size: 10px; text-transform: uppercase; pointer-events: auto;">
+                <button onclick="switchPage('${b.B_Action_Value}')" style="
+                    margin-top: 15px; 
+                    padding: 8px 20px; 
+                    background: ${textColor}; 
+                    color: #000; 
+                    filter: invert(1); 
+                    border: none; 
+                    border-radius: 15px; 
+                    font-weight: 900; 
+                    font-size: 10px; 
+                    text-transform: uppercase; 
+                    pointer-events: auto;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                ">
                     ${b.B_Btn_Text}
                 </button>` : ''}
         </div>
-        ${b.B_Image ? `<img src="${b.B_Image}" style="position: absolute; right: -15px; bottom: -10px; width: 55%; height: auto; object-fit: contain; transform: rotate(-15deg); z-index: 5; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.3)); pointer-events: none;">` : ''}
+
+        ${b.B_Image ? `
+            <img src="${b.B_Image}" style="
+                position: absolute;
+                right: -10px;
+                bottom: -10px; /* ქვედა მხარეზეც შეიძლება იყოს ოდნავ გადმოსული */
+                width: 60%;
+                height: auto;
+                object-fit: contain;
+                /* transform: translateY(-30px) - ეს წევს სურათს მაღლა ბანერიდან */
+                transform: translateY(-35px) rotate(-10deg); 
+                z-index: 20; 
+                filter: drop-shadow(0 20px 20px rgba(0,0,0,0.4));
+                pointer-events: none;
+            ">
+        ` : ''}
     `;
 }
 
