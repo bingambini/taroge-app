@@ -11,53 +11,40 @@
 </head>
 <body class="bg-[#f8f9fc]">
 
-    <div id="app-preloader">
-        <div class="loader-spin"></div>
-        <p style="margin-top: 20px; font-weight: 800; color: #1e293b;">იტვირთება...</p>
+    <div id="app-preloader" class="fixed inset-0 bg-white z-[50000] flex flex-col items-center justify-center">
+        <div class="loader-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-4 font-black text-slate-800">იტვირთება...</p>
     </div>
 
-    <header id="main-header"></header>
+    <header id="main-header" class="sticky top-0 z-[1000] transition-all"></header>
 
-    <main id="app-content">
-        <div id="home-page" class="page-fade">
-            <div id="hero-banner"></div>
-            <div id="product-grid" class="grid grid-cols-2 gap-4 px-6 mt-4"></div>
+    <main id="app-content" class="pb-24">
+        
+        <div id="main-page" class="page-fade">
+            <div id="hero-banner" class="px-5"></div>
+            <div id="product-grid" class="grid grid-cols-2 gap-4 px-5 mt-6"></div>
         </div>
 
-        <div id="cart-page" class="hidden page-fade px-6 pt-6">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">ჩემი კალათა</h2>
-            <div id="cart-items" class="space-y-4"></div>
-            <div id="cart-summary" class="mt-8 border-t pt-6 hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <span class="text-slate-500 font-bold">ჯამი:</span>
-                    <span id="cart-total-price" class="text-2xl font-black text-blue-600">0₾</span>
-                </div>
-                <button onclick="switchPage('checkout')" class="w-full bg-slate-900 text-white py-5 rounded-[25px] font-black">შეკვეთის გაფორმება</button>
+        <div id="details-page" class="hidden page-fade bg-white">
             </div>
-        </div>
+
+        <div id="cart-page" class="hidden page-fade min-h-screen">
+            </div>
 
         <div id="checkout-page" class="hidden page-fade px-6 pt-6 pb-20">
-            <h2 class="text-xl font-black mb-6">მიწოდების მონაცემები</h2>
+            <h2 class="text-xl font-black mb-6 text-slate-800">მიწოდების მონაცემები</h2>
             <div class="space-y-4">
-                <input type="text" id="order-name" class="checkout-input" placeholder="სახელი და გვარი *">
-                <input type="tel" id="order-phone" class="checkout-input" placeholder="ტელეფონი *">
-                <input type="text" id="order-address" class="checkout-input" placeholder="მისამართი *">
-                <button onclick="confirmFinalOrder()" class="w-full bg-blue-600 text-white py-5 rounded-[25px] font-black mt-4">დადასტურება</button>
+                <input type="text" id="order-name" class="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none focus:border-blue-600 transition-all font-bold" placeholder="სახელი და გვარი *">
+                <input type="tel" id="order-phone" class="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none focus:border-blue-600 transition-all font-bold" placeholder="ტელეფონი *">
+                <input type="text" id="order-address" class="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none focus:border-blue-600 transition-all font-bold" placeholder="მისამართი *">
+                <button onclick="placeOrder()" class="w-full bg-blue-600 text-white py-5 rounded-[25px] font-black mt-4 shadow-lg active:scale-95 transition-all">დადასტურება</button>
             </div>
         </div>
+
     </main>
 
-    <div id="product-details-page" class="hidden fixed inset-0 bg-white z-[30000] overflow-y-auto pb-40">
-        <div class="sticky top-0 bg-white/90 p-6 flex justify-between items-center">
-            <button onclick="closeProductDetails()" class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button>
-            <h3 class="font-bold">პროდუქტი</h3>
-            <div class="w-12"></div>
-        </div>
-        <div id="details-content" class="px-6"></div>
-    </div>
+    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-100 flex justify-around items-center px-4 py-3 z-[10000]"></nav>
 
-    <nav id="bottom-nav"></nav>
-
-<script src="script.js?v=2.7"></script>
+    <script src="script.js?v=2.7"></script>
 </body>
 </html>
