@@ -85,26 +85,38 @@ function renderBanner(b) {
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
-        // overflow: 'visible' - აუცილებელია, რომ სურათი ჩარჩოდან გამოვიდეს
-        overflow: 'visible', 
+        overflow: 'visible', // სურათის გამოსასვლელად
         borderRadius: '30px',
         padding: '25px',
-        margin: '40px 24px 20px 24px', // ზემოდან მეტი ადგილი, რომ ამოწეული სურათი არ დაიმალოს
+        margin: '50px 24px 30px 24px', // გავზარდეთ მარჟინები
         height: (b.B_Height || 180) + 'px',
-        marginTop: (b.B_Margin_Top || 40) + 'px',
+        marginTop: (b.B_Margin_Top || 50) + 'px',
         background: b.B_Gradient || '#1e293b',
         boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        zIndex: '1' // რომ სხვა ელემენტებს ხელი არ შეუშალოს
     });
 
     const textColor = b.B_Title_Color || '#ffffff';
 
     el.innerHTML = `
         <div style="z-index: 10; position: relative; width: 60%; pointer-events: none;">
-            <h2 style="margin: 0; font-weight: 900; line-height: 1.1; font-size: ${b.B_Title_Size || 22}px; color: ${textColor};">
+            <h2 style="
+                margin: 0; 
+                font-weight: 900; 
+                line-height: 1.1; 
+                font-size: ${b.B_Title_Size || 22}px; 
+                color: ${textColor};
+            ">
                 ${b.B_Title || ''}
             </h2>
-            <p style="margin-top: 8px; font-weight: 600; opacity: 0.85; font-size: ${b.B_Sub_Size || 12}px; color: ${textColor};">
+            <p style="
+                margin-top: 8px; 
+                font-weight: 600; 
+                opacity: 0.85; 
+                font-size: ${b.B_Sub_Size || 12}px; 
+                color: ${textColor};
+            ">
                 ${b.B_Subtitle || ''}
             </p>
             ${b.B_Btn_Text ? `
@@ -127,19 +139,26 @@ function renderBanner(b) {
         </div>
 
         ${b.B_Image ? `
-            <img src="${b.B_Image}" style="
-                position: absolute;
-                right: -10px;
-                bottom: -10px; /* ქვედა მხარეზეც შეიძლება იყოს ოდნავ გადმოსული */
-                width: 60%;
-                height: auto;
-                object-fit: contain;
-                /* transform: translateY(-30px) - ეს წევს სურათს მაღლა ბანერიდან */
-                transform: translateY(-35px) rotate(-10deg); 
-                z-index: 20; 
-                filter: drop-shadow(0 20px 20px rgba(0,0,0,0.4));
+            <div style="
+                position: absolute; 
+                right: -10px; 
+                top: 0; 
+                width: 55%; 
+                height: 100%; 
                 pointer-events: none;
+                z-index: 20;
             ">
+                <img src="${b.B_Image}" style="
+                    width: 110%; /* ოდნავ დიდი რომ გამოჩნდეს */
+                    height: auto;
+                    object-fit: contain;
+                    position: absolute;
+                    bottom: 0;
+                    right: 0;
+                    transform: translateY(-20%) rotate(-10deg); /* აქედან ვმართავთ ამოვარდნას */
+                    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+                ">
+            </div>
         ` : ''}
     `;
 }
