@@ -39,26 +39,55 @@ async function init() {
 
 function renderHeader(h) {
     const el = document.getElementById('main-header');
-    if (!el || h.status !== 'active') return;
+    if (!el) return;
 
-    el.className = "flex items-center px-6 sticky top-0 z-[1000] shadow-sm transition-all";
+    // თუ სტატუსი არ არის active, დავმალოთ
+    if (h.status !== 'active') {
+        el.style.display = 'none';
+        return;
+    }
+
+    // ჰედერის სტილის პირდაპირი მინიჭება (Tailwind-ის გარეშე, რომ არ აირიოს)
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.padding = '0 20px';
+    el.style.position = 'fixed'; // აფიქსირებს ზემოთ
+    el.style.top = '0';
+    el.style.left = '0';
+    el.style.right = '0';
+    el.style.zIndex = '9999'; // ყველაზე მაღალ ფენაზე
+    
     el.style.backgroundColor = h.bg || "#ffffff";
     el.style.color = h.textColor || "#000000";
-    el.style.height = (h.height || 70) + "px";
-    
+    el.style.height = (h.height || 60) + "px";
+    el.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+
     const isSplit = h.layout === 'split';
 
     el.innerHTML = `
-        <div class="flex items-center w-full relative h-full">
-            <img src="${h.logo}" style="width:${h.logoSize || 40}px; height:${h.logoSize || 40}px; border-radius:${h.logoRadius || 50}%; object-fit:cover;">
-            <span class="font-black text-lg" style="
+        <div style="display: flex; align-items: center; width: 100%; height: 100%; position: relative;">
+            <img src="${h.logo}" style="
+                width: ${h.logoSize || 40}px; 
+                height: ${h.logoSize || 40}px; 
+                border-radius: ${h.logoRadius || 50}%; 
+                object-fit: cover;
+                z-index: 10;
+            ">
+            <span style="
+                font-weight: 900; 
+                font-size: 18px; 
                 position: ${isSplit ? 'absolute' : 'relative'};
                 left: ${isSplit ? '50%' : '12px'};
                 transform: ${isSplit ? 'translateX(-50%)' : 'none'};
                 white-space: nowrap;
-            ">${h.name || ''}</span>
+            ">
+                ${h.name || ''}
+            </span>
         </div>
     `;
+
+    // რადგან ჰედერი fixed-ია, კონტენტს სჭირდება დაშორება (padding-top)
+    document.getElementById('app-content').style.paddingTop = (h.height || 60) + "px";
 }
 
 function renderBanner(b) {
