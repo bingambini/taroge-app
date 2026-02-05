@@ -39,7 +39,6 @@ function renderHeader(h) {
     const content = document.getElementById('app-content');
     if (!el || h.status !== 'active') return;
 
-    // ჰედერის სწორი სტილები (მთელ სიგანეზე)
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
@@ -71,7 +70,6 @@ function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
 
-    // ბანერის იდეალური ცენტრირება
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
@@ -79,7 +77,7 @@ function renderBanner(b) {
         overflow: 'visible', 
         borderRadius: '35px',
         margin: '50px auto 20px auto', 
-        width: 'calc(100% - 48px)', // ზუსტი დაშორება კიდეებიდან
+        width: 'calc(100% - 48px)',
         height: (b.height || 180) + 'px',
         marginTop: (b.marginTop || 50) + 'px',
         background: b.gradient || '#1e293b',
@@ -116,24 +114,83 @@ function renderBanner(b) {
 function renderProducts(items) {
     const grid = document.getElementById('product-grid');
     if (!grid) return;
+    
+    // ვიყენებთ შენს სვეტებს: ID, Name, Price, Old_Price, Image_URLs, Status
     grid.innerHTML = items.map(p => {
+        if (p.Status !== 'Active') return '';
+        
         let img = "https://via.placeholder.com/150";
-        if (p.images) img = p.images.split(',')[0].trim();
+        if (p.Image_URLs) img = p.Image_URLs.split(',')[0].trim();
+        
         return `
-            <div onclick="showDetails('${p.id}')" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all flex flex-col items-center text-center">
+            <div onclick="showDetails('${p.ID}')" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all flex flex-col items-center text-center relative">
+                ${p.Old_Price ? `<div style="position: absolute; top: 12px; left: 12px; background: #ef4444; color: white; font-size: 9px; font-weight: 900; padding: 4px 8px; border-radius: 8px; z-index: 5;">SALE</div>` : ''}
                 <div class="h-32 w-full flex items-center justify-center">
                     <img src="${img}" class="max-h-full max-w-full object-contain drop-shadow-md">
                 </div>
-                <h4 class="font-bold text-slate-700 text-sm mt-3 leading-tight h-10 overflow-hidden line-clamp-2">${p.name}</h4>
+                <h4 class="font-bold text-slate-700 text-sm mt-3 leading-tight h-10 overflow-hidden line-clamp-2">${p.Name}</h4>
                 <div class="flex justify-between items-center w-full mt-3">
-                    <span class="text-blue-600 font-black text-lg">${p.price}₾</span>
-                    <button class="bg-slate-100 w-10 h-10 rounded-full flex items-center justify-center text-slate-900">
+                    <div class="flex flex-col items-start">
+                        ${p.Old_Price ? `<span class="text-[10px] text-slate-400 line-through font-bold">${p.Old_Price}₾</span>` : ''}
+                        <span class="text-blue-600 font-black text-lg">${p.Price}₾</span>
+                    </div>
+                    <button class="bg-slate-900 w-10 h-10 rounded-full flex items-center justify-center text-white">
                         <i class="fa-solid fa-plus text-xs"></i>
                     </button>
                 </div>
             </div>
         `;
     }).join('');
+}
+
+function showDetails(productId) {
+    const product = storeData.latest.items.find(p => p.ID === productId);
+    if (!product) return;
+
+    const detailsPage = document.getElementById('details-page');
+    if (!detailsPage) return;
+
+    let images = product.Image_URLs ? product.Image_URLs.split(',').map(img => img.trim()) : ["https://via.placeholder.com/300"];
+    const sizes = product.Sizes ? product.Sizes.split(',') : [];
+
+    detailsPage.innerHTML = `
+        <div style="padding: 20px; padding-bottom: 120px; background: #fdfdfd; min-height: 100vh;">
+            <button onclick="switchPage('main')" style="background: white; border: none; width: 45px; height: 45px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.07); margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div style="width: 100%; height: 300px; background: white; border-radius: 40px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+                <img src="${images[0]}" style="max-width: 85%; max-height: 85%; object-fit: contain;">
+            </div>
+            <div style="margin-top: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <h1 style="font-size: 24px; font-weight: 900; color: #0f172a; width: 70%;">${product.Name}</h1>
+                    <div style="text-align: right;">
+                        ${product.Old_Price ? `<span style="display: block; text-decoration: line-through; color: #94a3b8; font-size: 14px;">${product.Old_Price}₾</span>` : ''}
+                        <span style="font-size: 24px; font-weight: 900; color: #2563eb;">${product.Price}₾</span>
+                    </div>
+                </div>
+                <p style="color: #64748b; font-weight: 700; font-size: 12px; margin-top: 5px; text-transform: uppercase;">${product.Category}</p>
+                
+                ${sizes.length > 0 ? `
+                    <div style="margin-top: 25px;">
+                        <p style="font-weight: 800; font-size: 14px; margin-bottom: 10px;">ზომა</p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            ${sizes.map(s => `<div style="padding: 10px 15px; border: 2px solid #f1f5f9; border-radius: 12px; font-weight: 700; font-size: 13px;">${s.trim()}</div>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div style="margin-top: 30px;">
+                    <p style="font-weight: 800; font-size: 14px; margin-bottom: 10px;">აღწერა</p>
+                    <p style="color: #64748b; font-size: 14px; line-height: 1.6;">${product.Description || ''}</p>
+                </div>
+            </div>
+            <div style="position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 20px; border-top: 1px solid #f1f5f9; display: flex; z-index: 10000;">
+                <button onclick="addToCart('${product.ID}')" style="flex: 1; background: #0f172a; color: white; border: none; padding: 18px; border-radius: 20px; font-weight: 800; font-size: 16px;">კალათაში დამატება</button>
+            </div>
+        </div>
+    `;
+    switchPage('details');
 }
 
 function renderNavigation(items) {
@@ -152,6 +209,13 @@ function switchPage(pageId) {
     document.querySelectorAll('.page-fade').forEach(p => p.classList.add('hidden'));
     const target = document.getElementById(pageId + '-page');
     if (target) target.classList.remove('hidden');
+}
+
+function addToCart(id) {
+    // კალათის ლოგიკას შემდეგ ეტაპზე გავმართავთ
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+    }
 }
 
 init();
