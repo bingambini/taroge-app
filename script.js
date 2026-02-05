@@ -1,6 +1,7 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbwogedzKe0goXS8gB0woEFW9VmAwAUATsRv-tKDwEjaevxGeZUq5SElNZa9aTwktZPvxw/exec";
 let storeData = null;
 let cart = [];
+let selectedSize = null;
 
 async function init() {
     console.log("App starting...");
@@ -19,6 +20,7 @@ async function init() {
         if (!response.ok) throw new Error('Network response was not ok');
         storeData = await response.json();
         
+        // მონაცემების ასახვა
         if (storeData.header) renderHeader(storeData.header);
         if (storeData.banner) renderBanner(storeData.banner);
         if (storeData.latest) renderProducts(storeData.latest.items);
@@ -45,7 +47,8 @@ function renderHeader(h) {
         backgroundColor: h.bg || "#ffffff",
         height: (h.height || 70) + "px",
         padding: '0 24px',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
     });
 
     if (content) content.style.paddingTop = el.style.height;
@@ -75,7 +78,8 @@ function renderBanner(b) {
         height: (b.height || 180) + 'px',
         background: b.gradient || '#1e293b',
         boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        overflow: 'hidden'
     });
 
     const textColor = b.titleColor || '#ffffff';
@@ -87,7 +91,7 @@ function renderBanner(b) {
             <button onclick="switchPage('${b.actionValue}')" style="margin-top: 15px; padding: 10px 20px; background: #56ab81; color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 12px;">${b.btnText || 'ყიდვა'}</button>
         </div>
         <div style="position: absolute; right: 10px; width: 45%; height: 100%; display: flex; align-items: center; justify-content: center;">
-            <img src="${b.image}" style="width: 100%; height: auto; object-fit: contain; transform: rotate(-10deg) translateY(-10%);">
+            <img src="${b.image}" style="width: 110%; height: auto; object-fit: contain; transform: rotate(-10deg) translateY(-5%);">
         </div>
     `;
 }
@@ -102,19 +106,17 @@ function renderProducts(items) {
     }
 
     grid.innerHTML = items.map(p => {
-        // Apps Script-ის მიხედვით: r[0]=id, r[1]=name, r[2]=price, r[3]=images
-        let img = "https://placehold.jp/24/3b82f6/ffffff/200x200.png?text=No%20Image"; // შეცვლილი placeholder
-        
-        if (p.images && p.images.toString().length > 5) {
-            img = p.images.split(',')[0].trim();
+        let img = "https://placehold.jp/24/3b82f6/ffffff/200x200.png?text=სურათი";
+        if (p.images) {
+            img = p.images.toString().split(',')[0].trim();
         }
 
         return `
             <div onclick="showDetails('${p.id}')" class="bg-white p-4 rounded-[35px] shadow-sm active:scale-95 transition-all flex flex-col items-center text-center">
                 <div class="h-32 w-full flex items-center justify-center mb-4">
-                    <img src="${img}" class="max-h-full max-w-full object-contain" onerror="this.src='https://placehold.jp/150x150.png'">
+                    <img src="${img}" class="max-h-full max-w-full object-contain" onerror="this.src='https://placehold.jp/150x150.png?text=Error'">
                 </div>
-                <h4 class="font-bold text-slate-800 text-[14px] leading-tight h-10 overflow-hidden line-clamp-2">${p.name || 'დასახელების გარეშე'}</h4>
+                <h4 class="font-bold text-slate-800 text-[14px] leading-tight h-10 overflow-hidden line-clamp-2">${p.name || 'ბოტასი'}</h4>
                 <div class="flex justify-between items-center w-full mt-4">
                     <span class="text-[#3b82f6] font-black text-xl">${p.price || 0}₾</span>
                     <button class="bg-[#f1f5f9] w-10 h-10 rounded-full flex items-center justify-center text-slate-900">
@@ -127,18 +129,14 @@ function renderProducts(items) {
 }
 
 function showDetails(productId) {
-    // ვიყენებთ storeData.productDetails-ს, რადგან Apps Script-ში მანდ არის სრული ინფო
     const product = storeData.productDetails.find(p => p.id.toString() === productId.toString());
     if (!product) return;
 
+    selectedSize = null;
     const detailsPage = document.getElementById('details-page');
     if (!detailsPage) return;
 
-    let img = product.images && product.images.toString().length > 5 
-              ? product.images.split(',')[0].trim() 
-              : "https://placehold.jp/300x300.png";
-
-    // ზომების დამუშავება r[5] სვეტიდან
+    let img = product.images ? product.images.toString().split(',')[0].trim() : "https://placehold.jp/300x300.png";
     const sizes = product.sizes ? product.sizes.toString().split(',') : [];
 
     detailsPage.innerHTML = `
@@ -157,9 +155,14 @@ function showDetails(productId) {
                 
                 ${sizes.length > 0 ? `
                     <div style="margin-top: 20px;">
-                        <p style="font-weight: 800; font-size: 14px; margin-bottom: 10px;">ხელმისაწვდომი ზომები</p>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            ${sizes.map(s => `<span style="padding: 10px 18px; background: #f8fafc; border-radius: 12px; font-weight: 700; font-size: 13px; border: 1px solid #f1f5f9;">${s.trim()}</span>`).join('')}
+                        <p style="font-weight: 800; font-size: 14px; margin-bottom: 10px;">აირჩიეთ ზომა</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="size-container">
+                            ${sizes.map(s => `
+                                <button onclick="selectSize(this, '${s.trim()}')" 
+                                        style="padding: 10px 18px; background: #f8fafc; border-radius: 12px; font-weight: 700; font-size: 13px; border: 1px solid #f1f5f9;">
+                                    ${s.trim()}
+                                </button>
+                            `).join('')}
                         </div>
                     </div>
                 ` : ''}
@@ -171,13 +174,51 @@ function showDetails(productId) {
             </div>
 
             <div style="position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 25px; border-top: 1px solid #f1f5f9; z-index: 10000;">
-                <button onclick="addToCart('${product.id}')" style="width: 100%; background: #0f172a; color: white; border: none; padding: 20px; border-radius: 20px; font-weight: 800; font-size: 16px;">
+                <button onclick="addToCart('${product.id}')" id="add-btn" style="width: 100%; background: #0f172a; color: white; border: none; padding: 20px; border-radius: 20px; font-weight: 800; font-size: 16px;">
                     კალათაში დამატება
                 </button>
             </div>
         </div>
     `;
     switchPage('details');
+}
+
+function selectSize(btn, size) {
+    document.querySelectorAll('#size-container button').forEach(b => {
+        b.style.background = '#f8fafc';
+        b.style.color = '#000';
+        b.style.borderColor = '#f1f5f9';
+    });
+    btn.style.background = '#0f172a';
+    btn.style.color = '#fff';
+    btn.style.borderColor = '#0f172a';
+    selectedSize = size;
+}
+
+function addToCart(id) {
+    const product = storeData.productDetails.find(p => p.id.toString() === id.toString());
+    if (product.sizes && !selectedSize) {
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.showAlert("გთხოვთ, აირჩიოთ ზომა!");
+        } else {
+            alert("გთხოვთ, აირჩიოთ ზომა!");
+        }
+        return;
+    }
+
+    cart.push({ ...product, selectedSize });
+    
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+    }
+    
+    const btn = document.getElementById('add-btn');
+    btn.innerHTML = "დამატებულია! ✓";
+    btn.style.background = "#22c55e";
+    setTimeout(() => {
+        btn.innerHTML = "კალათაში დამატება";
+        btn.style.background = "#0f172a";
+    }, 1500);
 }
 
 function renderNavigation(items) {
@@ -196,12 +237,6 @@ function switchPage(pageId) {
     document.querySelectorAll('.page-fade').forEach(p => p.classList.add('hidden'));
     const target = document.getElementById(pageId + '-page');
     if (target) target.classList.remove('hidden');
-}
-
-function addToCart(id) {
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-    }
 }
 
 init();
