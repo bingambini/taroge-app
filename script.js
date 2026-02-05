@@ -4,9 +4,19 @@ let cart = [];
 
 async function init() {
     console.log("App starting...");
+    
+    // Telegram WebApp-ის სრული გაფართოება და ვიზუალური სინქრონიზაცია
     if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand(); // აფართოებს აპს მაქსიმალურ სიმაღლეზე
+        
+        // ფერების სინქრონიზაცია ზედა პანელთან (სტატუს ბართან)
+        tg.setHeaderColor('bg_color'); 
+        tg.setBackgroundColor('bg_color');
+        
+        // სურვილის შემთხვევაში შეგიძლიათ ჩართოთ დახურვის დადასტურება
+        tg.isClosingConfirmationEnabled = true;
     }
 
     try {
@@ -26,12 +36,15 @@ async function init() {
 
     } catch (e) {
         console.error("Critical Error:", e);
-        document.getElementById('app-preloader').innerHTML = `
-            <div class="text-center p-10">
-                <p class="text-red-500 font-bold">ვერ მოხერხდა მონაცემების ჩატვირთვა</p>
-                <button onclick="location.reload()" class="mt-4 bg-slate-800 text-white px-6 py-2 rounded-xl">თავიდან ცდა</button>
-            </div>
-        `;
+        const preloader = document.getElementById('app-preloader');
+        if (preloader) {
+            preloader.innerHTML = `
+                <div class="text-center p-10">
+                    <p class="text-red-500 font-bold">ვერ მოხერხდა მონაცემების ჩატვირთვა</p>
+                    <button onclick="location.reload()" class="mt-4 bg-slate-800 text-white px-6 py-2 rounded-xl">თავიდან ცდა</button>
+                </div>
+            `;
+        }
     }
 }
 
@@ -71,7 +84,6 @@ function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
 
-    // 1. ბანერის მთავარი კონტეინერი
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
@@ -93,8 +105,8 @@ function renderBanner(b) {
         <div style="
             position: relative; 
             z-index: 30; 
-            width: 45%; /* შევამცირეთ სიგანე, რომ ფოტოს არ შეეხოს */
-            padding-left: 15px; /* მივწიეთ მარცხენა კიდისკენ */
+            width: 45%; 
+            padding-left: 15px; 
             display: flex; 
             flex-direction: column; 
             justify-content: center;
@@ -143,7 +155,7 @@ function renderBanner(b) {
                 position: absolute;
                 right: -10px;
                 top: -45px; 
-                width: 65%; /* ფოტოს ველი უფრო დიდია */
+                width: 65%; 
                 height: 140%;
                 z-index: 40;
                 pointer-events: none;
