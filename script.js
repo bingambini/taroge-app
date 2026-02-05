@@ -80,12 +80,15 @@ function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
 
-    // 1. ბანერის მთავარი კონტეინერი
+    // კონსოლში ვნახოთ რას იღებს რეალურად ბანერი
+    console.log("Banner Data Received:", b);
+
+    // ბანერის ძირითადი სტილი
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
-        overflow: 'visible', // აუცილებელია სურათის გადმოსასვლელად
+        overflow: 'visible', 
         borderRadius: '30px',
         margin: '60px 24px 20px 24px', 
         height: (b.B_Height || 180) + 'px',
@@ -93,9 +96,10 @@ function renderBanner(b) {
         background: b.B_Gradient || '#1e293b',
         boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
         boxSizing: 'border-box',
-        zIndex: '1' // ბაზისური ფენა
+        zIndex: '1'
     });
 
+    // თუ შიტიდან ფერი არ მოვიდა, იყოს თეთრი
     const textColor = b.B_Title_Color || '#ffffff';
 
     el.innerHTML = `
@@ -116,7 +120,7 @@ function renderBanner(b) {
                 font-size: ${b.B_Title_Size || 22}px; 
                 color: ${textColor};
             ">
-                ${b.B_Title || ''}
+                ${b.B_Title || 'სათაური არ მოიძებნა'}
             </h2>
             <p style="
                 margin-top: 8px; 
@@ -125,8 +129,9 @@ function renderBanner(b) {
                 font-size: ${b.B_Sub_Size || 12}px; 
                 color: ${textColor};
             ">
-                ${b.B_Subtitle || ''}
+                ${b.B_Subtitle || 'ქვესათაური არ მოიძებნა'}
             </p>
+            
             ${b.B_Btn_Text ? `
                 <div style="margin-top: 15px; pointer-events: auto;">
                     <button onclick="switchPage('${b.B_Action_Value}')" style="
@@ -143,28 +148,26 @@ function renderBanner(b) {
                 </div>` : ''}
         </div>
 
-        ${b.B_Image ? `
-            <div style="
-                position: absolute;
-                right: -10px;
-                top: -50px; /* სურათის აწევა ზემოთ კიდიდან */
-                width: 60%;
-                height: 130%;
-                z-index: 20; /* ტექსტზე წინ */
-                pointer-events: none;
-                display: flex;
-                align-items: flex-end;
-                justify-content: flex-end;
+        <div style="
+            position: absolute;
+            right: -10px;
+            top: -50px;
+            width: 60%;
+            height: 130%;
+            z-index: 20;
+            pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+        ">
+            <img src="${b.B_Image || 'https://via.placeholder.com/200'}" style="
+                width: 100%;
+                height: auto;
+                object-fit: contain;
+                transform: rotate(-10deg);
+                filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
             ">
-                <img src="${b.B_Image}" style="
-                    width: 100%;
-                    height: auto;
-                    object-fit: contain;
-                    transform: rotate(-10deg);
-                    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
-                ">
-            </div>
-        ` : ''}
+        </div>
     `;
 }
 
