@@ -223,4 +223,83 @@ function switchPage(pageId) {
     window.scrollTo(0, 0);
 }
 
+// --- კალათის ფუნქციები ---
+function renderCart() {
+    const cartPage = document.getElementById('cart-page');
+    if (!cartPage) return;
+
+    if (cart.length === 0) {
+        cartPage.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70vh; color: #cbd5e1;">
+                <i class="fa-solid fa-cart-shopping" style="font-size: 80px; margin-bottom: 20px;"></i>
+                <h2 style="color: #64748b; font-weight: 800;">კალათა ცარიელია</h2>
+                <button onclick="switchPage('main')" style="margin-top: 20px; color: #3b82f6; font-weight: 700; background: none; border: none;">საყიდლებზე დაბრუნება</button>
+            </div>
+        `;
+        return;
+    }
+
+    let total = cart.reduce((sum, item) => sum + Number(item.price), 0);
+
+    cartPage.innerHTML = `
+        <div style="padding: 20px; padding-bottom: 150px;">
+            <h2 style="font-size: 24px; font-weight: 900; margin-bottom: 25px;">ჩემი კალათა</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                ${cart.map((item, index) => `
+                    <div style="display: flex; align-items: center; background: #fff; padding: 15px; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid #f1f5f9;">
+                        <img src="${item.images.split(',')[0]}" style="width: 70px; height: 70px; object-fit: contain; border-radius: 15px;">
+                        <div style="margin-left: 15px; flex: 1;">
+                            <h4 style="font-weight: 800; font-size: 14px; margin: 0;">${item.name}</h4>
+                            <p style="font-size: 12px; color: #94a3b8; margin: 4px 0;">${item.selectedSize || '-'} / ${item.selectedColor || '-'}</p>
+                            <p style="font-weight: 900; color: #3b82f6; margin: 0;">${item.price}₾</p>
+                        </div>
+                        <button onclick="removeFromCart(${index})" style="background: none; border: none; color: #ef4444; font-size: 18px; padding: 10px;">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div style="position: fixed; bottom: 80px; left: 0; right: 0; background: white; padding: 25px; border-top: 1px solid #f1f5f9; z-index: 100;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span style="font-weight: 800; font-size: 18px;">ჯამი:</span>
+                    <span style="font-weight: 900; font-size: 22px; color: #3b82f6;">${total}₾</span>
+                </div>
+                <button onclick="placeOrder()" style="width: 100%; background: #0f172a; color: white; border: none; padding: 18px; border-radius: 20px; font-weight: 800; font-size: 16px;">შეკვეთის გაფორმება</button>
+            </div>
+        </div>
+    `;
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    renderCart();
+    if (window.Telegram?.WebApp) window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+    if (storeData.header) renderHeader(storeData.header);
+}
+
+async function placeOrder() {
+    const tg = window.Telegram?.WebApp;
+    if (cart.length === 0) return;
+
+    const itemsSummary = cart.map(i => `${i.name} (${i.selectedSize || '-'}, ${i.selectedColor || '-'})`).join(', ');
+    const total = cart.reduce((sum, item) => sum + Number(item.price), 0);
+    const userId = tg?.initDataUnsafe?.user?.id || "unknown";
+    const userName = tg?.initDataUnsafe?.user?.first_name || "Guest";
+
+    tg?.showConfirm("გსურთ შეკვეთის გაფორმება?", async (confirmed) => {
+        if (confirmed) {
+            try {
+                const url = `${API_URL}?action=placeOrder&userId=${userId}&customerName=${userName}&items=${encodeURIComponent(itemsSummary)}&total=${total}&phone=--&address=--&promo=არა`;
+                await fetch(url);
+                tg.showAlert("შეკვეთა წარმატებით გაიგზავნა!");
+                cart = [];
+                switchPage('main');
+            } catch (err) {
+                tg.showAlert("შეცდომა შეკვეთისას.");
+            }
+        }
+    });
+}
+
 init();
