@@ -1,30 +1,121 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
 
-body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding-bottom: 100px; }
-
-#app-preloader { position: fixed; inset: 0; z-index: 999999; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
-.loader-spin { border: 4px solid #f1f5f9; border-top: 4px solid #2563eb; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-#main-header { width: 100%; height: 70px; display: none; align-items: center; padding: 0 20px; color: white; }
-#hero-banner { margin: 20px auto; width: calc(100% - 40px); border-radius: 30px; height: 170px; position: relative; overflow: hidden; display: flex; align-items: center; padding: 25px; }
-.banner-img {
-    position: absolute;
-    right: -10px;
-    bottom: -10px;
-    width: 60%; /* ზომა შეგიძლია შეცვალო */
-    transform: rotate(-15deg);
-    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+/* ძირითადი სტილები */
+body { 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    margin: 0; 
+    padding: 0;
+    background-color: #f8f9fc;
+    color: #0f172a;
+    -webkit-tap-highlight-color: transparent; /* აშორებს ლურჯ ჩარჩოს მობილურზე დაჭერისას */
 }
 
-#bottom-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); height: 70px; background: #000; border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-.nav-item { color: #888; display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: 700; cursor: pointer; }
-.nav-item.active { color: #fff; }
+/* Preloader */
+#app-preloader { 
+    position: fixed; 
+    inset: 0; 
+    z-index: 999999; 
+    background: #ffffff; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+}
 
-.checkout-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #eee; font-weight: 600; outline: none; }
-.option-btn { padding: 10px 20px; border: 2px solid #f1f5f9; border-radius: 12px; font-weight: 800; background: white; }
-.option-btn.selected { background: #2563eb; color: white; border-color: #2563eb; }
+.loader-spin { 
+    border: 4px solid #f1f5f9; 
+    border-top: 4px solid #2563eb; 
+    border-radius: 50%; 
+    width: 50px; 
+    height: 50px; 
+    animation: spin 1s linear infinite; 
+}
 
-.hidden { display: none; }
-.page-fade { animation: fadeIn 0.3s ease; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Header - JavaScript მართავს display-ს, აქ მხოლოდ ვიზუალია */
+#main-header { 
+    width: 100%; 
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+/* Banner */
+#hero-banner { 
+    margin: 20px auto; 
+    width: calc(100% - 40px); 
+    border-radius: 35px; 
+    position: relative; 
+    overflow: hidden; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+/* Bottom Navigation */
+#bottom-nav { 
+    position: fixed; 
+    bottom: 20px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    width: calc(100% - 40px); 
+    height: 75px; 
+    background: #0f172a; 
+    border-radius: 25px; 
+    display: flex; 
+    justify-content: space-around; 
+    align-items: center; 
+    z-index: 10000; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    padding: 0 10px;
+}
+
+#bottom-nav div { color: #64748b; transition: all 0.2s; }
+#bottom-nav div:active { transform: scale(0.9); }
+#bottom-nav .active-nav { color: #ffffff !important; }
+
+/* Product Details & Option Buttons */
+.option-btn { 
+    padding: 12px 20px; 
+    border: 1px solid #f1f5f9; 
+    border-radius: 15px; 
+    font-weight: 700; 
+    background: #f8fafc;
+    transition: all 0.2s;
+}
+
+/* Input Fields */
+.checkout-input { 
+    width: 100%; 
+    padding: 18px; 
+    border-radius: 20px; 
+    border: 1px solid #f1f5f9; 
+    font-weight: 600; 
+    outline: none; 
+    background: #fff;
+    transition: all 0.2s;
+}
+
+.checkout-input:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.05); }
+
+/* Utility Classes */
+.hidden { display: none !important; }
+
+.page-fade { 
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+/* კალათის ნივთების ანიმაცია წაშლისას */
+.cart-item-remove {
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+/* დაჭერის ეფექტი ყველა ინტერაქტიულ ელემენტზე */
+button:active, .clickable:active {
+    transform: scale(0.96);
+}
