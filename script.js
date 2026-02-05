@@ -1,111 +1,89 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbwuUoh7dSasq18fEkJtFFq948F2NONk-6GWoUCCNDrnNpAwWUSn7Pq9xVShBeYAUOVBUw/exec";
 let storeData = null;
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let cart = [];
 
-// 1. ინიციალიზაცია
+// აპლიკაციის საწყისი ჩატვირთვა
 async function init() {
     if (window.Telegram?.WebApp) {
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
     }
     try {
-        const res = await fetch(API_URL);
-        storeData = await res.json();
+        const response = await fetch(API_URL);
+        storeData = await response.json();
         
+        // ვიძახებთ მხოლოდ იმას, რაც მუშაობდა
         if (storeData.header) renderHeader(storeData.header);
         if (storeData.banner) renderBanner(storeData.banner);
-        if (storeData.latest) renderProducts(storeData.latest);
+        if (storeData.latest) renderProducts(storeData.latest.items);
         if (storeData.navigation) renderNavigation(storeData.navigation);
         
-        const preloader = document.getElementById('app-preloader');
-        preloader.style.opacity = '0';
-        setTimeout(() => preloader.style.display = 'none', 500);
-    } catch (e) {
-        console.error("ჩატვირთვის შეცდომა:", e);
+        document.getElementById('app-preloader').style.display = 'none';
+    } catch (e) { 
+        console.error("Error loading data:", e); 
     }
 }
 
-// 2. პროდუქტების გამოჩენა (HTML-ში არსებული product-grid-ისთვის)
-function renderProducts(l) {
+// ჰედერის ფუნქცია (როგორც იყო)
+function renderHeader(h) { 
+    const el = document.getElementById('main-header');
+    if (!el || h.status !== 'active') return;
+    el.innerHTML = `
+        <div class="header-container flex items-center justify-between px-5 w-full h-full" style="background: ${h.bg}; color: ${h.textColor};">
+            ${h.logo ? `<img src="${h.logo}" style="height: ${h.logoSize || 40}px; border-radius: ${h.logoRadius || 0}px;">` : '<div></div>'}
+            <span class="font-black text-lg">${h.name || ''}</span>
+            <div onclick="switchPage('cart')" class="relative cursor-pointer">
+                <i class="fa-solid fa-cart-shopping text-xl"></i>
+            </div>
+        </div>`;
+}
+
+// ბანერის ფუნქცია (როგორც იყო)
+function renderBanner(b) { 
+    const el = document.getElementById('hero-banner');
+    if (!el) return;
+    el.innerHTML = `
+        <div class="relative w-full overflow-hidden rounded-[35px] mt-4 shadow-lg" style="height: ${b.height || 200}px;">
+            <img src="${b.image}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 p-6 flex flex-col justify-center bg-black/30">
+                <h2 style="color: ${b.titleColor}; font-size: ${b.titleSize}px;" class="font-black leading-tight">${b.title}</h2>
+                <p class="text-white text-sm mt-1">${b.subtitle || ''}</p>
+                <button class="mt-4 bg-white text-black px-6 py-2 rounded-full font-black text-sm w-fit">${b.btnText || 'ნახვა'}</button>
+            </div>
+        </div>`;
+}
+
+// პროდუქტების გამოჩენა
+function renderProducts(items) {
     const grid = document.getElementById('product-grid');
     if (!grid) return;
-    grid.innerHTML = l.items.map((p, index) => {
-        const details = storeData.productDetails.find(d => d.id.toString() === p.id.toString());
-        const statusBadge = details?.status ? `<span class="badge badge-${details.status.toLowerCase()}">${details.status}</span>` : '';
-        const mainImg = p.images ? p.images.split(',')[0] : '';
+    grid.innerHTML = items.map((p) => {
+        let img = p.images ? p.images.split(',')[0].trim() : "";
         return `
-            <div onclick="openProductSheet(${index})" class="bg-white p-4 rounded-[30px] border border-slate-100 shadow-sm active:scale-95 transition-all cursor-pointer relative overflow-hidden">
-                ${statusBadge}
-                <img src="${mainImg}" class="h-24 mx-auto object-contain">
-                <h4 class="font-bold text-[11px] text-slate-700 truncate mt-3">${p.name}</h4>
-                <p class="text-blue-600 font-black text-sm mt-1">${p.price}₾</p>
+            <div class="bg-white p-4 rounded-[30px] shadow-sm flex flex-col items-center border border-slate-50">
+                <img src="${img}" class="h-32 object-contain mb-4">
+                <h4 class="font-bold text-slate-800 text-[11px] text-center">${p.name}</h4>
+                <span class="text-blue-600 font-black text-lg mt-2">${p.price}₾</span>
             </div>`;
     }).join('');
 }
 
-// 3. პროდუქტის "ფურცლის" (Sheet) გახსნა
-function openProductSheet(index) {
-    const p = storeData.latest.items[index];
-    const overlay = document.getElementById('product-sheet-overlay');
-    const content = document.getElementById('sheet-content');
-    content.innerHTML = `
-        <div class="flex flex-col items-center">
-            <div class="w-full aspect-square bg-slate-50 rounded-[30px] flex items-center justify-center mb-6 overflow-hidden">
-                <img src="${p.images.split(',')[0]}" class="w-4/5 h-4/5 object-contain">
-            </div>
-            <h3 class="text-2xl font-black text-slate-800 text-center leading-tight">${p.name}</h3>
-            <p class="text-3xl font-black text-blue-600 mt-3">${p.price}₾</p>
-            <button onclick="goToProductDetails('${p.id}')" class="w-full mt-10 bg-slate-900 text-white py-5 rounded-[25px] font-black text-lg active:scale-95 transition-all flex items-center justify-center gap-3">
-                დეტალურად <i class="fa-solid fa-arrow-right text-sm"></i>
-            </button>
-        </div>`;
-    overlay.classList.remove('hidden');
-    setTimeout(() => {
-        overlay.classList.add('opacity-100');
-        document.getElementById('product-sheet').classList.remove('translate-y-full');
-    }, 10);
+// ნავიგაცია
+function renderNavigation(items) {
+    const nav = document.getElementById('bottom-nav');
+    if (!nav) return;
+    nav.innerHTML = items.map(i => `
+        <div onclick="switchPage('${i.action}')" class="flex flex-col items-center flex-1 text-slate-400 py-2">
+            <i class="fa-solid ${i.icon} text-xl"></i>
+            <span class="text-[10px] font-bold">${i.name}</span>
+        </div>`).join('');
 }
 
-// 4. გვერდების გადართვა
+// გვერდების გადართვა
 function switchPage(pageId) {
-    const pages = ['home-page', 'cart-page', 'checkout-page', 'payment-page', 'orders-page', 'product-details-page'];
-    pages.forEach(p => {
-        const el = document.getElementById(p);
-        if (el) el.classList.add('hidden');
-    });
-    
+    document.querySelectorAll('.page-fade').forEach(p => p.classList.add('hidden'));
     const target = document.getElementById(pageId + '-page');
     if (target) target.classList.remove('hidden');
-    
-    // თუ კალათაში გადავდივართ, განვაახლოთ შიგთავსი
-    if (pageId === 'cart') renderCart();
-}
-
-// 5. კალათის ლოგიკა
-function renderCart() {
-    const itemsContainer = document.getElementById('cart-items');
-    if (cart.length === 0) {
-        itemsContainer.innerHTML = '<p class="text-center text-slate-400 font-bold py-10">კალათა ცარიელია</p>';
-        return;
-    }
-    // აქ დაამატე კალათის ელემენტების რენდერი...
-}
-
-function closeProductSheet() {
-    const overlay = document.getElementById('product-sheet-overlay');
-    const sheet = document.getElementById('product-sheet');
-    sheet.classList.add('translate-y-full');
-    overlay.classList.remove('opacity-100');
-    setTimeout(() => overlay.classList.add('hidden'), 300);
-}
-
-// დანარჩენი ფუნქციები (renderHeader, renderBanner და ა.შ.) შენი code.txt-დან
-function renderHeader(h) {
-    const el = document.getElementById('main-header');
-    if (h.status !== 'active') return;
-    el.style.display = 'flex';
-    el.style.backgroundColor = h.bg || "#24afeb";
-    el.innerHTML = `<div class="header-container"><span class="font-black">${h.name}</span></div>`;
 }
 
 init();
