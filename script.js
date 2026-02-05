@@ -5,18 +5,23 @@ let cart = [];
 async function init() {
     console.log("App starting...");
     
-    // Telegram WebApp-ის სრული გაფართოება და ვიზუალური სინქრონიზაცია
     if (window.Telegram && window.Telegram.WebApp) {
         const tg = window.Telegram.WebApp;
         tg.ready();
-        tg.expand(); // აფართოებს აპს მაქსიმალურ სიმაღლეზე
+        tg.expand();
+
+        // ვამოწმებთ, უჭერს თუ არა მხარს ვერსია ამ ფუნქციებს
+        if (tg.isVersionAtLeast('6.1')) {
+            tg.setHeaderColor('bg_color');
+        }
         
-        // ფერების სინქრონიზაცია ზედა პანელთან (სტატუს ბართან)
-        tg.setHeaderColor('bg_color'); 
-        tg.setBackgroundColor('bg_color');
-        
-        // სურვილის შემთხვევაში შეგიძლიათ ჩართოთ დახურვის დადასტურება
-        tg.isClosingConfirmationEnabled = true;
+        if (tg.isVersionAtLeast('6.1')) {
+            tg.setBackgroundColor('bg_color');
+        }
+
+        if (tg.isVersionAtLeast('6.2')) {
+            tg.isClosingConfirmationEnabled = true;
+        }
     }
 
     try {
