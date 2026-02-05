@@ -37,42 +37,51 @@ async function init() {
     }
 }
 
+
 function renderHeader(h) {
     const el = document.getElementById('main-header');
-    if (!el) return;
-
-    // თუ სტატუსი არ არის active, დავმალოთ
-    if (h.status !== 'active') {
-        el.style.display = 'none';
+    const content = document.getElementById('app-content'); // კონტენტის დასაშორებლად
+    
+    if (!el || h.status !== 'active') {
+        if (el) el.style.display = 'none';
         return;
     }
 
-    // ჰედერის სტილის პირდაპირი მინიჭება (Tailwind-ის გარეშე, რომ არ აირიოს)
-    el.style.display = 'flex';
-    el.style.alignItems = 'center';
-    el.style.padding = '0 20px';
-    el.style.position = 'fixed'; // აფიქსირებს ზემოთ
-    el.style.top = '0';
-    el.style.left = '0';
-    el.style.right = '0';
-    el.style.zIndex = '9999'; // ყველაზე მაღალ ფენაზე
-    
-    el.style.backgroundColor = h.bg || "#ffffff";
-    el.style.color = h.textColor || "#000000";
-    el.style.height = (h.height || 60) + "px";
-    el.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+    // ჰედერის "ჩაკეტილი" სტილები - პირდაპირი ინექცია, რომელსაც CSS ვერ შეეხება
+    Object.assign(el.style, {
+        display: 'flex',
+        alignItems: 'center',
+        position: 'fixed', // ყოველთვის ეკრანის ზემოთ
+        top: '0',
+        left: '0',
+        right: '0',
+        zIndex: '10000', // ყველაზე მაღალი ფენა
+        backgroundColor: h.bg || "#ffffff",
+        color: h.textColor || "#000000",
+        height: (h.height || 70) + "px",
+        padding: '0 24px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        transition: 'all 0.3s ease',
+        boxSizing: 'border-box'
+    });
+
+    // ავტომატურად ვწევთ მთავარ კონტენტს ქვევით, რომ ჰედერმა არ დაფაროს ბანერი
+    if (content) {
+        content.style.paddingTop = el.style.height;
+    }
 
     const isSplit = h.layout === 'split';
 
     el.innerHTML = `
-        <div style="display: flex; align-items: center; width: 100%; height: 100%; position: relative;">
+        <div style="display: flex; align-items: center; width: 100%; height: 100%; position: relative; isolation: isolate;">
             <img src="${h.logo}" style="
                 width: ${h.logoSize || 40}px; 
                 height: ${h.logoSize || 40}px; 
                 border-radius: ${h.logoRadius || 50}%; 
                 object-fit: cover;
-                z-index: 10;
+                flex-shrink: 0;
             ">
+            
             <span style="
                 font-weight: 900; 
                 font-size: 18px; 
@@ -80,32 +89,11 @@ function renderHeader(h) {
                 left: ${isSplit ? '50%' : '12px'};
                 transform: ${isSplit ? 'translateX(-50%)' : 'none'};
                 white-space: nowrap;
+                pointer-events: none;
             ">
                 ${h.name || ''}
             </span>
         </div>
-    `;
-
-    // რადგან ჰედერი fixed-ია, კონტენტს სჭირდება დაშორება (padding-top)
-    document.getElementById('app-content').style.paddingTop = (h.height || 60) + "px";
-}
-
-function renderBanner(b) {
-    const el = document.getElementById('hero-banner');
-    if (!el) return;
-
-    el.className = "mx-6 mt-4 rounded-[30px] relative overflow-hidden flex items-center p-8 min-h-[180px]";
-    el.style.height = b.height + "px";
-    el.style.marginTop = b.marginTop + "px";
-    el.style.background = b.gradient || "#1e293b";
-
-    el.innerHTML = `
-        <div class="relative z-10 w-3/5">
-            <h2 class="font-black leading-tight" style="font-size:${b.titleSize || 24}px; color:${b.titleColor || '#fff'}">${b.title || ''}</h2>
-            <p class="mt-2 opacity-80 font-bold" style="font-size:${b.subSize || 12}px; color:${b.titleColor || '#fff'}">${b.subtitle || ''}</p>
-            ${b.btnText ? `<button class="mt-5 px-6 py-2 bg-white text-black rounded-full font-black text-[10px] uppercase shadow-lg active:scale-95 transition-all">${b.btnText}</button>` : ''}
-        </div>
-        <img src="${b.image}" class="absolute right-[-20px] bottom-[-10px] w-3/5 object-contain pointer-events-none transform rotate-[-15deg] drop-shadow-2xl">
     `;
 }
 
