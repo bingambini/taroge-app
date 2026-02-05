@@ -7,20 +7,36 @@ async function init() {
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
     }
-    try {
-        const res = await fetch(API_URL);
-        storeData = await res.json();
-        
-        console.log("Data loaded:", storeData); // დეველოპერებისთვის
 
+    try {
+        // დავამატეთ ქეშირების საწინააღმდეგო პარამეტრი და Redirect-ის მხარდაჭერა
+        const response = await fetch(API_URL, {
+            method: 'GET',
+            mode: 'cors',
+            credentials: 'omit'
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        storeData = await response.json();
+        console.log("მონაცემები წარმატებით ჩაიტვირთა:", storeData);
+
+        // მონაცემების ასახვა
         if (storeData.header) renderHeader(storeData.header);
         if (storeData.banner) renderBanner(storeData.banner);
         if (storeData.latest) renderProducts(storeData.latest.items);
         if (storeData.navigation) renderNavigation(storeData.navigation);
         
-        document.getElementById('app-preloader').style.display = 'none';
+        // პრელოადერის გათიშვა
+        const preloader = document.getElementById('app-preloader');
+        if (preloader) preloader.style.display = 'none';
+
     } catch (e) {
-        alert("ვერ მოხერხდა მონაცემების წამოღება. შეამოწმეთ ინტერნეტი.");
+        console.error("დეტალური შეცდომა:", e);
+        // თუ მაინც ვერ ჩატვირთა, ვცადოთ პატარა დაყოვნება (ხანდახან შველის)
+        setTimeout(() => {
+            if (!storeData) alert("კავშირის პრობლემა: დარწმუნდით, რომ Google Script-ზე წვდომა არის 'Anyone'");
+        }, 3000);
     }
 }
 
