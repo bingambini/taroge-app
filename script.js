@@ -26,12 +26,40 @@ async function init() {
 
 function renderHeader(h) {
     const el = document.getElementById('main-header');
+    
+    // M სვეტი (status) - თუ არ არის active, ჰედერი იმალება
+    if (h.status !== 'active') {
+        el.style.display = 'none';
+        return;
+    }
+
+    // ძირითადი სტილები შიტიდან
     el.style.display = 'flex';
-    el.style.backgroundColor = h.bg || "#2563eb";
+    el.style.alignItems = 'center';
+    el.style.width = '100%';
+    
+    el.style.backgroundColor = h.bg || "#2563eb";        // C სვეტი (H_BG)
+    el.style.color = h.textColor || "#ffffff";          // D სვეტი (H_Text)
+    el.style.height = (h.height || 70) + "px";          // H სვეტი (H_Height)
+    
+    // ჰედერის შიგთავსი
     el.innerHTML = `
-        <img src="${h.logo}" class="w-10 h-10 rounded-full mr-3 border-2 border-white/20">
-        <span class="text-white font-black">${h.name || 'Store'}</span>
+        <div class="flex items-center px-5 w-full" style="justify-content: ${h.layout === 'center' ? 'center' : 'flex-start'}">
+            <img src="${h.logo}" id="header-logo" style="
+                width: ${h.logoSize || 40}px; 
+                height: ${h.logoSize || 40}px; 
+                border-radius: ${h.logoRadius || 50}%;
+                margin-right: 12px;
+                object-fit: cover;
+            ">
+            <span style="font-weight: 800; font-size: 18px;">${h.name || ''}</span>
+        </div>
     `;
+
+    // თუ layout არის center, მოვაშოროთ მარჯვენა margin ლოგოს
+    if (h.layout === 'center') {
+        document.getElementById('header-logo').style.marginRight = "10px";
+    }
 }
 
 function renderBanner(b) {
