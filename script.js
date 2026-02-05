@@ -58,18 +58,22 @@ function renderHeader(h) {
     const content = document.getElementById('app-content');
     if (!el || h.status !== 'active') return;
 
+// 1. ბანერის მთავარი კონტეინერი - იდეალური ცენტრირება
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
-        position: 'fixed',
-        top: '0', left: '0', right: '0',
-        zIndex: '10000',
-        backgroundColor: h.bg || "#ffffff",
-        color: h.textColor || "#000000",
-        height: (h.height || 70) + "px",
-        padding: '0 24px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-        boxSizing: 'border-box'
+        position: 'relative',
+        overflow: 'visible', 
+        borderRadius: '35px',
+        // ავტომატური გაცენტრვა: ზევით 50px, გვერდებზე ავტო, ქვევით 20px
+        margin: '50px auto 20px auto', 
+        width: 'calc(100% - 48px)', // ეკრანის 100%-ს გამოკლებული გვერდითა დაშორებები
+        height: (b.height || 180) + 'px',
+        marginTop: (b.marginTop || 50) + 'px',
+        background: b.gradient || '#1e293b',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+        boxSizing: 'border-box',
+        zIndex: '10'
     });
 
     if (content) content.style.paddingTop = el.style.height;
@@ -89,6 +93,7 @@ function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
 
+    // 1. ბანერის მთავარი კონტეინერი
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
@@ -110,8 +115,8 @@ function renderBanner(b) {
         <div style="
             position: relative; 
             z-index: 30; 
-            width: 45%; 
-            padding-left: 15px; 
+            width: 50%; 
+            padding-left: 20px; 
             display: flex; 
             flex-direction: column; 
             justify-content: center;
@@ -148,35 +153,35 @@ function renderBanner(b) {
                         font-weight: 900; 
                         font-size: 10px; 
                         text-transform: uppercase;
-                        cursor: pointer;
                     ">
                         ${b.btnText}
                     </button>
                 </div>` : ''}
         </div>
 
-        ${b.image ? `
-            <div style="
-                position: absolute;
-                right: -10px;
-                top: -45px; 
-                width: 65%; 
-                height: 140%;
-                z-index: 40;
-                pointer-events: none;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            ">
+        <div style="
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+            z-index: 40;
+        ">
+            ${b.image ? `
                 <img src="${b.image}" style="
-                    width: 100%;
+                    width: 120%; /* ფოტო ოდნავ დიდია რომ გამოვიდეს ჩარჩოდან */
                     height: auto;
                     object-fit: contain;
-                    transform: rotate(-12deg);
+                    transform: rotate(-12deg) translateY(-15%); /* ზემოთ აწევა და დახრა */
                     filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4));
+                    pointer-events: none;
                 ">
-            </div>
-        ` : ''}
+            ` : ''}
+        </div>
     `;
 }
 
