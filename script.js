@@ -71,18 +71,18 @@ function renderBanner(b) {
     const el = document.getElementById('hero-banner');
     if (!el) return;
 
-    // 1. ბანერის მთავარი კონტეინერი (პროპორციები და დაშორება)
+    // 1. ბანერის მთავარი კონტეინერი
     Object.assign(el.style, {
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
-        overflow: 'visible', // სურათის "ამოსახტომად"
+        overflow: 'visible', 
         borderRadius: '35px',
         margin: '50px 24px 20px 24px', 
-        height: (b.height || 200) + 'px', // ოდნავ გავზარდე სიმაღლე
+        height: (b.height || 180) + 'px',
         marginTop: (b.marginTop || 50) + 'px',
-        background: b.gradient || 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+        background: b.gradient || '#1e293b',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
         boxSizing: 'border-box',
         zIndex: '10'
     });
@@ -93,8 +93,8 @@ function renderBanner(b) {
         <div style="
             position: relative; 
             z-index: 30; 
-            width: 55%; 
-            padding: 20px 0 20px 25px; 
+            width: 45%; /* შევამცირეთ სიგანე, რომ ფოტოს არ შეეხოს */
+            padding-left: 15px; /* მივწიეთ მარცხენა კიდისკენ */
             display: flex; 
             flex-direction: column; 
             justify-content: center;
@@ -104,39 +104,35 @@ function renderBanner(b) {
                 margin: 0; 
                 font-weight: 900; 
                 line-height: 1.1; 
-                font-size: ${b.titleSize || 24}px; 
+                font-size: ${b.titleSize || 20}px; 
                 color: ${textColor};
                 text-transform: uppercase;
-                letter-spacing: -0.5px;
             ">
                 ${b.title || ''}
             </h2>
             <p style="
-                margin-top: 10px; 
-                font-weight: 500; 
-                opacity: 0.8; 
-                font-size: ${b.subSize || 13}px; 
+                margin-top: 6px; 
+                font-weight: 600; 
+                opacity: 0.85; 
+                font-size: ${b.subSize || 11}px; 
                 color: ${textColor};
-                line-height: 1.4;
             ">
                 ${b.subtitle || ''}
             </p>
             ${b.btnText ? `
-                <div style="margin-top: 20px; pointer-events: auto;">
+                <div style="margin-top: 15px; pointer-events: auto;">
                     <button onclick="switchPage('${b.actionValue}')" style="
-                        padding: 12px 25px; 
+                        padding: 10px 22px; 
                         background: ${textColor}; 
                         color: #000; 
                         filter: invert(1); 
                         border: none; 
-                        border-radius: 18px; 
+                        border-radius: 14px; 
                         font-weight: 900; 
-                        font-size: 11px; 
+                        font-size: 10px; 
                         text-transform: uppercase;
-                        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
                         cursor: pointer;
-                        transition: transform 0.2s;
-                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    ">
                         ${b.btnText}
                     </button>
                 </div>` : ''}
@@ -145,9 +141,9 @@ function renderBanner(b) {
         ${b.image ? `
             <div style="
                 position: absolute;
-                right: -15px;
-                top: -40px; 
-                width: 60%;
+                right: -10px;
+                top: -45px; 
+                width: 65%; /* ფოტოს ველი უფრო დიდია */
                 height: 140%;
                 z-index: 40;
                 pointer-events: none;
@@ -156,11 +152,11 @@ function renderBanner(b) {
                 justify-content: center;
             ">
                 <img src="${b.image}" style="
-                    width: 110%;
+                    width: 100%;
                     height: auto;
                     object-fit: contain;
-                    transform: rotate(-15deg) scale(1.1);
-                    filter: drop-shadow(0 25px 35px rgba(0,0,0,0.5));
+                    transform: rotate(-12deg);
+                    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4));
                 ">
             </div>
         ` : ''}
