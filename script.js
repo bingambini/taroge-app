@@ -8,6 +8,47 @@ async function init() {
         window.Telegram.WebApp.expand();
     }
 
+    const preloader = document.getElementById('app-preloader');
+
+    try {
+        // ვიყენებთ სპეციალურ მიდგომას Google Apps Script-ისთვის
+        const response = await fetch(API_URL, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+
+        if (!response.ok) throw new Error('Network status: ' + response.status);
+
+        storeData = await response.json();
+        console.log("მონაცემები მოვიდა:", storeData);
+
+        // მონაცემების ასახვა
+        if (storeData.header) renderHeader(storeData.header);
+        if (storeData.banner) renderBanner(storeData.banner);
+        if (storeData.latest) renderProducts(storeData.latest.items);
+        if (storeData.navigation) renderNavigation(storeData.navigation);
+        
+        // პრელოადერის გაქრობა
+        if (preloader) {
+            preloader.style.opacity = '0';
+            setTimeout(() => preloader.style.display = 'none', 500);
+        }
+
+    } catch (e) {
+        console.error("Fetch Error:", e);
+        // თუ მაინც ვერ წამოიღო, ნიშნავს რომ Deploy მაინც "Only Me"-ზეა
+        if (preloader) {
+            preloader.innerHTML = `
+                <div style="text-align:center; padding:20px; color:white;">
+                    <p>ჩატვირთვის პრობლემა</p>
+                    <button onclick="location.reload()" style="background:white; color:black; padding:10px; border-radius:10px; margin-top:10px;">თავიდან ცდა</button>
+                </div>`;
+        }
+    }
+}
+
     try {
         // დავამატეთ ქეშირების საწინააღმდეგო პარამეტრი და Redirect-ის მხარდაჭერა
         const response = await fetch(API_URL, {
