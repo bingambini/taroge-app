@@ -109,11 +109,11 @@ function applyHeaderDesign(config) {
     }
 }
 
+// განახლებული ბანერის ფუნქცია ღილაკის ლოგიკით
 function applyHeroDesign(config) {
     const heroSection = document.getElementById('hero');
     if (!heroSection || !config) return;
 
-    // ვამოწმებთ, მოდის თუ არა საერთოდ სურათის ლინკი
     const imageUrl = config.B_Image || '';
     
     heroSection.innerHTML = `
@@ -125,19 +125,39 @@ function applyHeroDesign(config) {
             margin-top: ${config.B_Margin_Top || 20}px;
             display: flex;
             align-items: center;
+            border-radius: 18px;
+            position: relative;
+            overflow: hidden;
         ">
-            <div class="hero-content" style="padding: 20px;">
+            <div class="hero-content" style="padding: 20px; position: relative; z-index: 2;">
                 <h2 style="color: ${config.B_Title_Color || '#ffffff'}; font-size: ${config.B_Title_Size || 22}px;">
                     ${config.B_Title || ''}
                 </h2>
                 <p style="color: #ffffff; font-size: ${config.B_Sub_Size || 14}px; opacity: 0.9;">
                     ${config.B_Subtitle || ''}
                 </p>
-                ${config.B_Btn_Text ? `<button class="hero-btn">${config.B_Btn_Text}</button>` : ''}
+                ${config.B_Btn_Text ? `
+                    <button class="hero-btn" onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')">
+                        ${config.B_Btn_Text}
+                    </button>
+                ` : ''}
             </div>
         </div>
     `;
     heroSection.style.display = 'block';
+}
+
+// ფუნქცია ბანერის ღილაკზე დაჭერისას
+function handleHeroAction(type, value) {
+    if (type === 'product') {
+        // ვპოულობთ პროდუქტის ბარათებს შორის შესაბამისს
+        document.getElementById('products-grid').scrollIntoView({ behavior: 'smooth' });
+        console.log("ნავიგაცია პროდუქტზე ID-ით:", value);
+        
+        if (window.Telegram && window.Telegram.WebApp.HapticFeedback) {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        }
+    }
 }
 
 function renderProducts() {
