@@ -118,26 +118,61 @@ function applyHeroDesign(config) {
     
     heroSection.innerHTML = `
         <div class="hero-banner" style="
-            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${imageUrl}');
+            background-image: url('${imageUrl}');
             background-size: cover;
             background-position: center;
-            min-height: ${config.B_Height || 180}px;
-            margin-top: ${config.B_Margin_Top || 20}px;
+            height: ${config.B_Height || 240}px;
+            margin: ${config.B_Margin_Top || 15}px 15px;
             display: flex;
-            align-items: center;
-            border-radius: 18px;
+            align-items: flex-end;
+            border-radius: 24px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         ">
-            <div class="hero-content" style="padding: 20px; position: relative; z-index: 2;">
-                <h2 style="color: ${config.B_Title_Color || '#ffffff'}; font-size: ${config.B_Title_Size || 22}px;">
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 60%; 
+                        background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); z-index: 1;"></div>
+            
+            <div class="hero-content" style="
+                position: relative; 
+                z-index: 2; 
+                padding: 25px; 
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            ">
+                <h2 style="
+                    color: ${config.B_Title_Color || '#ffffff'}; 
+                    font-size: ${config.B_Title_Size || 24}px; 
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    margin: 0;
+                ">
                     ${config.B_Title || ''}
                 </h2>
-                <p style="color: #ffffff; font-size: ${config.B_Sub_Size || 14}px; opacity: 0.9;">
+                <p style="
+                    color: rgba(255,255,255,0.9); 
+                    font-size: ${config.B_Sub_Size || 15}px; 
+                    margin: 0 0 10px 0;
+                ">
                     ${config.B_Subtitle || ''}
                 </p>
                 ${config.B_Btn_Text ? `
-                    <button class="hero-btn" onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')">
+                    <button class="hero-btn" 
+                        onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')"
+                        style="
+                            width: fit-content;
+                            padding: 10px 25px;
+                            background: #ffffff;
+                            color: #000000;
+                            border-radius: 12px;
+                            font-weight: 700;
+                            border: none;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                            transition: transform 0.2s;
+                        ">
                         ${config.B_Btn_Text}
                     </button>
                 ` : ''}
