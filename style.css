@@ -38,7 +38,6 @@ body {
     backdrop-filter: blur(10px);
     z-index: 100;
     border-bottom: 0.5px solid #d2d2d7;
-    /* Opacity ამოღებულია, რომ ტელეგრამში ყოველთვის გამოჩნდეს */
     transition: opacity 0.5s ease;
 }
 
@@ -88,7 +87,7 @@ body {
     justify-content: center;
     font-weight: 700;
     font-size: 16px;
-    overflow: hidden; /* სურათისთვის */
+    overflow: hidden;
 }
 
 .cart-icon {
@@ -219,7 +218,7 @@ body {
     color: var(--text-secondary);
 }
 
-/* === ახალი ნაწილი: Loader & Animations === */
+/* === Loader & Animations === */
 
 #loader-wrapper {
     position: fixed;
@@ -280,4 +279,33 @@ body {
 @keyframes loading-bar {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
+}
+
+/* === RESPONSIVE ნაწილი (აქ ჩაემატა) === */
+
+/* ტაბლეტებისთვის და დიდი ტელეფონებისთვის */
+@media (min-width: 481px) {
+    .container {
+        max-width: 800px;
+    }
+    .products-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 სვეტი 2-ის ნაცვლად */
+    }
+}
+
+/* კომპიუტერებისთვის */
+@media (min-width: 1024px) {
+    .container {
+        max-width: 1000px;
+    }
+    .products-grid {
+        grid-template-columns: repeat(4, 1fr); /* 4 სვეტი */
+    }
+}
+
+/* ძალიან პატარა ეკრანებისთვის */
+@media (max-width: 350px) {
+    .logo { font-size: 15px; }
+    .products-grid { gap: 10px; }
+    .product-card { padding: 10px; }
 }
