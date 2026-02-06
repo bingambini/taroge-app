@@ -25,6 +25,12 @@ async function loadData() {
         state.headerConfig = data.headerConfig;
 
         applyHeaderDesign(state.headerConfig);
+        
+        // --- აქ ჩაემატა ბანერის გამოძახება ---
+        if (data.heroConfig) {
+            applyHeroDesign(data.heroConfig);
+        }
+        
         renderProducts();
 
         // 1. ვაჩვენებთ ჰედერს რბილად
@@ -101,6 +107,27 @@ function applyHeaderDesign(config) {
     if (config.H_Padding && headerGrid) {
         headerGrid.style.padding = `0 ${config.H_Padding}px`;
     }
+}
+
+// --- ახალი ფუნქცია: ბანერის დიზაინის გამოყენება ---
+function applyHeroDesign(config) {
+    const heroSection = document.getElementById('hero');
+    if (!heroSection) return;
+
+    if (!config || config.Status !== 'active') {
+        heroSection.style.display = 'none';
+        return;
+    }
+
+    heroSection.innerHTML = `
+        <div class="hero-banner" style="background-image: url('${config.Hero_Image}')">
+            <div class="hero-content">
+                <h2>${config.Hero_Title || ''}</h2>
+                <p>${config.Hero_Subtitle || ''}</p>
+            </div>
+        </div>
+    `;
+    heroSection.style.display = 'block';
 }
 
 function renderProducts() {
