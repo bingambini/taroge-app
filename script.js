@@ -109,21 +109,31 @@ function applyHeaderDesign(config) {
     }
 }
 
-// --- ახალი ფუნქცია: ბანერის დიზაინის გამოყენება ---
 function applyHeroDesign(config) {
     const heroSection = document.getElementById('hero');
-    if (!heroSection) return;
+    if (!heroSection || !config) return;
 
-    if (!config || config.Status !== 'active') {
-        heroSection.style.display = 'none';
-        return;
-    }
-
+    // ვამოწმებთ, მოდის თუ არა საერთოდ სურათის ლინკი
+    const imageUrl = config.B_Image || '';
+    
     heroSection.innerHTML = `
-        <div class="hero-banner" style="background-image: url('${config.Hero_Image}')">
-            <div class="hero-content">
-                <h2>${config.Hero_Title || ''}</h2>
-                <p>${config.Hero_Subtitle || ''}</p>
+        <div class="hero-banner" style="
+            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${imageUrl}');
+            background-size: cover;
+            background-position: center;
+            min-height: ${config.B_Height || 180}px;
+            margin-top: ${config.B_Margin_Top || 20}px;
+            display: flex;
+            align-items: center;
+        ">
+            <div class="hero-content" style="padding: 20px;">
+                <h2 style="color: ${config.B_Title_Color || '#ffffff'}; font-size: ${config.B_Title_Size || 22}px;">
+                    ${config.B_Title || ''}
+                </h2>
+                <p style="color: #ffffff; font-size: ${config.B_Sub_Size || 14}px; opacity: 0.9;">
+                    ${config.B_Subtitle || ''}
+                </p>
+                ${config.B_Btn_Text ? `<button class="hero-btn">${config.B_Btn_Text}</button>` : ''}
             </div>
         </div>
     `;
