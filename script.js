@@ -122,7 +122,10 @@ function applyHeroDesign(config) {
             background-size: cover;
             background-position: center;
             height: ${config.B_Height || 240}px;
-            margin: ${config.B_Margin_Top || 15}px 15px;
+            /* ცენტრირების ახალი ლოგიკა */
+            width: calc(100% - 32px); 
+            margin: ${config.B_Margin_Top || 15}px auto;
+            
             display: flex;
             align-items: flex-end;
             border-radius: 24px;
@@ -130,32 +133,28 @@ function applyHeroDesign(config) {
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         ">
-            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 60%; 
-                        background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); z-index: 1;"></div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 70%; 
+                        background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); z-index: 1;"></div>
             
             <div class="hero-content" style="
                 position: relative; 
                 z-index: 2; 
-                padding: 25px; 
+                padding: 20px 25px; 
                 width: 100%;
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
             ">
                 <h2 style="
                     color: ${config.B_Title_Color || '#ffffff'}; 
                     font-size: ${config.B_Title_Size || 24}px; 
                     font-weight: 800;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                    margin: 0;
+                    margin: 0 0 4px 0;
+                    line-height: 1.2;
                 ">
                     ${config.B_Title || ''}
                 </h2>
                 <p style="
                     color: rgba(255,255,255,0.9); 
                     font-size: ${config.B_Sub_Size || 15}px; 
-                    margin: 0 0 10px 0;
+                    margin: 0 0 12px 0;
                 ">
                     ${config.B_Subtitle || ''}
                 </p>
@@ -163,15 +162,14 @@ function applyHeroDesign(config) {
                     <button class="hero-btn" 
                         onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')"
                         style="
-                            width: fit-content;
-                            padding: 10px 25px;
+                            padding: 10px 28px;
                             background: #ffffff;
                             color: #000000;
                             border-radius: 12px;
                             font-weight: 700;
+                            font-size: 14px;
                             border: none;
-                            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                            transition: transform 0.2s;
+                            cursor: pointer;
                         ">
                         ${config.B_Btn_Text}
                     </button>
