@@ -44,19 +44,45 @@ function applyHeaderDesign(config) {
 
     // 1. ტექსტები
     if (config.Shop_Name) logoText.innerText = config.Shop_Name;
-    if (config.Shop_Logo) logoIcon.innerText = config.Shop_Logo;
+    
+    // --- ლოგოს ფოტოს ლოგიკა ---
+    if (config.Shop_Logo) {
+        // ვამოწმებთ, ლინკია თუ უბრალოდ ტექსტი
+        if (config.Shop_Logo.startsWith('http')) {
+            logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+            logoIcon.style.background = 'transparent'; // თუ ფოტოა, ფონი აღარ გვინდა
+        } else {
+            logoIcon.innerText = config.Shop_Logo; // თუ ტექსტია (მაგ: "S"), ისევ ტექსტი გამოჩნდეს
+        }
+    }
+    // ------------------------
 
-    // 2. ზომები (Styles)
+    // 2. ზომები
     if (config.H_Height) header.style.height = config.H_Height + 'px';
     if (config.H_Font_Size) logoText.style.fontSize = config.H_Font_Size + 'px';
     if (config.Logo_Size) {
         logoIcon.style.width = config.Logo_Size + 'px';
         logoIcon.style.height = config.Logo_Size + 'px';
-        logoIcon.style.fontSize = (config.Logo_Size / 2) + 'px';
     }
     if (config.Logo_Radius !== undefined) {
         logoIcon.style.borderRadius = config.Logo_Radius + '%';
     }
+
+    // 3. ფერები
+    if (config.H_BG) header.style.backgroundColor = config.H_BG;
+    if (config.H_Text) {
+        logoText.style.color = config.H_Text;
+        if (!config.Shop_Logo.startsWith('http')) {
+            logoIcon.style.color = config.H_BG || '#fff';
+            logoIcon.style.backgroundColor = config.H_Text;
+        }
+    }
+    if (config.Icon_Color && cartIconSvg) {
+        cartIconSvg.style.stroke = config.Icon_Color;
+    }
+    
+    // ... დანარჩენი (Shadow, Border) უცვლელია ...
+}
 
     // 3. ფერები
     if (config.H_BG) header.style.backgroundColor = config.H_BG;
