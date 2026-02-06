@@ -26,8 +26,19 @@ async function loadData() {
 
         applyHeaderDesign(state.headerConfig);
         renderProducts();
+
+        // --- მხოლოდ ეს ნაწილი დაემატა Loader-ის გასაქრობად ---
+        const loader = document.getElementById('loader-wrapper');
+        if (loader) {
+            loader.classList.add('loader-hidden');
+        }
+        // -----------------------------------------------
+
     } catch (error) {
         console.error("მონაცემების ჩატვირთვის შეცდომა:", error);
+        // შეცდომის შემთხვევაშიც ვაქრობთ ლოდერს, რომ მომხმარებელი არ დარჩეს თეთრ ეკრანზე
+        const loader = document.getElementById('loader-wrapper');
+        if (loader) loader.classList.add('loader-hidden');
     }
 }
 
@@ -68,7 +79,6 @@ function applyHeaderDesign(config) {
     if (config.H_BG && header) header.style.backgroundColor = config.H_BG;
     if (config.H_Text) {
         if (logoText) logoText.style.color = config.H_Text;
-        // მხოლოდ თუ სურათი არ არის, მაშინ ვუცვლით აიქონის ფონს
         const logoVal = String(config.Shop_Logo);
         if (logoIcon && !logoVal.startsWith('http')) {
             logoIcon.style.color = config.H_BG || '#fff';
