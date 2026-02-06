@@ -38,8 +38,7 @@ body {
     backdrop-filter: blur(10px);
     z-index: 100;
     border-bottom: 0.5px solid #d2d2d7;
-    /* ეფექტი ჩატვირთვისთვის */
-    opacity: 0;
+    /* Opacity ამოღებულია, რომ ტელეგრამში ყოველთვის გამოჩნდეს */
     transition: opacity 0.5s ease;
 }
 
