@@ -1,5 +1,5 @@
 const CONFIG = {
-    API_URL: 'https://script.google.com/macros/s/AKfycbxO0oyopgCm47jhJ1X_8q18VEejkZRqKL8HnLqviWnVqLA5gyIUDgtC2UfxOb4vsqLMnQ/exec'
+    API_URL: 'https://script.google.com/macros/s/AKfycbweHRx6EOMOWA019h00kuJ4-pn4A55UJgR7DKGdLvNc0AYOBF7W-O9-2MNi734ZEFfl6Q/exec'
 };
 
 let state = {
