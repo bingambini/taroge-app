@@ -1,4 +1,3 @@
-``javascript
 // Configuration
 const CONFIG = {
     API_URL: 'https://script.google.com/macros/s/AKfycbyaw4FwC-ERm_wDXNZYkcDBTtU2CkepINX6gCBL8Q3UTnAtu_g1oqSf23bsDI11zjy5PA/exec'
