@@ -109,69 +109,89 @@ function applyHeroDesign(config) {
     if (!heroSection || !config) return;
 
     const imageUrl = config.B_Image || '';
-    // B_Gradient მართავს მთლიანი ბანერის Glass ფერს [cite: 2026-02-01]
+    // B_Gradient სვეტიდან ვიღებთ შუშის ფერს
     const glassColor = config.B_Gradient || 'rgba(255, 255, 255, 0.2)';
 
     heroSection.innerHTML = `
-        <div class="hero-container" style="
+        <div class="hero-wrapper" style="
             position: relative;
             width: calc(100% - 32px);
-            margin: ${config.B_Margin_Top || 20}px auto;
-            height: ${config.B_Height || 250}px;
+            margin: ${config.B_Margin_Top || 30}px auto;
+            height: ${config.B_Height || 220}px;
+            display: flex;
+            align-items: center;
         ">
-            <div class="hero-banner" style="
+            <div class="glass-base" style="
                 position: absolute;
-                top: 0;
-                left: 0;
                 width: 100%;
                 height: 100%;
-                border-radius: 28px;
-                background: ${glassColor}; 
+                background: ${glassColor};
                 backdrop-filter: blur(15px);
                 -webkit-backdrop-filter: blur(15px);
+                border-radius: 24px;
                 border: 1px solid rgba(255,255,255,0.2);
-                box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
                 z-index: 1;
+            "></div>
+
+            <div class="hero-text" style="
+                position: relative;
+                z-index: 2;
+                padding-left: 25px;
+                width: 55%;
             ">
-                <div class="hero-content" style="
-                    position: relative;
-                    padding: 30px;
-                    width: 60%;
-                    height: 100%;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    z-index: 2;
+                <h2 style="
+                    color: ${config.B_Title_Color || '#ffffff'}; 
+                    font-size: ${config.B_Title_Size || 22}px; 
+                    font-weight: 900;
+                    margin: 0 0 5px 0;
+                    line-height: 1.1;
                 ">
-                    <h2 style="color: ${config.B_Title_Color || '#ffffff'}; font-size: ${config.B_Title_Size || 26}px; font-weight: 800; margin: 0 0 5px 0;">
-                        ${config.B_Title || ''}
-                    </h2>
-                    <p style="color: #ffffff; font-size: ${config.B_Sub_Size || 16}px; margin: 0 0 20px 0; opacity: 0.9;">
-                        ${config.B_Subtitle || ''}
-                    </p>
-                    ${config.B_Btn_Text ? `
-                        <button class="hero-btn" onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')"
-                            style="width: fit-content; padding: 12px 28px; background: ${config.B_Title_Color || '#ffffff'}; color: #000; border: none; border-radius: 14px; font-weight: 700; cursor: pointer;">
-                            ${config.B_Btn_Text}
-                        </button>
-                    ` : ''}
-                </div>
+                    ${config.B_Title || ''}
+                </h2>
+                <p style="
+                    color: #ffffff; 
+                    font-size: ${config.B_Sub_Size || 14}px; 
+                    margin: 0 0 15px 0;
+                    opacity: 0.8;
+                ">
+                    ${config.B_Subtitle || ''}
+                </p>
+                <button onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')"
+                    style="
+                        padding: 10px 24px;
+                        background: ${config.B_Title_Color || '#ffffff'};
+                        color: #000;
+                        border: none;
+                        border-radius: 12px;
+                        font-weight: 800;
+                        font-size: 13px;
+                        cursor: pointer;
+                    ">
+                    ${config.B_Btn_Text || 'ყიდვა'}
+                </button>
             </div>
 
             ${imageUrl ? `
-                <div style="
+                <div class="floating-product" style="
                     position: absolute;
-                    right: -10px; /* ოდნავ გამოვწიოთ ბანერიდან */
-                    top: 50%;
-                    transform: translateY(-50%) rotate(-15deg); /* ოდნავ გადავხაროთ სილამაზისთვის */
+                    right: -10px; /* ჩარჩოდან ოდნავ გასვლა */
+                    top: -20px;   /* ზემოდან გადმოსვლა */
                     width: 55%;
-                    height: auto;
-                    z-index: 3; /* ყველაზე მაღალი ფენა */
-                    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)); /* ჩრდილი, რომ 3D ეფექტი ჰქონდეს */
+                    height: 120%; /* ბანერზე მაღალი რომ იყოს */
+                    z-index: 3;   /* ყველაზე მაღალი ფენა */
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    filter: drop-shadow(0 20px 35px rgba(0,0,0,0.4)); /* რეალური ჩრდილი */
                     pointer-events: none;
                 ">
-                    <img src="${imageUrl}" style="width: 100%; height: auto; object-fit: contain;">
+                    <img src="${imageUrl}" style="
+                        width: 100%;
+                        height: auto;
+                        object-fit: contain;
+                        transform: rotate(-10deg); /* სტილისთვის */
+                    ">
                 </div>
             ` : ''}
         </div>
