@@ -9,7 +9,6 @@ let state = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Telegram-ის ინიციალიზაცია
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
@@ -25,9 +24,7 @@ async function loadData() {
         state.products = data.products;
         state.headerConfig = data.headerConfig;
 
-        // ჯერ ვრთავთ ჰედერის დიზაინს
         applyHeaderDesign(state.headerConfig);
-        // შემდეგ ვხატავთ პროდუქტებს
         renderProducts();
     } catch (error) {
         console.error("მონაცემების ჩატვირთვის შეცდომა:", error);
@@ -41,38 +38,39 @@ function applyHeaderDesign(config) {
     const logoText = document.getElementById('logo');
     const logoIcon = document.getElementById('logo-icon');
     const cartIconSvg = document.querySelector('.cart-icon svg');
+    const headerGrid = document.querySelector('.header-grid');
 
-    // 1. ტექსტები
-    if (config.Shop_Name) logoText.innerText = config.Shop_Name;
+    // 1. ტექსტები და ლოგო
+    if (config.Shop_Name && logoText) logoText.innerText = config.Shop_Name;
     
-    // --- ლოგოს ფოტოს ლოგიკა ---
-    if (config.Shop_Logo) {
-        // ვამოწმებთ, ლინკია თუ უბრალოდ ტექსტი
-        if (config.Shop_Logo.startsWith('http')) {
-            logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
-            logoIcon.style.background = 'transparent'; // თუ ფოტოა, ფონი აღარ გვინდა
+    if (config.Shop_Logo && logoIcon) {
+        const logoVal = String(config.Shop_Logo);
+        if (logoVal.startsWith('http')) {
+            logoIcon.innerHTML = `<img src="${logoVal}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+            logoIcon.style.background = 'transparent';
         } else {
-            logoIcon.innerText = config.Shop_Logo; // თუ ტექსტია (მაგ: "S"), ისევ ტექსტი გამოჩნდეს
+            logoIcon.innerHTML = logoVal;
         }
     }
-    // ------------------------
 
     // 2. ზომები
-    if (config.H_Height) header.style.height = config.H_Height + 'px';
-    if (config.H_Font_Size) logoText.style.fontSize = config.H_Font_Size + 'px';
-    if (config.Logo_Size) {
+    if (config.H_Height && header) header.style.height = config.H_Height + 'px';
+    if (config.H_Font_Size && logoText) logoText.style.fontSize = config.H_Font_Size + 'px';
+    if (config.Logo_Size && logoIcon) {
         logoIcon.style.width = config.Logo_Size + 'px';
         logoIcon.style.height = config.Logo_Size + 'px';
     }
-    if (config.Logo_Radius !== undefined) {
+    if (config.Logo_Radius !== undefined && logoIcon) {
         logoIcon.style.borderRadius = config.Logo_Radius + '%';
     }
 
     // 3. ფერები
-    if (config.H_BG) header.style.backgroundColor = config.H_BG;
+    if (config.H_BG && header) header.style.backgroundColor = config.H_BG;
     if (config.H_Text) {
-        logoText.style.color = config.H_Text;
-        if (!config.Shop_Logo.startsWith('http')) {
+        if (logoText) logoText.style.color = config.H_Text;
+        // მხოლოდ თუ სურათი არ არის, მაშინ ვუცვლით აიქონის ფონს
+        const logoVal = String(config.Shop_Logo);
+        if (logoIcon && !logoVal.startsWith('http')) {
             logoIcon.style.color = config.H_BG || '#fff';
             logoIcon.style.backgroundColor = config.H_Text;
         }
@@ -80,32 +78,14 @@ function applyHeaderDesign(config) {
     if (config.Icon_Color && cartIconSvg) {
         cartIconSvg.style.stroke = config.Icon_Color;
     }
-    
-    // ... დანარჩენი (Shadow, Border) უცვლელია ...
-}
-
-    // 3. ფერები
-    if (config.H_BG) header.style.backgroundColor = config.H_BG;
-    if (config.H_Text) {
-        logoText.style.color = config.H_Text;
-        logoIcon.style.color = config.H_BG || '#fff'; // აიქონის შიდა ასოს ფერი
-        logoIcon.style.backgroundColor = config.H_Text; // აიქონის წრის ფერი
-    }
-    if (config.Icon_Color && cartIconSvg) {
-        cartIconSvg.style.stroke = config.Icon_Color;
-    }
 
     // 4. დეკორაცია
-    if (config.H_Shadow === 'yes') {
-        header.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
-    } else {
-        header.style.boxShadow = 'none';
+    if (header) {
+        header.style.boxShadow = config.H_Shadow === 'yes' ? '0 4px 12px rgba(0,0,0,0.08)' : 'none';
+        if (config.H_Border) header.style.borderBottom = `1px solid ${config.H_Border}`;
     }
-    if (config.H_Border) {
-        header.style.borderBottom = `1px solid ${config.H_Border}`;
-    }
-    if (config.H_Padding) {
-        document.querySelector('.header-grid').style.padding = `0 ${config.H_Padding}px`;
+    if (config.H_Padding && headerGrid) {
+        headerGrid.style.padding = `0 ${config.H_Padding}px`;
     }
 }
 
@@ -152,5 +132,4 @@ function addToCart(id) {
 
 function toggleCart() {
     console.log("კალათა გაიხსნა:", state.cart);
-    // აქ მოგვიანებით დავწერთ კალათის გახსნის ლოგიკას
 }
