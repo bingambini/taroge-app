@@ -33,13 +33,11 @@ async function loadData() {
         
         renderProducts();
 
-        // 1. ვაჩვენებთ ჰედერს რბილად
         const header = document.querySelector('.header');
         if (header) {
             header.classList.add('loaded');
         }
 
-        // 2. ვაქრობთ ლოდერს
         const loader = document.getElementById('loader-wrapper');
         if (loader) {
             loader.classList.add('loader-hidden');
@@ -61,7 +59,6 @@ function applyHeaderDesign(config) {
     const cartIconSvg = document.querySelector('.cart-icon svg');
     const headerGrid = document.querySelector('.header-grid');
 
-    // 1. ტექსტები და ლოგო
     if (config.Shop_Name && logoText) logoText.innerText = config.Shop_Name;
     
     if (config.Shop_Logo && logoIcon) {
@@ -74,7 +71,6 @@ function applyHeaderDesign(config) {
         }
     }
 
-    // 2. ზომები
     if (config.H_Height && header) header.style.height = config.H_Height + 'px';
     if (config.H_Font_Size && logoText) logoText.style.fontSize = config.H_Font_Size + 'px';
     if (config.Logo_Size && logoIcon) {
@@ -85,7 +81,6 @@ function applyHeaderDesign(config) {
         logoIcon.style.borderRadius = config.Logo_Radius + '%';
     }
 
-    // 3. ფერები
     if (config.H_BG && header) header.style.backgroundColor = config.H_BG;
     if (config.H_Text) {
         if (logoText) logoText.style.color = config.H_Text;
@@ -99,7 +94,6 @@ function applyHeaderDesign(config) {
         cartIconSvg.style.stroke = config.Icon_Color;
     }
 
-    // 4. დეკორაცია
     if (header) {
         header.style.boxShadow = config.H_Shadow === 'yes' ? '0 4px 12px rgba(0,0,0,0.08)' : 'none';
         if (config.H_Border) header.style.borderBottom = `1px solid ${config.H_Border}`;
@@ -109,68 +103,49 @@ function applyHeaderDesign(config) {
     }
 }
 
-// განახლებული ბანერის ფუნქცია ღილაკის ლოგიკით
+// აი ეს ფუნქცია აკლდა შენს კოდს:
 function applyHeroDesign(config) {
     const heroSection = document.getElementById('hero');
     if (!heroSection || !config) return;
 
     const imageUrl = config.B_Image || '';
-    
+    const gradient = config.B_Gradient || '';
+
     heroSection.innerHTML = `
         <div class="hero-banner" style="
-            background-image: url('${imageUrl}');
+            position: relative;
+            width: calc(100% - 32px);
+            margin: ${config.B_Margin_Top || 20}px auto;
+            height: ${config.B_Height || 250}px;
+            border-radius: 28px;
+            background: ${gradient}${imageUrl ? (gradient ? ', ' : '') + `url('${imageUrl}')` : ''};
             background-size: cover;
             background-position: center;
-            height: ${config.B_Height || 240}px;
-            /* ცენტრირების ახალი ლოგიკა */
-            width: calc(100% - 32px); 
-            margin: ${config.B_Margin_Top || 15}px auto;
-            
-            display: flex;
-            align-items: flex-end;
-            border-radius: 24px;
-            position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         ">
-            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 70%; 
-                        background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); z-index: 1;"></div>
-            
-            <div class="hero-content" style="
-                position: relative; 
-                z-index: 2; 
-                padding: 20px 25px; 
-                width: 100%;
+            <div style="
+                margin-left: 20px;
+                padding: 20px;
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px;
+                max-width: 75%;
+                z-index: 2;
             ">
-                <h2 style="
-                    color: ${config.B_Title_Color || '#ffffff'}; 
-                    font-size: ${config.B_Title_Size || 24}px; 
-                    font-weight: 800;
-                    margin: 0 0 4px 0;
-                    line-height: 1.2;
-                ">
+                <h2 style="color: ${config.B_Title_Color || '#ffffff'}; font-size: ${config.B_Title_Size || 22}px; font-weight: 800; margin: 0 0 5px 0;">
                     ${config.B_Title || ''}
                 </h2>
-                <p style="
-                    color: rgba(255,255,255,0.9); 
-                    font-size: ${config.B_Sub_Size || 15}px; 
-                    margin: 0 0 12px 0;
-                ">
+                <p style="color: #ffffff; font-size: ${config.B_Sub_Size || 14}px; margin: 0 0 15px 0; opacity: 0.95;">
                     ${config.B_Subtitle || ''}
                 </p>
                 ${config.B_Btn_Text ? `
-                    <button class="hero-btn" 
-                        onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')"
-                        style="
-                            padding: 10px 28px;
-                            background: #ffffff;
-                            color: #000000;
-                            border-radius: 12px;
-                            font-weight: 700;
-                            font-size: 14px;
-                            border: none;
-                            cursor: pointer;
-                        ">
+                    <button class="hero-btn" onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')"
+                        style="padding: 10px 22px; background: ${config.B_Title_Color || '#ffffff'}; color: #000; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;">
                         ${config.B_Btn_Text}
                     </button>
                 ` : ''}
@@ -180,10 +155,8 @@ function applyHeroDesign(config) {
     heroSection.style.display = 'block';
 }
 
-// ფუნქცია ბანერის ღილაკზე დაჭერისას
 function handleHeroAction(type, value) {
     if (type === 'product') {
-        // ვპოულობთ პროდუქტის ბარათებს შორის შესაბამისს
         document.getElementById('products-grid').scrollIntoView({ behavior: 'smooth' });
         console.log("ნავიგაცია პროდუქტზე ID-ით:", value);
         
@@ -230,7 +203,7 @@ function addToCart(id) {
     }
     
     if (window.Telegram && window.Telegram.WebApp.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        window.Telegram.WebApp.impactOccurred('medium');
     }
 }
 
