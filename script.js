@@ -109,7 +109,8 @@ function applyHeroDesign(config) {
     if (!heroSection || !config) return;
 
     const imageUrl = config.B_Image || '';
-    const gradient = config.B_Gradient || '';
+    // B_Gradient-იდან ვიღებთ ფერს. თუ ცარიელია, ვიყენებთ გამჭვირვალე თეთრს
+    const glassBaseColor = config.B_Gradient || 'rgba(255, 255, 255, 0.2)';
 
     heroSection.innerHTML = `
         <div class="hero-banner" style="
@@ -118,34 +119,66 @@ function applyHeroDesign(config) {
             margin: ${config.B_Margin_Top || 20}px auto;
             height: ${config.B_Height || 250}px;
             border-radius: 28px;
-            background: ${gradient}${imageUrl ? (gradient ? ', ' : '') + `url('${imageUrl}')` : ''};
+            
+            /* მთავარი ფონი სურათისთვის */
+            background-image: url('${imageUrl}');
             background-size: cover;
             background-position: center;
+            
             overflow: hidden;
             display: flex;
             align-items: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         ">
+            /* Glassmorphism ფენა, რომელიც მთლიან ბანერს ფარავს */
             <div style="
-                margin-left: 20px;
-                padding: 20px;
-                background: rgba(255, 255, 255, 0.15);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                border-radius: 20px;
-                max-width: 75%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: ${glassBaseColor}; /* ამას მართავ B_Gradient-იდან */
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                z-index: 1;
+            "></div>
+
+            /* კონტენტი, რომელიც Glass-ის ზემოთ უნდა იყოს */
+            <div class="hero-content" style="
+                position: relative;
                 z-index: 2;
+                padding: 30px;
+                width: 100%;
             ">
-                <h2 style="color: ${config.B_Title_Color || '#ffffff'}; font-size: ${config.B_Title_Size || 22}px; font-weight: 800; margin: 0 0 5px 0;">
+                <h2 style="
+                    color: ${config.B_Title_Color || '#ffffff'}; 
+                    font-size: ${config.B_Title_Size || 26}px; 
+                    font-weight: 800;
+                    margin: 0 0 10px 0;
+                    text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                ">
                     ${config.B_Title || ''}
                 </h2>
-                <p style="color: #ffffff; font-size: ${config.B_Sub_Size || 14}px; margin: 0 0 15px 0; opacity: 0.95;">
+                <p style="
+                    color: #ffffff; 
+                    font-size: ${config.B_Sub_Size || 16}px; 
+                    margin: 0 0 20px 0;
+                    font-weight: 400;
+                ">
                     ${config.B_Subtitle || ''}
                 </p>
                 ${config.B_Btn_Text ? `
-                    <button class="hero-btn" onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')"
-                        style="padding: 10px 22px; background: ${config.B_Title_Color || '#ffffff'}; color: #000; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;">
+                    <button class="hero-btn" 
+                        onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')"
+                        style="
+                            padding: 12px 30px;
+                            background: ${config.B_Title_Color || '#ffffff'};
+                            color: #000;
+                            border: none;
+                            border-radius: 15px;
+                            font-weight: 700;
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                        ">
                         ${config.B_Btn_Text}
                     </button>
                 ` : ''}
