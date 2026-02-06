@@ -27,16 +27,20 @@ async function loadData() {
         applyHeaderDesign(state.headerConfig);
         renderProducts();
 
-        // --- მხოლოდ ეს ნაწილი დაემატა Loader-ის გასაქრობად ---
+        // 1. ვაჩვენებთ ჰედერს რბილად
+        const header = document.querySelector('.header');
+        if (header) {
+            header.classList.add('loaded');
+        }
+
+        // 2. ვაქრობთ ლოდერს
         const loader = document.getElementById('loader-wrapper');
         if (loader) {
             loader.classList.add('loader-hidden');
         }
-        // -----------------------------------------------
 
     } catch (error) {
         console.error("მონაცემების ჩატვირთვის შეცდომა:", error);
-        // შეცდომის შემთხვევაშიც ვაქრობთ ლოდერს, რომ მომხმარებელი არ დარჩეს თეთრ ეკრანზე
         const loader = document.getElementById('loader-wrapper');
         if (loader) loader.classList.add('loader-hidden');
     }
