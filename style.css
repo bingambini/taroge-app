@@ -27,7 +27,7 @@ body {
     margin: 0 auto;
 }
 
-/* Header */
+/* Header - განახლებული სამკომპონენტიანი განლაგებისთვის */
 .header {
     height: 70px;
     display: flex;
@@ -40,22 +40,55 @@ body {
     border-bottom: 0.5px solid #d2d2d7;
 }
 
-.header .container {
+.header-grid {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
 }
 
+.header-left, .header-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.header-center {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-right {
+    justify-content: flex-end;
+}
+
 .logo {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     letter-spacing: -0.5px;
+    text-transform: uppercase;
+}
+
+.logo-circle {
+    width: 32px;
+    height: 32px;
+    background: var(--text-main);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
 }
 
 .cart-icon {
     position: relative;
     cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
 #cart-count {
