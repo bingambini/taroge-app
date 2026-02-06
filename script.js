@@ -109,80 +109,71 @@ function applyHeroDesign(config) {
     if (!heroSection || !config) return;
 
     const imageUrl = config.B_Image || '';
-    // B_Gradient-იდან ვიღებთ ფერს. თუ ცარიელია, ვიყენებთ გამჭვირვალე თეთრს
-    const glassBaseColor = config.B_Gradient || 'rgba(255, 255, 255, 0.2)';
+    // B_Gradient მართავს მთლიანი ბანერის Glass ფერს [cite: 2026-02-01]
+    const glassColor = config.B_Gradient || 'rgba(255, 255, 255, 0.2)';
 
     heroSection.innerHTML = `
-        <div class="hero-banner" style="
+        <div class="hero-container" style="
             position: relative;
             width: calc(100% - 32px);
             margin: ${config.B_Margin_Top || 20}px auto;
             height: ${config.B_Height || 250}px;
-            border-radius: 28px;
-            
-            /* მთავარი ფონი სურათისთვის */
-            background-image: url('${imageUrl}');
-            background-size: cover;
-            background-position: center;
-            
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         ">
-            /* Glassmorphism ფენა, რომელიც მთლიან ბანერს ფარავს */
-            <div style="
+            <div class="hero-banner" style="
                 position: absolute;
                 top: 0;
                 left: 0;
-                right: 0;
-                bottom: 0;
-                background: ${glassBaseColor}; /* ამას მართავ B_Gradient-იდან */
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                z-index: 1;
-            "></div>
-
-            /* კონტენტი, რომელიც Glass-ის ზემოთ უნდა იყოს */
-            <div class="hero-content" style="
-                position: relative;
-                z-index: 2;
-                padding: 30px;
                 width: 100%;
+                height: 100%;
+                border-radius: 28px;
+                background: ${glassColor}; 
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+                border: 1px solid rgba(255,255,255,0.2);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+                overflow: hidden;
+                z-index: 1;
             ">
-                <h2 style="
-                    color: ${config.B_Title_Color || '#ffffff'}; 
-                    font-size: ${config.B_Title_Size || 26}px; 
-                    font-weight: 800;
-                    margin: 0 0 10px 0;
-                    text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                <div class="hero-content" style="
+                    position: relative;
+                    padding: 30px;
+                    width: 60%;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    z-index: 2;
                 ">
-                    ${config.B_Title || ''}
-                </h2>
-                <p style="
-                    color: #ffffff; 
-                    font-size: ${config.B_Sub_Size || 16}px; 
-                    margin: 0 0 20px 0;
-                    font-weight: 400;
-                ">
-                    ${config.B_Subtitle || ''}
-                </p>
-                ${config.B_Btn_Text ? `
-                    <button class="hero-btn" 
-                        onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')"
-                        style="
-                            padding: 12px 30px;
-                            background: ${config.B_Title_Color || '#ffffff'};
-                            color: #000;
-                            border: none;
-                            border-radius: 15px;
-                            font-weight: 700;
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-                        ">
-                        ${config.B_Btn_Text}
-                    </button>
-                ` : ''}
+                    <h2 style="color: ${config.B_Title_Color || '#ffffff'}; font-size: ${config.B_Title_Size || 26}px; font-weight: 800; margin: 0 0 5px 0;">
+                        ${config.B_Title || ''}
+                    </h2>
+                    <p style="color: #ffffff; font-size: ${config.B_Sub_Size || 16}px; margin: 0 0 20px 0; opacity: 0.9;">
+                        ${config.B_Subtitle || ''}
+                    </p>
+                    ${config.B_Btn_Text ? `
+                        <button class="hero-btn" onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')"
+                            style="width: fit-content; padding: 12px 28px; background: ${config.B_Title_Color || '#ffffff'}; color: #000; border: none; border-radius: 14px; font-weight: 700; cursor: pointer;">
+                            ${config.B_Btn_Text}
+                        </button>
+                    ` : ''}
+                </div>
             </div>
+
+            ${imageUrl ? `
+                <div style="
+                    position: absolute;
+                    right: -10px; /* ოდნავ გამოვწიოთ ბანერიდან */
+                    top: 50%;
+                    transform: translateY(-50%) rotate(-15deg); /* ოდნავ გადავხაროთ სილამაზისთვის */
+                    width: 55%;
+                    height: auto;
+                    z-index: 3; /* ყველაზე მაღალი ფენა */
+                    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)); /* ჩრდილი, რომ 3D ეფექტი ჰქონდეს */
+                    pointer-events: none;
+                ">
+                    <img src="${imageUrl}" style="width: 100%; height: auto; object-fit: contain;">
+                </div>
+            ` : ''}
         </div>
     `;
     heroSection.style.display = 'block';
