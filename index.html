@@ -2,103 +2,44 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHOESHOP - Modern Footwear</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ShoeShop - Premium Store</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header" id="header">
+
+    <header class="header">
         <div class="container">
-            <div class="header-content">
-                <div class="logo" id="logo">SHOESHOP</div>
-                <div class="header-actions">
-                    <button class="icon-button" aria-label="Search">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"/>
-                            <path d="m21 21-4.35-4.35"/>
-                        </svg>
-                    </button>
-                    <button class="icon-button cart-button" aria-label="Cart">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 2L7 6H2L5 9M22 22L19 19L22 22ZM16 6L18 2L16 6ZM2 6L5 9L2 6ZM5 9L8 22H16L19 9H5Z"/>
-                        </svg>
-                        <span class="cart-badge" id="cartBadge">0</span>
-                    </button>
+            <div id="logo" class="logo">SHOESHOP</div>
+            <div class="header-icons">
+                <div class="cart-icon" onclick="toggleCart()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    <span id="cart-count">0</span>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Promo Banner -->
-    <div class="promo-banner" id="promoBanner" style="display: none;">
-        <div class="container">
-            <p class="promo-text" id="promoText"></p>
+    <main class="container">
+        <section id="hero" class="hero-section"></section>
+
+        <section class="section">
+            <h2 id="new-arrivals-title" class="section-title">ახალი კოლექცია</h2>
+            <div id="products-grid" class="products-grid">
+                <div class="loading">იტვირთება...</div>
+            </div>
+        </section>
+    </main>
+
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modal-body"></div>
         </div>
     </div>
-
-    <!-- Hero Section -->
-    <section class="hero" id="hero">
-        <div class="hero-content">
-            <div class="container">
-                <div class="hero-text">
-                    <h1 class="hero-title" id="heroTitle">ახალი კოლექცია 2026</h1>
-                    <p class="hero-subtitle" id="heroSubtitle">მიიღე 20% ფასდაკლება პირველ შეკვეთაზე</p>
-                    <button class="hero-button" id="heroButton">
-                        <span>იყიდე ახლა</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M5 12h14M12 5l7 7-7 7"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Category Banners -->
-    <section class="category-banners" id="categoryBanners">
-        <div class="container">
-            <div class="banners-grid" id="bannersGrid">
-                <!-- Loaded dynamically -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Brands Section -->
-    <section class="brands-section" id="brandsSection">
-        <div class="container">
-            <div class="brands-grid" id="brandsGrid">
-                <!-- Loaded dynamically -->
-            </div>
-        </div>
-    </section>
-
-    <!-- New Arrivals -->
-    <section class="products-section" id="newArrivals">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title" id="newArrivalsTitle">ახალი მოსულები</h2>
-                <a href="#" class="view-all">ყველას ნახვა →</a>
-            </div>
-            <div class="products-grid" id="newArrivalsGrid">
-                <div class="loading">იტვირთება...</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sale Products -->
-    <section class="products-section sale-section" id="saleProducts">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title" id="saleTitle">ფასდაკლება</h2>
-                <a href="#" class="view-all">ყველას ნახვა →</a>
-            </div>
-            <div class="products-grid" id="saleGrid">
-                <div class="loading">იტვირთება...</div>
-            </div>
-        </div>
-    </section>
 
     <script src="script.js"></script>
 </body>
