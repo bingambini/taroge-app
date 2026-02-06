@@ -1,6 +1,6 @@
 // Configuration
 const CONFIG = {
-    API_URL: 'https://script.google.com/macros/s/AKfycbyaw4FwC-ERm_wDXNZYkcDBTtU2CkepINX6gCBL8Q3UTnAtu_g1oqSf23bsDI11zjy5PA/exec'
+    API_URL: 'https://script.google.com/macros/s/AKfycby0ynqSlQfk73gn6USsyYWCOFPI9zI55H_084didqwtsdY2jLSPasyXZn0VRr4mf-dfAg/exec'
 };
 
 // State
