@@ -78,9 +78,70 @@ body { background: var(--bg-color); color: var(--text-main); padding-bottom: 80p
 .main-btn:disabled { background: #d2d2d7; }
 
 /* Navigation */
-.bottom-nav { 
-    position: fixed; bottom: 0; width: 100%; height: 70px; background: white; 
-    border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; 
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 75px; /* ოპტიმალური სიმაღლე */
+    background: rgba(255, 255, 255, 0.85); /* ოდნავ გამჭვირვალე ეფექტი */
+    backdrop-filter: blur(20px); /* Apple-ის მინის ეფექტი */
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: env(safe-area-inset-bottom); /* iPhone-ის ქვედა ხაზისთვის */
+    z-index: 1000;
 }
-.nav-item { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
-.nav-item.active { color: var(--accent); }
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: #86868b;
+    transition: all 0.2s ease;
+    gap: 4px; /* დაშორება ხატულასა და ტექსტს შორის */
+}
+
+.nav-item.active {
+    color: #0071e3; /* ლურჯი აქტიური ფერი */
+}
+
+.nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+}
+
+.nav-item span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+}
+
+/* კალათის ბეიჯი ფუთერში */
+.cart-wrapper {
+    position: relative;
+}
+
+.nav-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background: #ff3b30;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid white;
+}
