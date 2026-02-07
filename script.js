@@ -58,22 +58,22 @@ async function loadData() {
 function applyHeaderDesign(config) {
     if (!config || config.Status !== 'active') return;
 
-    // ვეძებთ ელემენტებს კლასებით, თუ ID-ები არ გაქვს
-    const logoNameElement = document.querySelector('.logo-area span') || document.getElementById('logo');
-    const logoCircleElement = document.querySelector('.logo-circle') || document.getElementById('logo-icon');
+    // ვპოულობთ ელემენტებს ზუსტად იმ ID-ებით, რაც შენს HTML-შია
+    const logoNameElement = document.getElementById('logo'); 
+    const logoCircleElement = document.getElementById('logo-icon');
     const headerElement = document.querySelector('.header');
 
-    // მაღაზიის სახელი
+    // მაღაზიის სახელი (BingaMbini-ს ნაცვლად ჩაწერს შიტის სახელს)
     if (config.Shop_Name && logoNameElement) {
         logoNameElement.innerText = config.Shop_Name;
     }
     
-    // ლოგოს ასო (წრეში)
+    // ლოგოს ასო (B-ს ნაცვლად ჩაწერს შიტის ასოს)
     if (config.Logo_Char && logoCircleElement) {
         logoCircleElement.innerText = config.Logo_Char;
     }
     
-    // ფონი
+    // ჰედერის ფონი
     if (config.Bg_Color && headerElement) {
         headerElement.style.background = config.Bg_Color;
     }
