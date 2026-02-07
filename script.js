@@ -114,33 +114,22 @@ function renderProducts() {
     if (!grid) return;
     grid.innerHTML = '';
 
-    console.log("--- DEBUG START ---");
-    console.log("სულ პროდუქტები:", state.products);
-    console.log("სულ დეტალები:", state.productDetails);
-
-    state.products.forEach((product, index) => {
-        if (product.status !== 'active') return;
-
-        // დებაგერი: გამოაქვს პირველი 3 პროდუქტის სრული სტრუქტურა
-        if (index < 3) {
-            console.log(`პროდუქტი #${index} (${product.name_ge}):`, product);
-        }
-
-        // 1. ფერების ამოკრება მარაგის მიხედვით
+    state.products.forEach(product => {
+        // 1. ვპოულობთ ყველა ვარიანტს ამ პროდუქტისთვის, რომელიც მარაგშია
         const productVariants = state.productDetails.filter(d => 
             String(d.product_id) === String(product.product_id) && 
             parseInt(d.stock_quantity || 0) > 0
         );
+
+        // 2. ვიღებთ უნიკალურ ფერებს (მხოლოდ იმას, რაც მარაგშია)
         const uniqueColors = [...new Set(productVariants.map(v => v.Colors).filter(c => c))];
 
-        // 2. ფასდაკლების გამოთვლა
-        const finalPrice = parseFloat(product.final_price);
-        const oldPrice = parseFloat(product.old_price);
-        const hasDiscount = oldPrice && oldPrice > finalPrice;
-        const discountPercent = hasDiscount ? Math.round(((oldPrice - finalPrice) / oldPrice) * 100) : 0;
-        
-        // 3. ბეიჯის ლოგიკა (ვეძებთ ყველანაირ ვარიაციას)
-        const statusBadge = product.Badge_Status || product.badge_status || product.Badge || product.badge || "";
+        // 3. ვიღებთ ბეიჯის ტექსტს (რადგან ის Product_Details-შია, ავიღებთ პირველივე ვარიანტიდან)
+        const statusBadge = productVariants.length > 0 ? productVariants[0].Badge_Status : "";
+
+        // 4. ფასდაკლების ლოგიკა (შენი Products ტაბის მიხედვით)
+        const discountVal = parseInt(product.discount_percent || 0);
+        const hasDiscount = discountVal > 0;
 
         const card = document.createElement('div');
         card.className = 'product-card';
@@ -150,35 +139,34 @@ function renderProducts() {
             <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
                 <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
                 
-                <div style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 999;">
-                    ${hasDiscount ? `<div style="background: #ff3b30; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800;">-${discountPercent}%</div>` : ''}
-                    ${statusBadge ? `<div style="background: #007aff; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase;">${statusBadge}</div>` : ''}
+                <div style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 10;">
+                    ${hasDiscount ? `<div style="background: #ff3b30; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">-${discountVal}%</div>` : ''}
+                    ${statusBadge && statusBadge !== 'undefined' ? `<div style="background: #007aff; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${statusBadge}</div>` : ''}
                 </div>
             </div>
             
             <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1; background: white;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <p style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 700;">${product.brand || ''}</p>
+                    <p style="font-size: 11px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 700;">${product.brand || ''}</p>
                     
                     <div style="display: flex; gap: 4px;">
                         ${uniqueColors.map(color => `
-                            <div title="${color}" style="width: 12px; height: 12px; border-radius: 50%; background: ${translateColor(color)}; border: 1.5px solid #e5e5e5;"></div>
+                            <div title="${color}" style="width: 14px; height: 14px; border-radius: 50%; background: ${translateColor(color)}; border: 1.5px solid #e5e5e5;"></div>
                         `).join('')}
                     </div>
                 </div>
                 
-                <h3 style="font-size: 13px; font-weight: 600; margin: 4px 0 8px; height: 34px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; color: #1d1d1f;">
+                <h3 style="font-size: 14px; font-weight: 600; margin: 4px 0 10px; height: 36px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; color: #1d1d1f;">
                     ${product.name_ge}
                 </h3>
                 
-                <div style="margin-top: auto; display: flex; align-items: baseline; gap: 6px;">
-                    <span style="font-size: 16px; font-weight: 800; color: #000;">${product.final_price} ₾</span>
-                    ${hasDiscount ? `<span style="font-size: 11px; color: #86868b; text-decoration: line-through;">${product.old_price} ₾</span>` : ''}
+                <div style="margin-top: auto; display: flex; align-items: baseline; gap: 8px;">
+                    <span style="font-size: 18px; font-weight: 800; color: #000;">${product.final_price} ₾</span>
+                    ${hasDiscount ? `<span style="font-size: 12px; color: #86868b; text-decoration: line-through;">${product.price} ₾</span>` : ''}
                 </div>
             </div>`;
         grid.appendChild(card);
     });
-    console.log("--- DEBUG END ---");
 }
 
 // 7. დეტალური გვერდი
