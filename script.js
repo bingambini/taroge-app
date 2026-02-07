@@ -11,7 +11,25 @@ let state = {
 
 let selectedSize = null;
 
-// 1. Loader-ის მართვა (მხოლოდ ჩვენება/დამალვა)
+// დამხმარე ფუნქცია ფერების თარგმნისთვის
+function translateColor(color) {
+    const colors = {
+        'შავი': 'black',
+        'თეთრი': 'white',
+        'წითელი': 'red',
+        'ლურჯი': '#007aff',
+        'მწვანე': '#4cd964',
+        'ყვითელი': '#ffcc00',
+        'ნაცრისფერი': '#8e8e93',
+        'ყავისფერი': '#a2845e',
+        'ვარდისფერი': '#ff2d55',
+        'იასამნისფერი': '#5856d6',
+        'სტაფილოსფერი': '#ff9500'
+    };
+    return colors[color] || color;
+}
+
+// 1. Loader-ის მართვა
 function showLoader() { 
     const loader = document.getElementById('loader-wrapper');
     if (loader) loader.classList.remove('loader-hidden'); 
@@ -48,11 +66,11 @@ async function loadData() {
     } catch (error) {
         console.error("მონაცემების ჩატვირთვის შეცდომა:", error);
     } finally {
-        setTimeout(hideLoader, 800); // მცირე პაუზა სუფთა გადასვლისთვის
+        setTimeout(hideLoader, 800);
     }
 }
 
-// 4. დიზაინის ფუნქციები (Header)
+// 4. Header-ის დიზაინი
 function applyHeaderDesign(config) {
     if (!config || config.Status !== 'active') return;
     const logoElement = document.getElementById('logo'); 
@@ -105,7 +123,6 @@ function renderProducts() {
 
         // ფერების ამოკრება "Colors" სვეტიდან
         const productVariants = state.productDetails.filter(d => String(d.product_id) === String(product.product_id));
-        // ვიღებთ უნიკალურ ფერებს, ვფილტრავთ ცარიელებს
         const uniqueColors = [...new Set(productVariants.map(v => v.Colors).filter(c => c))];
 
         const card = document.createElement('div');
@@ -123,13 +140,10 @@ function renderProducts() {
             <div class="product-details">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <p class="brand" style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0;">${product.brand || ''}</p>
-                    
                     <div class="card-colors" style="display: flex; gap: 4px;">
-                        ${uniqueColors.slice(0, 3).map(color => {
-                            // თუ ფერი ქართულადაა, აქ შეგვიძლია პატარა ლექსიკონივით გვქონდეს, 
-                            // ან უბრალოდ CSS-მა აღიქვას თუ ინგლისურადაა (მაგ: Black, Blue)
-                            return `<div title="${color}" style="width: 10px; height: 10px; border-radius: 50%; background: ${translateColor(color)}; border: 1px solid rgba(0,0,0,0.1);"></div>`;
-                        }).join('')}
+                        ${uniqueColors.slice(0, 3).map(color => `
+                            <div title="${color}" style="width: 10px; height: 10px; border-radius: 50%; background: ${translateColor(color)}; border: 1px solid rgba(0,0,0,0.1);"></div>
+                        `).join('')}
                         ${uniqueColors.length > 3 ? `<span style="font-size: 9px; color: #86868b; font-weight: 600;">+${uniqueColors.length - 3}</span>` : ''}
                     </div>
                 </div>
@@ -143,51 +157,83 @@ function renderProducts() {
     });
 }
 
-// დამხმარე ფუნქცია ფერების თარგმნისთვის (რომ CSS-მა გაიგოს)
-function translateColor(color) {
-    const colors = {
-        'შავი': 'black',
-        'თეთრი': 'white',
-        'წითელი': 'red',
-        'ლურჯი': 'blue',
-        'მწვანე': 'green',
-        'ყვითელი': 'yellow',
-        'ნაცრისფერი': 'gray',
-        'ყავისფერი': 'brown',
-        'ვარდისფერი': 'pink',
-        'იასამნისფერი': 'purple',
-        'სტაფილოსფერი': 'orange'
-    };
-    return colors[color] || color; // თუ ვერ იპოვა, დააბრუნებს ორიგინალს (თუ ინგლისურადაა)
-}
-
-// 7. დეტალური გვერდი და კალათა (შემოკლებული ფუნქციები უცვლელად)
+// 7. დეტალური გვერდი
 function openProductDetails(productId) {
     const product = state.products.find(p => String(p.product_id) === String(productId));
     if (!product) return;
+
+    const variants = state.productDetails.filter(d => String(d.product_id) === String(productId));
+    const uniqueSizes = [...new Set(variants.map(v => v.Size).filter(s => s))];
+    const uniqueColors = [...new Set(variants.map(v => v.Colors).filter(c => c))];
+    const hasDiscount = product.old_price && parseFloat(product.old_price) > parseFloat(product.final_price);
+
     const overlay = document.createElement('div');
     overlay.className = 'detail-overlay';
     overlay.id = 'active-overlay';
     overlay.innerHTML = `
         <div class="detail-container">
             <div class="detail-header"><button onclick="closeProductDetail()" class="close-btn">✕</button></div>
-            <div class="detail-image"><img src="${product.photo_url_1}"></div>
-            <div class="detail-info">
-                <h2 class="detail-name">${product.name_ge}</h2>
-                <div class="detail-price">${product.final_price} ₾</div>
-                <button class="main-btn" onclick="handleAddToCart('${productId}')">კალათაში დამატება</button>
+            <div class="detail-image" style="display: flex; justify-content: center; align-items: center; height: 250px;">
+                <img src="${product.photo_url_1}" style="max-height: 100%; object-fit: contain;">
+            </div>
+            <div class="detail-info" style="padding: 20px;">
+                <p style="color: #86868b; text-transform: uppercase; font-size: 12px; font-weight: 600;">${product.brand || ''}</p>
+                <h2 class="detail-name" style="margin: 10px 0;">${product.name_ge}</h2>
+                <div class="price-block" style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 20px;">
+                    <span class="final-price" style="font-size: 24px; font-weight: 800;">${product.final_price} ₾</span>
+                    ${hasDiscount ? `<span class="old-price" style="text-decoration: line-through; color: #86868b;">${product.old_price} ₾</span>` : ''}
+                </div>
+
+                ${uniqueColors.length > 0 ? `
+                    <p class="section-label" style="font-size: 12px; font-weight: 700; color: #86868b; margin-bottom: 10px;">ფერები:</p>
+                    <div class="detail-colors" style="display:flex; gap:10px; margin-bottom:20px;">
+                        ${uniqueColors.map(c => `<div onclick="this.parentElement.querySelectorAll('div').forEach(d=>d.style.borderColor='#eee'); this.style.borderColor='#0071e3';" style="width:30px; height:30px; border-radius:50%; background:${translateColor(c)}; border:2px solid #eee; cursor:pointer;"></div>`).join('')}
+                    </div>
+                ` : ''}
+
+                ${uniqueSizes.length > 0 ? `
+                    <p class="section-label" style="font-size: 12px; font-weight: 700; color: #86868b; margin-bottom: 10px;">ზომა:</p>
+                    <div class="detail-sizes" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 20px;">
+                        ${uniqueSizes.map(s => `<div class="size-option" onclick="selectSize(this, '${s}')" style="padding:10px 15px; border:1px solid #ddd; border-radius:10px; cursor:pointer; font-weight: 600;">${s}</div>`).join('')}
+                    </div>
+                ` : ''}
+
+                <button class="main-btn" id="add-to-cart-btn" onclick="handleAddToCart('${productId}')">კალათაში დამატება</button>
             </div>
         </div>`;
     document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
 }
 
-function closeProductDetail() { document.getElementById('active-overlay')?.remove(); }
+function selectSize(el, size) {
+    document.querySelectorAll('.size-option').forEach(opt => {
+        opt.style.borderColor = '#ddd';
+        opt.style.background = 'transparent';
+        opt.style.color = '#1d1d1f';
+    });
+    el.style.borderColor = '#0071e3';
+    el.style.background = '#0071e3';
+    el.style.color = 'white';
+    selectedSize = size;
+}
+
+function closeProductDetail() { 
+    document.getElementById('active-overlay')?.remove(); 
+    document.body.style.overflow = 'auto';
+    selectedSize = null;
+}
 
 function handleAddToCart(productId) {
-    state.cart.push({ id: productId });
-    document.getElementById('nav-cart-badge').innerText = state.cart.length;
-    document.getElementById('nav-cart-badge').style.display = 'flex';
-    closeProductDetail();
+    state.cart.push({ id: productId, size: selectedSize });
+    const badge = document.getElementById('nav-cart-badge');
+    if (badge) {
+        badge.innerText = state.cart.length;
+        badge.style.display = 'flex';
+    }
+    const btn = document.getElementById('add-to-cart-btn');
+    btn.innerText = "დამატებულია! ✓";
+    btn.style.background = "#4cd964";
+    setTimeout(closeProductDetail, 800);
 }
 
 function handleNavChange(page, element) {
