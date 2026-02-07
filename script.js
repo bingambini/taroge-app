@@ -11,20 +11,20 @@ let state = {
 
 let selectedSize = null;
 
-// დამხმარე ფუნქცია ფერების თარგმნისთვის
+// დამხმარე ფუნქცია ფერების თარგმნისთვის (განახლებული)
 function translateColor(color) {
     const colors = {
-        'შავი': 'black',
-        'თეთრი': 'white',
-        'წითელი': 'red',
-        'ლურჯი': '#007aff',
-        'მწვანე': '#4cd964',
-        'ყვითელი': '#ffcc00',
-        'ნაცრისფერი': '#8e8e93',
-        'ყავისფერი': '#a2845e',
-        'ვარდისფერი': '#ff2d55',
-        'იასამნისფერი': '#5856d6',
-        'სტაფილოსფერი': '#ff9500'
+        'შავი': 'black', 'Black': 'black',
+        'თეთრი': 'white', 'White': 'white',
+        'წითელი': 'red', 'Red': 'red',
+        'ლურჯი': '#007aff', 'Blue': '#007aff',
+        'მწვანე': '#4cd964', 'Green': '#4cd964',
+        'ყვითელი': '#ffcc00', 'Yellow': '#ffcc00',
+        'ნაცრისფერი': '#8e8e93', 'Gray': '#8e8e93',
+        'ყავისფერი': '#a2845e', 'Brown': '#a2845e',
+        'ვარდისფერი': '#ff2d55', 'Pink': '#ff2d55',
+        'იასამნისფერი': '#5856d6', 'Purple': '#5856d6',
+        'სტაფილოსფერი': '#ff9500', 'Orange': '#ff9500'
     };
     return colors[color] || color;
 }
@@ -108,7 +108,7 @@ function applyHeroDesign(config) {
     heroSection.style.display = 'block';
 }
 
-// 6. პროდუქტების რენდერი
+// 6. პროდუქტების რენდერი (იძულებითი სტილებით)
 function renderProducts() {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
@@ -117,12 +117,7 @@ function renderProducts() {
     state.products.forEach(product => {
         if (product.status !== 'active') return;
 
-        // 1. ვპოულობთ ყველა ჩანაწერს productDetails-ში ამ კონკრეტული პროდუქტისთვის
-        const productVariants = state.productDetails.filter(d => 
-            String(d.product_id) === String(product.product_id)
-        );
-
-        // 2. ვიღებთ მხოლოდ უნიკალურ ფერებს "Colors" სვეტიდან
+        const productVariants = state.productDetails.filter(d => String(d.product_id) === String(product.product_id));
         const uniqueColors = [...new Set(productVariants.map(v => v.Colors).filter(c => c))];
 
         const hasDiscount = product.old_price && parseFloat(product.old_price) > parseFloat(product.final_price);
@@ -134,27 +129,32 @@ function renderProducts() {
         card.onclick = () => openProductDetails(product.product_id);
         
         card.innerHTML = `
-            <div class="product-image-container">
-                <img src="${product.photo_url_1}" loading="lazy" class="product-img">
-                <div class="badges-wrapper">
-                    ${hasDiscount ? `<div class="badge discount">-${discountPercent}%</div>` : ''}
-                    ${statusBadge ? `<div class="badge status">${statusBadge}</div>` : ''}
+            <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
+                <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
+                
+                <div class="badges-wrapper" style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 99 !important;">
+                    ${hasDiscount ? `<div style="background: #ff3b30; color: white; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; display: block !important;">-${discountPercent}%</div>` : ''}
+                    ${statusBadge ? `<div style="background: #007aff; color: white; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; display: block !important;">${statusBadge}</div>` : ''}
                 </div>
             </div>
-            <div class="product-details">
+            
+            <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <p class="brand" style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0;">${product.brand || ''}</p>
-                    
-                    <div class="card-colors" style="display: flex; gap: 3px;">
+                    <p style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 600;">${product.brand || ''}</p>
+                    <div style="display: flex; gap: 4px; align-items: center;">
                         ${uniqueColors.map(color => `
-                            <div title="${color}" style="width: 10px; height: 10px; border-radius: 50%; background: ${translateColor(color)}; border: 1px solid rgba(0,0,0,0.1);"></div>
+                            <div style="width: 10px; height: 10px; border-radius: 50%; background: ${translateColor(color)}; border: 1px solid rgba(0,0,0,0.1); display: block !important;"></div>
                         `).join('')}
                     </div>
                 </div>
-                <h3 class="product-title">${product.name_ge}</h3>
-                <div class="price-block">
-                    <span class="final-price">${product.final_price} ₾</span>
-                    ${hasDiscount ? `<span class="old-price">${product.old_price} ₾</span>` : ''}
+                
+                <h3 class="product-title" style="font-size: 13px; font-weight: 600; margin: 5px 0; height: 34px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; color: #1d1d1f;">
+                    ${product.name_ge}
+                </h3>
+                
+                <div class="price-block" style="margin-top: auto; display: flex; align-items: baseline; gap: 6px;">
+                    <span style="font-size: 16px; font-weight: 800; color: #000;">${product.final_price} ₾</span>
+                    ${hasDiscount ? `<span style="font-size: 11px; color: #86868b; text-decoration: line-through;">${product.old_price} ₾</span>` : ''}
                 </div>
             </div>`;
         grid.appendChild(card);
