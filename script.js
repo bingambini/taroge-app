@@ -56,7 +56,6 @@ async function loadData() {
 }
 
 // 4. დიზაინის ფუნქციები
-// 4. დიზაინის ფუნქციები
 function applyHeaderDesign(config) {
     if (!config || config.Status !== 'active') return;
 
@@ -244,15 +243,13 @@ function updateButtonState() {
 function handleAddToCart(productId) {
     state.cart.push({ id: productId, size: selectedSize });
     
-    const countBadge = document.getElementById('cart-count');
+    // განახლდა: ჰედერის კალათის იკონკის ძებნა ამოღებულია
     const navBadge = document.getElementById('nav-cart-badge');
     
-    [countBadge, navBadge].forEach(badge => {
-        if (badge) {
-            badge.innerText = state.cart.length;
-            badge.style.display = 'block';
-        }
-    });
+    if (navBadge) {
+        navBadge.innerText = state.cart.length;
+        navBadge.style.display = 'block';
+    }
 
     if (window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
