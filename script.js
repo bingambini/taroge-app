@@ -26,7 +26,6 @@ async function loadData() {
 
         applyHeaderDesign(state.headerConfig);
         
-        // --- აქ ჩაემატა ბანერის გამოძახება ---
         if (data.heroConfig) {
             applyHeroDesign(data.heroConfig);
         }
@@ -103,13 +102,11 @@ function applyHeaderDesign(config) {
     }
 }
 
-// აი ეს ფუნქცია აკლდა შენს კოდს:
 function applyHeroDesign(config) {
     const heroSection = document.getElementById('hero');
     if (!heroSection || !config) return;
 
     const imageUrl = config.B_Image || '';
-    // B_Gradient სვეტიდან ვიღებთ შუშის ფერს
     const glassColor = config.B_Gradient || 'rgba(255, 255, 255, 0.2)';
 
     heroSection.innerHTML = `
@@ -175,22 +172,22 @@ function applyHeroDesign(config) {
             ${imageUrl ? `
                 <div class="floating-product" style="
                     position: absolute;
-                    right: -10px; /* ჩარჩოდან ოდნავ გასვლა */
-                    top: -20px;   /* ზემოდან გადმოსვლა */
+                    right: -10px;
+                    top: -20px;
                     width: 55%;
-                    height: 120%; /* ბანერზე მაღალი რომ იყოს */
-                    z-index: 3;   /* ყველაზე მაღალი ფენა */
+                    height: 120%;
+                    z-index: 3;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    filter: drop-shadow(0 20px 35px rgba(0,0,0,0.4)); /* რეალური ჩრდილი */
+                    filter: drop-shadow(0 20px 35px rgba(0,0,0,0.4));
                     pointer-events: none;
                 ">
                     <img src="${imageUrl}" style="
                         width: 100%;
                         height: auto;
                         object-fit: contain;
-                        transform: rotate(-10deg); /* სტილისთვის */
+                        transform: rotate(-10deg);
                     ">
                 </div>
             ` : ''}
@@ -240,17 +237,104 @@ function renderProducts() {
 
 function addToCart(id) {
     state.cart.push(id);
+    
+    // განვაახლოთ ორივე ბეიჯი: ჰედერის და ნავიგაციის
     const badge = document.getElementById('cart-count');
+    const navBadge = document.getElementById('nav-cart-badge');
+    
+    const count = state.cart.length;
+    
     if (badge) {
-        badge.innerText = state.cart.length;
+        badge.innerText = count;
         badge.style.display = 'block';
+    }
+    if (navBadge) {
+        navBadge.innerText = count;
+        navBadge.style.display = 'flex';
     }
     
     if (window.Telegram && window.Telegram.WebApp.HapticFeedback) {
-        window.Telegram.WebApp.impactOccurred('medium');
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
     }
 }
 
 function toggleCart() {
     console.log("კალათა გაიხსნა:", state.cart);
+    // აქ შეგიძლია გამოიძახო კალათის გვერდი
+}
+
+/* =========================================
+   ახალი ფუნქციები ნავიგაციისთვის
+   ========================================= */
+
+function handleNavChange(page, element) {
+    // 1. აქტიური კლასის შეცვლა
+    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+    element.classList.add('active');
+
+    // 2. ვიბრაცია (Haptic)
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
+
+    // 3. გვერდების გადართვა
+    const mainProducts = document.getElementById('main-products');
+    const hero = document.getElementById('hero');
+    const profileSection = document.getElementById('profile-section');
+
+    if (page === 'home') {
+        mainProducts.style.display = 'block';
+        hero.style.display = 'block';
+        profileSection.style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } 
+    else if (page === 'category') {
+        openCategorySheet();
+    } 
+    else if (page === 'cart') {
+        toggleCart();
+    } 
+    else if (page === 'profile') {
+        mainProducts.style.display = 'none';
+        hero.style.display = 'none';
+        profileSection.style.display = 'block';
+        setupProfileData();
+    }
+}
+
+function openCategorySheet() {
+    const sheet = document.getElementById('category-sheet');
+    const list = document.getElementById('categories-list');
+    
+    // ამოვიღოთ უნიკალური ბრენდები
+    const brands = [...new Set(state.products.map(p => p.brand))];
+    
+    list.innerHTML = brands.map(brand => `
+        <div class="category-item" onclick="filterByBrand('${brand}')">
+            <span>${brand}</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+    `).join('');
+    
+    sheet.classList.add('active');
+}
+
+function closeSheet(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+function filterByBrand(brand) {
+    console.log("ფილტრი ბრენდით:", brand);
+    closeSheet('category-sheet');
+    // აქ შეგიძლია დაამატო რეალური ფილტრაციის ლოგიკა
+}
+
+function setupProfileData() {
+    if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+        const user = window.Telegram.WebApp.initDataUnsafe.user;
+        document.getElementById('user-name').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+        if (user.photo_url) {
+            document.getElementById('user-avatar').innerHTML = `<img src="${user.photo_url}" style="width:100%; height:100%; border-radius:50%;">`;
+        }
+    }
 }
