@@ -17,15 +17,37 @@ body { background: var(--bg-color); color: var(--text-main); padding-bottom: 80p
 #loader-wrapper {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: white; z-index: 9999; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; transition: 0.3s;
+    align-items: center; justify-content: center; 
+    transition: opacity 0.5s ease, visibility 0.5s ease; /* რბილი გაქრობა */
 }
-.loader-hidden { opacity: 0; pointer-events: none; }
-.loader { 
-    width: 40px; height: 40px; border: 4px solid #f3f3f3; 
-    border-top: 4px solid var(--accent); border-radius: 50%; 
-    animation: spin 1s linear infinite; 
+
+.loader-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+/* ანიმაციების კლასები, რომლებსაც JS მართავს */
+.spin { animation: spin 2s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.pulse { animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+.bounce { animation: bounce 0.5s ease-in-out infinite alternate; }
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-20px); } }
+
+/* პროგრეს ბარი */
+.progress-bar {
+    width: 200px; height: 4px; background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px; margin-top: 20px; overflow: hidden;
 }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.progress-line {
+    width: 100%; height: 100%; background: var(--accent);
+    animation: progressFill 2s ease-in-out infinite;
+}
+@keyframes progressFill {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.loading-text { margin-top: 15px; font-size: 14px; font-weight: 500; color: var(--text-secondary); }
 
 /* Header */
 .header { 
@@ -37,7 +59,7 @@ body { background: var(--bg-color); color: var(--text-main); padding-bottom: 80p
     background: rgba(255,255,255,0.8); 
     backdrop-filter: blur(20px); 
     z-index: 100;
-    border-bottom: 0.5px solid rgba(0,0,0,0.05); /* დავამატოთ თხელი ხაზი ქვემოთ */
+    border-bottom: 0.5px solid rgba(0,0,0,0.05);
 }
 
 .header-grid { 
@@ -45,7 +67,7 @@ body { background: var(--bg-color); color: var(--text-main); padding-bottom: 80p
     justify-content: space-between; 
     width: 100%; 
     align-items: center; 
-    padding: 0 16px; /* დაშორება კიდეებიდან */
+    padding: 0 16px;
 }
 
 .logo-area { 
@@ -53,7 +75,7 @@ body { background: var(--bg-color); color: var(--text-main); padding-bottom: 80p
     align-items: center; 
     gap: 12px; 
     font-weight: 700; 
-    font-size: 17px; /* Apple-ის სტანდარტული ზომა */
+    font-size: 17px;
 }
 
 .logo-circle { 
@@ -65,7 +87,7 @@ body { background: var(--bg-color); color: var(--text-main); padding-bottom: 80p
     display: flex; 
     align-items: center; 
     justify-content: center;
-    flex-shrink: 0; /* რომ წრე არ "მოიჭყლიტოს" */
+    flex-shrink: 0;
 }
 
 /* Products Grid */
@@ -109,15 +131,15 @@ body { background: var(--bg-color); color: var(--text-main); padding-bottom: 80p
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 75px; /* ოპტიმალური სიმაღლე */
-    background: rgba(255, 255, 255, 0.85); /* ოდნავ გამჭვირვალე ეფექტი */
-    backdrop-filter: blur(20px); /* Apple-ის მინის ეფექტი */
+    height: 75px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     display: flex;
     justify-content: space-around;
     align-items: center;
     border-top: 0.5px solid rgba(0, 0, 0, 0.1);
-    padding-bottom: env(safe-area-inset-bottom); /* iPhone-ის ქვედა ხაზისთვის */
+    padding-bottom: env(safe-area-inset-bottom);
     z-index: 1000;
 }
 
@@ -129,11 +151,11 @@ body { background: var(--bg-color); color: var(--text-main); padding-bottom: 80p
     flex: 1;
     color: #86868b;
     transition: all 0.2s ease;
-    gap: 4px; /* დაშორება ხატულასა და ტექსტს შორის */
+    gap: 4px;
 }
 
 .nav-item.active {
-    color: #0071e3; /* ლურჯი აქტიური ფერი */
+    color: #0071e3;
 }
 
 .nav-icon {
