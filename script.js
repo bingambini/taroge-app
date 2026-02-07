@@ -103,9 +103,10 @@ function renderProducts() {
         const discountPercent = hasDiscount ? Math.round(((product.old_price - product.final_price) / product.old_price) * 100) : 0;
         const statusBadge = product.badge_text ? product.badge_text : '';
 
-        // ფერების ამოკრება ამ პროდუქტისთვის
+        // ფერების ამოკრება "Colors" სვეტიდან
         const productVariants = state.productDetails.filter(d => String(d.product_id) === String(product.product_id));
-        const uniqueColors = [...new Set(productVariants.map(v => v.color_hex).filter(c => c))];
+        // ვიღებთ უნიკალურ ფერებს, ვფილტრავთ ცარიელებს
+        const uniqueColors = [...new Set(productVariants.map(v => v.Colors).filter(c => c))];
 
         const card = document.createElement('div');
         card.className = 'product-card';
@@ -120,13 +121,16 @@ function renderProducts() {
                 </div>
             </div>
             <div class="product-details">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <p class="brand" style="font-size: 10px; color: #86868b; text-transform: uppercase;">${product.brand || ''}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <p class="brand" style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0;">${product.brand || ''}</p>
+                    
                     <div class="card-colors" style="display: flex; gap: 4px;">
-                        ${uniqueColors.slice(0, 3).map(color => `
-                            <div style="width: 8px; height: 8px; border-radius: 50%; background: ${color}; border: 1px solid rgba(0,0,0,0.1);"></div>
-                        `).join('')}
-                        ${uniqueColors.length > 3 ? `<span style="font-size: 8px; color: #86868b;">+${uniqueColors.length - 3}</span>` : ''}
+                        ${uniqueColors.slice(0, 3).map(color => {
+                            // თუ ფერი ქართულადაა, აქ შეგვიძლია პატარა ლექსიკონივით გვქონდეს, 
+                            // ან უბრალოდ CSS-მა აღიქვას თუ ინგლისურადაა (მაგ: Black, Blue)
+                            return `<div title="${color}" style="width: 10px; height: 10px; border-radius: 50%; background: ${translateColor(color)}; border: 1px solid rgba(0,0,0,0.1);"></div>`;
+                        }).join('')}
+                        ${uniqueColors.length > 3 ? `<span style="font-size: 9px; color: #86868b; font-weight: 600;">+${uniqueColors.length - 3}</span>` : ''}
                     </div>
                 </div>
                 <h3 class="product-title">${product.name_ge}</h3>
@@ -137,6 +141,24 @@ function renderProducts() {
             </div>`;
         grid.appendChild(card);
     });
+}
+
+// დამხმარე ფუნქცია ფერების თარგმნისთვის (რომ CSS-მა გაიგოს)
+function translateColor(color) {
+    const colors = {
+        'შავი': 'black',
+        'თეთრი': 'white',
+        'წითელი': 'red',
+        'ლურჯი': 'blue',
+        'მწვანე': 'green',
+        'ყვითელი': 'yellow',
+        'ნაცრისფერი': 'gray',
+        'ყავისფერი': 'brown',
+        'ვარდისფერი': 'pink',
+        'იასამნისფერი': 'purple',
+        'სტაფილოსფერი': 'orange'
+    };
+    return colors[color] || color; // თუ ვერ იპოვა, დააბრუნებს ორიგინალს (თუ ინგლისურადაა)
 }
 
 // 7. დეტალური გვერდი და კალათა (შემოკლებული ფუნქციები უცვლელად)
