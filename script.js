@@ -58,25 +58,40 @@ async function loadData() {
 function applyHeaderDesign(config) {
     if (!config || config.Status !== 'active') return;
 
-    // ვპოულობთ ელემენტებს ზუსტად იმ ID-ებით, რაც შენს HTML-შია
     const logoNameElement = document.getElementById('logo'); 
     const logoCircleElement = document.getElementById('logo-icon');
     const headerElement = document.querySelector('.header');
 
-    // მაღაზიის სახელი (BingaMbini-ს ნაცვლად ჩაწერს შიტის სახელს)
     if (config.Shop_Name && logoNameElement) {
         logoNameElement.innerText = config.Shop_Name;
     }
     
-    // ლოგოს ასო (B-ს ნაცვლად ჩაწერს შიტის ასოს)
     if (config.Logo_Char && logoCircleElement) {
         logoCircleElement.innerText = config.Logo_Char;
     }
     
-    // ჰედერის ფონი
     if (config.Bg_Color && headerElement) {
         headerElement.style.background = config.Bg_Color;
     }
+}
+
+function applyHeroDesign(config) {
+    const heroSection = document.getElementById('hero');
+    if (!heroSection || !config || config.Status !== 'active') return;
+
+    const imageUrl = config.B_Image || '';
+    heroSection.innerHTML = `
+        <div class="hero-wrapper" style="background: ${config.B_Gradient || '#eee'}; border-radius: 24px; padding: 25px; position: relative; overflow: hidden; margin-bottom: 30px; height: 200px; display: flex; align-items: center;">
+            <div style="position: relative; z-index: 2; width: 60%;">
+                <h2 style="color: ${config.B_Title_Color || '#fff'}; font-size: 22px; margin-bottom: 8px;">${config.B_Title || ''}</h2>
+                <button onclick="document.getElementById('products-grid').scrollIntoView({behavior:'smooth'})" 
+                        style="padding: 10px 20px; border-radius: 12px; border: none; background: white; font-weight: 800; cursor: pointer;">
+                    ${config.B_Btn_Text || 'ყიდვა'}
+                </button>
+            </div>
+            ${imageUrl ? `<img src="${imageUrl}" style="position: absolute; right: -20px; top: 10px; height: 110%; transform: rotate(-10deg); z-index: 1;">` : ''}
+        </div>`;
+    heroSection.style.display = 'block';
 }
 
 // 5. პროდუქტების რენდერი (მთავარი გვერდი)
@@ -244,5 +259,4 @@ function handleNavChange(page, element) {
     if (page === 'home') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    // აქ შეიძლება დაემატოს კალათის ან პროფილის გვერდების გახსნის ლოგიკა
 }
