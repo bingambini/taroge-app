@@ -213,26 +213,31 @@ function renderProducts() {
     if (!grid) return;
     grid.innerHTML = '';
 
+    // state.products - მოდის "Products" შიტიდან
     state.products.forEach(product => {
         if (product.status !== 'active') return;
 
-        // 1. ვპოულობთ ყველა ვარიაციას საწყობიდან (Product_Details)
-        const variants = state.productDetails ? state.productDetails.filter(d => d.product_id === product.product_id) : [];
+        // 1. ვპოულობთ ყველა შესაბამის ხაზს "Product_Details" შიტიდან product_id-ით
+        const variants = state.productDetails ? state.productDetails.filter(d => String(d.product_id) === String(product.product_id)) : [];
 
-        // 2. ვაგროვებთ უნიკალურ ფერებს საწყობიდან
+        // 2. ვაგროვებთ უნიკალურ ფერებს ამ მოდელისთვის
         const uniqueColors = [...new Set(variants.map(v => v.Colors).filter(c => c))];
         
-        // 3. ვითვლით ჯამურ მარაგს საწყობში ამ მოდელზე
+        // 3. ვითვლით ჯამურ მარაგს ყველა ზომიდან
         const totalStock = variants.reduce((sum, v) => sum + parseInt(v.stock_quantity || 0), 0);
         const isAvailable = totalStock > 0;
 
-        // ფერების წრეების გენერაცია
-        let colorsHTML = uniqueColors.map(color => 
-            `<div class="color-dot" style="background: ${color.toLowerCase()};" title="${color}"></div>`
-        ).join('');
+        // ფერების HTML-ის მომზადება (წრეები)
+        let colorsHTML = '';
+        uniqueColors.forEach(color => {
+            // ვწმენდთ ფერის სახელს და ვიყენებთ background-ად
+            const cleanColor = color.trim().toLowerCase();
+            colorsHTML += `<div class="color-dot" style="background: ${cleanColor}; border: 1px solid #e0e0e0;" title="${color}"></div>`;
+        });
 
         const card = document.createElement('div');
         card.className = 'product-card';
+        // დაჭერისას გადავცემთ ID-ს დეტალური გვერდისთვის
         card.onclick = () => openProductDetails(product.product_id);
         
         card.innerHTML = `
@@ -248,8 +253,8 @@ function renderProducts() {
                 <p class="brand">${product.brand}</p>
                 <h3 class="name">${product.name_ge}</h3>
                 
-                <div class="color-options">
-                    ${colorsHTML || '<div style="height:12px"></div>'}
+                <div class="color-options" style="display: flex; gap: 4px; margin-bottom: 10px; height: 14px;">
+                    ${colorsHTML || '<div style="height:14px"></div>'}
                 </div>
 
                 <div class="price-box">
