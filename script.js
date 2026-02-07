@@ -115,22 +115,24 @@ function renderProducts() {
     grid.innerHTML = '';
 
     state.products.forEach(product => {
-        // 1. ფილტრავთ ვარიანტებს ამ კონკრეტული პროდუქტისთვის
+        // 1. მონაცემების ამოღება Product_Details-დან
         const productVariants = state.productDetails.filter(d => 
             String(d.product_id) === String(product.product_id)
         );
 
-        // 2. ვპოულობთ მხოლოდ იმ ვარიანტებს, რომლებიც რეალურად მარაგშია
+        // დებაგისთვის: ვნახოთ რას პოულობს კონკრეტულ ID-ზე
+        if (productVariants.length > 0) {
+            console.log(`პროდუქტი: ${product.name_ge}, ვარიანტები:`, productVariants);
+        }
+
+        // 2. მხოლოდ იმ ვარიანტების ფერები, სადაც მარაგია
         const availableVariants = productVariants.filter(v => parseInt(v.stock_quantity || 0) > 0);
-
-        // 3. ვიღებთ უნიკალურ ფერებს მხოლოდ იმ ვარიანტებიდან, რომლებიც მარაგშია
         const uniqueColors = [...new Set(availableVariants.map(v => v.Colors).filter(c => c))];
+        
+        // 3. მარაგის ბეიჯი (Badge_Status)
+        const statusBadge = productVariants.find(v => v.Badge_Status && v.Badge_Status !== "")?.Badge_Status || "";
 
-        // 4. ვიღებთ მარაგის ბეიჯს (Badge_Status) Product_Details ტაბიდან
-        // ავიღებთ პირველივე ვარიანტიდან, სადაც ეს ტექსტი წერია
-        const statusBadge = productVariants.find(v => v.Badge_Status)?.Badge_Status || "";
-
-        // 5. ფასდაკლების მონაცემები Products ტაბიდან
+        // 4. ფასდაკლება
         const discountVal = parseInt(product.discount_percent || 0);
         const hasDiscount = discountVal > 0;
 
@@ -143,23 +145,25 @@ function renderProducts() {
                 <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
                 
                 <div style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 10;">
-                    ${hasDiscount ? `<div style="background: #ff3b30; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">-${discountVal}%</div>` : ''}
-                    ${statusBadge ? `<div style="background: #007aff; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">${statusBadge}</div>` : ''}
+                    ${hasDiscount ? `<div style="background: #ff3b30; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${discountVal}%</div>` : ''}
+                    ${statusBadge ? `<div style="background: #007aff; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${statusBadge}</div>` : ''}
                 </div>
             </div>
             
             <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1; background: white;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <p style="font-size: 11px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 700;">${product.brand || ''}</p>
                     
-                    <div style="display: flex; gap: 4px; align-items: center;">
-                        ${uniqueColors.length > 0 ? uniqueColors.map(color => `
-                            <div title="${color}" style="width: 14px; height: 14px; border-radius: 50%; background: ${translateColor(color)}; border: 1.5px solid #e5e5e5; box-shadow: inset 0 0 2px rgba(0,0,0,0.1);"></div>
-                        `).join('') : '<span style="font-size: 10px; color: #ff3b30; font-weight: 600;">SOLD OUT</span>'}
+                    <div style="display: flex; gap: 4px; min-height: 14px;">
+                        ${uniqueColors.map(color => {
+                            const hexColor = translateColor(color);
+                            console.log(`ფერი: ${color} -> Hex: ${hexColor}`); // დებაგი
+                            return `<div style="width: 14px; height: 14px; border-radius: 50%; background: ${hexColor}; border: 1.5px solid #e5e5e5;"></div>`;
+                        }).join('')}
                     </div>
                 </div>
                 
-                <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 10px 0; height: 36px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; color: #1d1d1f;">
+                <h3 style="font-size: 14px; font-weight: 600; margin: 4px 0 10px; height: 36px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; color: #1d1d1f;">
                     ${product.name_ge}
                 </h3>
                 
