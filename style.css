@@ -4,7 +4,7 @@
     --text-secondary: #86868b;
     --accent: #0071e3;
     --card-bg: #f5f5f7;
-    --radius: 22px; /* უფრო რბილი და თანამედროვე კუთხეები */
+    --radius: 22px;
 }
 
 * {
@@ -104,7 +104,7 @@ body {
 }
 .hero-content { position: relative; z-index: 2; max-width: 80%; }
 
-/* --- Products Grid --- */
+/* --- Products Grid (Updated for Symmetry) --- */
 .section-title {
     font-size: 24px;
     font-weight: 700;
@@ -114,133 +114,126 @@ body {
 
 .products-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 100px; /* ადგილი Bottom Nav-ისთვის */
+    grid-template-columns: 1fr 1fr; /* ზუსტად 2 სვეტი */
+    gap: 16px; /* დაშორება ბარათებს შორის */
+    margin-bottom: 100px;
+    width: 100%;
 }
 
 /* =========================================
-   ახალი პრემიუმ პროდუქტის ბარათი
+   Adidas Style Premium Card (Simplified)
    ========================================= */
 .product-card {
     background: #ffffff;
-    border-radius: var(--radius);
-    padding: 12px;
+    border-radius: 25px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
     position: relative;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(0,0,0,0.03);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(0,0,0,0.04);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 
 .product-card:active {
-    transform: scale(0.96) translateY(2px);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    transform: scale(0.96);
 }
 
 .product-image {
-    position: relative;
     width: 100%;
     aspect-ratio: 1/1;
-    margin-bottom: 12px;
-    background: var(--card-bg); /* ფონი სურათის ქვეშ უკეთესი კონტრასტისთვის */
-    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    margin-bottom: 12px;
+    position: relative;
 }
 
 .product-image img {
-    width: 85%;
-    height: 85%;
+    width: 90%;
+    height: auto;
     object-fit: contain;
-    transition: transform 0.5s ease;
+    /* ეფექტური დახრა სტილისთვის */
+    transform: rotate(-10deg);
+    filter: drop-shadow(0 12px 12px rgba(0,0,0,0.1));
 }
 
-.product-card:hover .product-image img {
-    transform: scale(1.08);
-}
-
-.badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: #ff3b30;
-    color: white;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 20px;
-    box-shadow: 0 4px 8px rgba(255, 59, 48, 0.2);
-    z-index: 2;
-}
-
-.brand {
-    font-size: 11px;
-    color: var(--accent); /* ბრენდის სახელი აქცენტის ფერში */
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
+.product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .name {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 800;
     color: var(--text-main);
-    height: 40px;
-    margin-bottom: 12px;
+    text-transform: uppercase;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.description {
+    font-size: 10px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    height: 28px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    line-height: 1.3;
+    margin-bottom: 8px;
 }
 
-.price-row {
+/* ფერების ასარჩევი წრეები */
+.color-selection {
     display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 14px;
+    gap: 6px;
+    margin-bottom: 12px;
 }
 
-.price {
+.color-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.price-container {
+    margin-bottom: 12px;
+}
+
+.price-main {
     font-size: 18px;
     font-weight: 800;
-    color: var(--text-main);
+    color: #1d1d1f;
+    display: block;
 }
 
-.old-price {
-    font-size: 13px;
+.price-text {
+    font-size: 9px;
     color: var(--text-secondary);
-    text-decoration: line-through;
-    opacity: 0.6;
+    font-weight: 500;
 }
 
-/* თანამედროვე Add Button */
+/* Adidas Gradient Button */
 .add-btn {
-    background: var(--text-main);
+    background: linear-gradient(90deg, #87cefa 0%, #9370db 100%);
     color: white;
     border: none;
     padding: 12px;
-    border-radius: 14px;
+    border-radius: 20px;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
     width: 100%;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    box-shadow: 0 4px 10px rgba(135, 206, 250, 0.2);
 }
 
-.add-btn:active {
-    background: #000000;
-}
-
-/* --- Loader & Animations --- */
+/* --- Loader & Navigation (Unchanged) --- */
 #loader-wrapper {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -251,7 +244,6 @@ body {
 }
 .loader-hidden { opacity: 0; visibility: hidden; }
 
-/* --- Bottom Navigation --- */
 .bottom-nav {
     position: fixed;
     bottom: 0; left: 0; width: 100%; height: 75px;
@@ -293,7 +285,6 @@ body {
     z-index: 10;
 }
 
-/* --- Bottom Sheet & Profile --- */
 .bottom-sheet {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
