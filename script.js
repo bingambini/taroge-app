@@ -117,8 +117,13 @@ function renderProducts() {
     state.products.forEach(product => {
         if (product.status !== 'active') return;
 
+        // 1. ფერების ამოკრება და შემოწმება
         const productVariants = state.productDetails.filter(d => String(d.product_id) === String(product.product_id));
         const uniqueColors = [...new Set(productVariants.map(v => v.Colors).filter(c => c))];
+        
+        // კონსოლში გამოვიტანოთ რას პოულობს (შესამოწმებლად)
+        console.log(`პროდუქტი: ${product.name_ge}, ფერები:`, uniqueColors);
+        console.log(`ბეიჯის ტექსტი:`, product.badge_text);
 
         const hasDiscount = product.old_price && parseFloat(product.old_price) > parseFloat(product.final_price);
         const discountPercent = hasDiscount ? Math.round(((product.old_price - product.final_price) / product.old_price) * 100) : 0;
@@ -129,21 +134,22 @@ function renderProducts() {
         card.onclick = () => openProductDetails(product.product_id);
         
         card.innerHTML = `
-            <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
+            <div class="product-image-container" style="position: relative !important; width: 100%; height: 160px; background: #f8f8f8; display: flex !important; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
                 <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
                 
-                <div class="badges-wrapper" style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 99 !important;">
-                    ${hasDiscount ? `<div style="background: #ff3b30; color: white; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; display: block !important;">-${discountPercent}%</div>` : ''}
-                    ${statusBadge ? `<div style="background: #007aff; color: white; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; display: block !important;">${statusBadge}</div>` : ''}
+                <div class="badges-wrapper" style="position: absolute !important; top: 10px !important; left: 10px !important; display: flex !important; flex-direction: column !important; gap: 4px; z-index: 999 !important; pointer-events: none;">
+                    ${hasDiscount ? `<div style="background: #ff3b30 !important; color: white !important; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; display: block !important;">-${discountPercent}%</div>` : ''}
+                    ${statusBadge ? `<div style="background: #007aff !important; color: white !important; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; display: block !important;">${statusBadge}</div>` : ''}
                 </div>
             </div>
             
             <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <p style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 600;">${product.brand || ''}</p>
-                    <div style="display: flex; gap: 4px; align-items: center;">
+                    
+                    <div style="display: flex !important; gap: 4px !important; align-items: center !important;">
                         ${uniqueColors.map(color => `
-                            <div style="width: 10px; height: 10px; border-radius: 50%; background: ${translateColor(color)}; border: 1px solid rgba(0,0,0,0.1); display: block !important;"></div>
+                            <div style="width: 12px !important; height: 12px !important; border-radius: 50% !important; background: ${translateColor(color)} !important; border: 1px solid rgba(0,0,0,0.1) !important; display: block !important;"></div>
                         `).join('')}
                     </div>
                 </div>
