@@ -56,35 +56,43 @@ async function loadData() {
 }
 
 // 4. დიზაინის ფუნქციები
+// 4. დიზაინის ფუნქციები
 function applyHeaderDesign(config) {
-    const logoNameElement = document.getElementById('logo'); 
-    const logoCircleElement = document.getElementById('logo-icon');
+    if (!config || config.Status !== 'active') return;
+
+    const logoElement = document.getElementById('logo'); 
+    const logoIcon = document.getElementById('logo-icon');
     const headerElement = document.querySelector('.header');
 
-    // მაღაზიის სახელი (Shop_Name)
-    if (config.Shop_Name && logoNameElement) {
-        logoNameElement.innerText = config.Shop_Name;
-    }
-    
-    // ჰედერის ფონი (H_BG)
-    if (config.H_BG && headerElement) {
-        headerElement.style.background = config.H_BG;
-    }
+    // 1. ტექსტი და ფერები
+    if (config.Shop_Name && logoElement) logoElement.innerText = config.Shop_Name;
+    if (config.H_BG && headerElement) headerElement.style.background = config.H_BG;
+    if (config.H_Text && logoElement) logoElement.style.color = config.H_Text;
+    if (config.Icon_Color && logoIcon) logoIcon.style.color = config.Icon_Color;
 
-    // ტექსტის ფერი (H_Text)
-    if (config.H_Text && logoNameElement) {
-        logoNameElement.style.color = config.H_Text;
-    }
+    // 2. ზომები და დაშორებები
+    if (config.H_Height && headerElement) headerElement.style.height = config.H_Height + 'px';
+    if (config.H_Font_Size && logoElement) logoElement.style.fontSize = config.H_Font_Size + 'px';
+    if (config.H_Padding && headerElement) headerElement.style.padding = config.H_Padding;
 
-    // ლოგოს სურათი (Shop_Logo)
-    if (config.Shop_Logo && logoCircleElement) {
-        logoCircleElement.innerHTML = `<img src="${config.Shop_Logo}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    // 3. სტილი და ეფექტები
+    if (config.H_Shadow && headerElement) headerElement.style.boxShadow = config.H_Shadow;
+    if (config.H_Border && headerElement) headerElement.style.borderBottom = config.H_Border;
+
+    // 4. ლოგო/ხატულა
+    if (config.Shop_Logo && logoIcon) {
+        logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="
+            width: ${config.Logo_Size || 40}px; 
+            height: ${config.Logo_Size || 40}px; 
+            border-radius: ${config.Logo_Radius || '50%'}; 
+            object-fit: cover;">`;
+        logoIcon.style.background = 'none'; // ვაშორებთ წრეს თუ სურათია
     }
 }
 
 function applyHeroDesign(config) {
     const heroSection = document.getElementById('hero');
-    if (!heroSection || !config) return;
+    if (!heroSection || !config || config.Status !== 'active') return;
 
     const imageUrl = config.B_Image || '';
     heroSection.innerHTML = `
