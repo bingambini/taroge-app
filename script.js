@@ -218,31 +218,33 @@ function renderProducts() {
 
         const card = document.createElement('div');
         card.className = 'product-card';
+        // კალათის ღილაკის ნაცვლად, მთლიან ბარათს აქვს onclick
+        card.onclick = () => openProductDetails(product.product_id);
+        
         card.innerHTML = `
             <div class="product-image">
                 <img src="${product.photo_url_1}" alt="${product.name_ge}">
                 ${product.discount_percent > 0 ? `<span class="badge">-${product.discount_percent}%</span>` : ''}
             </div>
             <div class="product-info">
+                <p class="brand">${product.brand}</p>
                 <h3 class="name">${product.name_ge}</h3>
-                <p class="description">${product.description_ge || ''}</p>
-                
-                <div class="color-selection">
-                    <div class="color-dot" style="background: #1d1d1f;"></div>
-                    <div class="color-dot" style="background: #86868b;"></div>
-                    <div class="color-dot" style="background: #0071e3;"></div>
+                <div class="price">
+                    ${product.final_price} ₾
                 </div>
-
-                <div class="price-container">
-                    <span class="price-main">${product.final_price} ₾</span>
-                    <span class="price-text">ხელმისაწვდომია მარაგში</span>
-                </div>
-                
-                <button class="add-btn" onclick="addToCart('${product.product_id}')">კალათაში</button>
             </div>
         `;
         grid.appendChild(card);
     });
+}
+
+// ახალი ფუნქცია დეტალებზე გადასასვლელად
+function openProductDetails(productId) {
+    console.log("გადავდივართ პროდუქტზე:", productId);
+    // აქ ჩაწერ შენს ლოგიკას, რომელიც გახსნის სრულ გვერდს
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+    }
 }
 
 function addToCart(id) {
