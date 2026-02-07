@@ -115,50 +115,52 @@ function renderProducts() {
     grid.innerHTML = '';
 
     state.products.forEach(product => {
+        // ვიყენებთ შენს 'status' სვეტს
         if (product.status !== 'active') return;
 
-        // 1. ფერების ამოკრება და შემოწმება
-        const productVariants = state.productDetails.filter(d => String(d.product_id) === String(product.product_id));
+        // 1. ფერების ამოკრება Product_Details-დან (Colors სვეტიდან)
+        const productVariants = state.productDetails.filter(d => 
+            String(d.product_id) === String(product.product_id)
+        );
         const uniqueColors = [...new Set(productVariants.map(v => v.Colors).filter(c => c))];
-        
-        // კონსოლში გამოვიტანოთ რას პოულობს (შესამოწმებლად)
-        console.log(`პროდუქტი: ${product.name_ge}, ფერები:`, uniqueColors);
-        console.log(`ბეიჯის ტექსტი:`, product.badge_text);
 
+        // 2. ფასდაკლების გამოთვლა (final_price და old_price სვეტებით)
         const hasDiscount = product.old_price && parseFloat(product.old_price) > parseFloat(product.final_price);
         const discountPercent = hasDiscount ? Math.round(((product.old_price - product.final_price) / product.old_price) * 100) : 0;
-        const statusBadge = product.badge_text ? product.badge_text : '';
+        
+        // 3. ბეიჯის ტექსტი (შენი სვეტი: Badge_Status)
+        const statusBadge = product.Badge_Status ? product.Badge_Status : '';
 
         const card = document.createElement('div');
         card.className = 'product-card';
         card.onclick = () => openProductDetails(product.product_id);
         
         card.innerHTML = `
-            <div class="product-image-container" style="position: relative !important; width: 100%; height: 160px; background: #f8f8f8; display: flex !important; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
+            <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
                 <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
                 
-                <div class="badges-wrapper" style="position: absolute !important; top: 10px !important; left: 10px !important; display: flex !important; flex-direction: column !important; gap: 4px; z-index: 999 !important; pointer-events: none;">
-                    ${hasDiscount ? `<div style="background: #ff3b30 !important; color: white !important; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; display: block !important;">-${discountPercent}%</div>` : ''}
-                    ${statusBadge ? `<div style="background: #007aff !important; color: white !important; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; display: block !important;">${statusBadge}</div>` : ''}
+                <div style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 10;">
+                    ${hasDiscount ? `<div style="background: #ff3b30; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">-${discountPercent}%</div>` : ''}
+                    ${statusBadge ? `<div style="background: #007aff; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">${statusBadge}</div>` : ''}
                 </div>
             </div>
             
-            <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1;">
+            <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1; background: white;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <p style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 600;">${product.brand || ''}</p>
+                    <p style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 700; letter-spacing: 0.5px;">${product.brand || ''}</p>
                     
-                    <div style="display: flex !important; gap: 4px !important; align-items: center !important;">
+                    <div style="display: flex; gap: 4px;">
                         ${uniqueColors.map(color => `
-                            <div style="width: 12px !important; height: 12px !important; border-radius: 50% !important; background: ${translateColor(color)} !important; border: 1px solid rgba(0,0,0,0.1) !important; display: block !important;"></div>
+                            <div title="${color}" style="width: 12px; height: 12px; border-radius: 50%; background: ${translateColor(color)}; border: 1.5px solid #e5e5e5;"></div>
                         `).join('')}
                     </div>
                 </div>
                 
-                <h3 class="product-title" style="font-size: 13px; font-weight: 600; margin: 5px 0; height: 34px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; color: #1d1d1f;">
+                <h3 style="font-size: 13px; font-weight: 600; margin: 4px 0 8px; height: 34px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; color: #1d1d1f;">
                     ${product.name_ge}
                 </h3>
                 
-                <div class="price-block" style="margin-top: auto; display: flex; align-items: baseline; gap: 6px;">
+                <div style="margin-top: auto; display: flex; align-items: baseline; gap: 6px;">
                     <span style="font-size: 16px; font-weight: 800; color: #000;">${product.final_price} ₾</span>
                     ${hasDiscount ? `<span style="font-size: 11px; color: #86868b; text-decoration: line-through;">${product.old_price} ₾</span>` : ''}
                 </div>
