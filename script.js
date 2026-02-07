@@ -114,10 +114,19 @@ function renderProducts() {
     if (!grid) return;
     grid.innerHTML = '';
 
-    state.products.forEach(product => {
+    console.log("--- DEBUG START ---");
+    console.log("სულ პროდუქტები:", state.products);
+    console.log("სულ დეტალები:", state.productDetails);
+
+    state.products.forEach((product, index) => {
         if (product.status !== 'active') return;
 
-        // 1. ფერების ამოკრება მარაგის მიხედვით (stock_quantity > 0)
+        // დებაგერი: გამოაქვს პირველი 3 პროდუქტის სრული სტრუქტურა
+        if (index < 3) {
+            console.log(`პროდუქტი #${index} (${product.name_ge}):`, product);
+        }
+
+        // 1. ფერების ამოკრება მარაგის მიხედვით
         const productVariants = state.productDetails.filter(d => 
             String(d.product_id) === String(product.product_id) && 
             parseInt(d.stock_quantity || 0) > 0
@@ -125,11 +134,13 @@ function renderProducts() {
         const uniqueColors = [...new Set(productVariants.map(v => v.Colors).filter(c => c))];
 
         // 2. ფასდაკლების გამოთვლა
-        const hasDiscount = product.old_price && parseFloat(product.old_price) > parseFloat(product.final_price);
-        const discountPercent = hasDiscount ? Math.round(((product.old_price - product.final_price) / product.old_price) * 100) : 0;
+        const finalPrice = parseFloat(product.final_price);
+        const oldPrice = parseFloat(product.old_price);
+        const hasDiscount = oldPrice && oldPrice > finalPrice;
+        const discountPercent = hasDiscount ? Math.round(((oldPrice - finalPrice) / oldPrice) * 100) : 0;
         
-        // 3. ბეიჯის ტექსტი
-        const statusBadge = product.Badge_Status ? product.Badge_Status : '';
+        // 3. ბეიჯის ლოგიკა (ვეძებთ ყველანაირ ვარიაციას)
+        const statusBadge = product.Badge_Status || product.badge_status || product.Badge || product.badge || "";
 
         const card = document.createElement('div');
         card.className = 'product-card';
@@ -139,15 +150,15 @@ function renderProducts() {
             <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
                 <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
                 
-                <div style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 10;">
-                    ${hasDiscount ? `<div style="background: #ff3b30; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">-${discountPercent}%</div>` : ''}
-                    ${statusBadge ? `<div style="background: #007aff; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">${statusBadge}</div>` : ''}
+                <div style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 999;">
+                    ${hasDiscount ? `<div style="background: #ff3b30; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800;">-${discountPercent}%</div>` : ''}
+                    ${statusBadge ? `<div style="background: #007aff; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase;">${statusBadge}</div>` : ''}
                 </div>
             </div>
             
             <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1; background: white;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <p style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 700; letter-spacing: 0.5px;">${product.brand || ''}</p>
+                    <p style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 700;">${product.brand || ''}</p>
                     
                     <div style="display: flex; gap: 4px;">
                         ${uniqueColors.map(color => `
@@ -167,6 +178,7 @@ function renderProducts() {
             </div>`;
         grid.appendChild(card);
     });
+    console.log("--- DEBUG END ---");
 }
 
 // 7. დეტალური გვერდი
