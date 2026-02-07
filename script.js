@@ -112,7 +112,7 @@ function applyHeroDesign(config) {
     heroSection.innerHTML = `
         <div class="hero-wrapper" style="
             position: relative;
-            width: calc(100% - 32px);
+            width: 100%;
             margin: ${config.B_Margin_Top || 30}px auto;
             height: ${config.B_Height || 220}px;
             display: flex;
@@ -199,14 +199,15 @@ function applyHeroDesign(config) {
 function handleHeroAction(type, value) {
     if (type === 'product') {
         document.getElementById('products-grid').scrollIntoView({ behavior: 'smooth' });
-        console.log("ნავიგაცია პროდუქტზე ID-ით:", value);
-        
-        if (window.Telegram && window.Telegram.WebApp.HapticFeedback) {
+        if (window.Telegram?.WebApp?.HapticFeedback) {
             window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
     }
 }
 
+/* =========================================
+   განახლებული Render ფუნქცია Premium ბარათებისთვის
+   ========================================= */
 function renderProducts() {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
@@ -223,11 +224,20 @@ function renderProducts() {
                 ${product.discount_percent > 0 ? `<span class="badge">-${product.discount_percent}%</span>` : ''}
             </div>
             <div class="product-info">
-                <p class="brand">${product.brand}</p>
                 <h3 class="name">${product.name_ge}</h3>
-                <div class="price-row">
-                    <span class="price">${product.final_price} ₾</span>
+                <p class="description">${product.description_ge || ''}</p>
+                
+                <div class="color-selection">
+                    <div class="color-dot" style="background: #1d1d1f;"></div>
+                    <div class="color-dot" style="background: #86868b;"></div>
+                    <div class="color-dot" style="background: #0071e3;"></div>
                 </div>
+
+                <div class="price-container">
+                    <span class="price-main">${product.final_price} ₾</span>
+                    <span class="price-text">ხელმისაწვდომია მარაგში</span>
+                </div>
+                
                 <button class="add-btn" onclick="addToCart('${product.product_id}')">კალათაში</button>
             </div>
         `;
@@ -238,10 +248,8 @@ function renderProducts() {
 function addToCart(id) {
     state.cart.push(id);
     
-    // განვაახლოთ ორივე ბეიჯი: ჰედერის და ნავიგაციის
     const badge = document.getElementById('cart-count');
     const navBadge = document.getElementById('nav-cart-badge');
-    
     const count = state.cart.length;
     
     if (badge) {
@@ -253,88 +261,34 @@ function addToCart(id) {
         navBadge.style.display = 'flex';
     }
     
-    if (window.Telegram && window.Telegram.WebApp.HapticFeedback) {
+    if (window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
     }
 }
 
 function toggleCart() {
     console.log("კალათა გაიხსნა:", state.cart);
-    // აქ შეგიძლია გამოიძახო კალათის გვერდი
 }
 
-/* =========================================
-   ახალი ფუნქციები ნავიგაციისთვის
-   ========================================= */
-
 function handleNavChange(page, element) {
-    // 1. აქტიური კლასის შეცვლა
     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     element.classList.add('active');
 
-    // 2. ვიბრაცია (Haptic)
     if (window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
     }
 
-    // 3. გვერდების გადართვა
-    const mainProducts = document.getElementById('main-products');
+    // ელემენტების მართვა
+    const mainProducts = document.querySelector('.section');
     const hero = document.getElementById('hero');
-    const profileSection = document.getElementById('profile-section');
+    // დაამატე აქ სხვა სექციების მართვა (profile და ა.შ.)
 
     if (page === 'home') {
-        mainProducts.style.display = 'block';
-        hero.style.display = 'block';
-        profileSection.style.display = 'none';
+        if (mainProducts) mainProducts.style.display = 'block';
+        if (hero) hero.style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    } 
-    else if (page === 'category') {
-        openCategorySheet();
     } 
     else if (page === 'cart') {
         toggleCart();
-    } 
-    else if (page === 'profile') {
-        mainProducts.style.display = 'none';
-        hero.style.display = 'none';
-        profileSection.style.display = 'block';
-        setupProfileData();
-    }
-}
-
-function openCategorySheet() {
-    const sheet = document.getElementById('category-sheet');
-    const list = document.getElementById('categories-list');
-    
-    // ამოვიღოთ უნიკალური ბრენდები
-    const brands = [...new Set(state.products.map(p => p.brand))];
-    
-    list.innerHTML = brands.map(brand => `
-        <div class="category-item" onclick="filterByBrand('${brand}')">
-            <span>${brand}</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-        </div>
-    `).join('');
-    
-    sheet.classList.add('active');
-}
-
-function closeSheet(id) {
-    document.getElementById(id).classList.remove('active');
-}
-
-function filterByBrand(brand) {
-    console.log("ფილტრი ბრენდით:", brand);
-    closeSheet('category-sheet');
-    // აქ შეგიძლია დაამატო რეალური ფილტრაციის ლოგიკა
-}
-
-function setupProfileData() {
-    if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
-        const user = window.Telegram.WebApp.initDataUnsafe.user;
-        document.getElementById('user-name').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-        if (user.photo_url) {
-            document.getElementById('user-avatar').innerHTML = `<img src="${user.photo_url}" style="width:100%; height:100%; border-radius:50%;">`;
-        }
     }
 }
