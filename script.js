@@ -99,12 +99,13 @@ function renderProducts() {
     state.products.forEach(product => {
         if (product.status !== 'active') return;
 
-        // ფასდაკლების გამოთვლა
         const hasDiscount = product.old_price && parseFloat(product.old_price) > parseFloat(product.final_price);
         const discountPercent = hasDiscount ? Math.round(((product.old_price - product.final_price) / product.old_price) * 100) : 0;
-        
-        // სტატუსის ბეიჯი (მაგ: NEW, HOT, TOP)
         const statusBadge = product.badge_text ? product.badge_text : '';
+
+        // ფერების ამოკრება ამ პროდუქტისთვის
+        const productVariants = state.productDetails.filter(d => String(d.product_id) === String(product.product_id));
+        const uniqueColors = [...new Set(productVariants.map(v => v.color_hex).filter(c => c))];
 
         const card = document.createElement('div');
         card.className = 'product-card';
@@ -119,6 +120,15 @@ function renderProducts() {
                 </div>
             </div>
             <div class="product-details">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <p class="brand" style="font-size: 10px; color: #86868b; text-transform: uppercase;">${product.brand || ''}</p>
+                    <div class="card-colors" style="display: flex; gap: 4px;">
+                        ${uniqueColors.slice(0, 3).map(color => `
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: ${color}; border: 1px solid rgba(0,0,0,0.1);"></div>
+                        `).join('')}
+                        ${uniqueColors.length > 3 ? `<span style="font-size: 8px; color: #86868b;">+${uniqueColors.length - 3}</span>` : ''}
+                    </div>
+                </div>
                 <h3 class="product-title">${product.name_ge}</h3>
                 <div class="price-block">
                     <span class="final-price">${product.final_price} ₾</span>
