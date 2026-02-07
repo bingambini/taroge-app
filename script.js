@@ -11,7 +11,7 @@ let state = {
 
 let selectedSize = null;
 
-// 1. დამხმარე ფუნქციები (Loader & UI)
+// 1. Loader-ის მართვა
 function showLoader() { 
     const loader = document.getElementById('loader-wrapper');
     if (loader) loader.classList.remove('loader-hidden'); 
@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData();
 });
 
+// 3. მონაცემების ჩატვირთვა
 async function loadData() {
     showLoader();
     try {
@@ -39,54 +40,47 @@ async function loadData() {
         
         state.products = data.products || [];
         state.productDetails = data.productDetails || [];
-        state.design = data.design || {};
         
+        // დიზაინის პარამეტრების გამოყენება (თუ არსებობს)
         if (data.headerConfig) applyHeaderDesign(data.headerConfig);
         if (data.heroConfig) applyHeroDesign(data.heroConfig);
 
         renderProducts();
     } catch (error) {
-        console.error("Error loading data:", error);
+        console.error("მონაცემების ჩატვირთვის შეცდომა:", error);
     } finally {
-        hideLoader();
+        // მცირე დაყოვნება, რომ ანიმაცია ლამაზად გამოჩნდეს
+        setTimeout(hideLoader, 500);
     }
 }
 
-// 3. დიზაინის მართვა
+// 4. დიზაინის ფუნქციები
 function applyHeaderDesign(config) {
     if (!config || config.Status !== 'active') return;
     const logoText = document.getElementById('logo');
     if (config.Shop_Name && logoText) logoText.innerText = config.Shop_Name;
-    // ... აქ შეიძლება დაემატოს სხვა ვიზუალური პარამეტრებიც
 }
 
 function applyHeroDesign(config) {
     const heroSection = document.getElementById('hero');
-    if (!heroSection || !config) return;
+    if (!heroSection || !config || config.Status !== 'active') return;
 
     const imageUrl = config.B_Image || '';
-    const glassColor = config.B_Gradient || 'rgba(255, 255, 255, 0.2)';
-
     heroSection.innerHTML = `
-        <div class="hero-wrapper" style="position: relative; width: 100%; margin: ${config.B_Margin_Top || 30}px auto; height: ${config.B_Height || 220}px; display: flex; align-items: center;">
-            <div class="glass-base" style="position: absolute; width: 100%; height: 100%; background: ${glassColor}; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 24px; border: 1px solid rgba(255,255,255,0.2); z-index: 1;"></div>
-            <div class="hero-text" style="position: relative; z-index: 2; padding-left: 25px; width: 55%;">
-                <h2 style="color: ${config.B_Title_Color || '#ffffff'}; font-size: ${config.B_Title_Size || 22}px; font-weight: 900; margin-bottom: 5px;">${config.B_Title || ''}</h2>
-                <p style="color: #ffffff; opacity: 0.8; margin-bottom: 15px;">${config.B_Subtitle || ''}</p>
-                <button onclick="handleHeroAction('${config.B_Action_Type}', '${config.B_Action_Value}')" style="padding: 10px 24px; background: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer;">${config.B_Btn_Text || 'ნახვა'}</button>
+        <div class="hero-wrapper" style="background: ${config.B_Gradient || '#eee'}; border-radius: 24px; padding: 25px; position: relative; overflow: hidden; margin-bottom: 30px; height: 200px; display: flex; align-items: center;">
+            <div style="position: relative; z-index: 2; width: 60%;">
+                <h2 style="color: ${config.B_Title_Color || '#fff'}; font-size: 22px; margin-bottom: 8px;">${config.B_Title || ''}</h2>
+                <button onclick="document.getElementById('products-grid').scrollIntoView({behavior:'smooth'})" 
+                        style="padding: 10px 20px; border-radius: 12px; border: none; background: white; font-weight: 800; cursor: pointer;">
+                    ${config.B_Btn_Text || 'ყიდვა'}
+                </button>
             </div>
-            ${imageUrl ? `<div style="position: absolute; right: -10px; top: -20px; width: 55%; z-index: 3;"><img src="${imageUrl}" style="width: 100%; transform: rotate(-10deg);"></div>` : ''}
+            ${imageUrl ? `<img src="${imageUrl}" style="position: absolute; right: -20px; top: 10px; height: 110%; transform: rotate(-10deg); z-index: 1;">` : ''}
         </div>`;
     heroSection.style.display = 'block';
 }
 
-function handleHeroAction(type, value) {
-    if (type === 'product') {
-        document.getElementById('products-grid').scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
-// 4. პროდუქტების რენდერი
+// 5. პროდუქტების რენდერი (მთავარი გვერდი)
 function renderProducts() {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
@@ -95,106 +89,161 @@ function renderProducts() {
     state.products.forEach(product => {
         if (product.status !== 'active') return;
 
+        // ვამოწმებთ მარაგს ყველა ვარიანტში
         const variants = state.productDetails.filter(d => String(d.product_id) === String(product.product_id));
-        const uniqueColors = [...new Set(variants.map(v => v.Colors).filter(c => c))];
         const totalStock = variants.reduce((sum, v) => sum + parseInt(v.stock_quantity || 0), 0);
         const isAvailable = totalStock > 0;
-
-        let colorsHTML = uniqueColors.map(color => `<div class="color-dot" style="background: ${color.trim().toLowerCase()}; width:12px; height:12px; border-radius:50%; border:1px solid #ddd;"></div>`).join('');
 
         const card = document.createElement('div');
         card.className = 'product-card';
         card.onclick = () => openProductDetails(product.product_id);
         
         card.innerHTML = `
-            ${product.discount_percent > 0 ? `<span class="badge">-${product.discount_percent}%</span>` : ''}
-            <div class="product-image"><img src="${product.photo_url_1}"></div>
+            <div class="product-image">
+                <img src="${product.photo_url_1}" alt="${product.name_ge}" loading="lazy">
+            </div>
             <div class="product-info">
-                <div class="stock-status ${isAvailable ? 'in-stock' : 'out-of-stock'}">${isAvailable ? 'მარაგშია' : 'ამოიწურა'}</div>
-                <p class="brand">${product.brand}</p>
+                <p class="brand">${product.brand || ''}</p>
                 <h3 class="name">${product.name_ge}</h3>
-                <div style="display: flex; gap: 4px; margin-bottom: 8px;">${colorsHTML}</div>
                 <div class="price-value">${product.final_price} ₾</div>
+                <div style="font-size: 10px; color: ${isAvailable ? '#34c759' : '#ff3b30'}; font-weight: 700; margin-top: 5px;">
+                    ${isAvailable ? '● მარაგშია' : '○ ამოწურულია'}
+                </div>
             </div>`;
         grid.appendChild(card);
     });
 }
 
-// 5. დეტალური გვერდი (აქ არის მთელი ჯადოქრობა)
+// 6. დეტალური გვერდის გახსნა (Popup)
 function openProductDetails(productId) {
     const product = state.products.find(p => String(p.product_id) === String(productId));
     const variants = state.productDetails.filter(d => String(d.product_id) === String(productId));
     if (!product) return;
 
-    if (window.Telegram?.WebApp?.HapticFeedback) window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+    }
 
-    const detailOverlay = document.createElement('div');
-    detailOverlay.id = 'product-detail-overlay';
-    detailOverlay.className = 'detail-overlay';
+    const overlay = document.createElement('div');
+    overlay.className = 'detail-overlay';
+    overlay.id = 'active-overlay';
 
     const colors = [...new Set(variants.map(v => v.Colors).filter(c => c))];
 
-    detailOverlay.innerHTML = `
+    overlay.innerHTML = `
         <div class="detail-container">
-            <div class="detail-header"><button onclick="closeProductDetail()" class="close-btn">✕</button></div>
-            <div class="detail-image"><img src="${product.photo_url_1}"></div>
+            <div class="detail-header">
+                <button onclick="closeProductDetail()" class="close-btn">✕</button>
+            </div>
+            <div class="detail-image">
+                <img src="${product.photo_url_1}">
+            </div>
             <div class="detail-info">
-                <p class="brand">${product.brand}</p>
+                <p class="brand">${product.brand || ''}</p>
                 <h2 class="detail-name">${product.name_ge}</h2>
                 <div class="detail-price">${product.final_price} ₾</div>
+                
                 <p class="section-label">აირჩიე ფერი</p>
                 <div class="detail-colors">
-                    ${colors.map((color, i) => `<div class="color-option ${i===0?'active':''}" style="background:${color.trim().toLowerCase()};" onclick="selectColor(this,'${color}','${productId}')"></div>`).join('')}
+                    ${colors.map((color, i) => `
+                        <div class="color-option ${i === 0 ? 'active' : ''}" 
+                             style="background: ${color.trim().toLowerCase()};" 
+                             onclick="selectColor(this, '${color}', '${productId}')">
+                        </div>`).join('')}
                 </div>
+                
                 <p class="section-label">აირჩიე ზომა</p>
-                <div id="size-options" class="detail-sizes"></div>
-                <button id="add-to-cart-btn" class="main-btn" disabled onclick="handleAddToCart('${productId}')">აირჩიეთ ფერი და ზომა</button>
+                <div id="size-options" class="detail-sizes">
+                    </div>
+                
+                <button id="add-to-cart-btn" class="main-btn" disabled onclick="handleAddToCart('${productId}')">
+                    აირჩიეთ ფერი და ზომა
+                </button>
+                
                 <p class="description-text">${product.description_ge || ''}</p>
             </div>
         </div>`;
 
-    document.body.appendChild(detailOverlay);
-    if (colors.length > 0) selectColor(detailOverlay.querySelector('.color-option'), colors[0], productId);
+    document.body.appendChild(overlay);
+    // ავტომატურად ავირჩიოთ პირველი ფერი
+    if (colors.length > 0) {
+        const firstColorEl = overlay.querySelector('.color-option');
+        selectColor(firstColorEl, colors[0], productId);
+    }
 }
 
+// 7. ფერისა და ზომის შერჩევის ლოგიკა
 function selectColor(element, color, productId) {
     document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
     element.classList.add('active');
+    
     const sizesContainer = document.getElementById('size-options');
-    const available = state.productDetails.filter(d => String(d.product_id) === String(productId) && d.Colors === color && parseInt(d.stock_quantity) > 0);
-    sizesContainer.innerHTML = available.map(v => `<div class="size-option" onclick="selectSize(this,'${v.Sizes}')">${v.Sizes}</div>`).join('');
+    const availableVariants = state.productDetails.filter(v => 
+        String(v.product_id) === String(productId) && 
+        v.Colors === color && 
+        parseInt(v.stock_quantity) > 0
+    );
+
+    sizesContainer.innerHTML = availableVariants.map(v => `
+        <div class="size-option" onclick="selectSize(this, '${v.Sizes}')">${v.Sizes}</div>
+    `).join('');
+    
     selectedSize = null;
-    checkButtonState();
+    updateButtonState();
 }
 
 function selectSize(element, size) {
     document.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('active'));
     element.classList.add('active');
     selectedSize = size;
-    checkButtonState();
+    updateButtonState();
 }
 
-function checkButtonState() {
+function updateButtonState() {
     const btn = document.getElementById('add-to-cart-btn');
-    if (btn) {
-        btn.disabled = !selectedSize;
-        btn.innerText = selectedSize ? `დამატება - ${selectedSize}` : `აირჩიეთ ზომა`;
+    if (!btn) return;
+    
+    if (selectedSize) {
+        btn.disabled = false;
+        btn.innerText = `დამატება - ${selectedSize}`;
+    } else {
+        btn.disabled = true;
+        btn.innerText = `აირჩიეთ ზომა`;
     }
 }
 
-function closeProductDetail() { 
-    const el = document.getElementById('product-detail-overlay');
-    if (el) el.remove(); 
-}
+// 8. კალათა და ნავიგაცია
+function handleAddToCart(productId) {
+    state.cart.push({ id: productId, size: selectedSize });
+    
+    const countBadge = document.getElementById('cart-count');
+    const navBadge = document.getElementById('nav-cart-badge');
+    
+    [countBadge, navBadge].forEach(badge => {
+        if (badge) {
+            badge.innerText = state.cart.length;
+            badge.style.display = 'block';
+        }
+    });
 
-function handleAddToCart(id) {
-    state.cart.push({id, size: selectedSize});
-    const badge = document.getElementById('cart-count');
-    if (badge) { badge.innerText = state.cart.length; badge.style.display = 'block'; }
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+    }
+    
     closeProductDetail();
 }
 
+function closeProductDetail() {
+    const overlay = document.getElementById('active-overlay');
+    if (overlay) overlay.remove();
+}
+
 function handleNavChange(page, element) {
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     element.classList.add('active');
+    
+    if (page === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // აქ შეიძლება დაემატოს კალათის ან პროფილის გვერდების გახსნის ლოგიკა
 }
