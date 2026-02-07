@@ -206,7 +206,7 @@ function handleHeroAction(type, value) {
 }
 
 /* =========================================
-   განახლებული Render ფუნქცია Premium ბარათებისთვის
+   განახლებული Premium Render (Version 2.0)
    ========================================= */
 function renderProducts() {
     const grid = document.getElementById('products-grid');
@@ -216,9 +216,13 @@ function renderProducts() {
     state.products.forEach(product => {
         if (product.status !== 'active') return;
 
+        // მარაგის შემოწმება (სვეტი N: stock_quantity)
+        const isAvailable = parseInt(product.stock_quantity) > 0;
+        const stockStatusClass = isAvailable ? 'in-stock' : 'out-of-stock';
+        const stockText = isAvailable ? 'მარაგშია' : 'ამოიწურა';
+
         const card = document.createElement('div');
         card.className = 'product-card';
-        // კალათის ღილაკის ნაცვლად, მთლიან ბარათს აქვს onclick
         card.onclick = () => openProductDetails(product.product_id);
         
         card.innerHTML = `
@@ -226,11 +230,23 @@ function renderProducts() {
                 <img src="${product.photo_url_1}" alt="${product.name_ge}">
                 ${product.discount_percent > 0 ? `<span class="badge">-${product.discount_percent}%</span>` : ''}
             </div>
+            
             <div class="product-info">
+                <div class="stock-status ${stockStatusClass}">${stockText}</div>
                 <p class="brand">${product.brand}</p>
                 <h3 class="name">${product.name_ge}</h3>
-                <div class="price">
-                    ${product.final_price} ₾
+                
+                <div class="color-options">
+                    <div class="color-dot" style="background: #2196F3;"></div>
+                    <div class="color-dot" style="background: #E91E63;"></div>
+                    <div class="color-dot" style="background: #FFEB3B;"></div>
+                </div>
+
+                <div class="price-box">
+                    <span class="price-label">Price</span>
+                    <div class="price-value">
+                        ${product.final_price} <span class="currency">₾</span>
+                    </div>
                 </div>
             </div>
         `;
@@ -238,38 +254,29 @@ function renderProducts() {
     });
 }
 
-// ახალი ფუნქცია დეტალებზე გადასასვლელად
 function openProductDetails(productId) {
     console.log("გადავდივართ პროდუქტზე:", productId);
-    // აქ ჩაწერ შენს ლოგიკას, რომელიც გახსნის სრულ გვერდს
     if (window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
     }
+    // აქ დაამატებ პროდუქტის სრული გვერდის გახსნის ლოგიკას
 }
 
 function addToCart(id) {
     state.cart.push(id);
-    
     const badge = document.getElementById('cart-count');
     const navBadge = document.getElementById('nav-cart-badge');
-    const count = state.cart.length;
-    
     if (badge) {
-        badge.innerText = count;
+        badge.innerText = state.cart.length;
         badge.style.display = 'block';
     }
     if (navBadge) {
-        navBadge.innerText = count;
+        navBadge.innerText = state.cart.length;
         navBadge.style.display = 'flex';
     }
-    
     if (window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
     }
-}
-
-function toggleCart() {
-    console.log("კალათა გაიხსნა:", state.cart);
 }
 
 function handleNavChange(page, element) {
@@ -280,17 +287,12 @@ function handleNavChange(page, element) {
         window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
     }
 
-    // ელემენტების მართვა
     const mainProducts = document.querySelector('.section');
     const hero = document.getElementById('hero');
-    // დაამატე აქ სხვა სექციების მართვა (profile და ა.შ.)
 
     if (page === 'home') {
         if (mainProducts) mainProducts.style.display = 'block';
         if (hero) hero.style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    } 
-    else if (page === 'cart') {
-        toggleCart();
     }
 }
