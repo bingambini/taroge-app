@@ -22,6 +22,41 @@ function hideLoader() {
     if (loader) loader.classList.add('loader-hidden'); 
 }
 
+// ახალი ფუნქცია Loader-ის დიზაინისთვის (შიტიდან მართვა)
+function applyLoaderDesign(config) {
+    const loaderWrapper = document.getElementById('loader-wrapper');
+    const loadingText = document.querySelector('.loading-text');
+    const shoeAnim = document.querySelector('.shoe-animation');
+    const progressLine = document.querySelector('.progress-line');
+
+    if (!config || !loaderWrapper) return;
+
+    // 1. ფონი (L_BG)
+    if (config.L_BG) loaderWrapper.style.background = config.L_BG;
+
+    // 2. პროგრეს ბარის ფერი (L_Progress_Bar_Color)
+    if (config.L_Progress_Bar_Color && progressLine) {
+        progressLine.style.background = config.L_Progress_Bar_Color;
+    }
+
+    // 3. ლოგოს/ანიმაციის მართვა
+    if (shoeAnim) {
+        if (config.L_Logo_URL && config.L_Logo_URL.trim() !== "") {
+            shoeAnim.innerHTML = `<img src="${config.L_Logo_URL}" style="width: ${config.L_Logo_Size || '80px'}; height: auto;">`;
+        } else if (config.L_Logo_Size) {
+            shoeAnim.style.fontSize = config.L_Logo_Size;
+        }
+
+        // ანიმაციის ტიპი: spin, pulse, bounce
+        shoeAnim.classList.remove('spin', 'pulse', 'bounce');
+        if (config.L_Animation_Type) {
+            shoeAnim.classList.add(config.L_Animation_Type);
+        } else {
+            shoeAnim.classList.add('bounce'); // სტანდარტული
+        }
+    }
+}
+
 // 2. ინიციალიზაცია
 document.addEventListener('DOMContentLoaded', () => {
     if (window.Telegram && window.Telegram.WebApp) {
@@ -40,6 +75,9 @@ async function loadData() {
         
         console.log("შიტიდან მოსული ყველა მონაცემი:", data);
         
+        // პირველ რიგში ვცვლით ლოუდერის დიზაინს
+        if (data.loaderConfig) applyLoaderDesign(data.loaderConfig);
+        
         state.products = data.products || [];
         state.productDetails = data.productDetails || [];
         
@@ -50,7 +88,8 @@ async function loadData() {
     } catch (error) {
         console.error("მონაცემების ჩატვირთვის შეცდომა:", error);
     } finally {
-        setTimeout(hideLoader, 500);
+        // პაუზა 1 წამი, რომ ლოუდერის ეფექტი დავინახოთ
+        setTimeout(hideLoader, 1000);
     }
 }
 
@@ -274,11 +313,9 @@ function handleNavChange(page, element) {
     
     if (page === 'home') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        // აქ დავამატებთ კოდს, რომ კალათა თუ ღიაა დაიხუროს
     }
     
     if (page === 'cart') {
-        // აქ მომავალში გამოვიძახებთ კალათის გვერდის ჩვენების ფუნქციას
         console.log("კალათაშია:", state.cart);
     }
 }
