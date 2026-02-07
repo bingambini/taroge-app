@@ -307,3 +307,126 @@ body {
     .logo { font-size: 15px; }
     .hero-content h2 { font-size: 18px; }
 }
+
+/* =========================================
+   ახალი სექციები: Bottom Nav, Sheet & Profile
+   ========================================= */
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: #8E8E93;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.nav-item.active { color: #000000; transform: translateY(-2px); }
+.nav-item span { font-size: 9px; font-weight: 700; margin-top: 5px; text-transform: uppercase; }
+
+.nav-badge {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    background: #ff3b30;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    min-width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    display: none;
+}
+
+/* Bottom Sheet */
+.bottom-sheet {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 2000;
+    display: none;
+    align-items: flex-end;
+}
+
+.bottom-sheet.active { display: flex; }
+
+.sheet-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(2px);
+}
+
+.sheet-content {
+    position: relative;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 25px 25px 0 0;
+    padding: 20px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bottom-sheet.active .sheet-content { transform: translateY(0); }
+
+.drag-handle {
+    width: 40px; height: 5px; background: #e5e5ea;
+    border-radius: 10px; margin: 0 auto 15px;
+}
+
+.sheet-body { max-height: 60vh; overflow-y: auto; padding-bottom: 40px; }
+
+/* Category Pill In Sheet */
+.category-item {
+    padding: 15px;
+    border-bottom: 0.5px solid #f2f2f7;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Profile Card */
+.profile-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.user-avatar {
+    width: 80px; height: 80px;
+    background: #e5e5ea;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+}
+
+.user-status { color: var(--accent); font-weight: 600; font-size: 14px; }
