@@ -57,8 +57,21 @@ async function loadData() {
 // 4. დიზაინის ფუნქციები
 function applyHeaderDesign(config) {
     if (!config || config.Status !== 'active') return;
+
     const logoText = document.getElementById('logo');
+    const logoIcon = document.getElementById('logo-icon');
+    const headerElement = document.querySelector('.header');
+
+    // სახელი შიტიდან
     if (config.Shop_Name && logoText) logoText.innerText = config.Shop_Name;
+    
+    // ლოგოს ასო შიტიდან
+    if (config.Logo_Char && logoIcon) logoIcon.innerText = config.Logo_Char;
+    
+    // ჰედერის ფონი შიტიდან (თუ გაქვს Bg_Color სვეტი)
+    if (config.Bg_Color && headerElement) {
+        headerElement.style.background = config.Bg_Color;
+    }
 }
 
 function applyHeroDesign(config) {
