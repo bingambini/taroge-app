@@ -98,15 +98,32 @@ function renderProducts() {
 
     state.products.forEach(product => {
         if (product.status !== 'active') return;
+
+        // ფასდაკლების გამოთვლა
+        const hasDiscount = product.old_price && parseFloat(product.old_price) > parseFloat(product.final_price);
+        const discountPercent = hasDiscount ? Math.round(((product.old_price - product.final_price) / product.old_price) * 100) : 0;
+        
+        // სტატუსის ბეიჯი (მაგ: NEW, HOT, TOP)
+        const statusBadge = product.badge_text ? product.badge_text : '';
+
         const card = document.createElement('div');
         card.className = 'product-card';
         card.onclick = () => openProductDetails(product.product_id);
+        
         card.innerHTML = `
-            <div class="product-image"><img src="${product.photo_url_1}" loading="lazy"></div>
-            <div class="product-info">
-                <p class="brand">${product.brand || ''}</p>
-                <h3 class="name">${product.name_ge}</h3>
-                <div class="price-value">${product.final_price} ₾</div>
+            <div class="product-image-container">
+                <img src="${product.photo_url_1}" loading="lazy" class="product-img">
+                <div class="badges-wrapper">
+                    ${hasDiscount ? `<div class="badge discount">-${discountPercent}%</div>` : ''}
+                    ${statusBadge ? `<div class="badge status">${statusBadge}</div>` : ''}
+                </div>
+            </div>
+            <div class="product-details">
+                <h3 class="product-title">${product.name_ge}</h3>
+                <div class="price-block">
+                    <span class="final-price">${product.final_price} ₾</span>
+                    ${hasDiscount ? `<span class="old-price">${product.old_price} ₾</span>` : ''}
+                </div>
             </div>`;
         grid.appendChild(card);
     });
