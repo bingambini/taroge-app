@@ -9,43 +9,44 @@
 </head>
 <body>
     <div id="loader-wrapper">
-    <div class="loader-content">
-        <div class="shoe-animation">👟</div>
-        <div class="loading-text">იტვირთება...</div>
-        <div class="progress-bar"><div class="progress-line"></div></div>
+        <div class="loader-content">
+            <div class="shoe-animation">👟</div>
+            <div class="loading-text">იტვირთება...</div>
+            <div class="progress-bar"><div class="progress-line"></div></div>
+        </div>
     </div>
-</div>
     
-<header class="header">
-    <div class="container header-grid">
-        <div class="header-left">
-            <div id="logo-icon" class="logo-circle"></div> 
-        </div>
+    <header class="header">
+        <div class="container header-grid">
+            <div class="header-left">
+                <div id="logo-icon" class="logo-circle"></div> 
+            </div>
 
-        <div class="header-center">
-            <div id="logo" class="logo"></div>
-        </div>
+            <div class="header-center">
+                <div id="logo" class="logo"></div>
+            </div>
 
-        <div class="header-right">
-            <div class="header-icons">
-                <div class="cart-icon" onclick="toggleCart()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
-                    </svg>
-                    <span id="cart-count">0</span>
+            <div class="header-right">
+                <div class="header-icons">
+                    <div class="cart-icon" onclick="handleNavChange('cart', document.querySelector('.nav-item:nth-child(3)'))">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+                        </svg>
+                        <span id="cart-count">0</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</header>
+    </header>
 
-    <main class="container" style="padding-bottom: 90px;">
+    <main class="container" style="padding-bottom: 100px;">
         <section id="hero" class="hero-section"></section>
 
         <section class="section">
             <h2 id="new-arrivals-title" class="section-title">ახალი კოლექცია</h2>
+            
             <div id="products-grid" class="products-grid">
-                <div class="loading">იტვირთება...</div>
+                <div class="loading">იტვირთება პროდუქტები...</div>
             </div>
         </section>
     </main>
@@ -60,21 +61,32 @@
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="handleNavChange('home', this)">
             <div class="nav-icon">
-                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                </svg>
             </div>
             <span>მთავარი</span>
         </div>
         
         <div class="nav-item" onclick="handleNavChange('category', this)">
             <div class="nav-icon">
-                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
             </div>
             <span>კატეგორია</span>
         </div>
 
         <div class="nav-item" onclick="handleNavChange('cart', this)">
             <div class="nav-icon cart-wrapper">
-                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
                 <span id="nav-cart-badge" class="nav-badge">0</span>
             </div>
             <span>კალათა</span>
@@ -82,7 +94,10 @@
 
         <div class="nav-item" onclick="handleNavChange('profile', this)">
             <div class="nav-icon">
-                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
             </div>
             <span>პროფილი</span>
         </div>
