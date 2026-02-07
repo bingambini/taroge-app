@@ -108,27 +108,27 @@ function applyHeroDesign(config) {
     heroSection.style.display = 'block';
 }
 
-// 6. პროდუქტების რენდერი (იძულებითი სტილებით)
+// 6. პროდუქტების რენდერი (მარაგის ლოგიკით)
 function renderProducts() {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
     state.products.forEach(product => {
-        // ვიყენებთ შენს 'status' სვეტს
         if (product.status !== 'active') return;
 
-        // 1. ფერების ამოკრება Product_Details-დან (Colors სვეტიდან)
+        // 1. ფერების ამოკრება მარაგის მიხედვით (stock_quantity > 0)
         const productVariants = state.productDetails.filter(d => 
-            String(d.product_id) === String(product.product_id)
+            String(d.product_id) === String(product.product_id) && 
+            parseInt(d.stock_quantity || 0) > 0
         );
         const uniqueColors = [...new Set(productVariants.map(v => v.Colors).filter(c => c))];
 
-        // 2. ფასდაკლების გამოთვლა (final_price და old_price სვეტებით)
+        // 2. ფასდაკლების გამოთვლა
         const hasDiscount = product.old_price && parseFloat(product.old_price) > parseFloat(product.final_price);
         const discountPercent = hasDiscount ? Math.round(((product.old_price - product.final_price) / product.old_price) * 100) : 0;
         
-        // 3. ბეიჯის ტექსტი (შენი სვეტი: Badge_Status)
+        // 3. ბეიჯის ტექსტი
         const statusBadge = product.Badge_Status ? product.Badge_Status : '';
 
         const card = document.createElement('div');
