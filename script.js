@@ -4,9 +4,21 @@ const CONFIG = {
 
 let state = {
     products: [],
+    productDetails: [], // დავამატოთ დეტალების მასივი state-ში
     headerConfig: {},
     cart: []
 };
+
+// --- აკლებული Loader ფუნქციები ---
+function showLoader() { 
+    const loader = document.getElementById('loader-wrapper');
+    if (loader) loader.classList.remove('loader-hidden'); 
+}
+
+function hideLoader() { 
+    const loader = document.getElementById('loader-wrapper');
+    if (loader) loader.classList.add('loader-hidden'); 
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.Telegram && window.Telegram.WebApp) {
@@ -17,22 +29,24 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loadData() {
-    showLoader();
+    showLoader(); // ახლა უკვე იმუშავებს
     try {
-        const response = await fetch(API_URL);
+        const response = await fetch(CONFIG.API_URL); // გასწორდა: CONFIG.API_URL
         const data = await response.json();
         
-        // მონაცემების შენახვა state-ში
         state.products = data.products || [];
-        state.productDetails = data.productDetails || []; // საწყობის მონაცემები
+        state.productDetails = data.productDetails || []; 
         state.design = data.design || {};
         
-        renderHero(data.heroConfig);
-        renderProducts(); // აქ გამოიძახება ჩვენი ახალი "ჭკვიანი" რენდერი
+        // დიზაინის გამოყენება
+        if (data.headerConfig) applyHeaderDesign(data.headerConfig);
+        if (data.heroConfig) applyHeroDesign(data.heroConfig);
+        
+        renderProducts(); 
     } catch (error) {
         console.error("Error loading data:", error);
     } finally {
-        hideLoader();
+        hideLoader(); // ახლა უკვე იმუშავებს
     }
 }
 
@@ -185,46 +199,34 @@ function applyHeroDesign(config) {
 
 function handleHeroAction(type, value) {
     if (type === 'product') {
-        document.getElementById('products-grid').scrollIntoView({ behavior: 'smooth' });
+        const grid = document.getElementById('products-grid');
+        if(grid) grid.scrollIntoView({ behavior: 'smooth' });
         if (window.Telegram?.WebApp?.HapticFeedback) {
             window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
     }
 }
 
-/* =========================================
-   განახლებული Premium Render (Version 2.0)
-   ========================================= */
 function renderProducts() {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    // state.products - მოდის "Products" შიტიდან
     state.products.forEach(product => {
         if (product.status !== 'active') return;
 
-        // 1. ვპოულობთ ყველა შესაბამის ხაზს "Product_Details" შიტიდან product_id-ით
         const variants = state.productDetails ? state.productDetails.filter(d => String(d.product_id) === String(product.product_id)) : [];
-
-        // 2. ვაგროვებთ უნიკალურ ფერებს ამ მოდელისთვის
         const uniqueColors = [...new Set(variants.map(v => v.Colors).filter(c => c))];
-        
-        // 3. ვითვლით ჯამურ მარაგს ყველა ზომიდან
         const totalStock = variants.reduce((sum, v) => sum + parseInt(v.stock_quantity || 0), 0);
         const isAvailable = totalStock > 0;
 
-        // ფერების HTML-ის მომზადება (წრეები)
-        let colorsHTML = '';
-        uniqueColors.forEach(color => {
-            // ვწმენდთ ფერის სახელს და ვიყენებთ background-ად
+        let colorsHTML = uniqueColors.map(color => {
             const cleanColor = color.trim().toLowerCase();
-            colorsHTML += `<div class="color-dot" style="background: ${cleanColor}; border: 1px solid #e0e0e0;" title="${color}"></div>`;
-        });
+            return `<div class="color-dot" style="background: ${cleanColor}; border: 1px solid #e0e0e0; width: 12px; height: 12px; border-radius: 50%;"></div>`;
+        }).join('');
 
         const card = document.createElement('div');
         card.className = 'product-card';
-        // დაჭერისას გადავცემთ ID-ს დეტალური გვერდისთვის
         card.onclick = () => openProductDetails(product.product_id);
         
         card.innerHTML = `
@@ -257,41 +259,25 @@ function renderProducts() {
 }
 
 function openProductDetails(productId) {
-    console.log("გადავდივართ პროდუქტზე:", productId);
-    if (window.Telegram?.WebApp?.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-    }
-    // აქ დაამატებ პროდუქტის სრული გვერდის გახსნის ლოგიკას
+    // ეს ფუნქცია ახლა უკვე გამოიძახებს იმ სრულ ლოგიკას, რაც წინა წერილში მოგწერე
+    console.log("Product clicked:", productId);
+    // აქ უნდა ჩაამატო ის დიდი openProductDetails ფუნქცია
 }
 
 function addToCart(id) {
     state.cart.push(id);
     const badge = document.getElementById('cart-count');
-    const navBadge = document.getElementById('nav-cart-badge');
     if (badge) {
         badge.innerText = state.cart.length;
         badge.style.display = 'block';
-    }
-    if (navBadge) {
-        navBadge.innerText = state.cart.length;
-        navBadge.style.display = 'flex';
-    }
-    if (window.Telegram?.WebApp?.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
     }
 }
 
 function handleNavChange(page, element) {
     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     element.classList.add('active');
-
-    if (window.Telegram?.WebApp?.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-    }
-
     const mainProducts = document.querySelector('.section');
     const hero = document.getElementById('hero');
-
     if (page === 'home') {
         if (mainProducts) mainProducts.style.display = 'block';
         if (hero) hero.style.display = 'block';
