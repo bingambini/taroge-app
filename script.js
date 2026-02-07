@@ -38,12 +38,12 @@ async function loadData() {
         const response = await fetch(CONFIG.API_URL);
         const data = await response.json();
         
-        // აი ეს ხაზი ჩაამატე და ნახე კონსოლში რა დაიწერება:
         console.log("შიტიდან მოსული ყველა მონაცემი:", data);
         
         state.products = data.products || [];
         state.productDetails = data.productDetails || [];
         
+        // დიზაინის პარამეტრების გამოყენება
         if (data.headerConfig) applyHeaderDesign(data.headerConfig);
         if (data.heroConfig) applyHeroDesign(data.heroConfig);
 
@@ -57,42 +57,41 @@ async function loadData() {
 
 // 4. დიზაინის ფუნქციები
 function applyHeaderDesign(config) {
-    console.log("Header-ის მონაცემები შიტიდან:", config);
-
     const logoNameElement = document.getElementById('logo'); 
     const logoCircleElement = document.getElementById('logo-icon');
     const headerElement = document.querySelector('.header');
 
-    // 1. მაღაზიის სახელი (Shop_Name)
+    // მაღაზიის სახელი (Shop_Name)
     if (config.Shop_Name && logoNameElement) {
         logoNameElement.innerText = config.Shop_Name;
     }
     
-    // 2. ჰედერის ფონი (H_BG)
+    // ჰედერის ფონი (H_BG)
     if (config.H_BG && headerElement) {
         headerElement.style.background = config.H_BG;
     }
 
-    // 3. ტექსტის ფერი (H_Text)
+    // ტექსტის ფერი (H_Text)
     if (config.H_Text && logoNameElement) {
         logoNameElement.style.color = config.H_Text;
     }
 
-    // 4. ლოგოს ხატულა (თუ გაქვს Logo_Char, თუ არა - პირველი ასო)
-    if (logoCircleElement) {
-        logoCircleElement.innerText = config.Logo_Char || (config.Shop_Name ? config.Shop_Name[0] : 'B');
+    // ლოგოს სურათი (Shop_Logo)
+    if (config.Shop_Logo && logoCircleElement) {
+        logoCircleElement.innerHTML = `<img src="${config.Shop_Logo}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
     }
 }
 
 function applyHeroDesign(config) {
     const heroSection = document.getElementById('hero');
-    if (!heroSection || !config || config.Status !== 'active') return;
+    if (!heroSection || !config) return;
 
     const imageUrl = config.B_Image || '';
     heroSection.innerHTML = `
-        <div class="hero-wrapper" style="background: ${config.B_Gradient || '#eee'}; border-radius: 24px; padding: 25px; position: relative; overflow: hidden; margin-bottom: 30px; height: 200px; display: flex; align-items: center;">
+        <div class="hero-wrapper" style="background: ${config.B_Gradient || '#eee'}; border-radius: 24px; padding: 25px; position: relative; overflow: hidden; margin-bottom: 30px; height: ${config.B_Height || 200}px; display: flex; align-items: center;">
             <div style="position: relative; z-index: 2; width: 60%;">
                 <h2 style="color: ${config.B_Title_Color || '#fff'}; font-size: 22px; margin-bottom: 8px;">${config.B_Title || ''}</h2>
+                <p style="color: #fff; opacity: 0.9; margin-bottom: 15px; font-size: 14px;">${config.B_Subtitle || ''}</p>
                 <button onclick="document.getElementById('products-grid').scrollIntoView({behavior:'smooth'})" 
                         style="padding: 10px 20px; border-radius: 12px; border: none; background: white; font-weight: 800; cursor: pointer;">
                     ${config.B_Btn_Text || 'ყიდვა'}
@@ -112,7 +111,6 @@ function renderProducts() {
     state.products.forEach(product => {
         if (product.status !== 'active') return;
 
-        // ვამოწმებთ მარაგს ყველა ვარიანტში
         const variants = state.productDetails.filter(d => String(d.product_id) === String(product.product_id));
         const totalStock = variants.reduce((sum, v) => sum + parseInt(v.stock_quantity || 0), 0);
         const isAvailable = totalStock > 0;
@@ -133,7 +131,7 @@ function renderProducts() {
                     ${isAvailable ? '● მარაგშია' : '○ ამოწურულია'}
                 </div>
             </div>`;
-        grid.appendChild(card);
+    grid.appendChild(card);
     });
 }
 
@@ -188,7 +186,6 @@ function openProductDetails(productId) {
         </div>`;
 
     document.body.appendChild(overlay);
-    // ავტომატურად ავირჩიოთ პირველი ფერი
     if (colors.length > 0) {
         const firstColorEl = overlay.querySelector('.color-option');
         selectColor(firstColorEl, colors[0], productId);
