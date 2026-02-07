@@ -117,13 +117,17 @@ function renderProducts() {
     state.products.forEach(product => {
         if (product.status !== 'active') return;
 
+        // 1. ვპოულობთ ყველა ჩანაწერს productDetails-ში ამ კონკრეტული პროდუქტისთვის
+        const productVariants = state.productDetails.filter(d => 
+            String(d.product_id) === String(product.product_id)
+        );
+
+        // 2. ვიღებთ მხოლოდ უნიკალურ ფერებს "Colors" სვეტიდან
+        const uniqueColors = [...new Set(productVariants.map(v => v.Colors).filter(c => c))];
+
         const hasDiscount = product.old_price && parseFloat(product.old_price) > parseFloat(product.final_price);
         const discountPercent = hasDiscount ? Math.round(((product.old_price - product.final_price) / product.old_price) * 100) : 0;
         const statusBadge = product.badge_text ? product.badge_text : '';
-
-        // ფერების ამოკრება "Colors" სვეტიდან
-        const productVariants = state.productDetails.filter(d => String(d.product_id) === String(product.product_id));
-        const uniqueColors = [...new Set(productVariants.map(v => v.Colors).filter(c => c))];
 
         const card = document.createElement('div');
         card.className = 'product-card';
@@ -140,11 +144,11 @@ function renderProducts() {
             <div class="product-details">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <p class="brand" style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0;">${product.brand || ''}</p>
-                    <div class="card-colors" style="display: flex; gap: 4px;">
-                        ${uniqueColors.slice(0, 3).map(color => `
+                    
+                    <div class="card-colors" style="display: flex; gap: 3px;">
+                        ${uniqueColors.map(color => `
                             <div title="${color}" style="width: 10px; height: 10px; border-radius: 50%; background: ${translateColor(color)}; border: 1px solid rgba(0,0,0,0.1);"></div>
                         `).join('')}
-                        ${uniqueColors.length > 3 ? `<span style="font-size: 9px; color: #86868b; font-weight: 600;">+${uniqueColors.length - 3}</span>` : ''}
                     </div>
                 </div>
                 <h3 class="product-title">${product.name_ge}</h3>
