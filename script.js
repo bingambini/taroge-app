@@ -43,7 +43,6 @@ async function loadData() {
         state.products = data.products || [];
         state.productDetails = data.productDetails || [];
         
-        // დიზაინის პარამეტრების გამოყენება
         if (data.headerConfig) applyHeaderDesign(data.headerConfig);
         if (data.heroConfig) applyHeroDesign(data.heroConfig);
 
@@ -63,29 +62,25 @@ function applyHeaderDesign(config) {
     const logoIcon = document.getElementById('logo-icon');
     const headerElement = document.querySelector('.header');
 
-    // 1. ტექსტი და ფერები
     if (config.Shop_Name && logoElement) logoElement.innerText = config.Shop_Name;
     if (config.H_BG && headerElement) headerElement.style.background = config.H_BG;
     if (config.H_Text && logoElement) logoElement.style.color = config.H_Text;
     if (config.Icon_Color && logoIcon) logoIcon.style.color = config.Icon_Color;
 
-    // 2. ზომები და დაშორებები
     if (config.H_Height && headerElement) headerElement.style.height = config.H_Height + 'px';
     if (config.H_Font_Size && logoElement) logoElement.style.fontSize = config.H_Font_Size + 'px';
     if (config.H_Padding && headerElement) headerElement.style.padding = config.H_Padding;
 
-    // 3. სტილი და ეფექტები
     if (config.H_Shadow && headerElement) headerElement.style.boxShadow = config.H_Shadow;
     if (config.H_Border && headerElement) headerElement.style.borderBottom = config.H_Border;
 
-    // 4. ლოგო/ხატულა
     if (config.Shop_Logo && logoIcon) {
         logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="
             width: ${config.Logo_Size || 40}px; 
             height: ${config.Logo_Size || 40}px; 
             border-radius: ${config.Logo_Radius || '50%'}; 
             object-fit: cover;">`;
-        logoIcon.style.background = 'none'; // ვაშორებთ წრეს თუ სურათია
+        logoIcon.style.background = 'none';
     }
 }
 
@@ -93,9 +88,22 @@ function applyHeroDesign(config) {
     const heroSection = document.getElementById('hero');
     if (!heroSection || !config || config.Status !== 'active') return;
 
+    const marginTop = config.B_Margin_Top || '20px'; 
     const imageUrl = config.B_Image || '';
+
     heroSection.innerHTML = `
-        <div class="hero-wrapper" style="background: ${config.B_Gradient || '#eee'}; border-radius: 24px; padding: 25px; position: relative; overflow: hidden; margin-bottom: 30px; height: ${config.B_Height || 200}px; display: flex; align-items: center;">
+        <div class="hero-wrapper" style="
+            background: ${config.B_Gradient || '#eee'}; 
+            border-radius: 24px; 
+            padding: 25px; 
+            position: relative; 
+            overflow: hidden; 
+            margin-top: ${marginTop}; 
+            margin-bottom: 30px; 
+            height: ${config.B_Height || 200}px; 
+            display: flex; 
+            align-items: center;">
+            
             <div style="position: relative; z-index: 2; width: 60%;">
                 <h2 style="color: ${config.B_Title_Color || '#fff'}; font-size: 22px; margin-bottom: 8px;">${config.B_Title || ''}</h2>
                 <p style="color: #fff; opacity: 0.9; margin-bottom: 15px; font-size: 14px;">${config.B_Subtitle || ''}</p>
@@ -109,7 +117,7 @@ function applyHeroDesign(config) {
     heroSection.style.display = 'block';
 }
 
-// 5. პროდუქტების რენდერი (მთავარი გვერდი)
+// 5. პროდუქტების რენდერი
 function renderProducts() {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
@@ -142,7 +150,7 @@ function renderProducts() {
     });
 }
 
-// 6. დეტალური გვერდის გახსნა (Popup)
+// 6. დეტალური გვერდის გახსნა
 function openProductDetails(productId) {
     const product = state.products.find(p => String(p.product_id) === String(productId));
     const variants = state.productDetails.filter(d => String(d.product_id) === String(productId));
@@ -181,8 +189,7 @@ function openProductDetails(productId) {
                 </div>
                 
                 <p class="section-label">აირჩიე ზომა</p>
-                <div id="size-options" class="detail-sizes">
-                    </div>
+                <div id="size-options" class="detail-sizes"></div>
                 
                 <button id="add-to-cart-btn" class="main-btn" disabled onclick="handleAddToCart('${productId}')">
                     აირჩიეთ ფერი და ზომა
@@ -199,7 +206,7 @@ function openProductDetails(productId) {
     }
 }
 
-// 7. ფერისა და ზომის შერჩევის ლოგიკა
+// 7. ფერისა და ზომის შერჩევა
 function selectColor(element, color, productId) {
     document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
     element.classList.add('active');
@@ -243,12 +250,10 @@ function updateButtonState() {
 function handleAddToCart(productId) {
     state.cart.push({ id: productId, size: selectedSize });
     
-    // განახლდა: ჰედერის კალათის იკონკის ძებნა ამოღებულია
     const navBadge = document.getElementById('nav-cart-badge');
-    
     if (navBadge) {
         navBadge.innerText = state.cart.length;
-        navBadge.style.display = 'block';
+        navBadge.style.display = 'flex';
     }
 
     if (window.Telegram?.WebApp?.HapticFeedback) {
@@ -269,5 +274,11 @@ function handleNavChange(page, element) {
     
     if (page === 'home') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        // აქ დავამატებთ კოდს, რომ კალათა თუ ღიაა დაიხუროს
+    }
+    
+    if (page === 'cart') {
+        // აქ მომავალში გამოვიძახებთ კალათის გვერდის ჩვენების ფუნქციას
+        console.log("კალათაშია:", state.cart);
     }
 }
