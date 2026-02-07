@@ -57,22 +57,30 @@ async function loadData() {
 
 // 4. დიზაინის ფუნქციები
 function applyHeaderDesign(config) {
-    if (!config || config.Status !== 'active') return;
+    console.log("Header-ის მონაცემები შიტიდან:", config);
 
     const logoNameElement = document.getElementById('logo'); 
     const logoCircleElement = document.getElementById('logo-icon');
     const headerElement = document.querySelector('.header');
 
+    // 1. მაღაზიის სახელი (Shop_Name)
     if (config.Shop_Name && logoNameElement) {
         logoNameElement.innerText = config.Shop_Name;
     }
     
-    if (config.Logo_Char && logoCircleElement) {
-        logoCircleElement.innerText = config.Logo_Char;
+    // 2. ჰედერის ფონი (H_BG)
+    if (config.H_BG && headerElement) {
+        headerElement.style.background = config.H_BG;
     }
-    
-    if (config.Bg_Color && headerElement) {
-        headerElement.style.background = config.Bg_Color;
+
+    // 3. ტექსტის ფერი (H_Text)
+    if (config.H_Text && logoNameElement) {
+        logoNameElement.style.color = config.H_Text;
+    }
+
+    // 4. ლოგოს ხატულა (თუ გაქვს Logo_Char, თუ არა - პირველი ასო)
+    if (logoCircleElement) {
+        logoCircleElement.innerText = config.Logo_Char || (config.Shop_Name ? config.Shop_Name[0] : 'B');
     }
 }
 
