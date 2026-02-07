@@ -11,7 +11,6 @@ let state = {
 
 let selectedSize = null;
 
-// დამხმარე ფუნქცია ფერების თარგმნისთვის (განახლებული)
 function translateColor(color) {
     const colors = {
         'შავი': 'black', 'Black': 'black',
@@ -29,7 +28,6 @@ function translateColor(color) {
     return colors[color] || color;
 }
 
-// 1. Loader-ის მართვა
 function showLoader() { 
     const loader = document.getElementById('loader-wrapper');
     if (loader) loader.classList.remove('loader-hidden'); 
@@ -40,7 +38,6 @@ function hideLoader() {
     if (loader) loader.classList.add('loader-hidden'); 
 }
 
-// 2. ინიციალიზაცია
 document.addEventListener('DOMContentLoaded', () => {
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
@@ -49,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData();
 });
 
-// 3. მონაცემების ჩატვირთვა
 async function loadData() {
     showLoader();
     try {
@@ -64,13 +60,12 @@ async function loadData() {
 
         renderProducts();
     } catch (error) {
-        console.error("მონაცემების ჩატვირთვის შეცდომა:", error);
+        console.error("მონაცემების ჩატვირთვა ვერ მოხერხდა:", error);
     } finally {
         setTimeout(hideLoader, 800);
     }
 }
 
-// 4. Header-ის დიზაინი
 function applyHeaderDesign(config) {
     if (!config || config.Status !== 'active') return;
     const logoElement = document.getElementById('logo'); 
@@ -85,11 +80,9 @@ function applyHeaderDesign(config) {
     
     if (config.Shop_Logo && logoIcon) {
         logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="width: ${config.Logo_Size || 40}px; height: ${config.Logo_Size || 40}px; border-radius: 50%; object-fit: cover;">`;
-        logoIcon.style.background = 'none';
     }
 }
 
-// 5. Hero სექცია
 function applyHeroDesign(config) {
     const heroSection = document.getElementById('hero');
     if (!heroSection || !config || config.Status !== 'active') return;
@@ -108,31 +101,25 @@ function applyHeroDesign(config) {
     heroSection.style.display = 'block';
 }
 
-// 6. პროდუქტების რენდერი (მარაგის ლოგიკით)
+// 6. პროდუქტების რენდერი (გასწორებული ფერების ლოგიკით)
 function renderProducts() {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
     state.products.forEach(product => {
-        // 1. მონაცემების ამოღება Product_Details-დან
+        // პოულობს ვარიანტებს ID-ის მიხედვით (lowercase შედარებით, რომ შეცდომა არ დაუშვას)
         const productVariants = state.productDetails.filter(d => 
-            String(d.product_id) === String(product.product_id)
+            String(d.product_id).toLowerCase() === String(product.product_id).toLowerCase()
         );
 
-        // დებაგისთვის: ვნახოთ რას პოულობს კონკრეტულ ID-ზე
-        if (productVariants.length > 0) {
-            console.log(`პროდუქტი: ${product.name_ge}, ვარიანტები:`, productVariants);
-        }
-
-        // 2. მხოლოდ იმ ვარიანტების ფერები, სადაც მარაგია
+        // ფერების ამოღება (მხოლოდ იმ ვარიანტებიდან, სადაც მარაგია)
         const availableVariants = productVariants.filter(v => parseInt(v.stock_quantity || 0) > 0);
         const uniqueColors = [...new Set(availableVariants.map(v => v.Colors).filter(c => c))];
         
-        // 3. მარაგის ბეიჯი (Badge_Status)
-        const statusBadge = productVariants.find(v => v.Badge_Status && v.Badge_Status !== "")?.Badge_Status || "";
+        // ბეიჯის ამოღება Product_Details-დან
+        const statusBadge = productVariants.find(v => v.Badge_Status)?.Badge_Status || "";
 
-        // 4. ფასდაკლება
         const discountVal = parseInt(product.discount_percent || 0);
         const hasDiscount = discountVal > 0;
 
@@ -157,8 +144,7 @@ function renderProducts() {
                     <div style="display: flex; gap: 4px; min-height: 14px;">
                         ${uniqueColors.map(color => {
                             const hexColor = translateColor(color);
-                            console.log(`ფერი: ${color} -> Hex: ${hexColor}`); // დებაგი
-                            return `<div style="width: 14px; height: 14px; border-radius: 50%; background: ${hexColor}; border: 1.5px solid #e5e5e5;"></div>`;
+                            return `<div style="width: 14px; height: 14px; border-radius: 50%; background: ${hexColor}; border: 1.5px solid #e5e5e5; box-shadow: inset 0 0 2px rgba(0,0,0,0.1);"></div>`;
                         }).join('')}
                     </div>
                 </div>
@@ -176,15 +162,13 @@ function renderProducts() {
     });
 }
 
-// 7. დეტალური გვერდი
 function openProductDetails(productId) {
     const product = state.products.find(p => String(p.product_id) === String(productId));
     if (!product) return;
 
-    const variants = state.productDetails.filter(d => String(d.product_id) === String(productId));
-    const uniqueSizes = [...new Set(variants.map(v => v.Size).filter(s => s))];
+    const variants = state.productDetails.filter(d => String(d.product_id).toLowerCase() === String(productId).toLowerCase());
+    const uniqueSizes = [...new Set(variants.map(v => v.Sizes).filter(s => s))];
     const uniqueColors = [...new Set(variants.map(v => v.Colors).filter(c => c))];
-    const hasDiscount = product.old_price && parseFloat(product.old_price) > parseFloat(product.final_price);
 
     const overlay = document.createElement('div');
     overlay.className = 'detail-overlay';
@@ -200,7 +184,6 @@ function openProductDetails(productId) {
                 <h2 class="detail-name" style="margin: 10px 0;">${product.name_ge}</h2>
                 <div class="price-block" style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 20px;">
                     <span class="final-price" style="font-size: 24px; font-weight: 800;">${product.final_price} ₾</span>
-                    ${hasDiscount ? `<span class="old-price" style="text-decoration: line-through; color: #86868b;">${product.old_price} ₾</span>` : ''}
                 </div>
 
                 ${uniqueColors.length > 0 ? `
