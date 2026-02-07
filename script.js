@@ -88,7 +88,7 @@ function applyHeroDesign(config) {
     const heroSection = document.getElementById('hero');
     if (!heroSection || !config || config.Status !== 'active') return;
 
-    const marginTop = config.B_Margin_Top || '20px'; 
+    const marginTop = config.B_Margin_Top ? (isNaN(config.B_Margin_Top) ? config.B_Margin_Top : config.B_Margin_Top + 'px') : '20px';
     const imageUrl = config.B_Image || '';
 
     heroSection.innerHTML = `
