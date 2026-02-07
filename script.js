@@ -38,10 +38,12 @@ async function loadData() {
         const response = await fetch(CONFIG.API_URL);
         const data = await response.json();
         
+        // აი ეს ხაზი ჩაამატე და ნახე კონსოლში რა დაიწერება:
+        console.log("შიტიდან მოსული ყველა მონაცემი:", data);
+        
         state.products = data.products || [];
         state.productDetails = data.productDetails || [];
         
-        // დიზაინის პარამეტრების გამოყენება (თუ არსებობს)
         if (data.headerConfig) applyHeaderDesign(data.headerConfig);
         if (data.heroConfig) applyHeroDesign(data.heroConfig);
 
@@ -49,7 +51,6 @@ async function loadData() {
     } catch (error) {
         console.error("მონაცემების ჩატვირთვის შეცდომა:", error);
     } finally {
-        // მცირე დაყოვნება, რომ ანიმაცია ლამაზად გამოჩნდეს
         setTimeout(hideLoader, 500);
     }
 }
