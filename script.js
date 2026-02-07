@@ -17,35 +17,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loadData() {
+    showLoader();
     try {
-        const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
+        const response = await fetch(API_URL);
         const data = await response.json();
         
-        state.products = data.products;
-        state.headerConfig = data.headerConfig;
-
-        applyHeaderDesign(state.headerConfig);
+        // მონაცემების შენახვა state-ში
+        state.products = data.products || [];
+        state.productDetails = data.productDetails || []; // საწყობის მონაცემები
+        state.design = data.design || {};
         
-        if (data.heroConfig) {
-            applyHeroDesign(data.heroConfig);
-        }
-        
-        renderProducts();
-
-        const header = document.querySelector('.header');
-        if (header) {
-            header.classList.add('loaded');
-        }
-
-        const loader = document.getElementById('loader-wrapper');
-        if (loader) {
-            loader.classList.add('loader-hidden');
-        }
-
+        renderHero(data.heroConfig);
+        renderProducts(); // აქ გამოიძახება ჩვენი ახალი "ჭკვიანი" რენდერი
     } catch (error) {
-        console.error("მონაცემების ჩატვირთვის შეცდომა:", error);
-        const loader = document.getElementById('loader-wrapper');
-        if (loader) loader.classList.add('loader-hidden');
+        console.error("Error loading data:", error);
+    } finally {
+        hideLoader();
     }
 }
 
