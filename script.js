@@ -575,7 +575,7 @@ function goToPayment() {
 
     const grid = document.getElementById('products-grid');
     grid.innerHTML = `
-        <div style="grid-column: 1/-1; padding: 5px; padding-bottom: 100px;">
+        <div style="grid-column: 1/-1; padding: 5px; padding-bottom: 120px;">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px;">
                 <button onclick="checkout()" style="background: #f5f5f7; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                     <span style="font-size: 20px;">←</span>
@@ -593,30 +593,46 @@ function goToPayment() {
                     <div style="font-size: 24px;">🏦</div>
                     <div style="flex-grow: 1;">
                         <div style="font-weight: 700; color: #1d1d1f;">საბანკო გადარიცხვა</div>
-                        <div style="font-size: 12px; color: #86868b;">მიიღეთ რეკვიზიტები</div>
+                        <div style="font-size: 12px; color: #86868b;">ჩარიცხვა ანგარიშზე</div>
                     </div>
                 </div>
 
-                <div id="bank-details-box" style="display: none; background: #eef7ff; padding: 15px; border-radius: 15px; border: 1px dashed #0071e3; margin-top: -5px;">
-                    <span style="font-size: 11px; color: #0071e3; font-weight: 600; text-transform: uppercase;">ანგარიშის ნომერი (IBAN):</span>
-                    <div style="background: white; padding: 10px; border-radius: 10px; border: 1px solid #d0e8ff; font-family: monospace; font-weight: 700; margin-top: 5px; text-align: center; color: #1d1d1f;">
-                        GE00TB0000000000000000
+                <div id="bank-details-box" style="display: none; background: #f0f7ff; padding: 20px; border-radius: 20px; border: 1px solid #0071e3; margin-top: -5px;">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div>
+                            <span style="font-size: 11px; color: #0071e3; font-weight: 700; text-transform: uppercase;">ანგარიშის ნომერი (IBAN):</span>
+                            <div style="display: flex; gap: 8px; margin-top: 5px;">
+                                <div id="iban-text" style="background: white; padding: 12px; border-radius: 12px; border: 1px solid #d0e8ff; font-family: monospace; font-weight: 700; flex-grow: 1; font-size: 13px; display: flex; align-items: center;">GE00TB0000000000000000</div>
+                                <button onclick="copyIBAN()" style="background: #0071e3; color: white; border: none; padding: 0 15px; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer;">Copy</button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <span style="font-size: 11px; color: #86868b; font-weight: 600; text-transform: uppercase;">მიმღები:</span>
+                            <div style="font-weight: 700; color: #1d1d1f; margin-top: 2px;">შპს მაღაზია</div>
+                        </div>
+
+                        <div style="background: #fff9e6; padding: 10px; border-radius: 10px; border: 1px solid #ffeeba;">
+                            <p style="font-size: 11px; color: #856404; margin: 0; line-height: 1.4;">
+                                ⚠️ <b>დანიშნულებაში:</b> გთხოვთ მიუთითოთ თქვენი სახელი და გვარი.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <div onclick="selectPaymentMethod('ნაღდი ანგარიშსწორება', this)" class="pay-option" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s;">
-                    <div style="font-size: 24px;">💵</div>
-                    <div style="flex-grow: 1;">
-                        <div style="font-weight: 700; color: #1d1d1f;">ნაღდი ანგარიშსწორება</div>
-                        <div style="font-size: 12px; color: #86868b;">გადაიხადეთ კურიერთან</div>
-                    </div>
-                </div>
-
-                <div onclick="selectPaymentMethod('ბარათით კურიერთან', this)" class="pay-option" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s;">
+                <div onclick="selectPaymentMethod('ბარათით გადახდა', this)" class="pay-option" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
                     <div style="font-size: 24px;">💳</div>
                     <div style="flex-grow: 1;">
+                        <div style="font-weight: 700; color: #1d1d1f;">ბარათით გადახდა</div>
+                        <div style="font-size: 12px; color: #86868b;">ონლაინ გადახდა</div>
+                    </div>
+                </div>
+
+                <div onclick="selectPaymentMethod('ბარათით კურიერთან', this)" class="pay-option" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                    <div style="font-size: 24px;">🛵</div>
+                    <div style="flex-grow: 1;">
                         <div style="font-weight: 700; color: #1d1d1f;">ბარათით კურიერთან</div>
-                        <div style="font-size: 12px; color: #86868b;">ტერმინალით გადახდა</div>
+                        <div style="font-size: 12px; color: #86868b;">ტერმინალით ადგილზე</div>
                     </div>
                 </div>
             </div>
@@ -628,9 +644,16 @@ function goToPayment() {
     `;
 }
 
-// ახალი ფუნქცია მეთოდის ასარჩევად
+// კოპირების ფუნქცია
+function copyIBAN() {
+    const iban = document.getElementById('iban-text').innerText;
+    navigator.clipboard.writeText(iban).then(() => {
+        showToast("IBAN დაკოპირდა! ✅");
+    });
+}
+
+// მეთოდის არჩევის ფუნქცია
 function selectPaymentMethod(method, element) {
-    // 1. მოვნიშნოთ არჩეული ბლოკი ვიზუალურად
     document.querySelectorAll('.pay-option').forEach(opt => {
         opt.style.borderColor = '#f5f5f7';
         opt.style.background = 'white';
@@ -638,54 +661,14 @@ function selectPaymentMethod(method, element) {
     element.style.borderColor = '#0071e3';
     element.style.background = '#f0f7ff';
 
-    // 2. შევინახოთ არჩეული მეთოდი
     state.tempOrder.paymentMethod = method;
 
-    // 3. თუ აირჩია საბანკო, გამოვაჩინოთ IBAN, თუ არა - დავმალოთ
     const bankBox = document.getElementById('bank-details-box');
     if (method === 'საბანკო გადარიცხვა') {
         bankBox.style.display = 'block';
     } else {
         bankBox.style.display = 'none';
     }
-}
-
-function selectPayment(method, element) {
-    const allOptions = document.querySelectorAll('[onclick^="selectPayment"]');
-    allOptions.forEach(opt => {
-        opt.style.borderColor = '#f2f2f7';
-        const radio = opt.querySelector('.payment-radio');
-        if(radio) {
-            radio.style.background = 'none';
-            radio.style.borderColor = '#e5e5e7';
-        }
-    });
-
-    element.style.borderColor = '#0071e3';
-    const radio = element.querySelector('.payment-radio');
-    if(radio) {
-        radio.style.background = '#0071e3';
-        radio.style.borderColor = '#0071e3';
-    }
-
-    const bankDetails = document.getElementById('bank-details');
-    bankDetails.style.display = (method === 'საბანკო გადარიცხვა') ? 'block' : 'none';
-
-    const btn = document.getElementById('final-confirm-btn');
-    btn.disabled = false;
-    btn.style.background = '#000';
-    btn.style.opacity = '1';
-    btn.innerText = 'შეკვეთის დასრულება';
-    
-    state.tempOrder.paymentMethod = method;
-}
-
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        showToast("ანგარიშის ნომერი დაკოპირდა! ✅");
-    }).catch(err => {
-        console.error('შეცდომა: ', err);
-    });
 }
 
 async function handleFinalOrder() {
