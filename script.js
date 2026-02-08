@@ -297,23 +297,36 @@ function renderCart() {
     const hero = document.getElementById('hero');
     if (!grid) return;
 
-    // ვმალავთ Hero ბანერს
+    // 1. ვმალავთ Hero-ს და ზედმეტ სათაურებს, რომლებიც შეიძლება გვერდზე იყოს
     if (hero) hero.style.display = 'none';
     
-    // ვასუფთავებთ კონტეინერს, რომ "ახალი კოლექცია" და სხვა ნარჩენები წაიშალოს
+    // ვეძებთ ყველა <h2> სათაურს, რომელიც არ არის კალათის ნაწილი და ვმალავთ
+    document.querySelectorAll('h2').forEach(h2 => {
+        if (h2.innerText.includes("ახალი კოლექცია")) {
+            h2.style.display = 'none';
+        }
+    });
+
+    // 2. ვასუფთავებთ კონტეინერს
     grid.innerHTML = '';
     
-    // ვამატებთ სათაურს "ჩემი კალათა" უფრო პატარა შრიფტით
-    const cartTitle = document.createElement('h2');
-    cartTitle.style.cssText = 'grid-column: 1/-1; margin: 10px 0 20px 5px; font-size: 20px; font-weight: 700; color: #1d1d1f;';
-    cartTitle.innerText = 'ჩემი კალათა';
-    grid.appendChild(cartTitle);
+    // 3. ვამატებთ სათაურს "ჩემი კალათა" - უფრო პატარა შრიფტით (18px)
+    const cartHeader = document.createElement('h2');
+    cartHeader.style.cssText = `
+        grid-column: 1/-1; 
+        margin: 5px 0 15px 5px; 
+        font-size: 18px; 
+        font-weight: 700; 
+        color: #1d1d1f;
+        display: block !important;
+    `;
+    cartHeader.innerText = 'ჩემი კალათა';
+    grid.appendChild(cartHeader);
 
     if (state.cart.length === 0) {
         grid.innerHTML += `
-            <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px;">
-                <p style="color: #86868b; font-size: 16px;">კალათა ცარიელია</p>
-                <button onclick="handleNavChange('home', document.querySelector('.nav-item'))" style="margin-top: 20px; padding: 12px 25px; border-radius: 12px; border: none; background: #0071e3; color: white; font-weight: 600; font-size: 14px;">დაბრუნება</button>
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px;">
+                <p style="color: #86868b; font-size: 15px;">კალათა ცარიელია</p>
             </div>`;
         return;
     }
@@ -326,29 +339,29 @@ function renderCart() {
         totalSum += parseFloat(product.final_price);
 
         const cartItem = document.createElement('div');
-        cartItem.style.cssText = 'grid-column: 1/-1; display: flex; align-items: center; gap: 15px; background: white; padding: 15px; border-radius: 18px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative;';
+        cartItem.style.cssText = 'grid-column: 1/-1; display: flex; align-items: center; gap: 12px; background: white; padding: 12px; border-radius: 18px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: relative; border: 1px solid #f2f2f7;';
         
-        // თუ მონაცემები null-ია, ვაჩვენებთ ტირეს
         const displayColor = item.color && item.color !== 'null' ? item.color : '-';
         const displaySize = item.size && item.size !== 'null' ? item.size : '-';
 
         cartItem.innerHTML = `
-            <img src="${product.photo_url_1}" style="width: 70px; height: 70px; object-fit: contain; background: #f5f5f7; border-radius: 12px;">
+            <img src="${product.photo_url_1}" style="width: 65px; height: 65px; object-fit: contain; background: #f5f5f7; border-radius: 12px;">
             <div style="flex-grow: 1;">
-                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #1d1d1f; padding-right: 20px;">${product.name_ge}</h4>
-                <p style="font-size: 12px; color: #86868b; margin-bottom: 4px;">ფერი: ${displayColor}, ზომა: ${displaySize}</p>
-                <span style="font-weight: 700; color: #0071e3; font-size: 15px;">${product.final_price} ₾</span>
+                <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 3px; color: #1d1d1f; line-height: 1.2;">${product.name_ge}</h4>
+                <p style="font-size: 11px; color: #86868b; margin-bottom: 3px;">ფერი: ${displayColor}, ზომა: ${displaySize}</p>
+                <span style="font-weight: 700; color: #0071e3; font-size: 14px;">${product.final_price} ₾</span>
             </div>
-            <button onclick="removeFromCart(${index})" style="position: absolute; right: 15px; top: 15px; background: none; border: none; color: #ff3b30; font-size: 16px; cursor: pointer; padding: 5px;">✕</button>
+            <button onclick="removeFromCart(${index})" style="position: absolute; right: 10px; top: 10px; background: none; border: none; color: #d1d1d6; font-size: 14px; cursor: pointer;">✕</button>
         `;
         grid.appendChild(cartItem);
     });
 
+    // ფეხთერი (Footer)
     const footer = document.createElement('div');
-    footer.style.cssText = 'grid-column: 1/-1; margin-top: 10px; padding: 20px; background: #f5f5f7; border-radius: 24px; text-align: right;';
+    footer.style.cssText = 'grid-column: 1/-1; margin-top: 10px; padding: 15px; background: #f5f5f7; border-radius: 20px; text-align: right;';
     footer.innerHTML = `
-        <p style="font-size: 16px; margin-bottom: 15px; color: #1d1d1f;">სულ: <strong style="color: #0071e3; font-size: 20px;">${totalSum.toFixed(2)} ₾</strong></p>
-        <button onclick="checkout()" style="width: 100%; padding: 16px; border-radius: 14px; border: none; background: #000; color: white; font-size: 15px; font-weight: 700; cursor: pointer;">შეკვეთის გაფორმება</button>
+        <p style="font-size: 14px; margin-bottom: 12px; color: #1d1d1f;">სულ: <strong style="color: #0071e3; font-size: 18px;">${totalSum.toFixed(2)} ₾</strong></p>
+        <button onclick="checkout()" style="width: 100%; padding: 14px; border-radius: 12px; border: none; background: #000; color: white; font-size: 14px; font-weight: 700; cursor: pointer;">შეკვეთის გაფორმება</button>
     `;
     grid.appendChild(footer);
 }
