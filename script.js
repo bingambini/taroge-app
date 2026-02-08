@@ -751,14 +751,12 @@ async function renderProfile() {
     const mainTitle = document.getElementById('new-arrivals-title');
     const bottomNav = document.querySelector('.bottom-nav');
     
-    // პროფილში მენიუ უნდა ჩანდეს
     if (bottomNav) bottomNav.style.display = 'flex';
     
     if (!grid) return;
     if (hero) hero.style.display = 'none';
     if (mainTitle) mainTitle.style.display = 'none';
 
-    // Telegram-ის მონაცემების ამოღება
     const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
     const userName = user ? `${user.first_name} ${user.last_name || ''}` : "სტუმარი";
     const userPhoto = user?.photo_url || "https://ui-avatars.com/api/?name=" + userName + "&background=0071e3&color=fff";
@@ -766,13 +764,15 @@ async function renderProfile() {
 
     grid.innerHTML = `
         <div style="grid-column: 1/-1; padding: 10px; padding-bottom: 120px;">
-            <div style="background: white; padding: 30px 20px; border-radius: 32px; border: 1px solid #f2f2f7; text-align: center; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
-                <div style="position: relative; display: inline-block;">
-                    <img src="${userPhoto}" style="width: 90px; height: 90px; border-radius: 50%; border: 3px solid #f5f5f7;">
-                    <div style="position: absolute; bottom: 5px; right: 5px; width: 18px; height: 18px; background: #34c759; border: 3px solid #fff; border-radius: 50%;"></div>
+            <div style="background: white; padding: 15px 20px; border-radius: 24px; border: 1px solid #f2f2f7; display: flex; align-items: center; gap: 15px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                <div style="position: relative;">
+                    <img src="${userPhoto}" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid #f5f5f7;">
+                    <div style="position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px; background: #34c759; border: 2px solid #fff; border-radius: 50%;"></div>
                 </div>
-                <h3 style="font-size: 20px; font-weight: 800; color: #1d1d1f; margin: 15px 0 5px 0;">${userName}</h3>
-                <p style="font-size: 13px; color: #86868b; margin: 0;">ID: ${userId}</p>
+                <div style="text-align: left;">
+                    <h3 style="font-size: 16px; font-weight: 800; color: #1d1d1f; margin: 0;">${userName}</h3>
+                    <p style="font-size: 11px; color: #86868b; margin: 2px 0 0 0;">ID: ${userId}</p>
+                </div>
             </div>
 
             <h2 style="font-size: 18px; font-weight: 700; color: #1d1d1f; margin: 0 0 15px 10px;">შეკვეთების ისტორია</h2>
@@ -783,17 +783,17 @@ async function renderProfile() {
         </div>
     `;
 
-    // შეკვეთების ჩატვირთვა
     loadUserOrders(userId);
 }
 
 async function loadUserOrders(userId) {
     const listContainer = document.getElementById('orders-history-list');
+    if (!listContainer) return;
+
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
         const data = await response.json();
         
-        // ვფილტრავთ შეკვეთებს userId-ით
         const myOrders = data.orders ? data.orders.filter(o => String(o.userId) === userId) : [];
 
         if (myOrders.length === 0) {
@@ -805,23 +805,32 @@ async function loadUserOrders(userId) {
         }
 
         listContainer.innerHTML = myOrders.reverse().map(order => {
-            // სტატუსის ფერები
-            let color = "#ff9500"; // Pending
+            let color = "#ff9500"; 
             if (order.status === "გზაშია") color = "#0071e3";
             if (order.status === "ჩაბარდა") color = "#34c759";
             if (order.status === "გაუქმდა") color = "#ff3b30";
 
             return `
-                <div style="background: white; padding: 16px; border-radius: 22px; border: 1px solid #f2f2f7; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span style="font-size: 14px; font-weight: 700; color: #1d1d1f;">${order.orderId}</span>
-                        <span style="font-size: 11px; color: #86868b;">${order.date.split(',')[0]}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="font-size: 13px; color: #424245;">${order.total} ₾</div>
-                        <div style="background: ${color}15; color: ${color}; padding: 5px 12px; border-radius: 10px; font-size: 12px; font-weight: 700;">
-                            ${order.status}
+                <div style="background: white; padding: 18px; border-radius: 24px; border: 1px solid #f2f2f7; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.01);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                        <div>
+                            <span style="font-size: 14px; font-weight: 800; color: #1d1d1f; display: block;">#ORD-${order.orderId.toString().slice(-8)}</span>
+                            <span style="font-size: 11px; color: #86868b;">${order.date ? order.date.split(',')[0] : ''}</span>
                         </div>
+                        <span style="background: ${color}15; color: ${color}; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 700;">
+                            ${order.status}
+                        </span>
+                    </div>
+
+                    <div style="background: #f9f9fb; border-radius: 16px; padding: 12px; margin-bottom: 12px; border: 1px solid #f2f2f7;">
+                        <div style="font-size: 12px; color: #424245; line-height: 1.6; white-space: pre-line;">
+                            ${order.items}
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #f5f5f7;">
+                        <span style="font-size: 13px; color: #86868b;">ჯამი:</span>
+                        <span style="font-size: 16px; font-weight: 800; color: #0071e3;">${order.total} ₾</span>
                     </div>
                 </div>
             `;
