@@ -556,12 +556,15 @@ function goToPayment() {
         return;
     }
 
-    // ჯამური თანხის გამოთვლა NaN-ის პრევენციით
+    // ჯამური თანხის გამოთვლა გაუმჯობესებული ძებნით
     const totalAmount = state.cart.reduce((total, item) => {
-        // თუ ფასი ტექსტია (მაგ: "150₾"), ვაშორებთ სიმბოლოებს და ვაქცევთ რიცხვად
-        const priceClean = typeof item.price === 'string' 
-            ? parseFloat(item.price.replace(/[^\d.]/g, '')) 
-            : parseFloat(item.price);
+        // ვამოწმებთ ყველა შესაძლო სახელს, რაც შეიძლება ფასს ერქვას შენს ბაზაში
+        const rawPrice = item.price || item.Price || item.price_ge || item.price_unit || item.ფასი || 0;
+        
+        // ვასუფთავებთ ტექსტს (თუ წერია "150₾", ტოვებს მხოლოდ "150")
+        const priceClean = typeof rawPrice === 'string' 
+            ? parseFloat(rawPrice.replace(/[^\d.]/g, '')) 
+            : parseFloat(rawPrice);
         
         const quantity = parseInt(item.quantity) || 0;
         const subtotal = (priceClean || 0) * quantity;
