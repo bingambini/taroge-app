@@ -629,7 +629,6 @@ function goToPayment() {
 }
 
 async function handleFinalOrder() {
-    // 1. ვამოწმებთ, აირჩია თუ არა მომხმარებელმა მეთოდი
     if (!state.tempOrder || !state.tempOrder.paymentMethod) {
         showToast("გთხოვთ აირჩიოთ გადახდის მეთოდი ⚠️");
         return;
@@ -639,50 +638,50 @@ async function handleFinalOrder() {
     btn.disabled = true;
     btn.innerText = "იგზავნება...";
 
-    // 2. მონაცემების მომზადება (ზუსტად ისე, როგორც Apps Script ელოდება)
+    // გენერირდება მარტივი შეკვეთის ID
+    const orderId = "#ORD-" + Math.floor(Date.now() / 1000);
+
+    // ვაწყობთ მონაცემებს შენი 11 სვეტის მიხედვით:
+    // 1.orderId, 2.date, 3.userId, 4.customerName, 5.phone, 6.address, 7.items, 8.total, 9.Promo, 10.payment_method, 11.status
     const orderData = {
         action: 'addOrder',
-        name: state.tempOrder.name,
-        phone: state.tempOrder.phone,
-        address: state.tempOrder.address,
-        total_price: state.tempOrder.totalAmount,
-        payment_method: state.tempOrder.paymentMethod,
-        order_details: state.cart.map(item => 
+        orderId: orderId,                                     // 1. orderId
+        date: new Date().toLocaleString('ka-GE'),              // 2. date
+        userId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "Web-User", // 3. userId
+        customerName: state.tempOrder.name,                   // 4. customerName
+        phone: state.tempOrder.phone,                         // 5. phone
+        address: state.tempOrder.address,                     // 6. address
+        items: state.cart.map(item => 
             `${item.name_ge || item.name} (${item.color}, ${item.size}) x${item.quantity}`
-        ).join(', '),
-        date: new Date().toLocaleString('ka-GE')
+        ).join(', '),                                         // 7. items
+        total: state.tempOrder.totalAmount,                   // 8. total
+        Promo: "None",                                        // 9. Promo (თუ არ გაქვს, დეფოლტად None)
+        payment_method: state.tempOrder.paymentMethod,        // 10. payment_method
+        status: "Pending"                                     // 11. status
     };
 
-    // შენი ახალი URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyClomY0jgG71r9m15Wjn3_1-6wsI1AFDJ-CXW0IJaqH-pJG79HAbT0ZK_HbkgQm0EKLw/exec";
+    const SCRIPT_URL = CONFIG.API_URL;
 
     try {
-        // 3. გაგზავნა
         await fetch(SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors', // მნიშვნელოვანია Google Apps Script-ისთვის
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
 
-        // რადგან no-cors რეჟიმში ვართ, fetch ვერ ხედავს "success" პასუხს, 
-        // ამიტომ პირდაპირ გადავდივართ წარმატების ლოგიკაზე
-        showToast("შეკვეთა წარმატებით გაიგზავნა! 🎉");
+        showToast("შეკვეთა წარმატებულია! 🎉");
         
-        // კალათის გასუფთავება
         state.cart = [];
         if (typeof updateCartBadge === 'function') updateCartBadge();
         localStorage.removeItem('cart');
 
-        // 2 წამში გვერდის რესტარტი
         setTimeout(() => {
             window.location.reload();
         }, 2000);
 
     } catch (error) {
-        console.error("გაგზავნის შეცდომა:", error);
+        console.error("Error:", error);
         showToast("ვერ მოხერხდა გაგზავნა ❌");
         btn.disabled = false;
         btn.innerText = "შეკვეთის დასრულება";
