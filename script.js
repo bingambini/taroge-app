@@ -436,24 +436,31 @@ function changeQuantity(index, delta) {
 
 // რაოდენობის შეცვლის ფუნქცია
 function changeQuantity(index, delta) {
-    state.cart[index].quantity += delta;
+    const item = state.cart[index];
     
-    // თუ რაოდენობა 1-ზე ნაკლები ხდება, ნივთი იშლება
-    if (state.cart[index].quantity < 1) {
+    // მხოლოდ მომატების შემთხვევაში ვამოწმებთ მარაგს
+    if (delta > 0) {
+        const variant = state.productDetails.find(d => 
+            String(d.product_id) === String(item.id) && 
+            String(d.Colors).trim() === String(item.color).trim() && 
+            String(d.Sizes).trim() === String(item.size).trim()
+        );
+        
+        const stockLimit = variant ? parseInt(variant.stock_quantity || 0) : 0;
+        
+        if (item.quantity >= stockLimit) {
+            showToast("უკაცრავად, მეტი რაოდენობა მარაგში არ არის ✋");
+            return; // ფუნქცია აქ წყდება და რაოდენობა აღარ იზრდება
+        }
+    }
+
+    item.quantity += delta;
+    
+    if (item.quantity < 1) {
         state.cart.splice(index, 1);
     }
     
     updateCartBadge();
-    renderCart();
-}
-
-function removeFromCart(index) {
-    state.cart.splice(index, 1);
-    const badge = document.getElementById('nav-cart-badge');
-    if (badge) {
-        badge.innerText = state.cart.length;
-        if (state.cart.length === 0) badge.style.display = 'none';
-    }
     renderCart();
 }
 
