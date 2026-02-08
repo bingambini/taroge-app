@@ -638,26 +638,23 @@ async function handleFinalOrder() {
     btn.disabled = true;
     btn.innerText = "იგზავნება...";
 
-    // გენერირდება მარტივი შეკვეთის ID
     const orderId = "#ORD-" + Math.floor(Date.now() / 1000);
 
-    // ვაწყობთ მონაცემებს შენი 11 სვეტის მიხედვით:
-    // 1.orderId, 2.date, 3.userId, 4.customerName, 5.phone, 6.address, 7.items, 8.total, 9.Promo, 10.payment_method, 11.status
     const orderData = {
         action: 'addOrder',
-        orderId: orderId,                                     // 1. orderId
-        date: new Date().toLocaleString('ka-GE'),              // 2. date
-        userId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "Web-User", // 3. userId
-        customerName: state.tempOrder.name,                   // 4. customerName
-        phone: state.tempOrder.phone,                         // 5. phone
-        address: state.tempOrder.address,                     // 6. address
+        orderId: orderId,
+        date: new Date().toLocaleString('ka-GE'),
+        userId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "Web-User",
+        customerName: state.tempOrder.name,
+        phone: state.tempOrder.phone,
+        address: state.tempOrder.address,
         items: state.cart.map(item => 
             `${item.name_ge || item.name} (${item.color}, ${item.size}) x${item.quantity}`
-        ).join(', '),                                         // 7. items
-        total: state.tempOrder.totalAmount,                   // 8. total
-        Promo: "None",                                        // 9. Promo (თუ არ გაქვს, დეფოლტად None)
-        payment_method: state.tempOrder.paymentMethod,        // 10. payment_method
-        status: "Pending"                                     // 11. status
+        ).join(', '),
+        total: state.tempOrder.totalAmount,
+        Promo: "None",
+        payment_method: state.tempOrder.paymentMethod,
+        status: "Pending"
     };
 
     const SCRIPT_URL = CONFIG.API_URL;
@@ -687,3 +684,45 @@ async function handleFinalOrder() {
         btn.innerText = "შეკვეთის დასრულება";
     }
 }
+
+// --- აუცილებელი ფუნქციები გადახდის მეთოდების მუშაობისთვის ---
+
+window.selectPaymentMethod = function(method, element) {
+    // 1. მოვნიშნოთ ყველა ვარიანტი როგორც "აურჩეველი"
+    document.querySelectorAll('.pay-option').forEach(opt => {
+        opt.style.borderColor = '#f2f2f7';
+        opt.style.background = 'white';
+    });
+
+    // 2. მოვნიშნოთ არჩეული ვარიანტი
+    element.style.borderColor = '#0071e3';
+    element.style.background = '#f0f7ff';
+    
+    // 3. შევინახოთ არჩეული მეთოდი state-ში
+    if (!state.tempOrder) state.tempOrder = {};
+    state.tempOrder.paymentMethod = method;
+    
+    // 4. ბანკის რეკვიზიტების გამოჩენა/დამალვა
+    const bankBox = document.getElementById('bank-details-box');
+    if (bankBox) {
+        bankBox.style.display = (method === 'საბანკო გადარიცხვა') ? 'block' : 'none';
+    }
+};
+
+window.copyIBAN = function() {
+    const ibanText = document.getElementById('iban-text')?.innerText;
+    if (!ibanText) return;
+
+    navigator.clipboard.writeText(ibanText).then(() => {
+        showToast("IBAN დაკოპირდა! ✅");
+    }).catch(() => {
+        // fallback მეთოდი თუ clipboard-ზე წვდომა არ არის
+        const el = document.createElement('textarea');
+        el.value = ibanText;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showToast("IBAN დაკოპირდა! ✅");
+    });
+};
