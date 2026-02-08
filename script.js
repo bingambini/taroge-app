@@ -389,6 +389,11 @@ function renderCart() {
     const hero = document.getElementById('hero');
     const mainTitle = document.getElementById('new-arrivals-title');
     
+    // --- ჩამატებული ლოგიკა მენიუს გამოსაჩენად ---
+    const bottomNav = document.querySelector('.bottom-nav');
+    if (bottomNav) bottomNav.style.display = 'flex';
+    // ------------------------------------------
+    
     if (!grid) return;
     if (hero) hero.style.display = 'none';
     if (mainTitle) mainTitle.style.display = 'none';
