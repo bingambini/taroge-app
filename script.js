@@ -271,17 +271,27 @@ function closeProductDetail() {
 }
 
 function handleAddToCart(productId, color, size) {
-    state.cart.push({ 
-        id: productId, 
-        color: color, 
-        size: size 
-    });
+    // ვეძებთ, არის თუ არა უკვე ასეთი ნივთი კალათაში
+    const existingItem = state.cart.find(item => 
+        item.id === productId && 
+        item.color === color && 
+        item.size === size
+    );
 
-    const badge = document.getElementById('nav-cart-badge');
-    if (badge) {
-        badge.innerText = state.cart.length;
-        badge.style.display = 'flex';
+    if (existingItem) {
+        // თუ არის, ვუმატებთ მხოლოდ რაოდენობას
+        existingItem.quantity = (existingItem.quantity || 1) + 1;
+    } else {
+        // თუ არ არის, ვამატებთ ახალს რაოდენობით 1
+        state.cart.push({ 
+            id: productId, 
+            color: color, 
+            size: size,
+            quantity: 1
+        });
     }
+
+    updateCartBadge();
 
     const btn = document.getElementById('add-to-cart-btn');
     if (btn) {
@@ -290,6 +300,17 @@ function handleAddToCart(productId, color, size) {
     }
 
     setTimeout(closeProductDetail, 800);
+}
+
+// ცალკე ფუნქცია ბეიჯის განახლებისთვის
+function updateCartBadge() {
+    const badge = document.getElementById('nav-cart-badge');
+    if (badge) {
+        // ვითვლით ყველა ნივთის ჯამურ რაოდენობას
+        const totalQty = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+        badge.innerText = totalQty;
+        badge.style.display = totalQty > 0 ? 'flex' : 'none';
+    }
 }
 
 function handleNavChange(page, element) {
