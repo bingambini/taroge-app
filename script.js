@@ -357,7 +357,15 @@ function renderCart() {
     state.cart.forEach((item, index) => {
         const product = state.products.find(p => String(p.product_id) === String(item.id));
         if (!product) return;
+
+        // ვპოულობთ კონკრეტულ ნაშთს Product_Details-ში ფერისა და ზომის მიხედვით
+        const variant = state.productDetails.find(d => 
+            String(d.product_id) === String(item.id) && 
+            d.Colors === item.color && 
+            d.Sizes === item.size
+        );
         
+        const stockLimit = variant ? parseInt(variant.stock_quantity || 0) : 0;
         const itemTotal = parseFloat(product.final_price) * item.quantity;
         totalSum += itemTotal;
 
@@ -376,16 +384,19 @@ function renderCart() {
                     <div style="display: flex; align-items: center; background: #f5f5f7; border-radius: 8px; padding: 2px 8px; gap: 10px;">
                         <button onclick="changeQuantity(${index}, -1)" style="border:none; background:none; font-size: 18px; color: #0071e3; cursor: pointer;">−</button>
                         <span style="font-size: 13px; font-weight: 700; min-width: 15px; text-align: center;">${item.quantity}</span>
-                        <button onclick="changeQuantity(${index}, 1)" style="border:none; background:none; font-size: 18px; color: #0071e3; cursor: pointer;">+</button>
+                        
+                        ${item.quantity < stockLimit ? 
+                            `<button onclick="changeQuantity(${index}, 1)" style="border:none; background:none; font-size: 18px; color: #0071e3; cursor: pointer;">+</button>` : 
+                            `<span style="width: 20px; display: inline-block;"></span>`
+                        }
                     </div>
                 </div>
             </div>
-            <button onclick="removeFromCart(${index})" style="position: absolute; right: 10px; top: 10px; background: none; border: none; color: #d1d1d6; font-size: 16px;">✕</button>
+            <button onclick="removeFromCart(${index})" style="position: absolute; right: 10px; top: 10px; background: none; border: none; color: #d1d1d6; font-size: 16px; cursor: pointer;">✕</button>
         `;
         grid.appendChild(cartItem);
     });
 
-    // ფეხთერი ჯამური თანხით
     const footer = document.createElement('div');
     footer.style.cssText = 'grid-column: 1/-1; margin-top: 10px; padding: 20px; background: #f5f5f7; border-radius: 20px;';
     footer.innerHTML = `
@@ -393,9 +404,33 @@ function renderCart() {
             <span style="color: #86868b; font-size: 15px;">სულ გადასახდელი:</span>
             <strong style="color: #0071e3; font-size: 20px;">${totalSum.toFixed(2)} ₾</strong>
         </div>
-        <button onclick="checkout()" style="width: 100%; padding: 16px; border-radius: 14px; border: none; background: #000; color: white; font-size: 15px; font-weight: 700;">შეკვეთის გაფორმება</button>
+        <button onclick="checkout()" style="width: 100%; padding: 16px; border-radius: 14px; border: none; background: #000; color: white; font-size: 15px; font-weight: 700; cursor: pointer;">შეკვეთის გაფორმება</button>
     `;
     grid.appendChild(footer);
+}
+
+function changeQuantity(index, delta) {
+    const item = state.cart[index];
+    
+    // საწყობის ლიმიტის გადამოწმება მომატებისას
+    if (delta > 0) {
+        const variant = state.productDetails.find(d => 
+            String(d.product_id) === String(item.id) && 
+            d.Colors === item.color && 
+            d.Sizes === item.size
+        );
+        const stockLimit = variant ? parseInt(variant.stock_quantity || 0) : 0;
+        if (item.quantity >= stockLimit) return; // თუ ლიმიტს მიაღწია, არაფერი ქნას
+    }
+
+    item.quantity += delta;
+    
+    if (item.quantity < 1) {
+        state.cart.splice(index, 1);
+    }
+    
+    updateCartBadge();
+    renderCart();
 }
 
 // რაოდენობის შეცვლის ფუნქცია
