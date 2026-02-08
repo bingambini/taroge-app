@@ -556,8 +556,19 @@ function goToPayment() {
         return;
     }
 
-    // ჯამური თანხის გამოთვლა რეკვიზიტებისთვის
-    const totalAmount = state.cart.reduce((s, i) => s + (parseFloat(i.price) * i.quantity), 0).toFixed(2);
+    // ჯამური თანხის გამოთვლა NaN-ის პრევენციით
+    const totalAmount = state.cart.reduce((total, item) => {
+        // თუ ფასი ტექსტია (მაგ: "150₾"), ვაშორებთ სიმბოლოებს და ვაქცევთ რიცხვად
+        const priceClean = typeof item.price === 'string' 
+            ? parseFloat(item.price.replace(/[^\d.]/g, '')) 
+            : parseFloat(item.price);
+        
+        const quantity = parseInt(item.quantity) || 0;
+        const subtotal = (priceClean || 0) * quantity;
+        
+        return total + subtotal;
+    }, 0).toFixed(2);
+
     state.tempOrder = { name, phone, address, totalAmount };
 
     const grid = document.getElementById('products-grid');
@@ -608,7 +619,7 @@ function goToPayment() {
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <span style="font-size: 12px; color: #86868b;">ანგარიშის ნომერი (IBAN):</span>
                     <div style="display: flex; align-items: center; background: white; padding: 12px 15px; border-radius: 12px; border: 1px solid #e5e5e7; justify-content: space-between;">
-                        <span style="font-family: monospace; font-weight: 700; font-size: 14px; color: #1d1d1f;">GE00TB0000000000000000</span>
+                        <span id="iban-text" style="font-family: monospace; font-weight: 700; font-size: 14px; color: #1d1d1f;">GE00TB0000000000000000</span>
                         <button onclick="copyToClipboard('GE00TB0000000000000000')" style="background: #0071e3; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
                             COPY
                         </button>
