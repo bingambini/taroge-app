@@ -562,28 +562,26 @@ function goToPayment() {
         return;
     }
 
-    // 1. ვეძებთ ელემენტს, სადაც წერია "სულ გადასახდელი"
+    // --- უტყუარი მეთოდი: ვიღებთ იმას, რასაც თვალით ვხედავთ ეკრანზე ---
     let finalAmount = "0.00";
-    const allElements = document.querySelectorAll('div, span, p');
     
-    // ვპოულობთ იმ კონკრეტულ ელემენტს, რომელიც შეიცავს ტექსტს "სულ გადასახდელი"
-    const totalRow = Array.from(allElements).find(el => 
-        el.innerText.includes('სულ გადასახდელი') && el.innerText.includes('₾')
-    );
+    // ვეძებთ ელემენტს, სადაც წერია ლურჯი ციფრები (შენს სქრინშოტზე 400.00)
+    const cartTotalDisplay = document.querySelector('.cart-total-amount') || 
+                             Array.from(document.querySelectorAll('span')).find(el => el.innerText.includes('₾') && el.style.color !== '');
 
-    if (totalRow) {
-        // ვიღებთ ტექსტს, მაგალითად "სულ გადასახდელი: 400.00 ₾"
-        // და ვტოვებთ მხოლოდ ციფრებს და წერტილს
-        const textValue = totalRow.innerText;
-        const extracted = textValue.replace('სულ გადასახდელი:', '').replace('₾', '').trim();
-        finalAmount = extracted;
+    if (cartTotalDisplay) {
+        // ვიღებთ ტექსტს, მაგ: "400.00 ₾" და ვტოვებთ მხოლოდ "400.00"
+        finalAmount = cartTotalDisplay.innerText.replace(/[^\d.]/g, '');
     } else {
-        // თუ რამე მიზეზით ვერ იპოვა ტექსტით, გადავთვალოთ ხელით
-        finalAmount = state.cart.reduce((sum, item) => {
-            const p = typeof item.price === 'string' ? parseFloat(item.price.replace(/[^\d.]/g, '')) : parseFloat(item.price);
-            return sum + (p * (item.quantity || 1));
-        }, 0).toFixed(2);
+        // თუ რამე სასწაულით ვერ იპოვა, გადავთვალოთ ხელით, ოღონდ ძალიან ფრთხილად
+        let tempSum = 0;
+        state.cart.forEach(item => {
+            const price = typeof item.price === 'string' ? parseFloat(item.price.replace(/[^\d.]/g, '')) : parseFloat(item.price);
+            tempSum += (price * (item.quantity || 1));
+        });
+        finalAmount = tempSum.toFixed(2);
     }
+    // -------------------------------------------------------------
 
     state.tempOrder = { name, phone, address, totalAmount: finalAmount };
 
@@ -609,7 +607,7 @@ function goToPayment() {
 
             <div id="bank-details" style="display: block; margin-top: 15px; background: #f5f5f7; padding: 20px; border-radius: 22px; border: 1px dashed #d1d1d6;">
                 <div style="text-align: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e5e7;">
-                    <span style="font-size: 14px; color: #86868b;">გადასახდელი თანხა:</span>
+                    <span style="font-size: 14px; color: #86868b;">ზუსტი გადასახდელი თანხა:</span>
                     <div style="font-size: 32px; font-weight: 800; color: #0071e3; margin-top: 4px;">${finalAmount} ₾</div>
                 </div>
                 
@@ -621,7 +619,7 @@ function goToPayment() {
                 </div>
             </div>
 
-            <button id="final-confirm-btn" onclick="handleFinalOrder()" style="width: 100%; margin-top: 25px; padding: 18px; border-radius: 18px; border: none; background: #000; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
+            <button onclick="handleFinalOrder()" style="width: 100%; margin-top: 25px; padding: 18px; border-radius: 18px; border: none; background: #000; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
                 შეკვეთის დასრულება
             </button>
         </div>
