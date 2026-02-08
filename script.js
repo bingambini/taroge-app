@@ -338,58 +338,77 @@ function renderCart() {
     const mainTitle = document.getElementById('new-arrivals-title');
     
     if (!grid) return;
-
     if (hero) hero.style.display = 'none';
     if (mainTitle) mainTitle.style.display = 'none';
 
     grid.innerHTML = '';
     
     const cartHeader = document.createElement('h2');
-    cartHeader.style.cssText = 'grid-column: 1/-1; margin: 5px 0 15px 5px; font-size: 18px; font-weight: 700; color: #1d1d1f; display: block !important;';
+    cartHeader.style.cssText = 'grid-column: 1/-1; margin: 5px 0 15px 5px; font-size: 18px; font-weight: 700; color: #1d1d1f;';
     cartHeader.innerText = 'ჩემი კალათა';
     grid.appendChild(cartHeader);
 
     if (state.cart.length === 0) {
-        grid.innerHTML += `
-            <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px;">
-                <p style="color: #86868b; font-size: 15px;">კალათა ცარიელია</p>
-            </div>`;
+        grid.innerHTML += `<div style="grid-column: 1/-1; text-align: center; padding: 40px 20px;"><p style="color: #86868b;">კალათა ცარიელია</p></div>`;
         return;
     }
 
     let totalSum = 0;
     state.cart.forEach((item, index) => {
-        const product = state.products.find(p => String(p.product_id).trim().toLowerCase() === String(item.id).trim().toLowerCase());
+        const product = state.products.find(p => String(p.product_id) === String(item.id));
         if (!product) return;
         
-        totalSum += parseFloat(product.final_price);
+        const itemTotal = parseFloat(product.final_price) * item.quantity;
+        totalSum += itemTotal;
 
         const cartItem = document.createElement('div');
-        cartItem.style.cssText = 'grid-column: 1/-1; display: flex; align-items: center; gap: 12px; background: white; padding: 12px; border-radius: 18px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: relative; border: 1px solid #f2f2f7;';
+        cartItem.style.cssText = 'grid-column: 1/-1; display: flex; align-items: center; gap: 12px; background: white; padding: 12px; border-radius: 18px; margin-bottom: 10px; position: relative; border: 1px solid #f2f2f7;';
         
-        // მონაცემების გამოჩენის ლოგიკა
-        const displayColor = (item.color && item.color !== 'null') ? item.color : '-';
-        const displaySize = (item.size && item.size !== 'null') ? item.size : '-';
-
         cartItem.innerHTML = `
-            <img src="${product.photo_url_1}" style="width: 65px; height: 65px; object-fit: contain; background: #f5f5f7; border-radius: 12px;">
+            <img src="${product.photo_url_1}" style="width: 70px; height: 70px; object-fit: contain; background: #f5f5f7; border-radius: 12px;">
             <div style="flex-grow: 1;">
-                <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 3px; color: #1d1d1f; line-height: 1.2;">${product.name_ge}</h4>
-                <p style="font-size: 11px; color: #86868b; margin-bottom: 3px;">ფერი: ${displayColor}, ზომა: ${displaySize}</p>
-                <span style="font-weight: 700; color: #0071e3; font-size: 14px;">${product.final_price} ₾</span>
+                <h4 style="font-size: 13px; font-weight: 600; color: #1d1d1f; margin-bottom: 2px;">${product.name_ge}</h4>
+                <p style="font-size: 11px; color: #86868b; margin-bottom: 8px;">${item.color}, ${item.size}</p>
+                
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-weight: 700; color: #0071e3; font-size: 14px;">${itemTotal.toFixed(2)} ₾</span>
+                    
+                    <div style="display: flex; align-items: center; background: #f5f5f7; border-radius: 8px; padding: 2px 8px; gap: 10px;">
+                        <button onclick="changeQuantity(${index}, -1)" style="border:none; background:none; font-size: 18px; color: #0071e3; cursor: pointer;">−</button>
+                        <span style="font-size: 13px; font-weight: 700; min-width: 15px; text-align: center;">${item.quantity}</span>
+                        <button onclick="changeQuantity(${index}, 1)" style="border:none; background:none; font-size: 18px; color: #0071e3; cursor: pointer;">+</button>
+                    </div>
+                </div>
             </div>
-            <button onclick="removeFromCart(${index})" style="position: absolute; right: 10px; top: 10px; background: none; border: none; color: #d1d1d6; font-size: 14px; cursor: pointer;">✕</button>
+            <button onclick="removeFromCart(${index})" style="position: absolute; right: 10px; top: 10px; background: none; border: none; color: #d1d1d6; font-size: 16px;">✕</button>
         `;
         grid.appendChild(cartItem);
     });
 
+    // ფეხთერი ჯამური თანხით
     const footer = document.createElement('div');
-    footer.style.cssText = 'grid-column: 1/-1; margin-top: 10px; padding: 15px; background: #f5f5f7; border-radius: 20px; text-align: right;';
+    footer.style.cssText = 'grid-column: 1/-1; margin-top: 10px; padding: 20px; background: #f5f5f7; border-radius: 20px;';
     footer.innerHTML = `
-        <p style="font-size: 14px; margin-bottom: 12px; color: #1d1d1f;">სულ: <strong style="color: #0071e3; font-size: 18px;">${totalSum.toFixed(2)} ₾</strong></p>
-        <button onclick="checkout()" style="width: 100%; padding: 14px; border-radius: 12px; border: none; background: #000; color: white; font-size: 14px; font-weight: 700; cursor: pointer;">შეკვეთის გაფორმება</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <span style="color: #86868b; font-size: 15px;">სულ გადასახდელი:</span>
+            <strong style="color: #0071e3; font-size: 20px;">${totalSum.toFixed(2)} ₾</strong>
+        </div>
+        <button onclick="checkout()" style="width: 100%; padding: 16px; border-radius: 14px; border: none; background: #000; color: white; font-size: 15px; font-weight: 700;">შეკვეთის გაფორმება</button>
     `;
     grid.appendChild(footer);
+}
+
+// რაოდენობის შეცვლის ფუნქცია
+function changeQuantity(index, delta) {
+    state.cart[index].quantity += delta;
+    
+    // თუ რაოდენობა 1-ზე ნაკლები ხდება, ნივთი იშლება
+    if (state.cart[index].quantity < 1) {
+        state.cart.splice(index, 1);
+    }
+    
+    updateCartBadge();
+    renderCart();
 }
 
 function removeFromCart(index) {
