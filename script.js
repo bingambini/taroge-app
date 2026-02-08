@@ -647,6 +647,16 @@ async function handleFinalOrder() {
 
     const orderId = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
+    // ვაგროვებთ დეტალურ ინფორმაციას: ID, სახელი, ზომა, ფერი
+    const itemsDescription = state.cart.map(item => {
+        const pId = item.product_id || item.id || "No-ID";
+        const pName = item.name_ge || item.title || "პროდუქტი";
+        const pSize = item.size ? ` | ზომა: ${item.size}` : "";
+        const pColor = item.color ? ` | ფერი: ${item.color}` : "";
+        
+        return `[${pId}] ${pName}${pSize}${pColor} (${item.quantity}ც)`;
+    }).join('\n');
+
     const orderData = {
         orderId: orderId,
         date: new Date().toLocaleString('ka-GE'),
@@ -654,7 +664,7 @@ async function handleFinalOrder() {
         customerName: name,
         phone: phone,
         address: address,
-        items: state.cart.map(item => `${item.name} (${item.quantity}ც)`).join(', '),
+        items: itemsDescription,
         total: state.cart.reduce((s, i) => s + (parseFloat(i.price) * i.quantity), 0).toFixed(2),
         Promo: state.appliedPromo || "", 
         status: "pending"
