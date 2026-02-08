@@ -562,28 +562,28 @@ function goToPayment() {
         return;
     }
 
-    // --- უტყუარი მეთოდი: ვიღებთ იმას, რასაც თვალით ვხედავთ ეკრანზე ---
-    let finalAmount = "0.00";
-    
-    // ვეძებთ ელემენტს, სადაც წერია ლურჯი ციფრები (შენს სქრინშოტზე 400.00)
-    const cartTotalDisplay = document.querySelector('.cart-total-amount') || 
-                             Array.from(document.querySelectorAll('span')).find(el => el.innerText.includes('₾') && el.style.color !== '');
+    // 1. ყოველი შემთხვევისთვის, ძველი შეკვეთის სრული გასუფთავება
+    state.tempOrder = null; 
 
-    if (cartTotalDisplay) {
-        // ვიღებთ ტექსტს, მაგ: "400.00 ₾" და ვტოვებთ მხოლოდ "400.00"
-        finalAmount = cartTotalDisplay.innerText.replace(/[^\d.]/g, '');
-    } else {
-        // თუ რამე სასწაულით ვერ იპოვა, გადავთვალოთ ხელით, ოღონდ ძალიან ფრთხილად
-        let tempSum = 0;
-        state.cart.forEach(item => {
-            const price = typeof item.price === 'string' ? parseFloat(item.price.replace(/[^\d.]/g, '')) : parseFloat(item.price);
-            tempSum += (price * (item.quantity || 1));
-        });
-        finalAmount = tempSum.toFixed(2);
-    }
-    // -------------------------------------------------------------
+    // 2. თანხის თავიდან დათვლა მხოლოდ კალათის მიმდინარე შემადგენლობით
+    let currentSum = 0;
+    state.cart.forEach(item => {
+        const price = typeof item.price === 'string' 
+            ? parseFloat(item.price.replace(/[^\d.]/g, '')) 
+            : parseFloat(item.price);
+        const qty = parseInt(item.quantity) || 1;
+        currentSum += (price * qty);
+    });
 
-    state.tempOrder = { name, phone, address, totalAmount: finalAmount };
+    const finalAmount = currentSum.toFixed(2);
+
+    // 3. ახალი შეკვეთის ობიექტის შექმნა სუფთა მონაცემებით
+    state.tempOrder = { 
+        name: name, 
+        phone: phone, 
+        address: address, 
+        totalAmount: finalAmount 
+    };
 
     const grid = document.getElementById('products-grid');
     grid.innerHTML = `
@@ -619,7 +619,7 @@ function goToPayment() {
                 </div>
             </div>
 
-            <button onclick="handleFinalOrder()" style="width: 100%; margin-top: 25px; padding: 18px; border-radius: 18px; border: none; background: #000; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
+            <button id="final-confirm-btn" onclick="handleFinalOrder()" style="width: 100%; margin-top: 25px; padding: 18px; border-radius: 18px; border: none; background: #000; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
                 შეკვეთის დასრულება
             </button>
         </div>
