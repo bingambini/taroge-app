@@ -181,16 +181,14 @@ function openProductDetails(productId) {
     overlay.className = 'detail-overlay';
     overlay.id = 'active-overlay';
     
-    // ზომების განახლების და ღილაკის მართვის ფუნქცია
     window.updateSizeOptions = function(color) {
         activeColor = color;
         selectedSize = null; 
         
-        // ფერების ანიმაციური მარკირება
         document.querySelectorAll('.color-dot-option').forEach(node => {
             if(node.getAttribute('data-color') === color) {
-                node.style.boxShadow = '0 0 0 3px white, 0 0 0 5px #0071e3';
-                node.style.transform = 'scale(1.15)';
+                node.style.boxShadow = '0 0 0 2px white, 0 0 0 4px #0071e3';
+                node.style.transform = 'scale(1.1)';
             } else {
                 node.style.boxShadow = 'none';
                 node.style.transform = 'scale(1)';
@@ -200,14 +198,15 @@ function openProductDetails(productId) {
         const sizeContainer = document.getElementById('size-options-container');
         const availableSizes = allVariants.filter(v => v.Colors === color).map(v => v.Sizes);
 
+        // ჰორიზონტალური სკროლისთვის ვიყენებთ flex-nowrap-ს
         sizeContainer.innerHTML = availableSizes.map(s => `
             <div class="size-option" onclick="selectSize(this, '${s}')" 
-                 style="padding:12px 18px; border:1.5px solid #e5e5e7; border-radius:14px; cursor:pointer; font-weight: 600; min-width: 50px; text-align: center; transition: all 0.2s ease;">
+                 style="flex: 0 0 auto; padding: 12px 20px; border: 1.5px solid #e5e5e7; border-radius: 14px; cursor: pointer; font-weight: 600; min-width: 55px; text-align: center; transition: all 0.2s ease; background: white;">
                 ${s}
             </div>
         `).join('');
         
-        checkSelection(); // ღილაკის შემოწმება
+        checkSelection();
     };
 
     window.selectSize = function(el, size) {
@@ -220,9 +219,69 @@ function openProductDetails(productId) {
         el.style.borderColor = '#0071e3';
         el.style.background = '#f5f5f7';
         el.style.color = '#0071e3';
-        
-        checkSelection(); // ღილაკის შემოწმება
+        checkSelection();
     };
+
+    function checkSelection() {
+        const btn = document.getElementById('add-to-cart-btn');
+        if (activeColor && selectedSize) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.background = '#0071e3';
+            btn.innerText = 'კალათაში დამატება';
+        } else {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.background = '#86868b';
+            btn.innerText = 'აირჩიეთ ფერი და ზომა';
+        }
+    }
+
+    overlay.innerHTML = `
+        <div class="detail-container" style="max-height: 85vh; border-radius: 24px 24px 0 0; background: white;">
+            <div class="detail-header" style="padding: 12px 20px 0; display: flex; justify-content: flex-end;">
+                <button onclick="closeProductDetail()" style="background: #f5f5f7; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: #86868b;">✕</button>
+            </div>
+            
+            <div style="display: flex; justify-content: center; padding: 0 20px;">
+                <img src="${product.photo_url_1}" style="max-width: 90%; max-height: 240px; object-fit: contain;">
+            </div>
+
+            <div style="padding: 15px 25px 30px;">
+                <p style="color: #0071e3; text-transform: uppercase; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; margin-bottom: 4px;">${product.brand}</p>
+                <h2 style="font-size: 22px; font-weight: 700; color: #1d1d1f; line-height: 1.2; margin-bottom: 8px;">${product.name_ge}</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <span style="font-size: 26px; font-weight: 800; color: #1d1d1f;">${product.final_price} ₾</span>
+                </div>
+
+                <p style="font-size: 13px; font-weight: 700; color: #1d1d1f; margin-bottom: 12px;">ფერი</p>
+                <div style="display: flex; gap: 14px; margin-bottom: 20px;">
+                    ${uniqueColors.map(c => `
+                        <div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" 
+                             style="width: 30px; height: 30px; border-radius: 50%; background: ${translateColor(c)}; border: 1px solid #e5e5e7; cursor: pointer; transition: all 0.3s ease;">
+                        </div>
+                    `).join('')}
+                </div>
+
+                <p style="font-size: 13px; font-weight: 700; color: #1d1d1f; margin-bottom: 12px;">ზომა</p>
+                <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                    <p style="color: #86868b; font-size: 12px;">ჯერ აირჩიეთ ფერი...</p>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button class="main-btn" id="add-to-cart-btn" disabled 
+                            onclick="handleAddToCart('${product.product_id}', '${activeColor}', '${selectedSize}')" 
+                            style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; opacity: 0.5;">
+                        აირჩიეთ ფერი და ზომა
+                    </button>
+                </div>
+            </div>
+        </div>`;
+
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+}
 
     // მთავარი შემოწმების ფუნქცია
     function checkSelection() {
