@@ -219,7 +219,6 @@ function openProductDetails(productId) {
             btn.style.opacity = '1';
             btn.style.background = '#0071e3';
             btn.innerText = 'კალათაში დამატება';
-            // ვაახლებთ onclick-ს რეალური მნიშვნელობებით
             btn.onclick = () => handleAddToCart(product.product_id, selectedColor, selectedSize);
         } else {
             btn.disabled = true;
@@ -271,7 +270,6 @@ function closeProductDetail() {
 }
 
 function handleAddToCart(productId, color, size) {
-    // ვეძებთ, არის თუ არა უკვე ასეთი ნივთი კალათაში
     const existingItem = state.cart.find(item => 
         item.id === productId && 
         item.color === color && 
@@ -279,10 +277,8 @@ function handleAddToCart(productId, color, size) {
     );
 
     if (existingItem) {
-        // თუ არის, ვუმატებთ მხოლოდ რაოდენობას
         existingItem.quantity = (existingItem.quantity || 1) + 1;
     } else {
-        // თუ არ არის, ვამატებთ ახალს რაოდენობით 1
         state.cart.push({ 
             id: productId, 
             color: color, 
@@ -302,11 +298,9 @@ function handleAddToCart(productId, color, size) {
     setTimeout(closeProductDetail, 800);
 }
 
-// ცალკე ფუნქცია ბეიჯის განახლებისთვის
 function updateCartBadge() {
     const badge = document.getElementById('nav-cart-badge');
     if (badge) {
-        // ვითვლით ყველა ნივთის ჯამურ რაოდენობას
         const totalQty = state.cart.reduce((sum, item) => sum + item.quantity, 0);
         badge.innerText = totalQty;
         badge.style.display = totalQty > 0 ? 'flex' : 'none';
@@ -322,16 +316,12 @@ function handleNavChange(page, element) {
     } else {
         const hero = document.getElementById('hero');
         if (hero) hero.style.display = 'block';
-        
-        // ვაჩენთ "ახალი კოლექცია"-ს სათაურს
         const mainTitle = document.getElementById('new-arrivals-title');
         if (mainTitle) mainTitle.style.display = 'block';
-        
         renderProducts();
     }
 }
 
-// --- კალათის გვერდის ფუნქციები ---
 function renderCart() {
     const grid = document.getElementById('products-grid');
     const hero = document.getElementById('hero');
@@ -358,14 +348,12 @@ function renderCart() {
         const product = state.products.find(p => String(p.product_id) === String(item.id));
         if (!product) return;
 
-        // ვეძებთ ზუსტ ვარიანტს ბაზაში (გამოვიყენოთ String და trim ცდომილების გამოსარიცხად)
         const variant = state.productDetails.find(d => 
             String(d.product_id) === String(item.id) && 
             String(d.Colors).trim() === String(item.color).trim() && 
             String(d.Sizes).trim() === String(item.size).trim()
         );
         
-        // თუ ვარიანტი ვერ იპოვა, stockLimit იქნება 0, თუ იპოვა - ავიღებთ მნიშვნელობას
         const stockLimit = variant ? parseInt(variant.stock_quantity || 0) : 0;
         const itemTotal = parseFloat(product.final_price) * item.quantity;
         totalSum += itemTotal;
@@ -378,14 +366,11 @@ function renderCart() {
             <div style="flex-grow: 1;">
                 <h4 style="font-size: 13px; font-weight: 600; color: #1d1d1f; margin-bottom: 2px;">${product.name_ge}</h4>
                 <p style="font-size: 11px; color: #86868b; margin-bottom: 8px;">${item.color}, ${item.size}</p>
-                
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <span style="font-weight: 700; color: #0071e3; font-size: 14px;">${itemTotal.toFixed(2)} ₾</span>
-                    
                     <div style="display: flex; align-items: center; background: #f5f5f7; border-radius: 8px; padding: 4px 10px; gap: 12px;">
                         <button onclick="changeQuantity(${index}, -1)" style="border:none; background:none; font-size: 18px; color: #0071e3; cursor: pointer;">−</button>
                         <span style="font-size: 13px; font-weight: 700; min-width: 15px; text-align: center;">${item.quantity}</span>
-                        
                         ${item.quantity < stockLimit ? 
                             `<button onclick="changeQuantity(${index}, 1)" style="border:none; background:none; font-size: 18px; color: #0071e3; cursor: pointer;">+</button>` : 
                             `<span style="width: 18px; display: inline-block;"></span>`
@@ -412,56 +397,51 @@ function renderCart() {
 
 function changeQuantity(index, delta) {
     const item = state.cart[index];
-    
-    // საწყობის ლიმიტის გადამოწმება მომატებისას
-    if (delta > 0) {
-        const variant = state.productDetails.find(d => 
-            String(d.product_id) === String(item.id) && 
-            d.Colors === item.color && 
-            d.Sizes === item.size
-        );
-        const stockLimit = variant ? parseInt(variant.stock_quantity || 0) : 0;
-        if (item.quantity >= stockLimit) return; // თუ ლიმიტს მიაღწია, არაფერი ქნას
-    }
-
-    item.quantity += delta;
-    
-    if (item.quantity < 1) {
-        state.cart.splice(index, 1);
-    }
-    
-    updateCartBadge();
-    renderCart();
-}
-
-// რაოდენობის შეცვლის ფუნქცია
-function changeQuantity(index, delta) {
-    const item = state.cart[index];
-    
-    // მხოლოდ მომატების შემთხვევაში ვამოწმებთ მარაგს
     if (delta > 0) {
         const variant = state.productDetails.find(d => 
             String(d.product_id) === String(item.id) && 
             String(d.Colors).trim() === String(item.color).trim() && 
             String(d.Sizes).trim() === String(item.size).trim()
         );
-        
         const stockLimit = variant ? parseInt(variant.stock_quantity || 0) : 0;
-        
         if (item.quantity >= stockLimit) {
             showToast("უკაცრავად, მეტი რაოდენობა მარაგში არ არის ✋");
-            return; // ფუნქცია აქ წყდება და რაოდენობა აღარ იზრდება
+            return;
         }
     }
-
     item.quantity += delta;
-    
     if (item.quantity < 1) {
         state.cart.splice(index, 1);
     }
-    
     updateCartBadge();
     renderCart();
+}
+
+function removeFromCart(index) {
+    state.cart.splice(index, 1);
+    updateCartBadge();
+    renderCart();
+}
+
+function showToast(message) {
+    const oldToast = document.querySelector('.toast-notification');
+    if (oldToast) oldToast.remove();
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerText = message;
+    toast.style.cssText = `
+        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8); color: white; padding: 12px 24px;
+        border-radius: 25px; font-size: 14px; font-weight: 500; z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0;
+        transition: opacity 0.3s, bottom 0.3s; white-space: nowrap;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '1'; toast.style.bottom = '120px'; }, 10);
+    setTimeout(() => {
+        toast.style.opacity = '0'; toast.style.bottom = '100px';
+        setTimeout(() => toast.remove(), 300);
+    }, 2500);
 }
 
 function checkout() {
