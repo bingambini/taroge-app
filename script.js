@@ -553,6 +553,9 @@ function checkout() {
 }
 
 function goToPayment() {
+    console.log("=== დიაგნოსტიკა დაიწყო ===");
+    console.log("კალათის შემადგენლობა:", state.cart);
+
     const name = document.getElementById('order-name').value.trim();
     const phone = document.getElementById('order-phone').value.trim();
     const address = document.getElementById('order-address').value.trim();
@@ -562,34 +565,27 @@ function goToPayment() {
         return;
     }
 
-    // --- რადიკალური გადაწყვეტილება ---
-    // საერთოდ არ ვუყურებთ state.cart-ს. 
-    // ვიღებთ ზუსტად იმას, რაც კალათის ბოლოში "ლურჯად" გიწერია.
-    
-    let finalAmount = "0.00";
-    
-    // ვეძებთ იმ ელემენტს, რომელსაც აქვს ლურჯი ფერი (#0071e3) ან კლასი cart-total-amount
-    const totalEl = document.querySelector('.cart-total-amount') || 
-                    Array.from(document.querySelectorAll('span, div')).find(el => 
-                        el.innerText.includes('სულ გადასახდელი') || 
-                        (el.style.color === 'rgb(0, 113, 227)' && el.innerText.includes('.'))
-                    );
+    // ვამოწმებთ თითოეული ნივთის ფასს სათითაოდ
+    let checkSum = 0;
+    state.cart.forEach((item, index) => {
+        console.log(`ნივთი #${index + 1}: ${item.name_ge || item.name}`);
+        console.log(`-- ფასი კალათაში:`, item.price);
+        
+        // ვეძებთ ამავე ნივთს მთავარ ბაზაში
+        const original = state.products.find(p => p.product_id === item.id || p.id === item.id);
+        console.log(`-- ფასი მთავარ ბაზაში (state.products):`, original ? original.price : "ვერ მოიძებნა");
+        
+        const p = typeof item.price === 'string' ? parseFloat(item.price.replace(/[^\d.]/g, '')) : parseFloat(item.price);
+        checkSum += (p * (item.quantity || 1));
+    });
 
-    if (totalEl) {
-        // ვიღებთ ტექსტს, ვშლით ყველაფერს ციფრების და წერტილის გარდა
-        finalAmount = totalEl.innerText.replace(/[^\d.]/g, '');
-    }
+    console.log("საბოლოო გამოთვლილი ჯამი:", checkSum);
+    console.log("=== დიაგნოსტიკა დასრულდა ===");
 
-    // თუ მაინც ვერ იპოვა UI-ში, მაშინ იძულებითი მათემატიკა (ოღონდ გასუფთავებული)
-    if (!finalAmount || finalAmount === "0.00") {
-        finalAmount = state.cart.reduce((total, item) => {
-            const p = typeof item.price === 'string' ? parseFloat(item.price.replace(/[^\d.]/g, '')) : parseFloat(item.price);
-            return total + (p * (item.quantity || 1));
-        }, 0).toFixed(2);
-    }
-
+    const finalAmount = checkSum.toFixed(2);
     state.tempOrder = { name, phone, address, totalAmount: finalAmount };
 
+    // აქედან გრძელდება შენი ჩვეულებრივი კოდი (grid.innerHTML...)
     const grid = document.getElementById('products-grid');
     grid.innerHTML = `
         <div style="grid-column: 1/-1; padding: 5px;">
@@ -597,32 +593,13 @@ function goToPayment() {
                 <button onclick="checkout()" style="background: #f5f5f7; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                     <span style="font-size: 20px;">←</span>
                 </button>
-                <h2 style="font-size: 20px; font-weight: 800; color: #1d1d1f; margin: 0;">გადახდის მეთოდი</h2>
+                <h2 style="font-size: 20px; font-weight: 800; color: #1d1d1f; margin: 0;">გადახდა</h2>
             </div>
-
-            <div style="background: #f5f5f7; padding: 25px; border-radius: 22px; border: 1px dashed #d1d1d6; text-align: center; margin-bottom: 20px;">
-                <span style="font-size: 14px; color: #86868b;">ზუსტი გადასახდელი თანხა:</span>
-                <div style="font-size: 34px; font-weight: 800; color: #0071e3; margin-top: 5px;">${finalAmount} ₾</div>
+            <div style="background: #f5f5f7; padding: 25px; border-radius: 22px; text-align: center;">
+                <span style="font-size: 14px; color: #86868b;">გადასახდელი თანხა:</span>
+                <div style="font-size: 32px; font-weight: 800; color: #0071e3;">${finalAmount} ₾</div>
             </div>
-
-            <div onclick="selectPayment('საბანკო გადარიცხვა', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #0071e3; display: flex; align-items: center; gap: 15px; cursor: pointer;">
-                <div style="font-size: 24px;">🏦</div>
-                <div style="flex-grow: 1;">
-                    <div style="font-weight: 700; color: #1d1d1f;">საბანკო გადარიცხვა</div>
-                    <div style="font-size: 12px; color: #86868b;">ჩარიცხვა ანგარიშზე</div>
-                </div>
-            </div>
-
-            <div id="bank-details" style="display: block; margin-top: 15px; background: #f5f5f7; padding: 20px; border-radius: 22px;">
-                <span style="font-size: 12px; color: #86868b;">ანგარიშის ნომერი:</span>
-                <div style="background: white; padding: 12px; border-radius: 12px; border: 1px solid #e5e5e7; font-family: monospace; font-weight: 700; margin-top: 5px;">
-                    GE00TB0000000000000000
-                </div>
-            </div>
-
-            <button onclick="handleFinalOrder()" style="width: 100%; margin-top: 25px; padding: 18px; border-radius: 18px; border: none; background: #000; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
-                შეკვეთის დასრულება
-            </button>
+            <button onclick="handleFinalOrder()" style="width: 100%; margin-top: 25px; padding: 18px; border-radius: 18px; background: #000; color: #fff; font-weight: 700;">შეკვეთის დასრულება</button>
         </div>
     `;
 }
