@@ -510,13 +510,18 @@ function checkout() {
     const grid = document.getElementById('products-grid');
     const hero = document.getElementById('hero');
     const mainTitle = document.getElementById('new-arrivals-title');
+    // ვპოულობთ ქვედა მენიუს
+    const bottomNav = document.querySelector('.bottom-nav');
     
     if (!grid) return;
     if (hero) hero.style.display = 'none';
     if (mainTitle) mainTitle.style.display = 'none';
+    
+    // ვმალავთ მენიუს, რომ კლავიატურას არ შეეჯახოს
+    if (bottomNav) bottomNav.style.display = 'none';
 
     grid.innerHTML = `
-        <div style="grid-column: 1/-1; padding: 5px;">
+        <div style="grid-column: 1/-1; padding: 5px; padding-bottom: 150px;">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px;">
                 <button onclick="renderCart()" style="background: #f5f5f7; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                     <span style="font-size: 20px;">←</span>
