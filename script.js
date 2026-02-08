@@ -645,12 +645,9 @@ async function handleFinalOrder() {
     btn.disabled = true;
     btn.innerText = "მუშავდება...";
 
-    // გენერირდება უნიკალური Order ID
     const orderId = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
-    // მონაცემების მომზადება შენი სვეტების მიხედვით
     const orderData = {
-        tab: "orders",
         orderId: orderId,
         date: new Date().toLocaleString('ka-GE'),
         userId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'WEB-USER',
@@ -664,13 +661,11 @@ async function handleFinalOrder() {
     };
 
     try {
-        // აქ უნდა ჩაიწეროს შენი Google Apps Script-ის URL
-        const SCRIPT_URL = 'შენი_სკრიპტის_ლინკი';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwN__LBBIq5SQT2wPe0OZLykacu-HYJ3Nlw4ajumQSyOpDcWaNycHwxGb5h-bOssFGNaw/exec';
         
         await fetch(SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors', // მნიშვნელოვანია CORS-ის თავიდან ასაცილებლად
-            cache: 'no-cache',
+            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
@@ -680,7 +675,7 @@ async function handleFinalOrder() {
             <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px;">
                 <div style="width: 80px; height: 80px; background: #4cd964; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 40px;">✓</div>
                 <h2 style="font-size: 24px; font-weight: 800; color: #1d1d1f; margin-bottom: 12px;">შეკვეთა მიღებულია!</h2>
-                <p style="color: #86868b; line-height: 1.6; font-size: 15px;">მადლობა, ${name}.<br>შეკვეთის ნომერი: <b>${orderId}</b><br>სტატუსი: <b>Pending</b></p>
+                <p style="color: #86868b; line-height: 1.6; font-size: 15px;">მადლობა, ${name}.<br>შეკვეთის ნომერი: <b>${orderId}</b><br>მეთოდი: ${paymentMethod}</p>
                 <button onclick="location.reload()" style="margin-top: 35px; padding: 16px 30px; border-radius: 16px; border: none; background: #0071e3; color: white; font-weight: 700; font-size: 15px; cursor: pointer;">მთავარ გვერდზე</button>
             </div>
         `;
@@ -688,7 +683,6 @@ async function handleFinalOrder() {
         state.cart = [];
         updateCartBadge();
     } catch (e) {
-        console.error(e);
         showToast("შეცდომა გაგზავნისას ❌");
         btn.disabled = false;
         btn.innerText = "შეკვეთის დასრულება";
