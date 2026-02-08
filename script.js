@@ -501,5 +501,85 @@ function showToast(message) {
 }
 
 function checkout() {
-    alert("შეკვეთა მიღებულია!");
+    const grid = document.getElementById('products-grid');
+    const hero = document.getElementById('hero');
+    const mainTitle = document.getElementById('new-arrivals-title');
+    
+    if (!grid) return;
+    if (hero) hero.style.display = 'none';
+    if (mainTitle) mainTitle.style.display = 'none';
+
+    // ვითვლით ჯამს
+    const totalSum = state.cart.reduce((sum, item) => {
+        const product = state.products.find(p => String(p.product_id) === String(item.id));
+        return sum + (product ? parseFloat(product.final_price) * item.quantity : 0);
+    }, 0);
+
+    grid.innerHTML = `
+        <div style="grid-column: 1/-1; padding: 5px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px;">
+                <button onclick="renderCart()" style="background: #f5f5f7; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <span style="font-size: 20px;">←</span>
+                </button>
+                <h2 style="font-size: 20px; font-weight: 800; color: #1d1d1f; margin: 0;">გაფორმება</h2>
+            </div>
+
+            <div style="background: #fff; padding: 24px; border-radius: 28px; border: 1px solid #f2f2f7; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #86868b; margin-bottom: 8px; margin-left: 4px;">სრული სახელი</label>
+                    <input type="text" id="order-name" placeholder="მაგ: გიორგი ბერიძე" 
+                        style="width: 100%; padding: 16px; border-radius: 14px; border: 1px solid #e5e5e7; background: #f9f9fb; font-size: 15px; outline: none; box-sizing: border-box;">
+                </div>
+
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #86868b; margin-bottom: 8px; margin-left: 4px;">ტელეფონის ნომერი</label>
+                    <input type="tel" id="order-phone" placeholder="599 XX XX XX" 
+                        style="width: 100%; padding: 16px; border-radius: 14px; border: 1px solid #e5e5e7; background: #f9f9fb; font-size: 15px; outline: none; box-sizing: border-box;">
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #86868b; margin-bottom: 8px; margin-left: 4px;">მიტანის მისამართი</label>
+                    <textarea id="order-address" placeholder="ქალაქი, ქუჩა, კორპუსი..." 
+                        style="width: 100%; padding: 16px; border-radius: 14px; border: 1px solid #e5e5e7; background: #f9f9fb; font-size: 15px; outline: none; height: 90px; resize: none; box-sizing: border-box;"></textarea>
+                </div>
+
+                <div style="background: #f5f5f7; padding: 20px; border-radius: 18px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #1d1d1f; font-weight: 600;">ჯამში გადასახდელი:</span>
+                        <span style="color: #0071e3; font-size: 20px; font-weight: 800;">${totalSum.toFixed(2)} ₾</span>
+                    </div>
+                </div>
+
+                <button onclick="confirmOrder()" style="width: 100%; padding: 18px; border-radius: 18px; border: none; background: #000; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s;">
+                    შეკვეთის დადასტურება
+                </button>
+            </div>
+        </div>
+    `;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function confirmOrder() {
+    const name = document.getElementById('order-name').value.trim();
+    const phone = document.getElementById('order-phone').value.trim();
+    const address = document.getElementById('order-address').value.trim();
+
+    if (!name || !phone || !address) {
+        showToast("გთხოვთ შეავსოთ ყველა ველი ⚠️");
+        return;
+    }
+
+    // წარმატების ეკრანი
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px;">
+            <div style="width: 80px; height: 80px; background: #4cd964; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 40px;">✓</div>
+            <h2 style="font-size: 24px; font-weight: 800; color: #1d1d1f; margin-bottom: 12px;">შეკვეთა მიღებულია!</h2>
+            <p style="color: #86868b; line-height: 1.6; font-size: 15px;">მადლობა, ${name}.<br>ჩვენი ოპერატორი მალე დაგიკავშირდებათ ნომერზე: ${phone}</p>
+            <button onclick="location.reload()" style="margin-top: 35px; padding: 16px 30px; border-radius: 16px; border: none; background: #0071e3; color: white; font-weight: 700; font-size: 15px; cursor: pointer;">მთავარ გვერდზე</button>
+        </div>
+    `;
+    
+    state.cart = [];
+    updateCartBadge();
 }
