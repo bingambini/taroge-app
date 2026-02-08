@@ -563,35 +563,19 @@ function goToPayment() {
     }
 
     let totalSum = 0;
-
     state.cart.forEach(item => {
-        // ვპოულობთ პროდუქტს მთავარ ბაზაში (state.products)
         const productData = state.products.find(p => p.product_id === item.id || p.id === item.id);
-        
-        let correctPrice = 0;
-        
-        if (productData) {
-            // 1. პირველ რიგში ვამოწმებთ final_price-ს (სადაც შენი ფორმულის შედეგია)
-            // 2. თუ ის არ არის, მაშინ ვიღებთ ჩვეულებრივ price-ს
-            correctPrice = productData.final_price || productData.price || item.price;
-        } else {
-            correctPrice = item.price;
-        }
-
-        // ვასუფთავებთ ფასს ზედმეტი სიმბოლოებისგან
-        const priceNum = typeof correctPrice === 'string' 
-            ? parseFloat(correctPrice.replace(/[^\d.]/g, '')) 
-            : parseFloat(correctPrice);
-            
+        const correctPrice = productData ? (productData.final_price || productData.price) : item.price;
+        const priceNum = typeof correctPrice === 'string' ? parseFloat(correctPrice.replace(/[^\d.]/g, '')) : parseFloat(correctPrice);
         totalSum += (priceNum * (item.quantity || 1));
     });
 
     const finalAmount = totalSum.toFixed(2);
-    state.tempOrder = { name, phone, address, totalAmount: finalAmount };
+    state.tempOrder = { name, phone, address, totalAmount: finalAmount, paymentMethod: "" };
 
     const grid = document.getElementById('products-grid');
     grid.innerHTML = `
-        <div style="grid-column: 1/-1; padding: 5px;">
+        <div style="grid-column: 1/-1; padding: 5px; padding-bottom: 100px;">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px;">
                 <button onclick="checkout()" style="background: #f5f5f7; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                     <span style="font-size: 20px;">←</span>
@@ -599,30 +583,71 @@ function goToPayment() {
                 <h2 style="font-size: 20px; font-weight: 800; color: #1d1d1f; margin: 0;">გადახდის მეთოდი</h2>
             </div>
 
-            <div style="background: #f5f5f7; padding: 25px; border-radius: 22px; text-align: center; margin-bottom: 20px; border: 1px solid #e5e5e7;">
-                <span style="font-size: 14px; color: #86868b; font-weight: 500;">გადასახდელი თანხა (ფასდაკლებით):</span>
-                <div style="font-size: 36px; font-weight: 800; color: #0071e3; margin-top: 5px;">${finalAmount} ₾</div>
+            <div style="background: #f5f5f7; padding: 25px; border-radius: 22px; text-align: center; margin-bottom: 25px; border: 1px solid #e5e5e7;">
+                <span style="font-size: 14px; color: #86868b; font-weight: 500;">ზუსტი გადასახდელი თანხა:</span>
+                <div style="font-size: 34px; font-weight: 800; color: #0071e3; margin-top: 5px;">${finalAmount} ₾</div>
             </div>
 
-            <div style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #0071e3; display: flex; align-items: center; gap: 15px;">
-                <div style="font-size: 24px;">🏦</div>
-                <div style="flex-grow: 1;">
-                    <div style="font-weight: 700; color: #1d1d1f;">საბანკო გადარიცხვა</div>
-                    <div style="font-size: 12px; color: #86868b;">ჩარიცხვა ანგარიშზე</div>
+            <div style="display: flex; flex-direction: column; gap: 12px;" id="payment-options">
+                <div onclick="selectPaymentMethod('საბანკო გადარიცხვა', this)" class="pay-option" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s;">
+                    <div style="font-size: 24px;">🏦</div>
+                    <div style="flex-grow: 1;">
+                        <div style="font-weight: 700; color: #1d1d1f;">საბანკო გადარიცხვა</div>
+                        <div style="font-size: 12px; color: #86868b;">მიიღეთ რეკვიზიტები</div>
+                    </div>
+                </div>
+
+                <div id="bank-details-box" style="display: none; background: #eef7ff; padding: 15px; border-radius: 15px; border: 1px dashed #0071e3; margin-top: -5px;">
+                    <span style="font-size: 11px; color: #0071e3; font-weight: 600; text-transform: uppercase;">ანგარიშის ნომერი (IBAN):</span>
+                    <div style="background: white; padding: 10px; border-radius: 10px; border: 1px solid #d0e8ff; font-family: monospace; font-weight: 700; margin-top: 5px; text-align: center; color: #1d1d1f;">
+                        GE00TB0000000000000000
+                    </div>
+                </div>
+
+                <div onclick="selectPaymentMethod('ნაღდი ანგარიშსწორება', this)" class="pay-option" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s;">
+                    <div style="font-size: 24px;">💵</div>
+                    <div style="flex-grow: 1;">
+                        <div style="font-weight: 700; color: #1d1d1f;">ნაღდი ანგარიშსწორება</div>
+                        <div style="font-size: 12px; color: #86868b;">გადაიხადეთ კურიერთან</div>
+                    </div>
+                </div>
+
+                <div onclick="selectPaymentMethod('ბარათით კურიერთან', this)" class="pay-option" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s;">
+                    <div style="font-size: 24px;">💳</div>
+                    <div style="flex-grow: 1;">
+                        <div style="font-weight: 700; color: #1d1d1f;">ბარათით კურიერთან</div>
+                        <div style="font-size: 12px; color: #86868b;">ტერმინალით გადახდა</div>
+                    </div>
                 </div>
             </div>
 
-            <div id="bank-details" style="display: block; margin-top: 15px; background: #f5f5f7; padding: 20px; border-radius: 22px;">
-                <div style="background: white; padding: 12px; border-radius: 12px; border: 1px solid #e5e5e7; font-family: monospace; font-weight: 700; text-align: center;">
-                    GE00TB0000000000000000
-                </div>
-            </div>
-
-            <button onclick="handleFinalOrder()" style="width: 100%; margin-top: 25px; padding: 18px; border-radius: 18px; border: none; background: #000; color: white; font-size: 16px; font-weight: 700;">
+            <button onclick="handleFinalOrder()" style="width: 100%; margin-top: 30px; padding: 20px; border-radius: 20px; border: none; background: #000; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
                 შეკვეთის დასრულება
             </button>
         </div>
     `;
+}
+
+// ახალი ფუნქცია მეთოდის ასარჩევად
+function selectPaymentMethod(method, element) {
+    // 1. მოვნიშნოთ არჩეული ბლოკი ვიზუალურად
+    document.querySelectorAll('.pay-option').forEach(opt => {
+        opt.style.borderColor = '#f5f5f7';
+        opt.style.background = 'white';
+    });
+    element.style.borderColor = '#0071e3';
+    element.style.background = '#f0f7ff';
+
+    // 2. შევინახოთ არჩეული მეთოდი
+    state.tempOrder.paymentMethod = method;
+
+    // 3. თუ აირჩია საბანკო, გამოვაჩინოთ IBAN, თუ არა - დავმალოთ
+    const bankBox = document.getElementById('bank-details-box');
+    if (method === 'საბანკო გადარიცხვა') {
+        bankBox.style.display = 'block';
+    } else {
+        bankBox.style.display = 'none';
+    }
 }
 
 function selectPayment(method, element) {
