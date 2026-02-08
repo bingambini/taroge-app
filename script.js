@@ -1,6 +1,6 @@
 // --- კონფიგურაცია და მონაცემთა საცავი ---
 const CONFIG = {
-    API_URL: 'https://script.google.com/macros/s/AKfycbzfoJLltxIO6mkRgRs1H-kf7eubu9quktfij9czu50-kqgPM_Hqc9sBUUZtiJe8qqrCAw/exec'
+    API_URL: 'https://script.google.com/macros/s/AKfycbyClomY0jgG71r9m15Wjn3_1-6wsI1AFDJ-CXW0IJaqH-pJG79HAbT0ZK_HbkgQm0EKLw/exec'
 };
 
 let state = {
