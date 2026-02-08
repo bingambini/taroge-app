@@ -562,17 +562,28 @@ function goToPayment() {
         return;
     }
 
-    // ზუსტი გამოთვლა: ვიღებთ იმას, რაც კალათაში რეალურად წერია
-    const totalAmount = state.cart.reduce((total, item) => {
-        // ვასუფთავებთ ფასს ნებისმიერი სიმბოლოსგან (სქრინშოტზე ჩანს ₾ სიმბოლო)
-        const itemPrice = typeof item.price === 'string' 
-            ? parseFloat(item.price.replace(/[^\d.]/g, '')) 
-            : parseFloat(item.price);
-        
-        return total + (itemPrice * (item.quantity || 1));
-    }, 0).toFixed(2);
+    // ყველაზე საიმედო მეთოდი: წავიკითხოთ ჯამი პირდაპირ კალათის ეკრანიდან
+    // სადაც ვიცით, რომ 1032.00 სწორად წერია
+    let totalFromUI = "0.00";
+    const cartTotalElement = document.querySelector('.cart-total-amount') || // თუ გაქვს ასეთი კლასი
+                           document.getElementById('cart-total'); // ან ასეთი აიდი
+    
+    if (cartTotalElement) {
+        totalFromUI = cartTotalElement.innerText.replace(/[^\d.]/g, '');
+    } else {
+        // თუ ელემენტი ვერ იპოვა, გადავთვალოთ ხელახლა ძალიან ფრთხილად
+        totalFromUI = state.cart.reduce((s, i) => {
+            const p = typeof i.price === 'string' ? parseFloat(i.price.replace(/[^\d.]/g, '')) : parseFloat(i.price);
+            return s + (p * (parseInt(i.quantity) || 1));
+        }, 0).toFixed(2);
+    }
 
-    state.tempOrder = { name, phone, address, totalAmount };
+    state.tempOrder = { 
+        name, 
+        phone, 
+        address, 
+        totalAmount: totalFromUI 
+    };
 
     const grid = document.getElementById('products-grid');
     grid.innerHTML = `
@@ -616,7 +627,7 @@ function goToPayment() {
             <div id="bank-details" style="display: none; margin-top: 15px; background: #f5f5f7; padding: 20px; border-radius: 22px; border: 1px dashed #d1d1d6;">
                 <div style="text-align: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e5e7;">
                     <span style="font-size: 14px; color: #86868b;">გადასახდელი თანხა:</span>
-                    <div style="font-size: 26px; font-weight: 800; color: #0071e3; margin-top: 4px;">${totalAmount} ₾</div>
+                    <div style="font-size: 26px; font-weight: 800; color: #0071e3; margin-top: 4px;">${totalFromUI} ₾</div>
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 8px;">
