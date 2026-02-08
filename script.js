@@ -10,6 +10,8 @@ let state = {
     cart: []
 };
 
+// გლობალური ცვლადები შერჩევისთვის
+let selectedColor = null;
 let selectedSize = null;
 
 // --- ფუნქცია: ფერების სახელების თარგმნა CSS ფერებში ---
@@ -164,7 +166,7 @@ function openProductDetails(productId) {
     );
 
     const uniqueColors = [...new Set(allVariants.map(v => v.Colors).filter(c => c))];
-    let activeColor = null;
+    selectedColor = null;
     selectedSize = null;
 
     const overlay = document.createElement('div');
@@ -172,7 +174,7 @@ function openProductDetails(productId) {
     overlay.id = 'active-overlay';
     
     window.updateSizeOptions = function(color) {
-        activeColor = color;
+        selectedColor = color;
         selectedSize = null; 
         
         document.querySelectorAll('.color-dot-option').forEach(node => {
@@ -212,11 +214,13 @@ function openProductDetails(productId) {
 
     function checkSelection() {
         const btn = document.getElementById('add-to-cart-btn');
-        if (activeColor && selectedSize) {
+        if (selectedColor && selectedSize) {
             btn.disabled = false;
             btn.style.opacity = '1';
             btn.style.background = '#0071e3';
             btn.innerText = 'კალათაში დამატება';
+            // ვაახლებთ onclick-ს რეალური მნიშვნელობებით
+            btn.onclick = () => handleAddToCart(product.product_id, selectedColor, selectedSize);
         } else {
             btn.disabled = true;
             btn.style.opacity = '0.5';
@@ -248,7 +252,7 @@ function openProductDetails(productId) {
                     <p style="color: #86868b; font-size: 13px;">ჯერ აირჩიეთ ფერი...</p>
                 </div>
                 <div style="margin-top: 15px;">
-                    <button class="main-btn" id="add-to-cart-btn" disabled onclick="handleAddToCart('${product.product_id}', '${activeColor}', '${selectedSize}')" style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; opacity: 0.5;">
+                    <button class="main-btn" id="add-to-cart-btn" disabled style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; opacity: 0.5;">
                         აირჩიეთ ფერი და ზომა
                     </button>
                 </div>
@@ -262,19 +266,29 @@ function openProductDetails(productId) {
 function closeProductDetail() { 
     document.getElementById('active-overlay')?.remove(); 
     document.body.style.overflow = 'auto';
+    selectedColor = null;
     selectedSize = null;
 }
 
 function handleAddToCart(productId, color, size) {
-    state.cart.push({ id: productId, color: color, size: size });
+    state.cart.push({ 
+        id: productId, 
+        color: color, 
+        size: size 
+    });
+
     const badge = document.getElementById('nav-cart-badge');
     if (badge) {
         badge.innerText = state.cart.length;
         badge.style.display = 'flex';
     }
+
     const btn = document.getElementById('add-to-cart-btn');
-    btn.innerText = "დამატებულია! ✓";
-    btn.style.background = "#4cd964";
+    if (btn) {
+        btn.innerText = "დამატებულია! ✓";
+        btn.style.background = "#4cd964";
+    }
+
     setTimeout(closeProductDetail, 800);
 }
 
@@ -287,6 +301,11 @@ function handleNavChange(page, element) {
     } else {
         const hero = document.getElementById('hero');
         if (hero) hero.style.display = 'block';
+        
+        // ვაჩენთ "ახალი კოლექცია"-ს სათაურს
+        const mainTitle = document.getElementById('new-arrivals-title');
+        if (mainTitle) mainTitle.style.display = 'block';
+        
         renderProducts();
     }
 }
@@ -295,31 +314,17 @@ function handleNavChange(page, element) {
 function renderCart() {
     const grid = document.getElementById('products-grid');
     const hero = document.getElementById('hero');
+    const mainTitle = document.getElementById('new-arrivals-title');
+    
     if (!grid) return;
 
-    // 1. ვმალავთ Hero-ს და ზედმეტ სათაურებს, რომლებიც შეიძლება გვერდზე იყოს
     if (hero) hero.style.display = 'none';
-    
-    // ვეძებთ ყველა <h2> სათაურს, რომელიც არ არის კალათის ნაწილი და ვმალავთ
-    document.querySelectorAll('h2').forEach(h2 => {
-        if (h2.innerText.includes("ახალი კოლექცია")) {
-            h2.style.display = 'none';
-        }
-    });
+    if (mainTitle) mainTitle.style.display = 'none';
 
-    // 2. ვასუფთავებთ კონტეინერს
     grid.innerHTML = '';
     
-    // 3. ვამატებთ სათაურს "ჩემი კალათა" - უფრო პატარა შრიფტით (18px)
     const cartHeader = document.createElement('h2');
-    cartHeader.style.cssText = `
-        grid-column: 1/-1; 
-        margin: 5px 0 15px 5px; 
-        font-size: 18px; 
-        font-weight: 700; 
-        color: #1d1d1f;
-        display: block !important;
-    `;
+    cartHeader.style.cssText = 'grid-column: 1/-1; margin: 5px 0 15px 5px; font-size: 18px; font-weight: 700; color: #1d1d1f; display: block !important;';
     cartHeader.innerText = 'ჩემი კალათა';
     grid.appendChild(cartHeader);
 
@@ -341,8 +346,9 @@ function renderCart() {
         const cartItem = document.createElement('div');
         cartItem.style.cssText = 'grid-column: 1/-1; display: flex; align-items: center; gap: 12px; background: white; padding: 12px; border-radius: 18px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: relative; border: 1px solid #f2f2f7;';
         
-        const displayColor = item.color && item.color !== 'null' ? item.color : '-';
-        const displaySize = item.size && item.size !== 'null' ? item.size : '-';
+        // მონაცემების გამოჩენის ლოგიკა
+        const displayColor = (item.color && item.color !== 'null') ? item.color : '-';
+        const displaySize = (item.size && item.size !== 'null') ? item.size : '-';
 
         cartItem.innerHTML = `
             <img src="${product.photo_url_1}" style="width: 65px; height: 65px; object-fit: contain; background: #f5f5f7; border-radius: 12px;">
@@ -356,7 +362,6 @@ function renderCart() {
         grid.appendChild(cartItem);
     });
 
-    // ფეხთერი (Footer)
     const footer = document.createElement('div');
     footer.style.cssText = 'grid-column: 1/-1; margin-top: 10px; padding: 15px; background: #f5f5f7; border-radius: 20px; text-align: right;';
     footer.innerHTML = `
