@@ -326,6 +326,9 @@ function closeProductDetail() {
 }
 
 function handleAddToCart(productId, color, size) {
+    // ვიპოვოთ პროდუქტის მონაცემები მთავარ სიაში, რომ ფასი და სახელი წამოვიღოთ
+    const productData = state.products.find(p => p.product_id === productId || p.id === productId);
+
     const existingItem = state.cart.find(item => 
         item.id === productId && 
         item.color === color && 
@@ -336,7 +339,10 @@ function handleAddToCart(productId, color, size) {
         existingItem.quantity = (existingItem.quantity || 1) + 1;
     } else {
         state.cart.push({ 
-            id: productId, 
+            id: productId,
+            product_id: productId, // შენი Sheets-ისთვის
+            name_ge: productData ? (productData.name_ge || productData.name) : "პროდუქტი", 
+            price: productData ? productData.price : 0, // აი ეს აკლდა!
             color: color, 
             size: size,
             quantity: 1
