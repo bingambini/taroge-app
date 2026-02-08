@@ -562,20 +562,14 @@ function goToPayment() {
         return;
     }
 
-    // ჯამური თანხის გამოთვლა გაუმჯობესებული ძებნით
+    // ზუსტი გამოთვლა: ვიღებთ იმას, რაც კალათაში რეალურად წერია
     const totalAmount = state.cart.reduce((total, item) => {
-        // ვამოწმებთ ყველა შესაძლო სახელს, რაც შეიძლება ფასს ერქვას შენს ბაზაში
-        const rawPrice = item.price || item.Price || item.price_ge || item.price_unit || item.ფასი || 0;
+        // ვასუფთავებთ ფასს ნებისმიერი სიმბოლოსგან (სქრინშოტზე ჩანს ₾ სიმბოლო)
+        const itemPrice = typeof item.price === 'string' 
+            ? parseFloat(item.price.replace(/[^\d.]/g, '')) 
+            : parseFloat(item.price);
         
-        // ვასუფთავებთ ტექსტს (თუ წერია "150₾", ტოვებს მხოლოდ "150")
-        const priceClean = typeof rawPrice === 'string' 
-            ? parseFloat(rawPrice.replace(/[^\d.]/g, '')) 
-            : parseFloat(rawPrice);
-        
-        const quantity = parseInt(item.quantity) || 0;
-        const subtotal = (priceClean || 0) * quantity;
-        
-        return total + subtotal;
+        return total + (itemPrice * (item.quantity || 1));
     }, 0).toFixed(2);
 
     state.tempOrder = { name, phone, address, totalAmount };
@@ -591,7 +585,7 @@ function goToPayment() {
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 15px;">
-                <div onclick="selectPayment('ბარათით გადახდა', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
+                <div onclick="selectPayment('ბარათით გადახდა', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
                     <div style="font-size: 24px;">💳</div>
                     <div style="flex-grow: 1;">
                         <div style="font-weight: 700; color: #1d1d1f;">ბარათით გადახდა</div>
@@ -600,7 +594,7 @@ function goToPayment() {
                     <div class="payment-radio" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #e5e5e7;"></div>
                 </div>
 
-                <div onclick="selectPayment('ნაღდი ანგარიშსწორება', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
+                <div onclick="selectPayment('ნაღდი ანგარიშსწორება', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
                     <div style="font-size: 24px;">💵</div>
                     <div style="flex-grow: 1;">
                         <div style="font-weight: 700; color: #1d1d1f;">ნაღდი ანგარიშსწორება</div>
@@ -609,7 +603,7 @@ function goToPayment() {
                     <div class="payment-radio" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #e5e5e7;"></div>
                 </div>
                 
-                <div onclick="selectPayment('საბანკო გადარიცხვა', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
+                <div onclick="selectPayment('საბანკო გადარიცხვა', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
                     <div style="font-size: 24px;">🏦</div>
                     <div style="flex-grow: 1;">
                         <div style="font-weight: 700; color: #1d1d1f;">საბანკო გადარიცხვა</div>
@@ -628,7 +622,7 @@ function goToPayment() {
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <span style="font-size: 12px; color: #86868b;">ანგარიშის ნომერი (IBAN):</span>
                     <div style="display: flex; align-items: center; background: white; padding: 12px 15px; border-radius: 12px; border: 1px solid #e5e5e7; justify-content: space-between;">
-                        <span id="iban-text" style="font-family: monospace; font-weight: 700; font-size: 14px; color: #1d1d1f;">GE00TB0000000000000000</span>
+                        <span style="font-family: monospace; font-weight: 700; font-size: 14px; color: #1d1d1f;">GE00TB0000000000000000</span>
                         <button onclick="copyToClipboard('GE00TB0000000000000000')" style="background: #0071e3; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
                             COPY
                         </button>
