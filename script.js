@@ -553,9 +553,7 @@ function checkout() {
 }
 
 function goToPayment() {
-    console.log("=== DEBUG START ===");
-    console.log("Cart contents:", state.cart);
-
+    // 1. მონაცემების აღება
     const name = document.getElementById('order-name').value.trim();
     const phone = document.getElementById('order-phone').value.trim();
     const address = document.getElementById('order-address').value.trim();
@@ -565,29 +563,23 @@ function goToPayment() {
         return;
     }
 
-    // დებაგერი: ვნახოთ თითოეული პროდუქტის ფასი და რაოდენობა
-    let calculatedTotal = 0;
-    state.cart.forEach((item, index) => {
-        const p = typeof item.price === 'string' ? parseFloat(item.price.replace(/[^\d.]/g, '')) : parseFloat(item.price);
-        const q = parseInt(item.quantity) || 1;
-        const sub = p * q;
-        console.log(`Item ${index}: ${item.name_ge || 'No Name'} | Price: ${p} | Qty: ${q} | Subtotal: ${sub}`);
-        calculatedTotal += sub;
+    // 2. მათემატიკა პირდაპირ კალათიდან (ყველაზე საიმედო გზა)
+    let finalTotal = 0;
+    state.cart.forEach(item => {
+        // ვასუფთავებთ ფასს ყველანაირი სიმბოლოსგან
+        const cleanPrice = typeof item.price === 'string' 
+            ? parseFloat(item.price.replace(/[^\d.]/g, '')) 
+            : parseFloat(item.price);
+        
+        const quantity = parseInt(item.quantity) || 1;
+        finalTotal += (cleanPrice * quantity);
     });
 
-    console.log("Calculated Total:", calculatedTotal);
+    // ვაფიქსირებთ საბოლოო ციფრს
+    const displayTotal = finalTotal.toFixed(2);
+    state.tempOrder = { name, phone, address, totalAmount: displayTotal };
 
-    // მეთოდი 2: ვნახოთ რას ხედავს კოდი ეკრანზე
-    const cartTotalElement = document.querySelector('.cart-total-amount') || document.getElementById('cart-total');
-    if (cartTotalElement) {
-        console.log("Found UI Total Text:", cartTotalElement.innerText);
-    } else {
-        console.warn("UI Total Element NOT FOUND!");
-    }
-
-    const finalAmount = calculatedTotal.toFixed(2);
-    state.tempOrder = { name, phone, address, totalAmount: finalAmount };
-
+    // 3. ვიზუალის დახატვა
     const grid = document.getElementById('products-grid');
     grid.innerHTML = `
         <div style="grid-column: 1/-1; padding: 5px;">
@@ -596,10 +588,6 @@ function goToPayment() {
                     <span style="font-size: 20px;">←</span>
                 </button>
                 <h2 style="font-size: 20px; font-weight: 800; color: #1d1d1f; margin: 0;">გადახდის მეთოდი</h2>
-            </div>
-            
-            <div style="text-align: center; background: #e8f4ff; padding: 10px; border-radius: 10px; margin-bottom: 20px; font-size: 12px; color: #0071e3;">
-                DEBUG: კალათის ჯამი - ${finalAmount} ₾
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -625,7 +613,7 @@ function goToPayment() {
             <div id="bank-details" style="display: none; margin-top: 15px; background: #f5f5f7; padding: 20px; border-radius: 22px; border: 1px dashed #d1d1d6;">
                 <div style="text-align: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e5e7;">
                     <span style="font-size: 14px; color: #86868b;">გადასახდელი თანხა:</span>
-                    <div style="font-size: 26px; font-weight: 800; color: #0071e3; margin-top: 4px;">${finalAmount} ₾</div>
+                    <div style="font-size: 28px; font-weight: 800; color: #0071e3; margin-top: 4px;">${displayTotal} ₾</div>
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -644,7 +632,6 @@ function goToPayment() {
             </div>
         </div>
     `;
-    console.log("=== DEBUG END ===");
 }
 
 function selectPayment(method, element) {
