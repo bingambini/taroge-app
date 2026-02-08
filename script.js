@@ -375,11 +375,19 @@ function handleNavChange(page, element) {
     
     if (page === 'cart') {
         renderCart();
+    } else if (page === 'profile') {
+        renderProfile(); // გამოიძახებს ჩვენს ახალ პროფილის ფუნქციას
     } else {
+        // ეს არის 'home' ან ნებისმიერი სხვა გვერდი
         const hero = document.getElementById('hero');
         if (hero) hero.style.display = 'block';
         const mainTitle = document.getElementById('new-arrivals-title');
         if (mainTitle) mainTitle.style.display = 'block';
+        
+        // პროდუქტების დახატვამდე მენიუ უნდა გამოჩნდეს (თუ checkout-იდან გამოვდივართ)
+        const bottomNav = document.querySelector('.bottom-nav');
+        if (bottomNav) bottomNav.style.display = 'flex';
+        
         renderProducts();
     }
 }
