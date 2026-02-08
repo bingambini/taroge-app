@@ -358,13 +358,14 @@ function renderCart() {
         const product = state.products.find(p => String(p.product_id) === String(item.id));
         if (!product) return;
 
-        // ვპოულობთ კონკრეტულ ნაშთს Product_Details-ში ფერისა და ზომის მიხედვით
+        // ვეძებთ ზუსტ ვარიანტს ბაზაში (გამოვიყენოთ String და trim ცდომილების გამოსარიცხად)
         const variant = state.productDetails.find(d => 
             String(d.product_id) === String(item.id) && 
-            d.Colors === item.color && 
-            d.Sizes === item.size
+            String(d.Colors).trim() === String(item.color).trim() && 
+            String(d.Sizes).trim() === String(item.size).trim()
         );
         
+        // თუ ვარიანტი ვერ იპოვა, stockLimit იქნება 0, თუ იპოვა - ავიღებთ მნიშვნელობას
         const stockLimit = variant ? parseInt(variant.stock_quantity || 0) : 0;
         const itemTotal = parseFloat(product.final_price) * item.quantity;
         totalSum += itemTotal;
@@ -381,13 +382,13 @@ function renderCart() {
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <span style="font-weight: 700; color: #0071e3; font-size: 14px;">${itemTotal.toFixed(2)} ₾</span>
                     
-                    <div style="display: flex; align-items: center; background: #f5f5f7; border-radius: 8px; padding: 2px 8px; gap: 10px;">
+                    <div style="display: flex; align-items: center; background: #f5f5f7; border-radius: 8px; padding: 4px 10px; gap: 12px;">
                         <button onclick="changeQuantity(${index}, -1)" style="border:none; background:none; font-size: 18px; color: #0071e3; cursor: pointer;">−</button>
                         <span style="font-size: 13px; font-weight: 700; min-width: 15px; text-align: center;">${item.quantity}</span>
                         
                         ${item.quantity < stockLimit ? 
                             `<button onclick="changeQuantity(${index}, 1)" style="border:none; background:none; font-size: 18px; color: #0071e3; cursor: pointer;">+</button>` : 
-                            `<span style="width: 20px; display: inline-block;"></span>`
+                            `<span style="width: 18px; display: inline-block;"></span>`
                         }
                     </div>
                 </div>
