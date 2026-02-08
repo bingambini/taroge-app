@@ -569,7 +569,7 @@ function goToPayment() {
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 15px;">
-                <div onclick="selectPayment('card', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
+                <div onclick="selectPayment('ბარათით გადახდა', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
                     <div style="font-size: 24px;">💳</div>
                     <div style="flex-grow: 1;">
                         <div style="font-weight: 700; color: #1d1d1f;">ბარათით გადახდა</div>
@@ -578,7 +578,7 @@ function goToPayment() {
                     <div class="payment-radio" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #e5e5e7;"></div>
                 </div>
 
-                <div onclick="selectPayment('cash', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
+                <div onclick="selectPayment('ნაღდი ანგარიშსწორება', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
                     <div style="font-size: 24px;">💵</div>
                     <div style="flex-grow: 1;">
                         <div style="font-weight: 700; color: #1d1d1f;">ნაღდი ანგარიშსწორება</div>
@@ -587,14 +587,20 @@ function goToPayment() {
                     <div class="payment-radio" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #e5e5e7;"></div>
                 </div>
                 
-                <div onclick="selectPayment('crypto', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
-                    <div style="font-size: 24px;">₿</div>
+                <div onclick="selectPayment('საბანკო გადარიცხვა', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
+                    <div style="font-size: 24px;">🏦</div>
                     <div style="flex-grow: 1;">
-                        <div style="font-weight: 700; color: #1d1d1f;">Crypto Payment</div>
-                        <div style="font-size: 12px; color: #86868b;">USDT (TRC20)</div>
+                        <div style="font-weight: 700; color: #1d1d1f;">საბანკო გადარიცხვა</div>
+                        <div style="font-size: 12px; color: #86868b;">თანხის ჩარიცხვა ანგარიშზე</div>
                     </div>
                     <div class="payment-radio" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #e5e5e7;"></div>
                 </div>
+            </div>
+
+            <div id="bank-details" style="display: none; margin-top: 15px; background: #f5f5f7; padding: 15px; border-radius: 15px; border: 1px dashed #d1d1d6;">
+                <p style="margin: 0 0 5px; font-size: 12px; color: #86868b;">ჩარიცხეთ მითითებულ ანგარიშზე:</p>
+                <p style="margin: 0; font-family: monospace; font-weight: 700; font-size: 14px; color: #1d1d1f;">GE00TB0000000000000000</p>
+                <p style="margin: 5px 0 0; font-size: 12px; font-weight: 600;">მიმღები: შპს ჩემი მაღაზია</p>
             </div>
 
             <div style="margin-top: 30px;">
@@ -620,6 +626,9 @@ function selectPayment(method, element) {
     radio.style.background = '#0071e3';
     radio.style.borderColor = '#0071e3';
 
+    const bankDetails = document.getElementById('bank-details');
+    bankDetails.style.display = (method === 'საბანკო გადარიცხვა') ? 'block' : 'none';
+
     const btn = document.getElementById('final-confirm-btn');
     btn.disabled = false;
     btn.style.background = '#000';
@@ -629,19 +638,44 @@ function selectPayment(method, element) {
     state.tempOrder.paymentMethod = method;
 }
 
-function handleFinalOrder() {
+async function handleFinalOrder() {
     const { name, phone, address, paymentMethod } = state.tempOrder;
-    const grid = document.getElementById('products-grid');
-    
-    grid.innerHTML = `
-        <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px;">
-            <div style="width: 80px; height: 80px; background: #4cd964; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 40px;">✓</div>
-            <h2 style="font-size: 24px; font-weight: 800; color: #1d1d1f; margin-bottom: 12px;">შეკვეთა მიღებულია!</h2>
-            <p style="color: #86868b; line-height: 1.6; font-size: 15px;">მადლობა, ${name}.<br>გადახდის მეთოდი: <b>${paymentMethod}</b><br>ოპერატორი მალე დაგიკავშირდებათ.</p>
-            <button onclick="location.reload()" style="margin-top: 35px; padding: 16px 30px; border-radius: 16px; border: none; background: #0071e3; color: white; font-weight: 700; font-size: 15px; cursor: pointer;">მთავარ გვერდზე</button>
-        </div>
-    `;
-    
-    state.cart = [];
-    updateCartBadge();
+    const btn = document.getElementById('final-confirm-btn');
+    btn.disabled = true;
+    btn.innerText = "იგზავნება...";
+
+    // მონაცემები Google Sheets-ისთვის
+    const orderData = {
+        tab: "orders",
+        date: new Date().toLocaleString('ka-GE'),
+        customer: name,
+        phone: phone,
+        address: address,
+        payment: paymentMethod,
+        items: state.cart.map(item => `${item.name} (${item.quantity}ც)`).join(', '),
+        total: state.cart.reduce((s, i) => s + (parseFloat(i.price) * i.quantity), 0).toFixed(2) + " ₾"
+    };
+
+    try {
+        // აქ ჩასვი შენი Google Script URL როცა გექნება:
+        // await fetch('შენი_ლინკი', { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) });
+
+        const grid = document.getElementById('products-grid');
+        grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px;">
+                <div style="width: 80px; height: 80px; background: #4cd964; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 40px;">✓</div>
+                <h2 style="font-size: 24px; font-weight: 800; color: #1d1d1f; margin-bottom: 12px;">შეკვეთა მიღებულია!</h2>
+                <p style="color: #86868b; line-height: 1.6; font-size: 15px;">მადლობა, ${name}.<br>გადახდის მეთოდი: <b>${paymentMethod}</b><br>ორდერი წარმატებით გაიგზავნა.</p>
+                <button onclick="location.reload()" style="margin-top: 35px; padding: 16px 30px; border-radius: 16px; border: none; background: #0071e3; color: white; font-weight: 700; font-size: 15px; cursor: pointer;">მთავარ გვერდზე</button>
+            </div>
+        `;
+        
+        state.cart = [];
+        updateCartBadge();
+    } catch (e) {
+        console.error(e);
+        showToast("შეცდომა გაგზავნისას ❌");
+        btn.disabled = false;
+        btn.innerText = "შეკვეთის დასრულება";
+    }
 }
