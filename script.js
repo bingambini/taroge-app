@@ -165,48 +165,100 @@ function renderProducts() {
 }
 
 function openProductDetails(productId) {
-    const product = state.products.find(p => String(p.product_id) === String(productId));
+    const product = state.products.find(p => String(p.product_id).trim().toLowerCase() === String(productId).trim().toLowerCase());
     if (!product) return;
 
-    const variants = state.productDetails.filter(d => String(d.product_id).toLowerCase() === String(productId).toLowerCase());
-    const uniqueSizes = [...new Set(variants.map(v => v.Sizes).filter(s => s))];
-    const uniqueColors = [...new Set(variants.map(v => v.Colors).filter(c => c))];
+    // 1. ვიღებთ ყველა ვარიანტს ამ ID-სთვის
+    const allVariants = state.productDetails.filter(d => 
+        String(d.product_id).trim().toLowerCase() === String(productId).trim().toLowerCase() && 
+        parseInt(d.stock_quantity || 0) > 0
+    );
+
+    // 2. ვიღებთ უნიკალურ ფერებს
+    const uniqueColors = [...new Set(allVariants.map(v => v.Colors).filter(c => c))];
+    
+    // საწყისად ვირჩევთ პირველ ფერს
+    let activeColor = uniqueColors[0];
+    selectedSize = null; 
 
     const overlay = document.createElement('div');
     overlay.className = 'detail-overlay';
     overlay.id = 'active-overlay';
-    overlay.innerHTML = `
-        <div class="detail-container">
-            <div class="detail-header"><button onclick="closeProductDetail()" class="close-btn">✕</button></div>
-            <div class="detail-image" style="display: flex; justify-content: center; align-items: center; height: 250px;">
-                <img src="${product.photo_url_1}" style="max-height: 100%; object-fit: contain;">
+    
+    // ფუნქცია, რომელიც ანახლებს ზომებს ფერის შეცვლისას
+    window.updateSizeOptions = function(color) {
+        activeColor = color;
+        selectedSize = null; // ზომის არჩევანი იშლება ფერის შეცვლისას
+        
+        const sizeContainer = document.getElementById('size-options-container');
+        const colorNodes = document.querySelectorAll('.color-dot-option');
+        
+        // ფერების მარკირება
+        colorNodes.forEach(node => {
+            node.style.borderColor = node.getAttribute('data-color') === color ? '#0071e3' : '#eee';
+            node.style.transform = node.getAttribute('data-color') === color ? 'scale(1.1)' : 'scale(1)';
+        });
+
+        // ამ ფერის შესაბამისი ზომების გაფილტვრა
+        const availableSizes = allVariants
+            .filter(v => v.Colors === color)
+            .map(v => v.Sizes);
+
+        sizeContainer.innerHTML = availableSizes.map(s => `
+            <div class="size-option" onclick="selectSize(this, '${s}')" 
+                 style="padding:10px 15px; border:1px solid #ddd; border-radius:12px; cursor:pointer; font-weight: 600; min-width: 45px; text-align: center; transition: 0.2s;">
+                ${s}
             </div>
-            <div class="detail-info" style="padding: 20px;">
-                <p style="color: #86868b; text-transform: uppercase; font-size: 12px; font-weight: 600;">${product.brand || ''}</p>
-                <h2 class="detail-name" style="margin: 10px 0;">${product.name_ge}</h2>
-                <div class="price-block" style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 20px;">
-                    <span class="final-price" style="font-size: 24px; font-weight: 800;">${product.final_price} ₾</span>
+        `).join('');
+    };
+
+    overlay.innerHTML = `
+        <div class="detail-container" style="max-height: 90vh; overflow-y: auto;">
+            <div class="detail-header" style="position: sticky; top: 0; background: white; z-index: 100; padding: 10px; display: flex; justify-content: flex-end;">
+                <button onclick="closeProductDetail()" class="close-btn" style="background: #f5f5f7; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">✕</button>
+            </div>
+            
+            <div class="detail-image" style="display: flex; justify-content: center; align-items: center; padding: 20px;">
+                <img src="${product.photo_url_1}" style="max-width: 100%; max-height: 250px; object-fit: contain;">
+            </div>
+
+            <div class="detail-info" style="padding: 0 20px 30px;">
+                <p style="color: #86868b; text-transform: uppercase; font-size: 12px; font-weight: 700; margin-bottom: 5px;">${product.brand}</p>
+                <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 15px;">${product.name_ge}</h2>
+                
+                <div style="margin-bottom: 25px;">
+                    <span style="font-size: 24px; font-weight: 800; color: #1d1d1f;">${product.final_price} ₾</span>
                 </div>
 
-                ${uniqueColors.length > 0 ? `
-                    <p class="section-label" style="font-size: 12px; font-weight: 700; color: #86868b; margin-bottom: 10px;">ფერები:</p>
-                    <div class="detail-colors" style="display:flex; gap:10px; margin-bottom:20px;">
-                        ${uniqueColors.map(c => `<div onclick="this.parentElement.querySelectorAll('div').forEach(d=>d.style.borderColor='#eee'); this.style.borderColor='#0071e3';" style="width:30px; height:30px; border-radius:50%; background:${translateColor(c)}; border:2px solid #eee; cursor:pointer;"></div>`).join('')}
-                    </div>
-                ` : ''}
+                <p style="font-size: 13px; font-weight: 700; color: #1d1d1f; margin-bottom: 12px;">ფერები:</p>
+                <div style="display: flex; gap: 12px; margin-bottom: 25px;">
+                    ${uniqueColors.map(c => `
+                        <div class="color-dot-option" 
+                             data-color="${c}"
+                             onclick="updateSizeOptions('${c}')" 
+                             style="width: 34px; height: 34px; border-radius: 50%; background: ${translateColor(c)}; border: 2px solid #eee; cursor: pointer; transition: 0.3s; box-shadow: inset 0 0 3px rgba(0,0,0,0.1);">
+                        </div>
+                    `).join('')}
+                </div>
 
-                ${uniqueSizes.length > 0 ? `
-                    <p class="section-label" style="font-size: 12px; font-weight: 700; color: #86868b; margin-bottom: 10px;">ზომა:</p>
-                    <div class="detail-sizes" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 20px;">
-                        ${uniqueSizes.map(s => `<div class="size-option" onclick="selectSize(this, '${s}')" style="padding:10px 15px; border:1px solid #ddd; border-radius:10px; cursor:pointer; font-weight: 600;">${s}</div>`).join('')}
+                <p style="font-size: 13px; font-weight: 700; color: #1d1d1f; margin-bottom: 12px;">აირჩიე ზომა:</p>
+                <div id="size-options-container" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px;">
                     </div>
-                ` : ''}
 
-                <button class="main-btn" id="add-to-cart-btn" onclick="handleAddToCart('${productId}')">კალათაში დამატება</button>
+                <button class="main-btn" id="add-to-cart-btn" onclick="handleAddToCart('${product.product_id}')" 
+                        style="width: 100%; padding: 16px; border-radius: 14px; border: none; background: #0071e3; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
+                    კალათაში დამატება
+                </button>
             </div>
         </div>`;
+
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
+
+    // პირველივე ფერის ზომების ჩატვირთვა
+    if (uniqueColors.length > 0) {
+        updateSizeOptions(uniqueColors[0]);
+    }
 }
 
 function selectSize(el, size) {
