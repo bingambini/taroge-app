@@ -556,7 +556,7 @@ function goToPayment() {
         return;
     }
 
-    // ჯამური თანხის გამოთვლა
+    // ჯამური თანხის გამოთვლა რეკვიზიტებისთვის
     const totalAmount = state.cart.reduce((s, i) => s + (parseFloat(i.price) * i.quantity), 0).toFixed(2);
     state.tempOrder = { name, phone, address, totalAmount };
 
@@ -571,7 +571,7 @@ function goToPayment() {
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 15px;">
-                <div onclick="selectPayment('ბარათით გადახდა', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                <div onclick="selectPayment('ბარათით გადახდა', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
                     <div style="font-size: 24px;">💳</div>
                     <div style="flex-grow: 1;">
                         <div style="font-weight: 700; color: #1d1d1f;">ბარათით გადახდა</div>
@@ -580,7 +580,7 @@ function goToPayment() {
                     <div class="payment-radio" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #e5e5e7;"></div>
                 </div>
 
-                <div onclick="selectPayment('ნაღდი ანგარიშსწორება', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                <div onclick="selectPayment('ნაღდი ანგარიშსწორება', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
                     <div style="font-size: 24px;">💵</div>
                     <div style="flex-grow: 1;">
                         <div style="font-weight: 700; color: #1d1d1f;">ნაღდი ანგარიშსწორება</div>
@@ -589,7 +589,7 @@ function goToPayment() {
                     <div class="payment-radio" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #e5e5e7;"></div>
                 </div>
                 
-                <div onclick="selectPayment('საბანკო გადარიცხვა', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                <div onclick="selectPayment('საბანკო გადარიცხვა', this)" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f2f2f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
                     <div style="font-size: 24px;">🏦</div>
                     <div style="flex-grow: 1;">
                         <div style="font-weight: 700; color: #1d1d1f;">საბანკო გადარიცხვა</div>
@@ -599,15 +599,26 @@ function goToPayment() {
                 </div>
             </div>
 
-            <div id="bank-details" style="display: none; margin-top: 15px; background: #f5f5f7; padding: 20px; border-radius: 20px; border: 1px dashed #d1d1d6;">
+            <div id="bank-details" style="display: none; margin-top: 15px; background: #f5f5f7; padding: 20px; border-radius: 22px; border: 1px dashed #d1d1d6;">
                 <div style="text-align: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e5e7;">
                     <span style="font-size: 14px; color: #86868b;">გადასახდელი თანხა:</span>
-                    <div style="font-size: 24px; font-weight: 800; color: #0071e3;">${totalAmount} ₾</div>
+                    <div style="font-size: 26px; font-weight: 800; color: #0071e3; margin-top: 4px;">${totalAmount} ₾</div>
                 </div>
-                <p style="margin: 0 0 5px; font-size: 12px; color: #86868b;">რეკვიზიტები:</p>
-                <p style="margin: 0; font-family: monospace; font-weight: 700; font-size: 14px; color: #1d1d1f; letter-spacing: 0.5px;">GE00TB0000000000000000</p>
-                <p style="margin: 5px 0 0; font-size: 12px; font-weight: 600; color: #1d1d1f;">მიმღები: შპს ჩემი მაღაზია</p>
-                <p style="margin: 10px 0 0; font-size: 11px; color: #eb5757; font-style: italic;">* გთხოვთ, დანიშნულებაში მიუთითოთ თქვენი სახელი</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <span style="font-size: 12px; color: #86868b;">ანგარიშის ნომერი (IBAN):</span>
+                    <div style="display: flex; align-items: center; background: white; padding: 12px 15px; border-radius: 12px; border: 1px solid #e5e5e7; justify-content: space-between;">
+                        <span style="font-family: monospace; font-weight: 700; font-size: 14px; color: #1d1d1f;">GE00TB0000000000000000</span>
+                        <button onclick="copyToClipboard('GE00TB0000000000000000')" style="background: #0071e3; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                            COPY
+                        </button>
+                    </div>
+                    <span style="font-size: 12px; font-weight: 600; color: #1d1d1f; margin-top: 4px;">მიმღები: შპს ჩემი მაღაზია</span>
+                </div>
+                
+                <p style="margin: 15px 0 0; font-size: 11px; color: #eb5757; text-align: center; line-height: 1.4;">
+                    * გთხოვთ, გადარიცხვისას დანიშნულებაში <br>მიუთითოთ თქვენი <b>სახელი და გვარი</b>
+                </p>
             </div>
 
             <div style="margin-top: 30px;">
@@ -645,8 +656,16 @@ function selectPayment(method, element) {
     state.tempOrder.paymentMethod = method;
 }
 
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast("ანგარიშის ნომერი დაკოპირდა! ✅");
+    }).catch(err => {
+        console.error('შეცდომა: ', err);
+    });
+}
+
 async function handleFinalOrder() {
-    const { name, phone, address, paymentMethod } = state.tempOrder;
+    const { name, phone, address, paymentMethod, totalAmount } = state.tempOrder;
     const btn = document.getElementById('final-confirm-btn');
     
     btn.disabled = true;
@@ -654,14 +673,12 @@ async function handleFinalOrder() {
 
     const orderId = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
-    // ვაგროვებთ დეტალურ ინფორმაციას: ID, სახელი, ზომა, ფერი
     const itemsDescription = state.cart.map(item => {
         const pId = item.product_id || item.id || "No-ID";
-        const pName = item.name_ge || item.title || "პროდუქტი";
+        const pName = item.name_ge || item.name || item.title || "პროდუქტი";
         const pSize = item.size ? ` | ზომა: ${item.size}` : "";
         const pColor = item.color ? ` | ფერი: ${item.color}` : "";
-        
-        return `[${pId}] ${pName}${pSize}${pColor} (${item.quantity}ც)`;
+        return `[ID: ${pId}] ${pName}${pSize}${pColor} (${item.quantity}ც)`;
     }).join('\n');
 
     const orderData = {
@@ -672,7 +689,7 @@ async function handleFinalOrder() {
         phone: phone,
         address: address,
         items: itemsDescription,
-        total: state.cart.reduce((s, i) => s + (parseFloat(i.price) * i.quantity), 0).toFixed(2),
+        total: totalAmount,
         Promo: state.appliedPromo || "", 
         status: "pending"
     };
@@ -692,7 +709,7 @@ async function handleFinalOrder() {
             <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px;">
                 <div style="width: 80px; height: 80px; background: #4cd964; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 40px;">✓</div>
                 <h2 style="font-size: 24px; font-weight: 800; color: #1d1d1f; margin-bottom: 12px;">შეკვეთა მიღებულია!</h2>
-                <p style="color: #86868b; line-height: 1.6; font-size: 15px;">მადლობა, ${name}.<br>შეკვეთის ნომერი: <b>${orderId}</b><br>მეთოდი: ${paymentMethod}</p>
+                <p style="color: #86868b; line-height: 1.6; font-size: 15px;">მადლობა, ${name}.<br>შეკვეთის ნომერი: <b>${orderId}</b><br>თანხა: <b>${totalAmount} ₾</b></p>
                 <button onclick="location.reload()" style="margin-top: 35px; padding: 16px 30px; border-radius: 16px; border: none; background: #0071e3; color: white; font-weight: 700; font-size: 15px; cursor: pointer;">მთავარ გვერდზე</button>
             </div>
         `;
