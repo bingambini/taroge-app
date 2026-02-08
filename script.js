@@ -185,7 +185,6 @@ function openProductDetails(productId) {
     overlay.className = 'detail-overlay';
     overlay.id = 'active-overlay';
     
-    // ზომების განახლების ლოგიკა ფერის არჩევისას
     window.updateSizeOptions = function(color) {
         activeColor = color;
         selectedSize = null; 
@@ -213,7 +212,6 @@ function openProductDetails(productId) {
         checkSelection();
     };
 
-    // კონკრეტული ზომის არჩევის ლოგიკა
     window.selectSize = function(el, size) {
         selectedSize = size;
         document.querySelectorAll('.size-option').forEach(opt => {
@@ -227,7 +225,6 @@ function openProductDetails(productId) {
         checkSelection();
     };
 
-    // ღილაკის აქტივაციის შემოწმება
     function checkSelection() {
         const btn = document.getElementById('add-to-cart-btn');
         if (activeColor && selectedSize) {
@@ -243,43 +240,43 @@ function openProductDetails(productId) {
         }
     }
 
-    // Overlay-ს შიგთავსი (ვარიანტი 1)
+    // განახლებული დიზაინი: ფასი ლურჯია და დაშორებები შემცირებულია
     overlay.innerHTML = `
-        <div class="detail-container" style="max-height: 85vh; border-radius: 24px 24px 0 0; background: white;">
+        <div class="detail-container" style="max-height: 90vh; border-radius: 30px 30px 0 0; background: white; position: fixed; bottom: 0; width: 100%; overflow-y: auto;">
             <div class="detail-header" style="padding: 12px 20px 0; display: flex; justify-content: flex-end;">
-                <button onclick="closeProductDetail()" style="background: #f5f5f7; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: #86868b;">✕</button>
+                <button onclick="closeProductDetail()" style="background: #f5f5f7; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; color: #86868b; font-size: 16px;">✕</button>
             </div>
             
-            <div style="display: flex; justify-content: center; padding: 0 20px;">
-                <img src="${product.photo_url_1}" style="max-width: 90%; max-height: 240px; object-fit: contain;">
+            <div style="display: flex; justify-content: center; padding: 5px 20px;">
+                <img src="${product.photo_url_1}" style="max-width: 90%; max-height: 220px; object-fit: contain;">
             </div>
 
-            <div style="padding: 15px 25px 30px;">
-                <p style="color: #0071e3; text-transform: uppercase; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; margin-bottom: 4px;">${product.brand}</p>
+            <div style="padding: 10px 25px 30px;">
+                <p style="color: #0071e3; text-transform: uppercase; font-size: 12px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px;">${product.brand}</p>
                 <h2 style="font-size: 22px; font-weight: 700; color: #1d1d1f; line-height: 1.2; margin-bottom: 8px;">${product.name_ge}</h2>
                 
-                <div style="margin-bottom: 20px;">
-                    <span style="font-size: 26px; font-weight: 800; color: #1d1d1f;">${product.final_price} ₾</span>
+                <div style="margin-bottom: 15px;">
+                    <span style="font-size: 26px; font-weight: 800; color: #0071e3;">${product.final_price} ₾</span>
                 </div>
 
-                <p style="font-size: 13px; font-weight: 700; color: #1d1d1f; margin-bottom: 12px;">ფერი</p>
-                <div style="display: flex; gap: 14px; margin-bottom: 20px;">
+                <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ფერი</p>
+                <div style="display: flex; gap: 14px; margin-bottom: 15px;">
                     ${uniqueColors.map(c => `
                         <div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" 
-                             style="width: 30px; height: 30px; border-radius: 50%; background: ${translateColor(c)}; border: 1px solid #e5e5e7; cursor: pointer; transition: all 0.3s ease;">
+                             style="width: 32px; height: 32px; border-radius: 50%; background: ${translateColor(c)}; border: 1px solid #e5e5e7; cursor: pointer; transition: 0.3s;">
                         </div>
                     `).join('')}
                 </div>
 
-                <p style="font-size: 13px; font-weight: 700; color: #1d1d1f; margin-bottom: 12px;">ზომა</p>
-                <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
-                    <p style="color: #86868b; font-size: 12px;">ჯერ აირჩიეთ ფერი...</p>
+                <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ზომა</p>
+                <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                    <p style="color: #86868b; font-size: 13px;">ჯერ აირჩიეთ ფერი...</p>
                 </div>
 
-                <div style="margin-top: 20px;">
+                <div style="margin-top: 15px;">
                     <button class="main-btn" id="add-to-cart-btn" disabled 
                             onclick="handleAddToCart('${product.product_id}', '${activeColor}', '${selectedSize}')" 
-                            style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; opacity: 0.5;">
+                            style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; opacity: 0.5;">
                         აირჩიეთ ფერი და ზომა
                     </button>
                 </div>
@@ -288,6 +285,7 @@ function openProductDetails(productId) {
 
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
+}
 
     // --- მეორე შემოწმების ბლოკი და დუბლირებული HTML სტრუქტურა ---
     function checkSelection() {
