@@ -628,4 +628,63 @@ function goToPayment() {
     `;
 }
 
-handleFinalOrder
+async function handleFinalOrder() {
+    // 1. ვამოწმებთ, აირჩია თუ არა მომხმარებელმა მეთოდი
+    if (!state.tempOrder || !state.tempOrder.paymentMethod) {
+        showToast("გთხოვთ აირჩიოთ გადახდის მეთოდი ⚠️");
+        return;
+    }
+
+    const btn = document.getElementById('final-submit-btn');
+    btn.disabled = true;
+    btn.innerText = "იგზავნება...";
+
+    // 2. მონაცემების მომზადება (ზუსტად ისე, როგორც Apps Script ელოდება)
+    const orderData = {
+        action: 'addOrder',
+        name: state.tempOrder.name,
+        phone: state.tempOrder.phone,
+        address: state.tempOrder.address,
+        total_price: state.tempOrder.totalAmount,
+        payment_method: state.tempOrder.paymentMethod,
+        order_details: state.cart.map(item => 
+            `${item.name_ge || item.name} (${item.color}, ${item.size}) x${item.quantity}`
+        ).join(', '),
+        date: new Date().toLocaleString('ka-GE')
+    };
+
+    // შენი ახალი URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyClomY0jgG71r9m15Wjn3_1-6wsI1AFDJ-CXW0IJaqH-pJG79HAbT0ZK_HbkgQm0EKLw/exec";
+
+    try {
+        // 3. გაგზავნა
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // მნიშვნელოვანია Google Apps Script-ისთვის
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        });
+
+        // რადგან no-cors რეჟიმში ვართ, fetch ვერ ხედავს "success" პასუხს, 
+        // ამიტომ პირდაპირ გადავდივართ წარმატების ლოგიკაზე
+        showToast("შეკვეთა წარმატებით გაიგზავნა! 🎉");
+        
+        // კალათის გასუფთავება
+        state.cart = [];
+        if (typeof updateCartBadge === 'function') updateCartBadge();
+        localStorage.removeItem('cart');
+
+        // 2 წამში გვერდის რესტარტი
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
+
+    } catch (error) {
+        console.error("გაგზავნის შეცდომა:", error);
+        showToast("ვერ მოხერხდა გაგზავნა ❌");
+        btn.disabled = false;
+        btn.innerText = "შეკვეთის დასრულება";
+    }
+}
