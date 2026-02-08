@@ -571,6 +571,7 @@ function goToPayment() {
     });
 
     const finalAmount = totalSum.toFixed(2);
+    // ვინახავთ მონაცემებს დროებით ობიექტში
     state.tempOrder = { name, phone, address, totalAmount: finalAmount, paymentMethod: "" };
 
     const grid = document.getElementById('products-grid');
@@ -580,153 +581,51 @@ function goToPayment() {
                 <button onclick="checkout()" style="background: #f5f5f7; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                     <span style="font-size: 20px;">←</span>
                 </button>
-                <h2 style="font-size: 20px; font-weight: 800; color: #1d1d1f; margin: 0;">გადახდის მეთოდი</h2>
+                <h2 style="font-size: 20px; font-weight: 800; color: #1d1d1f; margin: 0;">გადახდა</h2>
             </div>
 
-            <div style="background: #f5f5f7; padding: 25px; border-radius: 22px; text-align: center; margin-bottom: 25px; border: 1px solid #e5e5e7;">
-                <span style="font-size: 14px; color: #86868b; font-weight: 500;">ზუსტი გადასახდელი თანხა:</span>
+            <div style="background: #f5f5f7; padding: 25px; border-radius: 22px; text-align: center; margin-bottom: 25px;">
+                <span style="font-size: 14px; color: #86868b;">ზუსტი გადასახდელი:</span>
                 <div style="font-size: 34px; font-weight: 800; color: #0071e3; margin-top: 5px;">${finalAmount} ₾</div>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 12px;" id="payment-options">
-                <div onclick="selectPaymentMethod('საბანკო გადარიცხვა', this)" class="pay-option" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s;">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div onclick="selectPaymentMethod('საბანკო გადარიცხვა', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
                     <div style="font-size: 24px;">🏦</div>
-                    <div style="flex-grow: 1;">
-                        <div style="font-weight: 700; color: #1d1d1f;">საბანკო გადარიცხვა</div>
-                        <div style="font-size: 12px; color: #86868b;">ჩარიცხვა ანგარიშზე</div>
+                    <div style="font-weight: 700;">საბანკო გადარიცხვა</div>
+                </div>
+
+                <div id="bank-details-box" style="display: none; background: #f0f7ff; padding: 18px; border-radius: 20px; border: 1px solid #0071e3; margin-top: -5px;">
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 12px; font-weight: 700; color: #1d1d1f;">მიმღები: შპს მაღაზია</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <div id="iban-text" style="background: white; padding: 10px; border-radius: 10px; border: 1px solid #d0e8ff; font-family: monospace; font-weight: 700; flex-grow: 1; font-size: 13px;">GE00TB0000000000000000</div>
+                            <button onclick="copyIBAN()" style="background: #0071e3; color: white; border: none; padding: 0 12px; border-radius: 10px; font-size: 11px; cursor: pointer;">Copy</button>
+                        </div>
+                        <p style="font-size: 11px; color: #856404; margin: 0; background: #fff9e6; padding: 8px; border-radius: 8px;">
+                            ℹ️ დანიშნულებაში მიუთითეთ თქვენი სახელი და გვარი.
+                        </p>
                     </div>
                 </div>
 
-                <div id="bank-details-box" style="display: none; background: #f0f7ff; padding: 20px; border-radius: 20px; border: 1px solid #0071e3; margin-top: -5px;">
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div>
-                            <span style="font-size: 11px; color: #0071e3; font-weight: 700; text-transform: uppercase;">ანგარიშის ნომერი (IBAN):</span>
-                            <div style="display: flex; gap: 8px; margin-top: 5px;">
-                                <div id="iban-text" style="background: white; padding: 12px; border-radius: 12px; border: 1px solid #d0e8ff; font-family: monospace; font-weight: 700; flex-grow: 1; font-size: 13px; display: flex; align-items: center;">GE00TB0000000000000000</div>
-                                <button onclick="copyIBAN()" style="background: #0071e3; color: white; border: none; padding: 0 15px; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer;">Copy</button>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <span style="font-size: 11px; color: #86868b; font-weight: 600; text-transform: uppercase;">მიმღები:</span>
-                            <div style="font-weight: 700; color: #1d1d1f; margin-top: 2px;">შპს მაღაზია</div>
-                        </div>
-
-                        <div style="background: #fff9e6; padding: 10px; border-radius: 10px; border: 1px solid #ffeeba;">
-                            <p style="font-size: 11px; color: #856404; margin: 0; line-height: 1.4;">
-                                ⚠️ <b>დანიშნულებაში:</b> გთხოვთ მიუთითოთ თქვენი სახელი და გვარი.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div onclick="selectPaymentMethod('ბარათით გადახდა', this)" class="pay-option" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                <div onclick="selectPaymentMethod('ბარათით გადახდა', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
                     <div style="font-size: 24px;">💳</div>
-                    <div style="flex-grow: 1;">
-                        <div style="font-weight: 700; color: #1d1d1f;">ბარათით გადახდა</div>
-                        <div style="font-size: 12px; color: #86868b;">ონლაინ გადახდა</div>
-                    </div>
+                    <div style="font-weight: 700;">ბარათით გადახდა</div>
                 </div>
 
-                <div onclick="selectPaymentMethod('ბარათით კურიერთან', this)" class="pay-option" style="background: white; padding: 20px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                <div onclick="selectPaymentMethod('ბარათით კურიერთან', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
                     <div style="font-size: 24px;">🛵</div>
-                    <div style="flex-grow: 1;">
-                        <div style="font-weight: 700; color: #1d1d1f;">ბარათით კურიერთან</div>
-                        <div style="font-size: 12px; color: #86868b;">ტერმინალით ადგილზე</div>
-                    </div>
+                    <div style="font-weight: 700;">ბარათით კურიერთან</div>
                 </div>
             </div>
 
-            <button onclick="handleFinalOrder()" style="width: 100%; margin-top: 30px; padding: 20px; border-radius: 20px; border: none; background: #000; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
+            <button id="final-submit-btn" onclick="handleFinalOrder()" style="width: 100%; margin-top: 30px; padding: 20px; border-radius: 20px; border: none; background: #000; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
                 შეკვეთის დასრულება
             </button>
         </div>
     `;
 }
 
-// კოპირების ფუნქცია
-function copyIBAN() {
-    const iban = document.getElementById('iban-text').innerText;
-    navigator.clipboard.writeText(iban).then(() => {
-        showToast("IBAN დაკოპირდა! ✅");
-    });
-}
-
-// მეთოდის არჩევის ფუნქცია
-function selectPaymentMethod(method, element) {
-    document.querySelectorAll('.pay-option').forEach(opt => {
-        opt.style.borderColor = '#f5f5f7';
-        opt.style.background = 'white';
-    });
-    element.style.borderColor = '#0071e3';
-    element.style.background = '#f0f7ff';
-
-    state.tempOrder.paymentMethod = method;
-
-    const bankBox = document.getElementById('bank-details-box');
-    if (method === 'საბანკო გადარიცხვა') {
-        bankBox.style.display = 'block';
-    } else {
-        bankBox.style.display = 'none';
-    }
-}
-
-async function handleFinalOrder() {
-    const { name, phone, address, paymentMethod, totalAmount } = state.tempOrder;
-    const btn = document.getElementById('final-confirm-btn');
-    
-    btn.disabled = true;
-    btn.innerText = "მუშავდება...";
-
-    const orderId = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-
-    const itemsDescription = state.cart.map(item => {
-        const pId = item.product_id || item.id || "No-ID";
-        const pName = item.name_ge || item.name || "პროდუქტი";
-        const pSize = item.size ? ` | ზომა: ${item.size}` : "";
-        const pColor = item.color ? ` | ფერი: ${item.color}` : "";
-        return `[ID: ${pId}] ${pName}${pSize}${pColor} (${item.quantity}ც)`;
-    }).join('\n');
-
-    const orderData = {
-        orderId: orderId,
-        date: new Date().toLocaleString('ka-GE'),
-        userId: window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'WEB-USER',
-        customerName: name,
-        phone: phone,
-        address: address,
-        items: itemsDescription,
-        total: totalAmount,
-        paymentMethod: paymentMethod,
-        Promo: state.appliedPromo || "", 
-        status: "pending"
-    };
-
-    try {
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwN__LBBIq5SQT2wPe0OZLykacu-HYJ3Nlw4ajumQSyOpDcWaNycHwxGb5h-bOssFGNaw/exec';
-        
-        await fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-        });
-
-        const grid = document.getElementById('products-grid');
-        grid.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px;">
-                <div style="width: 80px; height: 80px; background: #4cd964; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 40px;">✓</div>
-                <h2 style="font-size: 24px; font-weight: 800; color: #1d1d1f; margin-bottom: 12px;">შეკვეთა მიღებულია!</h2>
-                <p style="color: #86868b; line-height: 1.6; font-size: 15px;">მადლობა, ${name}.<br>შეკვეთის ნომერი: <b>${orderId}</b><br>თანხა: <b>${totalAmount} ₾</b></p>
-                <button onclick="location.reload()" style="margin-top: 35px; padding: 16px 30px; border-radius: 16px; border: none; background: #0071e3; color: white; font-weight: 700; font-size: 15px; cursor: pointer;">მთავარ გვერდზე</button>
-            </div>
-        `;
-        
-        state.cart = [];
-        updateCartBadge();
-    } catch (e) {
-        showToast("შეცდომა გაგზავნისას ❌");
-        btn.disabled = false;
-        btn.innerText = "შეკვეთის დასრულება";
-    }
-}
+handleFinalOrder
