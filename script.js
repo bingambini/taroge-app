@@ -326,7 +326,6 @@ function closeProductDetail() {
 }
 
 function handleAddToCart(productId, color, size) {
-    // ვიპოვოთ პროდუქტის მონაცემები მთავარ სიაში, რომ ფასი და სახელი წამოვიღოთ
     const productData = state.products.find(p => p.product_id === productId || p.id === productId);
 
     const existingItem = state.cart.find(item => 
@@ -335,14 +334,17 @@ function handleAddToCart(productId, color, size) {
         item.size === size
     );
 
+    // ვიღებთ final_price-ს, თუ არა - ჩვეულებრივ price-ს
+    const finalPrice = productData ? (productData.final_price || productData.price) : 0;
+
     if (existingItem) {
         existingItem.quantity = (existingItem.quantity || 1) + 1;
     } else {
         state.cart.push({ 
             id: productId,
-            product_id: productId, // შენი Sheets-ისთვის
+            product_id: productId,
             name_ge: productData ? (productData.name_ge || productData.name) : "პროდუქტი", 
-            price: productData ? productData.price : 0, // აი ეს აკლდა!
+            price: finalPrice, // აი აქ ჩაიწერება უკვე ფასდაკლებული ფასი
             color: color, 
             size: size,
             quantity: 1
@@ -350,13 +352,11 @@ function handleAddToCart(productId, color, size) {
     }
 
     updateCartBadge();
-
     const btn = document.getElementById('add-to-cart-btn');
     if (btn) {
         btn.innerText = "დამატებულია! ✓";
         btn.style.background = "#4cd964";
     }
-
     setTimeout(closeProductDetail, 800);
 }
 
