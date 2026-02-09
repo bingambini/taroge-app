@@ -929,22 +929,20 @@ function updateActiveTab(tabName) {
 // 1. ბრენდების სიის გამოტანის ფუნქცია
 async function renderBrandsList() {
     const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:200px;"><div class="shoe-animation">👟</div><p style="margin-top:10px;">ბრენდები იტვირთება...</p></div>';
+    mainContent.innerHTML = '<div style="text-align:center; padding:50px;">იტვირთება ბრენდები...</div>';
     
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
-        const resData = await response.json();
+        const data = await response.json();
         
-        // ვპოულობთ მასივს: ან Product_Details-ში, ან პირდაპირ resData-ში
-        const products = resData.Product_Details || resData;
+        // მნიშვნელოვანი: შენი API აბრუნებს "productDetails" და არა "Product_Details"
+        const products = data.productDetails;
 
-        // ვამოწმებთ, რომ ნამდვილად მასივია
-        if (!Array.isArray(products)) {
-            console.error("Data structure error:", resData);
-            throw new Error("მონაცემების ფორმატი არასწორია (Array not found)");
+        if (!products || !Array.isArray(products)) {
+            throw new Error("მონაცემები ვერ მოიძებნა productDetails-ში");
         }
 
-        // უნიკალური ბრენდების ამოკრება
+        // უნიკალური ბრენდები
         const uniqueBrands = [...new Set(products.map(p => p.brand))].filter(b => b && b.trim() !== "");
         uniqueBrands.sort();
 
@@ -970,24 +968,21 @@ async function renderBrandsList() {
             </div>
         `;
     } catch (error) {
-        console.error("Render Error:", error);
-        mainContent.innerHTML = `
-            <div style="padding: 40px 20px; text-align: center;">
-                <p style="color: #ff3b30; font-weight: 600;">შეცდომაა: ${error.message}</p>
-                <button onclick="renderBrandsList()" style="margin-top:15px; padding:10px 20px; border-radius:10px; border:none; background:#0071e3; color:white;">სცადე თავიდან</button>
-            </div>`;
+        console.error("ბრენდების შეცდომა:", error);
+        mainContent.innerHTML = `<p style="padding: 20px; color: red; text-align: center;">შეცდომაა: ${error.message}</p>`;
     }
     window.scrollTo(0, 0);
 }
 
-// 2. კონკრეტული ბრენდის ფილტრაციის ფუნქცია
+// აუცილებლად შეასწორე ფილტრაციის ფუნქციაც:
 async function filterByBrand(brandName) {
     const mainContent = document.getElementById('main-content');
-    
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
         const data = await response.json();
-        const filtered = data.Product_Details.filter(p => p.brand === brandName);
+        
+        // აქაც მივმართავთ productDetails-ს
+        const filtered = data.productDetails.filter(p => p.brand === brandName);
 
         mainContent.innerHTML = `
             <div style="padding: 20px 16px 10px 16px;">
@@ -999,11 +994,8 @@ async function filterByBrand(brandName) {
             <div id="products-grid" class="products-grid" style="padding: 0 16px 20px 16px;"></div>
         `;
 
-        if (typeof renderProducts === 'function') {
-            renderProducts(filtered);
-        }
+        renderProducts(filtered);
     } catch (error) {
-        console.error("Error filtering brands:", error);
+        console.error("ფილტრაციის შეცდომა:", error);
     }
-    window.scrollTo(0, 0);
 }
