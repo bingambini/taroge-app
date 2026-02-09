@@ -149,8 +149,15 @@ function renderProducts(productsToRender) {
             String(d.product_id).trim().toLowerCase() === currentProductId
         );
         
-        // --- 2. ფასის დაზუსტება (რომ undefined არ დაიწეროს) ---
-        const price = product.final_price || (productVariants.length > 0 ? productVariants[0].final_price : '---');
+        // --- 2. ფასის დაზუსტება (პრიორიტეტი: sale_full სვეტი Product_Details-იდან) ---
+        // ვეძებთ ვარიანტებში sale_full-ს, თუ თავად product-ში არ გვიწერია
+        let finalDisplayPrice = product.sale_full || product.final_price;
+
+        if (!finalDisplayPrice || finalDisplayPrice === 'undefined') {
+            const variantWithPrice = productVariants.find(v => v.sale_full && v.sale_full !== 'undefined');
+            finalDisplayPrice = variantWithPrice ? variantWithPrice.sale_full : 
+                               (productVariants.length > 0 ? productVariants[0].final_price : '---');
+        }
         
         const availableVariants = productVariants.filter(v => parseInt(v.stock_quantity || 0) > 0);
         const uniqueColors = [...new Set(availableVariants.map(v => v.Colors).filter(c => c))];
@@ -180,7 +187,7 @@ function renderProducts(productsToRender) {
                     ${product.name_ge}
                 </h3>
                 <div style="margin-top: auto;">
-                    <span style="font-size: 15px; font-weight: 800; color: #000;">${price} ₾</span>
+                    <span style="font-size: 15px; font-weight: 800; color: #000;">${finalDisplayPrice} ₾</span>
                 </div>
             </div>`;
         grid.appendChild(card);
