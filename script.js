@@ -149,20 +149,25 @@ function renderProducts(productsToRender) {
             String(d.product_id).trim().toLowerCase() === currentProductId
         );
         
-        // --- 2. ფასის დაზუსტება (პრიორიტეტი: sale_full სვეტი Product_Details-იდან) ---
-        // ვეძებთ ვარიანტებში sale_full-ს, თუ თავად product-ში არ გვიწერია
-        let finalDisplayPrice = product.sale_full || product.final_price;
-
-        if (!finalDisplayPrice || finalDisplayPrice === 'undefined') {
-            const variantWithPrice = productVariants.find(v => v.sale_full && v.sale_full !== 'undefined');
-            finalDisplayPrice = variantWithPrice ? variantWithPrice.sale_full : 
-                               (productVariants.length > 0 ? productVariants[0].final_price : '---');
+        // --- 2. ფასის ლოგიკა (ვიყენებთ Price სვეტს Product_Details-იდან) ---
+        let finalDisplayPrice = '---';
+        
+        // ვეძებთ პირველივე ვარიანტს, რომელსაც აქვს ფასი Price სვეტში
+        const variantWithPrice = productVariants.find(v => v.Price && v.Price !== 'undefined' && v.Price !== '');
+        
+        if (variantWithPrice) {
+            finalDisplayPrice = variantWithPrice.Price;
+        } else {
+            // თუ დეტალებში ვერ იპოვა, აიღებს მთავარი შიტიდან (fallback)
+            finalDisplayPrice = product.final_price || '---';
         }
         
         const availableVariants = productVariants.filter(v => parseInt(v.stock_quantity || 0) > 0);
         const uniqueColors = [...new Set(availableVariants.map(v => v.Colors).filter(c => c))];
         const statusBadge = productVariants.find(v => v.Badge_Status)?.Badge_Status || "";
-        const discountVal = parseInt(product.discount_percent || 0);
+        
+        // ფასდაკლების პროცენტი შენი ახალი სვეტიდან (sale_full)
+        const discountVal = parseInt(productVariants.find(v => v.sale_full)?.sale_full || product.discount_percent || 0);
 
         const card = document.createElement('div');
         card.className = 'product-card';
