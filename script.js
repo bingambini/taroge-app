@@ -840,3 +840,82 @@ async function loadUserOrders(userId) {
         listContainer.innerHTML = `<p style="color: #ff3b30; text-align: center;">შეცდომა ჩატვირთვისას</p>`;
     }
 }
+// --- CATEGORIES HUB LOGIC ---
+
+// კატეგორიების ჰაბის ჩვენება
+function showCategoriesHub() {
+    // ვპოულობთ მთავარ კონტეინერს. 
+    // თუ შენს index.html-ში მთავარ კონტეინერს სხვა ID აქვს, გამოიყენე ის (მაგ: 'app-main')
+    const mainContainer = document.querySelector('.container'); 
+    
+    if (!mainContainer) return;
+
+    mainContainer.innerHTML = `
+        <div style="padding: 20px 0 10px 0; animation: fadeIn 0.4s ease;">
+            <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 5px;">დაათვალიერეთ</h1>
+            <p style="color: #86868b; font-size: 14px;">აირჩიეთ ძებნის მეთოდი</p>
+        </div>
+        
+        <div class="categories-hub">
+            <div class="hub-banner-large banner-brands" onclick="handleHubClick('brands')">
+                <div>
+                    <div class="banner-title">ბრენდები</div>
+                    <div class="banner-desc">თქვენი ფავორიტი მწარმოებლები</div>
+                </div>
+                <div class="banner-icon">🏷️</div>
+            </div>
+
+            <div class="hub-banner-small banner-sale" onclick="handleHubClick('sale')">
+                <div class="banner-title">Sale</div>
+                <div class="banner-desc">საუკეთესო ფასები</div>
+                <div class="banner-icon">🔥</div>
+            </div>
+
+            <div class="hub-banner-small banner-new" onclick="handleHubClick('new')">
+                <div class="banner-title">სიახლე</div>
+                <div class="banner-desc">ბოლო კოლექცია</div>
+                <div class="banner-icon">✨</div>
+            </div>
+
+            <div class="hub-banner-large banner-style" onclick="handleHubClick('filters')">
+                <div>
+                    <div class="banner-title">ზომა და ფერი</div>
+                    <div class="banner-desc">მოერგეთ თქვენს სტილს</div>
+                </div>
+                <div class="banner-icon">🎨</div>
+            </div>
+        </div>
+    `;
+
+    // ნავიგაციის ტაბის განახლება
+    updateActiveTab('categories');
+}
+
+// ბანერებზე დაჭერის დამუშავება
+function handleHubClick(type) {
+    console.log("Category selected:", type);
+    
+    if (type === 'brands') {
+        alert('ბრენდების სია მალე გამოჩნდება!');
+        // აქ მალე ჩავსვამთ renderBrandsList() ფუნქციას
+    } else if (type === 'sale') {
+        // თუ გაქვს ფუნქცია რომელიც ფილტრავს ნივთებს
+        if (typeof renderProducts === "function") {
+            // აქ დავწერთ ფილტრაციის ლოგიკას
+        }
+    } else {
+        alert('ეს სექცია მალე გააქტიურდება');
+    }
+}
+
+// ტაბების გააქტიურების ფუნქცია (თუ უკვე არ გაქვს)
+function updateActiveTab(tabName) {
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.classList.remove('active');
+        // ვამოწმებთ ტექსტს, რომ სწორი ტაბი გავაფერადოთ
+        if (item.querySelector('span')?.innerText.includes('კატეგორია') && tabName === 'categories') {
+            item.classList.add('active');
+        }
+    });
+}
