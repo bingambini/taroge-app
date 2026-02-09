@@ -983,9 +983,24 @@ async function filterByBrand(brandName) {
         
         const allProducts = data.productDetails || [];
 
-        const filtered = allProducts.filter(p => 
+        // 1. ჯერ ვფილტრავთ ბრენდის მიხედვით
+        const brandEntries = allProducts.filter(p => 
             p.brand && p.brand.trim().toLowerCase() === brandName.trim().toLowerCase()
         );
+
+        // 2. ვაჯგუფებთ მოდელებს სახელით (Name), რომ დუბლიკატები ავიცილოთ
+        // და ერთად მოვაგროვოთ ყველა ფერი
+        const groupedMap = {};
+        
+        brandEntries.forEach(entry => {
+            const productName = entry.Name || entry.name_ge;
+            if (!groupedMap[productName]) {
+                groupedMap[productName] = { ...entry };
+            }
+        });
+
+        // მასივად გადაქცევა რენდერისთვის
+        const filtered = Object.values(groupedMap);
 
         mainContent.innerHTML = `
             <div style="padding: 20px 16px 10px 16px;">
