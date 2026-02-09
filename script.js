@@ -929,38 +929,39 @@ function updateActiveTab(tabName) {
 // 1. ბრენდების სიის გამოტანის ფუნქცია
 async function renderBrandsList() {
     const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML = '<div style="text-align:center; padding:50px;">იტვირთება ბრენდები...</div>';
+    mainContent.innerHTML = '<div style="text-align:center; padding:50px;"><div class="shoe-animation">👟</div><p>იტვირთება...</p></div>';
     
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
         const data = await response.json();
-        
-        // მნიშვნელოვანი: შენი API აბრუნებს "productDetails" და არა "Product_Details"
         const products = data.productDetails;
 
         if (!products || !Array.isArray(products)) {
-            throw new Error("მონაცემები ვერ მოიძებნა productDetails-ში");
+            throw new Error("მონაცემები ვერ მოიძებნა");
         }
 
-        // უნიკალური ბრენდები
         const uniqueBrands = [...new Set(products.map(p => p.brand))].filter(b => b && b.trim() !== "");
         uniqueBrands.sort();
 
         mainContent.innerHTML = `
-            <div style="padding: 20px 16px; animation: fadeIn 0.4s ease;">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px;">
-                    <button onclick="showCategoriesHub()" style="background: #f0f0f2; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
-                    <h1 style="font-size: 26px; font-weight: 800; margin: 0;">ბრენდები</h1>
+            <div style="padding: 20px 12px; animation: fadeIn 0.4s ease;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                    <button onclick="showCategoriesHub()" style="background: #f0f0f2; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
+                    <h1 style="font-size: 22px; font-weight: 800; margin: 0;">ბრენდები</h1>
                 </div>
                 
-                <div class="brands-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="brands-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
                     ${uniqueBrands.map(brandName => {
                         const count = products.filter(p => p.brand === brandName).length;
                         return `
                             <div class="brand-item" onclick="filterByBrand('${brandName}')" 
-                                 style="background: white; padding: 25px 15px; border-radius: 20px; text-align: center; cursor: pointer; border: 1px solid #f2f2f7; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-                                <div style="font-weight: 700; font-size: 17px; color: #1d1d1f;">${brandName}</div>
-                                <div style="font-size: 12px; color: #86868b; margin-top: 4px;">${count} მოდელი</div>
+                                 style="background: #fff; height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 14px; cursor: pointer; border: 1px solid #f0f0f2; box-shadow: 0 4px 10px rgba(0,0,0,0.02); padding: 8px;">
+                                <div style="font-weight: 700; font-size: 12px; color: #1d1d1f; text-align: center; word-break: break-word; line-height: 1.2;">
+                                    ${brandName}
+                                </div>
+                                <div style="font-size: 10px; color: #86868b; margin-top: 5px;">
+                                    ${count} მოდელი
+                                </div>
                             </div>
                         `;
                     }).join('')}
@@ -968,7 +969,6 @@ async function renderBrandsList() {
             </div>
         `;
     } catch (error) {
-        console.error("ბრენდების შეცდომა:", error);
         mainContent.innerHTML = `<p style="padding: 20px; color: red; text-align: center;">შეცდომაა: ${error.message}</p>`;
     }
     window.scrollTo(0, 0);
