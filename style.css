@@ -256,3 +256,82 @@ body { background: var(--bg-color); color: var(--text-main); padding-bottom: 80p
     align-items: center; justify-content: center;
     padding: 0 4px; border: 2px solid white;
 }
+
+/* --- ახალი კოდი: კატეგორიების ჰაბის სტილები --- */
+
+.categories-hub {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    animation: hubFadeIn 0.4s ease-out;
+}
+
+.hub-banner-large {
+    grid-column: span 2;
+    height: 140px;
+    border-radius: var(--radius);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding: 24px;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.hub-banner-small {
+    height: 160px;
+    border-radius: var(--radius);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.banner-brands { background: linear-gradient(135deg, #0071e3 0%, #00c6ff 100%); }
+.banner-sale   { background: linear-gradient(135deg, #ff3b30 0%, #ff9f0a 100%); }
+.banner-new    { background: linear-gradient(135deg, #34c759 0%, #96e6a1 100%); }
+.banner-style  { 
+    grid-column: span 2;
+    background: linear-gradient(135deg, #5856d6 0%, #af52de 100%); 
+    height: 100px;
+}
+
+.hub-banner-large:active, .hub-banner-small:active {
+    transform: scale(0.97);
+}
+
+.banner-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    z-index: 1;
+}
+
+.banner-desc {
+    font-size: 13px;
+    opacity: 0.9;
+    z-index: 1;
+}
+
+.banner-icon {
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+    font-size: 80px;
+    opacity: 0.2;
+    transform: rotate(-15deg);
+    pointer-events: none;
+}
+
+@keyframes hubFadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
