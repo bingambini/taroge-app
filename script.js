@@ -977,12 +977,21 @@ async function renderBrandsList() {
 // აუცილებლად შეასწორე ფილტრაციის ფუნქციაც:
 async function filterByBrand(brandName) {
     const mainContent = document.getElementById('main-content');
+    
+    // ვიზუალური ეფექტისთვის, სანამ ჩაიტვირთება
+    mainContent.innerHTML = '<div style="text-align:center; padding:50px;"><p>იტვირთება...</p></div>';
+
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
         const data = await response.json();
         
-        // აქაც მივმართავთ productDetails-ს
-        const filtered = data.productDetails.filter(p => p.brand === brandName);
+        // ვიღებთ მონაცემებს სწორი გასაღებით
+        const allProducts = data.productDetails || [];
+
+        // ფილტრაცია "ჭკვიანი" შედარებით
+        const filtered = allProducts.filter(p => 
+            p.brand && p.brand.trim().toLowerCase() === brandName.trim().toLowerCase()
+        );
 
         mainContent.innerHTML = `
             <div style="padding: 20px 16px 10px 16px;">
@@ -994,8 +1003,12 @@ async function filterByBrand(brandName) {
             <div id="products-grid" class="products-grid" style="padding: 0 16px 20px 16px;"></div>
         `;
 
+        // პროდუქტების გამოჩენა
         renderProducts(filtered);
+
     } catch (error) {
         console.error("ფილტრაციის შეცდომა:", error);
+        mainContent.innerHTML = `<p style="padding:20px; color:red;">შეცდომა მონაცემების წაკითხვისას.</p>`;
     }
+    window.scrollTo(0, 0);
 }
