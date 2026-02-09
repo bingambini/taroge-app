@@ -953,21 +953,34 @@ async function renderBrandsList() {
                 <div class="brands-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
                     ${uniqueBrands.map(brandName => {
                         const count = products.filter(p => p.brand === brandName).length;
-                        return `
-                            <div class="brand-item" onclick="filterByBrand('${brandName}')" 
-                                 style="background: #fff; height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 14px; cursor: pointer; border: 1px solid #f0f0f2; box-shadow: 0 4px 10px rgba(0,0,0,0.02); padding: 8px;">
-                                <div style="font-weight: 700; font-size: 12px; color: #1d1d1f; text-align: center; word-break: break-word; line-height: 1.2;">
-                                    ${brandName}
-                                </div>
-                                <div style="font-size: 10px; color: #86868b; margin-top: 5px;">
-                                    ${count} მოდელი
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-        `;
+// ბრენდების ბადეში (Grid) ჩაანაცვლე ბარათის სტილი ამით:
+return `
+    <div class="brand-item" onclick="filterByBrand('${brandName}')" 
+         style="
+            background: linear-gradient(145deg, #ffffff, #f9f9fb); 
+            height: 95px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            border: 1.5px solid rgba(0,0,0,0.02); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05), inset 0 -2px 5px rgba(0,0,0,0.02); 
+            padding: 12px;
+            transition: all 0.2s ease;
+         "
+         onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.08)';"
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.05)';"
+    >
+        <div style="font-weight: 800; font-size: 13px; color: #1d1d1f; text-align: center; letter-spacing: -0.3px; line-height: 1.1;">
+            ${brandName.toUpperCase()}
+        </div>
+        <div style="background: #0071e3; color: white; font-size: 9px; padding: 2px 8px; border-radius: 20px; margin-top: 8px; font-weight: 600;">
+            ${count} მოდელი
+        </div>
+    </div>
+`;
     } catch (error) {
         mainContent.innerHTML = `<p style="padding: 20px; color: red; text-align: center;">შეცდომაა: ${error.message}</p>`;
     }
