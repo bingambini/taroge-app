@@ -953,55 +953,54 @@ async function renderBrandsList() {
                 <div class="brands-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
                     ${uniqueBrands.map(brandName => {
                         const count = products.filter(p => p.brand === brandName).length;
-// ბრენდების ბადეში (Grid) ჩაანაცვლე ბარათის სტილი ამით:
-return `
-    <div class="brand-item" onclick="filterByBrand('${brandName}')" 
-         style="
-            background: linear-gradient(145deg, #ffffff, #f9f9fb); 
-            height: 95px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            border-radius: 20px; 
-            cursor: pointer; 
-            border: 1.5px solid rgba(0,0,0,0.02); 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05), inset 0 -2px 5px rgba(0,0,0,0.02); 
-            padding: 12px;
-            transition: all 0.2s ease;
-         "
-         onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.08)';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.05)';"
-    >
-        <div style="font-weight: 800; font-size: 13px; color: #1d1d1f; text-align: center; letter-spacing: -0.3px; line-height: 1.1;">
-            ${brandName.toUpperCase()}
-        </div>
-        <div style="background: #0071e3; color: white; font-size: 9px; padding: 2px 8px; border-radius: 20px; margin-top: 8px; font-weight: 600;">
-            ${count} მოდელი
-        </div>
-    </div>
-`;
+                        return `
+                            <div class="brand-item" onclick="filterByBrand('${brandName}')" 
+                                 style="
+                                    background: #ffffff; 
+                                    height: 100px; 
+                                    display: flex; 
+                                    flex-direction: column; 
+                                    align-items: center; 
+                                    justify-content: center; 
+                                    border-radius: 18px; 
+                                    cursor: pointer; 
+                                    border: 1px solid #f2f2f7; 
+                                    box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+                                    padding: 10px;
+                                    transition: transform 0.2s ease;
+                                 "
+                            >
+                                <div style="font-weight: 800; font-size: 14px; color: #1d1d1f; text-align: center; margin-bottom: 4px; letter-spacing: -0.2px;">
+                                    ${brandName}
+                                </div>
+                                
+                                <div style="font-size: 11px; color: #86868b; font-weight: 500; background: #f5f5f7; padding: 2px 8px; border-radius: 10px;">
+                                    ${count} მოდელი
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
     } catch (error) {
         mainContent.innerHTML = `<p style="padding: 20px; color: red; text-align: center;">შეცდომაა: ${error.message}</p>`;
     }
     window.scrollTo(0, 0);
 }
 
-// აუცილებლად შეასწორე ფილტრაციის ფუნქციაც:
+// 2. ფილტრაციის ფუნქცია
 async function filterByBrand(brandName) {
     const mainContent = document.getElementById('main-content');
     
-    // ვიზუალური ეფექტისთვის, სანამ ჩაიტვირთება
     mainContent.innerHTML = '<div style="text-align:center; padding:50px;"><p>იტვირთება...</p></div>';
 
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
         const data = await response.json();
         
-        // ვიღებთ მონაცემებს სწორი გასაღებით
         const allProducts = data.productDetails || [];
 
-        // ფილტრაცია "ჭკვიანი" შედარებით
         const filtered = allProducts.filter(p => 
             p.brand && p.brand.trim().toLowerCase() === brandName.trim().toLowerCase()
         );
@@ -1016,7 +1015,6 @@ async function filterByBrand(brandName) {
             <div id="products-grid" class="products-grid" style="padding: 0 16px 20px 16px;"></div>
         `;
 
-        // პროდუქტების გამოჩენა
         renderProducts(filtered);
 
     } catch (error) {
