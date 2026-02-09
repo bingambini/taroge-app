@@ -844,15 +844,17 @@ async function loadUserOrders(userId) {
 
 // კატეგორიების ჰაბის ჩვენება
 function showCategoriesHub() {
-    // 1. ვპოულობთ მთავარ კონტეინერს
+    // 1. ვპოულობთ მთავარ კონტეინერს ID-ით
     const mainContent = document.getElementById('main-content');
     
-    // 2. ვასუფთავებთ ყველაფერს (Hero-საც და პროდუქტებსაც)
+    if (!mainContent) return;
+
+    // 2. ჯერ ვასუფთავებთ ყველაფერს, რომ ძველი ბანერები წაიშალოს
     mainContent.innerHTML = ''; 
 
-    // 3. ვხატავთ მხოლოდ ჰაბს
+    // 3. ვხატავთ მხოლოდ ახალ ჰაბს
     mainContent.innerHTML = `
-        <div class="categories-page-wrapper" style="animation: fadeIn 0.4s ease;">
+        <div class="categories-page-wrapper" style="animation: fadeIn 0.4s ease; padding-bottom: 30px;">
             <div style="padding: 20px 16px 10px 16px;">
                 <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin: 0;">დაათვალიერეთ</h1>
                 <p style="color: #86868b; font-size: 14px; margin: 5px 0 0 0;">აირჩიეთ ძებნის მეთოდი</p>
@@ -893,7 +895,7 @@ function showCategoriesHub() {
     // ნავიგაციის ტაბის განახლება
     updateActiveTab('categories');
     
-    // გვერდი ავწიოთ ზემოთ, რომ თავიდან დაიწყოს
+    // ეკრანი ავწიოთ ზემოთ
     window.scrollTo(0, 0);
 }
 
