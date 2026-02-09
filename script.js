@@ -111,12 +111,14 @@ function applyHeroDesign(config) {
 }
 
 // --- "ახალი კოლექცია" და პროდუქტების რენდერი ---
-function renderProducts() {
+// --- პროდუქტების რენდერის ერთიანი და გამართული ფუნქცია ---
+function renderProducts(productsToRender) {
     const grid = document.getElementById('products-grid');
     const mainTitle = document.getElementById('new-arrivals-title');
+    
     if (!grid) return;
     
-    // სათაურის ზომის დაპატარავება
+    // სათაურის სტილი (თუ მთავარ გვერდზე ვართ, დააპატარავებს)
     if (mainTitle) {
         mainTitle.style.fontSize = '18px';
         mainTitle.style.margin = '10px 0 15px 5px';
@@ -124,11 +126,22 @@ function renderProducts() {
 
     grid.innerHTML = '';
 
-    state.products.forEach(product => {
+    // თუ ფუნქციას გადავაწოდეთ კონკრეტული სია (მაგ. BOSS), გამოიყენებს მას.
+    // თუ არაფერი გადავაწოდეთ, აიღებს მთლიან სიას (Home გვერდისთვის).
+    const products = productsToRender || state.products;
+
+    if (!products || products.length === 0) {
+        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 20px; color: #86868b;">პროდუქტები ვერ მოიძებნა</p>';
+        return;
+    }
+
+    products.forEach(product => {
         const currentProductId = String(product.product_id).trim().toLowerCase();
+        
         const productVariants = state.productDetails.filter(d => 
             String(d.product_id).trim().toLowerCase() === currentProductId
         );
+        
         const availableVariants = productVariants.filter(v => parseInt(v.stock_quantity || 0) > 0);
         const uniqueColors = [...new Set(availableVariants.map(v => v.Colors).filter(c => c))];
         const statusBadge = productVariants.find(v => v.Badge_Status)?.Badge_Status || "";
@@ -142,8 +155,8 @@ function renderProducts() {
             <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
                 <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
                 <div style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 10;">
-                    ${discountVal > 0 ? `<div style="background: #ff3b30; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid white;">-${discountVal}%</div>` : ''}
-                    ${statusBadge && statusBadge !== 'undefined' ? `<div style="background: #007aff; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid white;">${statusBadge}</div>` : ''}
+                    ${discountVal > 0 ? `<div style="background: #ff3b30; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; border: 1px solid white;">-${discountVal}%</div>` : ''}
+                    ${statusBadge && statusBadge !== 'undefined' ? `<div style="background: #007aff; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid white;">${statusBadge}</div>` : ''}
                 </div>
             </div>
             <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1; background: white;">
@@ -164,53 +177,6 @@ function renderProducts() {
     });
 }
 
-function renderProducts() {
-    const grid = document.getElementById('products-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
-
-    state.products.forEach(product => {
-        const currentProductId = String(product.product_id).trim().toLowerCase();
-        const productVariants = state.productDetails.filter(d => 
-            String(d.product_id).trim().toLowerCase() === currentProductId
-        );
-        const availableVariants = productVariants.filter(v => parseInt(v.stock_quantity || 0) > 0);
-        const uniqueColors = [...new Set(availableVariants.map(v => v.Colors).filter(c => c))];
-        const statusBadge = productVariants.find(v => v.Badge_Status)?.Badge_Status || "";
-        const discountVal = parseInt(product.discount_percent || 0);
-
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.onclick = () => openProductDetails(product.product_id);
-        
-        card.innerHTML = `
-            <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
-                <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
-                <div style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 10;">
-                    ${discountVal > 0 ? `<div style="background: #ff3b30; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid white;">-${discountVal}%</div>` : ''}
-                    ${statusBadge && statusBadge !== 'undefined' ? `<div style="background: #007aff; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid white;">${statusBadge}</div>` : ''}
-                </div>
-            </div>
-            <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1; background: white;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <p style="font-size: 11px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 700;">${product.brand || ''}</p>
-                    <div style="display: flex; gap: 4px; min-height: 14px;">
-                        ${uniqueColors.map(color => {
-                            const hexColor = translateColor(color.trim());
-                            return `<div style="width: 14px; height: 14px; border-radius: 50%; background: ${hexColor}; border: 1px solid #e5e5e5;"></div>`;
-                        }).join('')}
-                    </div>
-                </div>
-                <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 10px 0; height: 36px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.2; color: #1d1d1f;">
-                    ${product.name_ge}
-                </h3>
-                <div style="margin-top: auto;">
-                    <span style="font-size: 17px; font-weight: 800; color: #000;">${product.final_price} ₾</span>
-                </div>
-            </div>`;
-        grid.appendChild(card);
-    });
-}
 
 function openProductDetails(productId) {
     const product = state.products.find(p => String(p.product_id).trim().toLowerCase() === String(productId).trim().toLowerCase());
