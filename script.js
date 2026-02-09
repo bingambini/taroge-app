@@ -118,7 +118,6 @@ function renderProducts(productsToRender) {
     
     if (!grid) return;
     
-    // სათაურის სტილი (თუ მთავარ გვერდზე ვართ, დააპატარავებს)
     if (mainTitle) {
         mainTitle.style.fontSize = '18px';
         mainTitle.style.margin = '10px 0 15px 5px';
@@ -126,21 +125,32 @@ function renderProducts(productsToRender) {
 
     grid.innerHTML = '';
 
-    // თუ ფუნქციას გადავაწოდეთ კონკრეტული სია (მაგ. BOSS), გამოიყენებს მას.
-    // თუ არაფერი გადავაწოდეთ, აიღებს მთლიან სიას (Home გვერდისთვის).
-    const products = productsToRender || state.products;
+    // ვიღებთ ბაზას
+    let products = productsToRender || state.products;
 
     if (!products || products.length === 0) {
         grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 20px; color: #86868b;">პროდუქტები ვერ მოიძებნა</p>';
         return;
     }
 
-    products.forEach(product => {
+    // --- 1. დუბლიკატების მოცილება ---
+    const seenIds = new Set();
+    const uniqueProducts = products.filter(product => {
+        const id = String(product.product_id).trim().toLowerCase();
+        if (seenIds.has(id)) return false;
+        seenIds.add(id);
+        return true;
+    });
+
+    uniqueProducts.forEach(product => {
         const currentProductId = String(product.product_id).trim().toLowerCase();
         
         const productVariants = state.productDetails.filter(d => 
             String(d.product_id).trim().toLowerCase() === currentProductId
         );
+        
+        // --- 2. ფასის დაზუსტება (რომ undefined არ დაიწეროს) ---
+        const price = product.final_price || (productVariants.length > 0 ? productVariants[0].final_price : '---');
         
         const availableVariants = productVariants.filter(v => parseInt(v.stock_quantity || 0) > 0);
         const uniqueColors = [...new Set(availableVariants.map(v => v.Colors).filter(c => c))];
@@ -170,13 +180,12 @@ function renderProducts(productsToRender) {
                     ${product.name_ge}
                 </h3>
                 <div style="margin-top: auto;">
-                    <span style="font-size: 15px; font-weight: 800; color: #000;">${product.final_price} ₾</span>
+                    <span style="font-size: 15px; font-weight: 800; color: #000;">${price} ₾</span>
                 </div>
             </div>`;
         grid.appendChild(card);
     });
 }
-
 
 function openProductDetails(productId) {
     const product = state.products.find(p => String(p.product_id).trim().toLowerCase() === String(productId).trim().toLowerCase());
