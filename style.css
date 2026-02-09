@@ -260,11 +260,12 @@ body { background: var(--bg-color); color: var(--text-main); padding-bottom: 80p
 /* --- ახალი კოდი: კატეგორიების ჰაბის სტილები --- */
 
 .categories-hub {
-    padding: 16px;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr; /* აუცილებლად ორი სვეტი */
     gap: 16px;
-    animation: hubFadeIn 0.4s ease-out;
+    padding: 16px;
+    width: 100%;
+    box-sizing: border-box; /* რომ ფედინგმა სიგანე არ გაზარდოს */
 }
 
 .hub-banner-large {
