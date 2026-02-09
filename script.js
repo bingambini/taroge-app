@@ -904,26 +904,93 @@ function handleHubClick(type) {
     console.log("Category selected:", type);
     
     if (type === 'brands') {
-        alert('ბრენდების სია მალე გამოჩნდება!');
-        // აქ მალე ჩავსვამთ renderBrandsList() ფუნქციას
+        // აქ შევცვალეთ: alert-ის ნაცვლად ვიძახებთ ფუნქციას
+        renderBrandsList(); 
     } else if (type === 'sale') {
-        // თუ გაქვს ფუნქცია რომელიც ფილტრავს ნივთებს
-        if (typeof renderProducts === "function") {
-            // აქ დავწერთ ფილტრაციის ლოგიკას
-        }
+        alert('ფასდაკლებები მალე დაემატება');
     } else {
         alert('ეს სექცია მალე გააქტიურდება');
     }
 }
 
-// ტაბების გააქტიურების ფუნქცია (თუ უკვე არ გაქვს)
+// ტაბების გააქტიურების ფუნქცია
 function updateActiveTab(tabName) {
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => {
         item.classList.remove('active');
-        // ვამოწმებთ ტექსტს, რომ სწორი ტაბი გავაფერადოთ
         if (item.querySelector('span')?.innerText.includes('კატეგორია') && tabName === 'categories') {
             item.classList.add('active');
         }
     });
+}
+
+// --- აქედან იწყება ახალი კოდი, რომელიც უნდა მიაყოლო ---
+
+// 1. ბრენდების სიის გამოტანის ფუნქცია
+async function renderBrandsList() {
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = '<p style="padding: 20px; text-align: center;">იტვირთება ბრენდები...</p>';
+    
+    try {
+        const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
+        const data = await response.json();
+        const products = data.Product_Details;
+
+        // უნიკალური ბრენდების ამოკრება
+        const uniqueBrands = [...new Set(products.map(p => p.brand))].filter(b => b && b.trim() !== "");
+        uniqueBrands.sort();
+
+        mainContent.innerHTML = `
+            <div style="padding: 20px 16px; animation: fadeIn 0.4s ease;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px;">
+                    <button onclick="showCategoriesHub()" style="background: #f0f0f2; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
+                    <h1 style="font-size: 26px; font-weight: 800; margin: 0;">ბრენდები</h1>
+                </div>
+                
+                <div class="brands-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    ${uniqueBrands.map(brandName => {
+                        const count = products.filter(p => p.brand === brandName).length;
+                        return `
+                            <div class="brand-item" onclick="filterByBrand('${brandName}')" 
+                                 style="background: white; padding: 25px 15px; border-radius: 20px; text-align: center; cursor: pointer; border: 1px solid #f2f2f7; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                                <div style="font-weight: 700; font-size: 17px; color: #1d1d1f;">${brandName}</div>
+                                <div style="font-size: 12px; color: #86868b; margin-top: 4px;">${count} მოდელი</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        mainContent.innerHTML = `<p style="padding: 20px; color: red;">შეცდომაა: ${error.message}</p>`;
+    }
+    window.scrollTo(0, 0);
+}
+
+// 2. კონკრეტული ბრენდის ფილტრაციის ფუნქცია
+async function filterByBrand(brandName) {
+    const mainContent = document.getElementById('main-content');
+    
+    try {
+        const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
+        const data = await response.json();
+        const filtered = data.Product_Details.filter(p => p.brand === brandName);
+
+        mainContent.innerHTML = `
+            <div style="padding: 20px 16px 10px 16px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+                    <button onclick="renderBrandsList()" style="background: #f0f0f2; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
+                    <h1 style="font-size: 24px; font-weight: 800; margin: 0;">${brandName}</h1>
+                </div>
+            </div>
+            <div id="products-grid" class="products-grid" style="padding: 0 16px 20px 16px;"></div>
+        `;
+
+        if (typeof renderProducts === 'function') {
+            renderProducts(filtered);
+        }
+    } catch (error) {
+        console.error("Error filtering brands:", error);
+    }
+    window.scrollTo(0, 0);
 }
