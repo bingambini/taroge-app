@@ -111,7 +111,6 @@ function applyHeroDesign(config) {
 }
 
 // --- "ახალი კოლექცია" და პროდუქტების რენდერი ---
-// --- პროდუქტების რენდერის ერთიანი და გამართული ფუნქცია ---
 function renderProducts(productsToRender) {
     const grid = document.getElementById('products-grid');
     const mainTitle = document.getElementById('new-arrivals-title');
@@ -125,7 +124,6 @@ function renderProducts(productsToRender) {
 
     grid.innerHTML = '';
 
-    // ვიღებთ ბაზას
     let products = productsToRender || state.products;
 
     if (!products || products.length === 0) {
@@ -133,7 +131,6 @@ function renderProducts(productsToRender) {
         return;
     }
 
-    // --- 1. დუბლიკატების მოცილება ---
     const seenIds = new Set();
     const uniqueProducts = products.filter(product => {
         const id = String(product.product_id).trim().toLowerCase();
@@ -149,24 +146,23 @@ function renderProducts(productsToRender) {
             String(d.product_id).trim().toLowerCase() === currentProductId
         );
         
-        // --- 2. ფასის ლოგიკა (ვიყენებთ Price სვეტს Product_Details-იდან) ---
+        // 1. ფასის ლოგიკა (Product_Details-ის Price სვეტიდან)
         let finalDisplayPrice = '---';
-        
-        // ვეძებთ პირველივე ვარიანტს, რომელსაც აქვს ფასი Price სვეტში
         const variantWithPrice = productVariants.find(v => v.Price && v.Price !== 'undefined' && v.Price !== '');
-        
         if (variantWithPrice) {
             finalDisplayPrice = variantWithPrice.Price;
         } else {
-            // თუ დეტალებში ვერ იპოვა, აიღებს მთავარი შიტიდან (fallback)
             finalDisplayPrice = product.final_price || '---';
         }
         
-        const availableVariants = productVariants.filter(v => parseInt(v.stock_quantity || 0) > 0);
-        const uniqueColors = [...new Set(availableVariants.map(v => v.Colors).filter(c => c))];
-        const statusBadge = productVariants.find(v => v.Badge_Status)?.Badge_Status || "";
+        // 2. ფერების ჭკვიანი ლოგიკა (მაქსიმუმ 4 წრე + ინდიკატორი)
+        const allColorsInDatabase = productVariants.map(v => v.Colors).filter(c => c && c !== 'undefined');
+        const uniqueColors = [...new Set(allColorsInDatabase.map(c => c.trim()))];
         
-        // ფასდაკლების პროცენტი შენი ახალი სვეტიდან (sale_full)
+        const displayedColors = uniqueColors.slice(0, 4);
+        const remainingCount = uniqueColors.length - displayedColors.length;
+        
+        const statusBadge = productVariants.find(v => v.Badge_Status)?.Badge_Status || "";
         const discountVal = parseInt(productVariants.find(v => v.sale_full)?.sale_full || product.discount_percent || 0);
 
         const card = document.createElement('div');
@@ -184,8 +180,11 @@ function renderProducts(productsToRender) {
             <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1; background: white;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <p style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 700;">${product.brand || ''}</p>
-                    <div style="display: flex; gap: 3px;">
-                        ${uniqueColors.slice(0, 4).map(color => `<div style="width: 12px; height: 12px; border-radius: 50%; background: ${translateColor(color.trim())}; border: 1px solid #e5e5e5;"></div>`).join('')}
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <div style="display: flex; gap: 3px;">
+                            ${displayedColors.map(color => `<div style="width: 10px; height: 10px; border-radius: 50%; background: ${translateColor(color)}; border: 1px solid #e5e5e5;"></div>`).join('')}
+                        </div>
+                        ${remainingCount > 0 ? `<span style="font-size: 10px; color: #86868b; font-weight: 700;">+${remainingCount}</span>` : ''}
                     </div>
                 </div>
                 <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px 0; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.2; color: #1d1d1f;">
