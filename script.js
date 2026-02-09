@@ -146,11 +146,17 @@ function renderProducts(productsToRender) {
             String(d.product_id).trim().toLowerCase() === currentProductId
         );
         
-        // 1. ფასის ლოგიკა (Product_Details-ის Price სვეტიდან)
+        // 1. ფასის ლოგიკა (Product_Details-ის Price და Old_Price სვეტებიდან)
         let finalDisplayPrice = '---';
+        let oldDisplayPrice = null;
+        
         const variantWithPrice = productVariants.find(v => v.Price && v.Price !== 'undefined' && v.Price !== '');
         if (variantWithPrice) {
             finalDisplayPrice = variantWithPrice.Price;
+            // ვიღებთ Old_Price-ს იმავე ვარიანტიდან
+            if (variantWithPrice.Old_Price && variantWithPrice.Old_Price !== 'undefined' && variantWithPrice.Old_Price !== '') {
+                oldDisplayPrice = variantWithPrice.Old_Price;
+            }
         } else {
             finalDisplayPrice = product.final_price || '---';
         }
@@ -167,9 +173,17 @@ function renderProducts(productsToRender) {
 
         const card = document.createElement('div');
         card.className = 'product-card';
+        
+        // --- ამოზნექილი ეფექტის სტილები ---
+        card.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
+        card.style.borderRadius = "18px";
+        card.style.background = "#ffffff";
+        card.style.overflow = "hidden";
+        card.style.transition = "transform 0.2s ease";
+        
         card.onclick = () => openProductDetails(product.product_id);
         
-        // --- განახლებული დიზაინი კუთხეში მიკრული ბეიჯებით ---
+        // --- განახლებული დიზაინი კუთხეში მიკრული ბეიჯებით და ორმაგი ფასით ---
         card.innerHTML = `
             <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
                 <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
@@ -199,8 +213,9 @@ function renderProducts(productsToRender) {
                 <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px 0; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.2; color: #1d1d1f;">
                     ${product.name_ge}
                 </h3>
-                <div style="margin-top: auto;">
-                    <span style="font-size: 15px; font-weight: 800; color: #000;">${finalDisplayPrice} ₾</span>
+                <div style="margin-top: auto; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px; font-weight: 800; color: #000;">${finalDisplayPrice} ₾</span>
+                    ${oldDisplayPrice ? `<span style="font-size: 12px; color: #86868b; text-decoration: line-through; font-weight: 500;">${oldDisplayPrice} ₾</span>` : ''}
                 </div>
             </div>`;
             
