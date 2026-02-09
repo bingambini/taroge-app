@@ -169,15 +169,24 @@ function renderProducts(productsToRender) {
         card.className = 'product-card';
         card.onclick = () => openProductDetails(product.product_id);
         
+        // --- განახლებული დიზაინი კუთხეში მიკრული ბეიჯებით ---
         card.innerHTML = `
             <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
                 <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
-                <div style="position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 10;">
-                    ${discountVal > 0 ? `<div style="background: #ff3b30; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; border: 1px solid white;">-${discountVal}%</div>` : ''}
-                    ${statusBadge && statusBadge !== 'undefined' ? `<div style="background: #007aff; color: white; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid white;">${statusBadge}</div>` : ''}
+                
+                <div style="position: absolute; top: 0; left: 0; display: flex; flex-direction: column; z-index: 10;">
+                    ${discountVal > 0 ? `
+                        <div style="background: linear-gradient(135deg, #ff3b30, #ff7f50); color: white; padding: 5px 12px; border-radius: 18px 0 12px 0; font-size: 11px; font-weight: 800; box-shadow: 2px 2px 8px rgba(255,59,48,0.2);">
+                            -${discountVal}%
+                        </div>` : ''}
+                    
+                    ${statusBadge && statusBadge !== 'undefined' ? `
+                        <div style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); color: #1d1d1f; padding: 4px 12px; border-radius: ${discountVal > 0 ? '0 0 12px 0' : '18px 0 12px 0'}; font-size: 10px; font-weight: 800; text-transform: uppercase; border-right: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; gap: 4px;">
+                            ${statusBadge.toLowerCase() === 'hot' ? '🔥 ' : ''}${statusBadge}
+                        </div>` : ''}
                 </div>
             </div>
-            <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1; background: white;">
+            <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1; background: white; border-radius: 0 0 18px 18px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <p style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 700;">${product.brand || ''}</p>
                     <div style="display: flex; align-items: center; gap: 4px;">
@@ -194,6 +203,7 @@ function renderProducts(productsToRender) {
                     <span style="font-size: 15px; font-weight: 800; color: #000;">${finalDisplayPrice} ₾</span>
                 </div>
             </div>`;
+            
         grid.appendChild(card);
     });
 }
