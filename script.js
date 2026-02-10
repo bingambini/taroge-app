@@ -471,8 +471,12 @@ function handleNavChange(page, element) {
             // 'home' გვერდი
             if (hero) {
                 hero.style.display = 'block';
-                // ხელახლა ვააქტიურებთ ჰერო ბანერის დიზაინს state-იდან
-                if (typeof state !== 'undefined' && state.headerConfig) {
+                
+                // ვიყენებთ შენახულ კონფიგურაციას ბანერის აღსადგენად
+                if (window.lastHeroConfig) {
+                    applyHeroDesign(window.lastHeroConfig);
+                } else if (typeof state !== 'undefined' && state.headerConfig) {
+                    // რეზერვი: თუ window.lastHeroConfig არ არსებობს, ვცდით state-იდან
                     applyHeroDesign(state.headerConfig);
                 }
             }
