@@ -638,7 +638,7 @@ function checkout() {
                 <button onclick="renderCart()" style="background: #f5f5f7; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                     <span style="font-size: 20px;">←</span>
                 </button>
-                <h2 style="font-size: 18px; font-weight: 800; color: #1d1d1f; margin: 0;">შეკვეთის მონაცემები</h2>
+                <h2 style="font-size: 16px; font-weight: 800; color: #1d1d1f; margin: 0;">შეკვეთის მონაცემები</h2>
             </div>
 
             <div style="background: #fff; padding: 24px; border-radius: 28px; border: 1px solid #f2f2f7; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
@@ -698,11 +698,11 @@ function goToPayment() {
                 <button onclick="checkout()" style="background: #f5f5f7; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                     <span style="font-size: 20px;">←</span>
                 </button>
-                <h2 style="font-size: 20px; font-weight: 800; color: #1d1d1f; margin: 0;">გადახდა</h2>
+                <h2 style="font-size: 16px; font-weight: 800; color: #1d1d1f; margin: 0;">გადახდა</h2>
             </div>
 
             <div style="background: #f5f5f7; padding: 25px; border-radius: 22px; text-align: center; margin-bottom: 25px;">
-                <span style="font-size: 14px; color: #86868b;">ზუსტი გადასახდელი:</span>
+                <span style="font-size: 14px; color: #86868b;">სულ გადასახდელი:</span>
                 <div style="font-size: 34px; font-weight: 800; color: #0071e3; margin-top: 5px;">${finalAmount} ₾</div>
             </div>
 
@@ -734,7 +734,7 @@ function goToPayment() {
 
                 <div onclick="selectPaymentMethod('ბარათით კურიერთან', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
                     <div style="font-size: 24px;">🛵</div>
-                    <div style="font-weight: 700;">ბარათით კურიერთან</div>
+                    <div style="font-weight: 700;">კურიერთან გადახდა</div>
                 </div>
             </div>
 
@@ -784,7 +784,7 @@ async function handleFinalOrder() {
             body: JSON.stringify(orderData)
         });
 
-        showToast("შეკვეთა წარმატებულია! 🎉");
+        showToast("თქვენი შეკვეთა წარმატებით გაიგზავნა! 🎉");
         
         state.cart = [];
         if (typeof updateCartBadge === 'function') updateCartBadge();
