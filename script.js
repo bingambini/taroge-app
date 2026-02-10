@@ -86,7 +86,15 @@ function applyHeaderDesign(config) {
     if (config.H_Height && headerElement) headerElement.style.height = config.H_Height + 'px';
     
     if (config.Shop_Logo && logoIcon) {
-        logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="width: ${config.Logo_Size || 40}px; height: ${config.Logo_Size || 40}px; border-radius: 50%; object-fit: cover;">`;
+        // ვასუფთავებთ logo-circle კლასის ნაგულისხმევ სტილებს
+        logoIcon.style.background = "transparent";
+        logoIcon.style.backgroundColor = "transparent";
+        logoIcon.style.border = "none";
+
+        // ვიღებთ რადიუსს შიტიდან (რადგან 0 გიწერია, იქნება 0)
+        const radius = config.Logo_Radius || "0";
+
+        logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="width: ${config.Logo_Size || 40}px; height: auto; border-radius: ${radius}; object-fit: contain; display: block;">`;
     }
 }
 
