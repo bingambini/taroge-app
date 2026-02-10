@@ -919,7 +919,7 @@ function showCategoriesHub() {
     mainContent.innerHTML = `
         <div class="categories-page-wrapper" style="animation: fadeIn 0.4s ease; padding-bottom: 30px;">
             <div style="padding: 20px 16px 10px 16px;">
-                <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin: 0;">დაათვალიერეთ</h1>
+                <h1 style="font-size: 18px; font-weight: 800; letter-spacing: -0.5px; margin: 0;">კატალოგი</h1>
                 <p style="color: #86868b; font-size: 14px; margin: 5px 0 0 0;">აირჩიეთ ძებნის მეთოდი</p>
             </div>
             
