@@ -436,19 +436,28 @@ function handleNavChange(page, element) {
     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     element.classList.add('active');
     
-    if (page === 'cart') {
+    // ელემენტების მოძიება დამალვა/ჩვენებისთვის
+    const hero = document.getElementById('hero');
+    const mainTitle = document.getElementById('new-arrivals-title');
+    const bottomNav = document.querySelector('.bottom-nav');
+
+    if (page === 'categories') {
+        // კატეგორიების დროს ვმალავთ ბანერს და სათაურს
+        if (hero) hero.style.display = 'none';
+        if (mainTitle) mainTitle.style.display = 'none';
+        showCategoriesHub(); // იძახებს კატეგორიების ფუნქციას
+    } else if (page === 'cart') {
+        if (hero) hero.style.display = 'none';
+        if (mainTitle) mainTitle.style.display = 'none';
         renderCart();
     } else if (page === 'profile') {
-        renderProfile(); // გამოიძახებს ჩვენს ახალ პროფილის ფუნქციას
+        if (hero) hero.style.display = 'none';
+        if (mainTitle) mainTitle.style.display = 'none';
+        renderProfile();
     } else {
-        // ეს არის 'home' ან ნებისმიერი სხვა გვერდი
-        const hero = document.getElementById('hero');
+        // ეს არის 'home'
         if (hero) hero.style.display = 'block';
-        const mainTitle = document.getElementById('new-arrivals-title');
         if (mainTitle) mainTitle.style.display = 'block';
-        
-        // პროდუქტების დახატვამდე მენიუ უნდა გამოჩნდეს (თუ checkout-იდან გამოვდივართ)
-        const bottomNav = document.querySelector('.bottom-nav');
         if (bottomNav) bottomNav.style.display = 'flex';
         
         renderProducts();
