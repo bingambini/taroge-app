@@ -174,33 +174,34 @@ function renderProducts(productsToRender) {
         const card = document.createElement('div');
         card.className = 'product-card';
         
-        // --- ამოზნექილი ეფექტის სტილები ---
-        card.style.boxShadow = "0 8px 20px rgba(0,0,0,0.06)";
-        card.style.borderRadius = "18px";
+        // --- მაქსიმალურად "ამოწეული" ეფექტის სტილები ---
+        card.style.boxShadow = "0 15px 30px rgba(0,0,0,0.12)"; // უფრო ღრმა და გაბნეული ჩრდილი
+        card.style.borderRadius = "20px"; // ოდნავ მეტი მომრგვალება სირბილისთვის
         card.style.background = "#ffffff";
         card.style.overflow = "hidden";
-        card.style.transition = "transform 0.2s ease";
+        card.style.transform = "translateY(-5px)"; // ბარათის ფიზიკური აწევა სივრცეში
+        card.style.transition = "all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)";
         
         card.onclick = () => openProductDetails(product.product_id);
         
         // --- განახლებული დიზაინი კუთხეში მიკრული ბეიჯებით და ორმაგი ფასით ---
         card.innerHTML = `
-            <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; border-radius: 18px 18px 0 0; overflow: hidden;">
+            <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #fbfbfb; display: flex; align-items: center; justify-content: center; border-radius: 20px 20px 0 0; overflow: hidden;">
                 <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
                 
                 <div style="position: absolute; top: 0; left: 0; display: flex; flex-direction: column; z-index: 10;">
                     ${discountVal > 0 ? `
-                        <div style="background: linear-gradient(135deg, #ff3b30, #ff7f50); color: white; padding: 5px 12px; border-radius: 18px 0 12px 0; font-size: 11px; font-weight: 800; box-shadow: 2px 2px 8px rgba(255,59,48,0.2);">
+                        <div style="background: linear-gradient(135deg, #ff3b30, #ff7f50); color: white; padding: 5px 12px; border-radius: 20px 0 12px 0; font-size: 11px; font-weight: 800; box-shadow: 2px 2px 8px rgba(255,59,48,0.2);">
                             -${discountVal}%
                         </div>` : ''}
                     
                     ${statusBadge && statusBadge !== 'undefined' ? `
-                        <div style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); color: #1d1d1f; padding: 4px 12px; border-radius: ${discountVal > 0 ? '0 0 12px 0' : '18px 0 12px 0'}; font-size: 10px; font-weight: 800; text-transform: uppercase; border-right: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; gap: 4px;">
+                        <div style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); color: #1d1d1f; padding: 4px 12px; border-radius: ${discountVal > 0 ? '0 0 12px 0' : '20px 0 12px 0'}; font-size: 10px; font-weight: 800; text-transform: uppercase; border-right: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; gap: 4px;">
                             ${statusBadge.toLowerCase() === 'hot' ? '🔥 ' : ''}${statusBadge}
                         </div>` : ''}
                 </div>
             </div>
-            <div class="product-details" style="padding: 12px; display: flex; flex-direction: column; flex-grow: 1; background: white; border-radius: 0 0 18px 18px;">
+            <div class="product-details" style="padding: 14px 12px; display: flex; flex-direction: column; flex-grow: 1; background: white; border-radius: 0 0 20px 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <p style="font-size: 10px; color: #86868b; text-transform: uppercase; margin: 0; font-weight: 700;">${product.brand || ''}</p>
                     <div style="display: flex; align-items: center; gap: 4px;">
@@ -210,7 +211,7 @@ function renderProducts(productsToRender) {
                         ${remainingCount > 0 ? `<span style="font-size: 10px; color: #86868b; font-weight: 700;">+${remainingCount}</span>` : ''}
                     </div>
                 </div>
-                <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px 0; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.2; color: #1d1d1f;">
+                <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 10px 0; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.2; color: #1d1d1f;">
                     ${product.name_ge}
                 </h3>
                 <div style="margin-top: auto; display: flex; align-items: center; gap: 8px;">
