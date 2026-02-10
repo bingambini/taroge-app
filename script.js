@@ -105,15 +105,41 @@ function applyHeroDesign(config) {
 
     // margin-top შევამცირე 20px-დან 5px-მდე
     heroSection.innerHTML = `
-        <div class="hero-wrapper" style="background: ${config.B_Gradient || '#eee'}; border-radius: 24px; padding: 25px; position: relative; overflow: hidden; margin-top: 5px; margin-bottom: 20px; height: ${config.B_Height || 200}px; display: flex; align-items: center;">
+        <div class="hero-wrapper" style="
+            background: ${config.B_Gradient || '#eee'}; 
+            border-radius: 24px; 
+            padding: 25px; 
+            position: relative; 
+            overflow: visible; /* შეიცვალა visible-ზე, რომ ჩრდილი არ მოიჭრას */
+            margin-top: 10px; 
+            margin-bottom: 25px; 
+            margin-left: 15px;
+            margin-right: 15px;
+            height: ${config.B_Height || 200}px; 
+            display: flex; 
+            align-items: center;
+            /* ბანერის ამოწევა სივრცეში */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+        ">
             <div style="position: relative; z-index: 2; width: 60%;">
                 <h2 style="color: ${config.B_Title_Color || '#fff'}; font-size: 20px; margin-bottom: 8px;">${config.B_Title || ''}</h2>
                 <p style="color: #fff; opacity: 0.9; margin-bottom: 15px; font-size: 13px;">${config.B_Subtitle || ''}</p>
-                <button onclick="document.getElementById('products-grid').scrollIntoView({behavior:'smooth'})" style="padding: 8px 18px; border-radius: 10px; border: none; background: white; font-weight: 800; font-size: 13px;">
+                <button onclick="document.getElementById('products-grid').scrollIntoView({behavior:'smooth'})" style="padding: 8px 18px; border-radius: 10px; border: none; background: white; font-weight: 800; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
                     ${config.B_Btn_Text || 'ყიდვა'}
                 </button>
             </div>
-            ${config.B_Image ? `<img src="${config.B_Image}" style="position: absolute; right: -10px; top: 10px; height: 110%; transform: rotate(-5deg); z-index: 1;">` : ''}
+            ${config.B_Image ? `
+                <img src="${config.B_Image}" style="
+                    position: absolute; 
+                    right: -10px; 
+                    top: 0px; 
+                    height: 115%; 
+                    transform: rotate(-8deg); 
+                    z-index: 3;
+                    /* სურათის (ბოტასის) ამოწევის ეფექტი ბანერზე */
+                    filter: drop-shadow(0 20px 15px rgba(0,0,0,0.4));
+                ">` : ''}
         </div>`;
     heroSection.style.display = 'block';
 }
