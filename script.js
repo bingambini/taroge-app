@@ -103,6 +103,9 @@ function applyHeroDesign(config) {
     const heroSection = document.getElementById('hero');
     if (!heroSection || !config || config.Status !== 'active') return;
 
+    // ვინახავთ კონფიგურაციას გლობალურად, რომ ნავიგაციამ შეძლოს მისი აღდგენა
+    window.lastHeroConfig = config;
+
     // ფუნქცია, რომელიც პოულობს პროდუქტს B_Subtitle-ში მოცემული სახელით
     window.handleHeroClick = function() {
         const searchTerm = (config.B_Subtitle || "").toLowerCase().trim();
@@ -117,7 +120,8 @@ function applyHeroDesign(config) {
             openProductDetails(product.product_id);
         } else {
             // თუ ვერ იპოვა, ჩვეულებრივ ჩასქროლავს ქვემოთ
-            document.getElementById('products-grid').scrollIntoView({behavior:'smooth'});
+            const grid = document.getElementById('products-grid');
+            if (grid) grid.scrollIntoView({behavior:'smooth'});
         }
     };
 
