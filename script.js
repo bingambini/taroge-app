@@ -433,44 +433,54 @@ function updateCartBadge() {
 }
 
 function handleNavChange(page, element) {
-    // 1. ნავიგაციის ვიზუალური მხარე
     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     element.classList.add('active');
     
-    // 2. ელემენტების მოძიება
-    const hero = document.getElementById('hero');
-    const mainTitle = document.getElementById('new-arrivals-title');
-    const productsGrid = document.getElementById('products-grid');
-    const bottomNav = document.querySelector('.bottom-nav');
+    const mainContent = document.getElementById('main-content');
+    if (!mainContent) return;
 
-    // 3. ნავიგაციის ლოგიკა გვერდების მიხედვით
     if (page === 'categories') {
-        // კატეგორიების დროს ვასუფთავებთ ეკრანს ზედმეტი ბანერებისგან
-        if (hero) hero.style.display = 'none';
-        if (mainTitle) mainTitle.style.display = 'none';
-        
-        // ვიძახებთ კატეგორიების ჩატვირთვას
-        showCategoriesHub(); 
-        
-    } else if (page === 'cart') {
-        if (hero) hero.style.display = 'none';
-        if (mainTitle) mainTitle.style.display = 'none';
-        renderCart();
-        
-    } else if (page === 'profile') {
-        if (hero) hero.style.display = 'none';
-        if (mainTitle) mainTitle.style.display = 'none';
-        renderProfile();
-        
+        showCategoriesHub();
     } else {
-        // ეს არის 'home' - აქ ვაბრუნებთ ყველაფერს საწყის მდგომარეობაში
-        if (hero) hero.style.display = 'block';
-        if (mainTitle) mainTitle.style.display = 'block';
-        if (bottomNav) bottomNav.style.display = 'flex';
-        
-        // თავიდან ვხატავთ ყველა პროდუქტს
-        renderProducts();
+        // თუ კატეგორიებიდან გამოვდივართ, უნდა აღვადგინოთ HTML სტრუქტურა
+        // რადგან showCategoriesHub-მა ის წაშალა
+        mainContent.innerHTML = `
+            <section id="hero" class="hero-section" style="display: none;"></section>
+            <section id="content-section" class="section">
+                <h2 id="new-arrivals-title" class="section-title">ახალი კოლექცია</h2>
+                <div id="products-grid" class="products-grid"></div>
+            </section>
+        `;
+
+        const hero = document.getElementById('hero');
+        const mainTitle = document.getElementById('new-arrivals-title');
+
+        if (page === 'cart') {
+            if (hero) hero.style.display = 'none';
+            if (mainTitle) mainTitle.style.display = 'none';
+            renderCart();
+        } else if (page === 'profile') {
+            if (hero) hero.style.display = 'none';
+            if (mainTitle) mainTitle.style.display = 'none';
+            renderProfile();
+        } else {
+            // 'home' გვერდი
+            if (hero) {
+                hero.style.display = 'block';
+                // ხელახლა ვააქტიურებთ ჰერო ბანერის დიზაინს state-იდან
+                if (typeof state !== 'undefined' && state.headerConfig) {
+                    applyHeroDesign(state.headerConfig);
+                }
+            }
+            if (mainTitle) mainTitle.style.display = 'block';
+            
+            const bottomNav = document.querySelector('.bottom-nav');
+            if (bottomNav) bottomNav.style.display = 'flex';
+            
+            renderProducts();
+        }
     }
+    window.scrollTo(0, 0);
 }
 
 function renderCart() {
