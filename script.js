@@ -602,13 +602,13 @@ function checkout() {
                 <button onclick="renderCart()" style="background: #f5f5f7; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                     <span style="font-size: 20px;">←</span>
                 </button>
-                <h2 style="font-size: 20px; font-weight: 800; color: #1d1d1f; margin: 0;">მიტანის მონაცემები</h2>
+                <h2 style="font-size: 18px; font-weight: 800; color: #1d1d1f; margin: 0;">შეკვეთის მონაცემები</h2>
             </div>
 
             <div style="background: #fff; padding: 24px; border-radius: 28px; border: 1px solid #f2f2f7; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
                 <div style="margin-bottom: 18px;">
                     <label style="display: block; font-size: 13px; font-weight: 600; color: #86868b; margin-bottom: 8px; margin-left: 4px;">სრული სახელი</label>
-                    <input type="text" id="order-name" placeholder="მაგ: გიორგი ბერიძე" 
+                    <input type="text" id="order-name" placeholder="მაგ: გიორგი გიორგაძე" 
                         style="width: 100%; padding: 16px; border-radius: 14px; border: 1px solid #e5e5e7; background: #f9f9fb; font-size: 15px; outline: none; box-sizing: border-box;">
                 </div>
 
