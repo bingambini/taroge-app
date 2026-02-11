@@ -14,18 +14,24 @@ let state = {
 let selectedColor = null;
 let selectedSize = null;
 
-// --- ფუნქცია: ფერების სახელების თარგმნა CSS ფერებში (შევსებული) ---
+// --- ფუნქცია: ფერების სახელების თარგმნა CSS ფერებში ---
 function translateColor(color) {
     const colors = {
-        'თეთრი': '#ffffff',
-        'შავი': '#1d1d1f',
-        'წითელი': '#ff3b30',
-        'ლურჯი': '#007aff',
-        'ნაცრისფერი': '#8e8e93',
-        'ვერცხლისფერი': '#d2d2d7'
+        'შავი': 'black', 'Black': 'black',
+        'თეთრი': 'white', 'White': 'white',
+        'წითელი': 'red', 'Red': 'red',
+        'ლურჯი': '#007aff', 'Blue': '#007aff',
+        'მწვანე': '#4cd964', 'Green': '#4cd964',
+        'ყვითელი': '#ffcc00', 'Yellow': '#ffcc00',
+        'ნაცრისფერი': '#8e8e93', 'Gray': '#8e8e93',
+        'ყავისფერი': '#a2845e', 'Brown': '#a2845e',
+        'ვარდისფერი': '#ff2d55', 'Pink': '#ff2d55',
+        'იასამნისფერი': '#5856d6', 'Purple': '#5856d6',
+        'სტაფილოსფერი': '#ff9500', 'Orange': '#ff9500'
     };
-    return colors[color] || '#e5e5e7'; // აბრუნებს ფერს ან სტანდარტულ ნაცრისფერს
+    return colors[color] || color;
 }
+
 
 // --- ფუნქციები: ჩატვირთვის ინდიკატორის (Loader) მართვა ---
 function showLoader() { 
