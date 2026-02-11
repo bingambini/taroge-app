@@ -280,204 +280,134 @@ function renderProducts(productsToRender) {
 }
 
 function openProductDetails(productId) {
-    const product = state.products.find(p => String(p.product_id).trim().toLowerCase() === String(productId).trim().toLowerCase());
+    const product = state.products.find(p => p.product_id === productId || p.id === productId);
     if (!product) return;
 
-    const allVariants = state.productDetails.filter(d => 
-        String(d.product_id).trim().toLowerCase() === String(productId).trim().toLowerCase() && 
-        parseInt(d.stock_quantity || 0) > 0
-    );
-
-    const uniqueColors = [...new Set(allVariants.map(v => v.Colors).filter(c => c))];
-    selectedColor = null;
-    selectedSize = null;
+    let selectedColor = null;
+    let selectedSize = null;
 
     const overlay = document.createElement('div');
-    overlay.className = 'detail-overlay';
     overlay.id = 'active-overlay';
-    
-    // --- სურათების გადამრთველი ფუნქცია ---
-    window.changeDetailImage = function(src, el) {
-        document.getElementById('main-detail-img').src = src;
-        document.querySelectorAll('.thumb-frame').forEach(thumb => {
-            thumb.style.borderColor = '#e5e5e7';
-            thumb.style.transform = 'scale(1)';
-        });
-        el.style.borderColor = '#0071e3';
-        el.style.transform = 'scale(1.05)';
+    overlay.className = 'detail-overlay';
+
+    const uniqueColors = [...new Set(state.products
+        .filter(p => p.name_ge === product.name_ge)
+        .map(p => p.color))];
+
+    // ფერების თარგმნის ფუნქცია
+    const translateColor = (c) => {
+        const colors = { 'თეთრი': '#FFFFFF', 'შავი': '#000000', 'წითელი': '#FF3B30', 'ლურჯი': '#007AFF', 'ნაცრისფერი': '#8E8E93' };
+        return colors[c] || '#ccc';
     };
 
-    // ვამზადებთ გალერეის HTML-ს
-    let galleryHtml = `
-        <div class="gallery-container" style="margin-bottom: 20px;">
-            <img id="main-detail-img" src="${product.image}" style="width: 100%; border-radius: 20px; object-fit: contain; max-height: 300px;">
-            <div class="thumbnails-list" style="display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; padding-bottom: 5px;">
-                <div class="thumb-frame" onclick="changeDetailImage('${product.image}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #0071e3; border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.2s;">
-                    <img src="${product.image}" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                ${product.image2 ? `<div class="thumb-frame" onclick="changeDetailImage('${product.image2}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.image2}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
-                ${product.image3 ? `<div class="thumb-frame" onclick="changeDetailImage('${product.image3}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.image3}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
-                ${product.image4 ? `<div class="thumb-frame" onclick="changeDetailImage('${product.image4}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.image4}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
-                ${product.image5 ? `<div class="thumb-frame" onclick="changeDetailImage('${product.image5}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.image5}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
-                ${product.image6 ? `<div class="thumb-frame" onclick="changeDetailImage('${product.image6}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.image6}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
-            </div>
-        </div>
-    `;
-
-    // აქ ემატება overlay-ს შიგთავსი (შენი არსებული სტილის დაცვით)
-    overlay.innerHTML = `
-        <div class="detail-card">
-            <button class="close-btn" onclick="closeProductDetails()">✕</button>
-            ${galleryHtml}
-            <div class="detail-info">
-                <p style="color: #0071e3; font-weight: 700; font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">${product.brand}</p>
-                <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px;">${product.name_ge}</h2>
-                <p style="font-size: 24px; font-weight: 700; color: #1d1d1f; margin-bottom: 20px;">${product.price} ₾</p>
-                
-                <div style="margin-bottom: 20px;">
-                    <p style="font-weight: 600; margin-bottom: 12px; font-size: 15px;">ფერი</p>
-                    <div style="display: flex; gap: 12px;">
-                        ${uniqueColors.map(c => `
-                            <div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" 
-                                 style="width: 32px; height: 32px; border-radius: 50%; background: ${getColorHex(c)}; cursor: pointer; border: 1px solid #e5e5e7; transition: 0.2s;"></div>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 25px;">
-                    <p style="font-weight: 600; margin-bottom: 12px; font-size: 15px;">ზომა</p>
-                    <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;">
-                        <p style="color: #86868b; font-size: 14px;">ჯერ აირჩიეთ ფერი...</p>
-                    </div>
-                </div>
-
-                <button id="main-action-btn" class="buy-btn-disabled" onclick="handleAddToCart('${product.product_id}')" 
-                        style="width: 100%; padding: 18px; border-radius: 18px; border: none; font-size: 16px; font-weight: 700; cursor: not-allowed; background: #e5e5e7; color: #86868b; transition: 0.3s;">
-                    აირჩიეთ ფერი და ზომა
-                </button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(overlay);
+    // მთავარი სურათის შეცვლის ფუნქცია
+    window.changeMainImage = function(url, el) {
+        const mainImg = document.getElementById('main-detail-img');
+        if (mainImg) {
+            mainImg.src = url;
+            mainImg.classList.remove('img-fade');
+            void mainImg.offsetWidth; 
+            mainImg.classList.add('img-fade');
+        }
+        document.querySelectorAll('.thumb-frame').forEach(f => f.classList.remove('selected'));
+        el.classList.add('selected');
+    };
 
     window.updateSizeOptions = function(color) {
         selectedColor = color;
-        selectedSize = null; 
+        selectedSize = null;
         
-        document.querySelectorAll('.color-dot-option').forEach(node => {
-            if(node.getAttribute('data-color') === color) {
-                node.style.boxShadow = '0 0 0 2px white, 0 0 0 4px #0071e3';
-                node.style.transform = 'scale(1.1)';
-            } else {
-                node.style.boxShadow = 'none';
-                node.style.transform = 'scale(1)';
-            }
+        document.querySelectorAll('.color-dot-option').forEach(opt => {
+            opt.style.transform = opt.getAttribute('data-color') === color ? 'scale(1.2)' : 'scale(1)';
+            opt.style.borderColor = opt.getAttribute('data-color') === color ? '#0071e3' : '#e5e5e7';
         });
 
-        const sizeContainer = document.getElementById('size-options-container');
-        const availableSizes = allVariants.filter(v => v.Colors === color).map(v => v.Sizes);
+        const sizes = state.products
+            .filter(p => p.name_ge === product.name_ge && p.color === color)
+            .map(p => p.size);
 
-        sizeContainer.innerHTML = availableSizes.map(s => `
-            <div class="size-option" onclick="selectSize(this, '${s}')" 
-                 style="flex: 0 0 auto; padding: 12px 20px; border: 1.5px solid #e5e5e7; border-radius: 14px; cursor: pointer; font-weight: 600; min-width: 55px; text-align: center; background: white;">
+        const container = document.getElementById('size-options-container');
+        container.innerHTML = sizes.map(s => `
+            <div class="size-option" onclick="window.selectSize(this, '${s}')" 
+                 style="min-width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border: 2px solid #e5e5e7; border-radius: 12px; cursor: pointer; font-weight: 700;">
                 ${s}
             </div>
         `).join('');
         checkSelection();
     };
 
- // --- წაშლილია ზედმეტი } პირველი ხაზიდან ---
+    window.selectSize = function(el, size) {
+        selectedSize = size;
+        document.querySelectorAll('.size-option').forEach(opt => {
+            opt.style.borderColor = '#e5e5e7';
+            opt.style.background = 'white';
+            opt.style.color = '#1d1d1f';
+        });
+        el.style.borderColor = '#0071e3';
+        el.style.background = '#f5f5f7';
+        el.style.color = '#0071e3';
+        checkSelection();
+    };
 
-window.selectSize = function(el, size) {
-    selectedSize = size;
-    document.querySelectorAll('.size-option').forEach(opt => {
-        opt.style.borderColor = '#e5e5e7';
-        opt.style.background = 'white';
-        opt.style.color = '#1d1d1f';
-    });
-    el.style.borderColor = '#0071e3';
-    el.style.background = '#f5f5f7';
-    el.style.color = '#0071e3';
-    checkSelection();
-};
-
-function checkSelection() {
-    const btn = document.getElementById('add-to-cart-btn');
-    if (selectedColor && selectedSize) {
-        btn.disabled = false;
-        btn.style.opacity = '1';
-        btn.style.background = '#0071e3';
-        btn.innerText = 'კალათაში დამატება';
-        // handleAddToCart-ის გამოძახება
-        btn.onclick = () => handleAddToCart(product.product_id, selectedColor, selectedSize);
-    } else {
-        btn.disabled = true;
-        btn.style.opacity = '0.5';
-        btn.style.background = '#86868b';
-        btn.innerText = 'აირჩიეთ ფერი და ზომა';
+    function checkSelection() {
+        const btn = document.getElementById('add-to-cart-btn');
+        if (selectedColor && selectedSize) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.background = '#0071e3';
+            btn.innerText = 'კალათაში დამატება';
+            btn.onclick = () => handleAddToCart(product.product_id, selectedColor, selectedSize);
+        } else {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.background = '#86868b';
+            btn.innerText = 'აირჩიეთ ფერი და ზომა';
+        }
     }
-}
 
-// გალერეის ფუნქციონალი (თუ გინდა რომ მუშაობდეს)
-window.changeMainImage = function(url, el) {
-    const mainImg = document.getElementById('main-detail-img');
-    if (mainImg) {
-        mainImg.src = url;
-        // ანიმაციის დამატება
-        mainImg.classList.remove('img-fade');
-        void mainImg.offsetWidth; // რეფლოუ ანიმაციისთვის
-        mainImg.classList.add('img-fade');
-    }
-    
-    document.querySelectorAll('.thumb-frame').forEach(f => f.classList.remove('selected'));
-    el.classList.add('selected');
-};
-
-// Overlay-ს შიგთავსი
-overlay.innerHTML = `
-    <div class="detail-container" style="max-height: 90vh; border-radius: 30px 30px 0 0; background: white; position: fixed; bottom: 0; width: 100%; overflow-y: auto;">
-        <div class="detail-header" style="padding: 12px 20px 0; display: flex; justify-content: flex-end;">
-            <button onclick="closeProductDetail()" style="background: #f5f5f7; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; color: #86868b; font-size: 16px;">✕</button>
-        </div>
-        
-        <div class="gallery-container" style="padding: 5px 20px;">
-            <img id="main-detail-img" src="${product.photo_url_1}" style="max-width: 90%; max-height: 220px; object-fit: contain;">
-            <div class="thumbnails-list">
-                <div class="thumb-frame selected" onclick="changeMainImage('${product.photo_url_1}', this)">
-                    <img src="${product.photo_url_1}">
+    overlay.innerHTML = `
+        <div class="detail-container" style="max-height: 90vh; border-radius: 30px 30px 0 0; background: white; position: fixed; bottom: 0; width: 100%; overflow-y: auto; z-index: 2001;">
+            <div class="detail-header" style="padding: 12px 20px 0; display: flex; justify-content: flex-end;">
+                <button onclick="closeProductDetail()" style="background: #f5f5f7; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; color: #86868b; font-size: 16px;">✕</button>
+            </div>
+            
+            <div class="gallery-container" style="padding: 5px 20px; text-align: center;">
+                <img id="main-detail-img" src="${product.photo_url_1}" style="max-width: 90%; max-height: 220px; object-fit: contain; border-radius: 15px;">
+                <div class="thumbnails-list" style="display: flex; gap: 8px; justify-content: center; margin-top: 10px; overflow-x: auto; padding: 5px;">
+                    <div class="thumb-frame selected" onclick="changeMainImage('${product.photo_url_1}', this)" style="width: 50px; height: 50px; border: 2px solid #0071e3; border-radius: 10px; overflow: hidden; cursor: pointer;">
+                        <img src="${product.photo_url_1}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    ${product.photo_url_2 ? `<div class="thumb-frame" onclick="changeMainImage('${product.photo_url_2}', this)" style="width: 50px; height: 50px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.photo_url_2}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
+                    ${product.photo_url_3 ? `<div class="thumb-frame" onclick="changeMainImage('${product.photo_url_3}', this)" style="width: 50px; height: 50px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.photo_url_3}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
                 </div>
-                ${product.photo_url_2 ? `<div class="thumb-frame" onclick="changeMainImage('${product.photo_url_2}', this)"><img src="${product.photo_url_2}"></div>` : ''}
-                ${product.photo_url_3 ? `<div class="thumb-frame" onclick="changeMainImage('${product.photo_url_3}', this)"><img src="${product.photo_url_3}"></div>` : ''}
+            </div>
+
+            <div style="padding: 10px 25px 30px;">
+                <p style="color: #0071e3; text-transform: uppercase; font-size: 12px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px;">${product.brand}</p>
+                <h2 style="font-size: 22px; font-weight: 700; color: #1d1d1f; line-height: 1.2; margin-bottom: 8px;">${product.name_ge}</h2>
+                <div style="margin-bottom: 15px;">
+                    <span style="font-size: 26px; font-weight: 800; color: #0071e3;">${product.final_price} ₾</span>
+                </div>
+                <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ფერი</p>
+                <div style="display: flex; gap: 14px; margin-bottom: 15px;">
+                    ${uniqueColors.map(c => `<div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" style="width: 32px; height: 32px; border-radius: 50%; background: ${translateColor(c)}; border: 2px solid #e5e5e7; cursor: pointer;"></div>`).join('')}
+                </div>
+                <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ზომა</p>
+                <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;">
+                    <p style="color: #86868b; font-size: 13px;">ჯერ აირჩიეთ ფერი...</p>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="main-btn" id="add-to-cart-btn" disabled style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
+                        აირჩიეთ ფერი და ზომა
+                    </button>
+                </div>
             </div>
         </div>
+    `;
 
-        <div style="padding: 10px 25px 30px;">
-            <p style="color: #0071e3; text-transform: uppercase; font-size: 12px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px;">${product.brand}</p>
-            <h2 style="font-size: 22px; font-weight: 700; color: #1d1d1f; line-height: 1.2; margin-bottom: 8px;">${product.name_ge}</h2>
-            <div style="margin-bottom: 15px;">
-                <span style="font-size: 26px; font-weight: 800; color: #0071e3;">${product.final_price} ₾</span>
-            </div>
-            <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ფერი</p>
-            <div style="display: flex; gap: 14px; margin-bottom: 15px;">
-                ${uniqueColors.map(c => `<div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" style="width: 32px; height: 32px; border-radius: 50%; background: ${translateColor(c)}; border: 1px solid #e5e5e7; cursor: pointer;"></div>`).join('')}
-            </div>
-            <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ზომა</p>
-            <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;">
-                <p style="color: #86868b; font-size: 13px;">ჯერ აირჩიეთ ფერი...</p>
-            </div>
-            <div style="margin-top: 15px;">
-                <button class="main-btn" id="add-to-cart-btn" disabled style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; opacity: 0.5;">
-                    აირჩიეთ ფერი და ზომა
-                </button>
-            </div>
-        </div>
-    </div>`;
-
-document.body.appendChild(overlay);
-document.body.style.overflow = 'hidden';
-// აქ მთავრდება openProductDetails ფუნქცია
-
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+}
 function closeProductDetail() { 
     document.getElementById('active-overlay')?.remove(); 
     document.body.style.overflow = 'auto';
