@@ -428,7 +428,6 @@ function openProductDetails(productId) {
 
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
-}
     console.log("Overlay წარმატებით დაემატა DOM-ში");
 }
 
