@@ -27,6 +27,7 @@ async function initializeApp() {
     await loadData();
     updateCartBadge();
     setupEventListeners();
+    hideLoader(); // ეს გათიშავს ლოუდერს მონაცემების ჩატვირთვის შემდეგ
 }
 
 async function loadData() {
@@ -1193,3 +1194,25 @@ window.onerror = function(msg, url, line) {
 };
 
 console.log("Full script loaded successfully.");
+
+// --- აქედან ჩაამატე ახალი კოდი ---
+
+function hideLoader() {
+    const loader = document.getElementById('loader-wrapper');
+    if (loader) {
+        loader.classList.add('loader-hidden');
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 500);
+    }
+}
+
+// ეს ფუნქცია უკვე გიწერია თავში, მაგრამ რადგან პროგრამისტი არ ხარ, 
+// უბრალოდ ჩაამატე აქაც - ბოლო ვერსია გადააწერს ძველს და იმუშავებს.
+async function initializeApp() {
+    console.log("App initializing...");
+    await loadData();
+    updateCartBadge();
+    setupEventListeners();
+    hideLoader(); 
+}
