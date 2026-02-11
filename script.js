@@ -372,45 +372,55 @@ function openProductDetails(productId) {
         }
     }
 
-    overlay.innerHTML = `
-        <div class="detail-container" style="max-height: 90vh; border-radius: 30px 30px 0 0; background: white; position: fixed; bottom: 0; width: 100%; overflow-y: auto; box-shadow: 0 -10px 25px rgba(0,0,0,0.1);">
-            <div class="detail-header" style="padding: 12px 20px 0; display: flex; justify-content: flex-end; position: sticky; top: 0; background: white; z-index: 10;">
-                <button onclick="closeProductDetail()" style="background: #f5f5f7; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; color: #86868b; font-size: 16px;">✕</button>
+overlay.innerHTML = `
+        <div class="detail-container" style="max-height: 92vh; border-radius: 32px 32px 0 0; background: white; position: fixed; bottom: 0; width: 100%; overflow-y: auto; box-shadow: 0 -15px 35px rgba(0,0,0,0.15); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+            <div style="position: sticky; top: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 15px 20px; display: flex; justify-content: flex-end; z-index: 20;">
+                <button onclick="closeProductDetail()" style="background: #efeff4; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: #8e8e93; font-size: 18px; display: flex; align-items: center; justify-content: center;">✕</button>
             </div>
             
-            <div style="padding: 0 20px 20px;">
-                <div style="display: flex; justify-content: center; padding: 10px 0;">
-                    <img id="main-detail-img" src="${allPhotos[0]}" style="width: 100%; max-height: 250px; object-fit: contain; border-radius: 15px;">
+            <div style="padding: 0 24px 40px;">
+                <div style="display: flex; justify-content: center; padding: 10px 0 20px 0;">
+                    <img id="main-detail-img" src="${allPhotos[0]}" style="width: 100%; max-height: 280px; object-fit: contain; border-radius: 20px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05));">
                 </div>
 
                 ${allPhotos.length > 1 ? `
-                <div style="display: flex; gap: 10px; justify-content: center; align-items: center; padding: 10px 0; margin-bottom: 10px; flex-wrap: wrap;">
+                <div style="display: flex; gap: 12px; justify-content: center; align-items: center; padding-bottom: 30px; flex-wrap: wrap;">
                     ${allPhotos.map((img, idx) => `
                         <img src="${img}" class="thumb-item" onclick="changeMainImage('${img}', this)" 
-                             style="width: 55px; height: 55px; object-fit: cover; border-radius: 10px; border: 2px solid ${idx === 0 ? '#0071e3' : '#f2f2f7'}; cursor: pointer; flex-shrink: 0; transition: border-color 0.2s;">
+                             style="width: 58px; height: 58px; object-fit: cover; border-radius: 14px; border: 2px solid ${idx === 0 ? '#0071e3' : '#f2f2f7'}; cursor: pointer; transition: all 0.2s ease;">
                     `).join('')}
                 </div>
                 ` : ''}
 
-                <div style="padding-top: 10px;">
-                    <p style="color: #0071e3; text-transform: uppercase; font-size: 12px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px;">${product.brand}</p>
-                    <h2 style="font-size: 22px; font-weight: 700; color: #1d1d1f; line-height: 1.2; margin-bottom: 8px;">${product.name_ge}</h2>
-                    <div style="margin-bottom: 15px;">
-                        <span style="font-size: 26px; font-weight: 800; color: #0071e3;">${product.final_price} ₾</span>
+                <div style="text-align: left;">
+                    <p style="color: #8e8e93; text-transform: uppercase; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 6px;">${product.brand}</p>
+                    <h2 style="font-size: 20px; font-weight: 700; color: #1d1d1f; line-height: 1.3; margin-bottom: 12px; letter-spacing: -0.5px;">${product.name_ge}</h2>
+                    
+                    <div style="margin-bottom: 32px;">
+                        <span style="font-size: 24px; font-weight: 700; color: #0071e3;">${product.final_price} <span style="font-size: 20px;">₾</span></span>
                     </div>
                     
-                    <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ფერი</p>
-                    <div style="display: flex; gap: 14px; margin-bottom: 15px;">
-                        ${uniqueColors.map(c => `<div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" style="width: 32px; height: 32px; border-radius: 50%; background: ${translateColor(c)}; border: 1px solid #e5e5e7; cursor: pointer;"></div>`).join('')}
+                    <div style="margin-bottom: 28px;">
+                        <p style="font-size: 13px; font-weight: 600; color: #8e8e93; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">ფერი</p>
+                        <div style="display: flex; gap: 16px;">
+                            ${uniqueColors.map(c => `
+                                <div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" 
+                                     style="width: 36px; height: 36px; border-radius: 50%; background: ${translateColor(c)}; border: 1px solid #e5e5e7; cursor: pointer; transition: transform 0.2s;">
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                     
-                    <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ზომა</p>
-                    <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
-                        <p style="color: #86868b; font-size: 13px;">ჯერ აირჩიეთ ფერი...</p>
+                    <div style="margin-bottom: 35px;">
+                        <p style="font-size: 13px; font-weight: 600; color: #8e8e93; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">ზომა</p>
+                        <div id="size-options-container" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none;">
+                            <p style="color: #c7c7cc; font-size: 14px; font-style: italic;">ჯერ აირჩიეთ ფერი...</p>
+                        </div>
                     </div>
                     
-                    <div style="margin-top: 20px;">
-                        <button class="main-btn" id="add-to-cart-btn" disabled style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; opacity: 0.5;">
+                    <div style="margin-top: 10px;">
+                        <button class="main-btn" id="add-to-cart-btn" disabled 
+                                style="width: 100%; padding: 20px; border-radius: 18px; border: none; background: #f2f2f7; color: #8e8e93; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s ease;">
                             აირჩიეთ ფერი და ზომა
                         </button>
                     </div>
