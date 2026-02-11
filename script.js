@@ -296,6 +296,71 @@ function openProductDetails(productId) {
     overlay.className = 'detail-overlay';
     overlay.id = 'active-overlay';
     
+    // --- სურათების გადამრთველი ფუნქცია ---
+    window.changeDetailImage = function(src, el) {
+        document.getElementById('main-detail-img').src = src;
+        document.querySelectorAll('.thumb-frame').forEach(thumb => {
+            thumb.style.borderColor = '#e5e5e7';
+            thumb.style.transform = 'scale(1)';
+        });
+        el.style.borderColor = '#0071e3';
+        el.style.transform = 'scale(1.05)';
+    };
+
+    // ვამზადებთ გალერეის HTML-ს
+    let galleryHtml = `
+        <div class="gallery-container" style="margin-bottom: 20px;">
+            <img id="main-detail-img" src="${product.image}" style="width: 100%; border-radius: 20px; object-fit: contain; max-height: 300px;">
+            <div class="thumbnails-list" style="display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; padding-bottom: 5px;">
+                <div class="thumb-frame" onclick="changeDetailImage('${product.image}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #0071e3; border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.2s;">
+                    <img src="${product.image}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                ${product.image2 ? `<div class="thumb-frame" onclick="changeDetailImage('${product.image2}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.image2}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
+                ${product.image3 ? `<div class="thumb-frame" onclick="changeDetailImage('${product.image3}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.image3}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
+                ${product.image4 ? `<div class="thumb-frame" onclick="changeDetailImage('${product.image4}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.image4}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
+                ${product.image5 ? `<div class="thumb-frame" onclick="changeDetailImage('${product.image5}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.image5}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
+                ${product.image6 ? `<div class="thumb-frame" onclick="changeDetailImage('${product.image6}', this)" style="flex: 0 0 55px; height: 55px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.image6}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
+            </div>
+        </div>
+    `;
+
+    // აქ ემატება overlay-ს შიგთავსი (შენი არსებული სტილის დაცვით)
+    overlay.innerHTML = `
+        <div class="detail-card">
+            <button class="close-btn" onclick="closeProductDetails()">✕</button>
+            ${galleryHtml}
+            <div class="detail-info">
+                <p style="color: #0071e3; font-weight: 700; font-size: 13px; margin-bottom: 4px; text-transform: uppercase;">${product.brand}</p>
+                <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 8px;">${product.name_ge}</h2>
+                <p style="font-size: 24px; font-weight: 700; color: #1d1d1f; margin-bottom: 20px;">${product.price} ₾</p>
+                
+                <div style="margin-bottom: 20px;">
+                    <p style="font-weight: 600; margin-bottom: 12px; font-size: 15px;">ფერი</p>
+                    <div style="display: flex; gap: 12px;">
+                        ${uniqueColors.map(c => `
+                            <div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" 
+                                 style="width: 32px; height: 32px; border-radius: 50%; background: ${getColorHex(c)}; cursor: pointer; border: 1px solid #e5e5e7; transition: 0.2s;"></div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <p style="font-weight: 600; margin-bottom: 12px; font-size: 15px;">ზომა</p>
+                    <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;">
+                        <p style="color: #86868b; font-size: 14px;">ჯერ აირჩიეთ ფერი...</p>
+                    </div>
+                </div>
+
+                <button id="main-action-btn" class="buy-btn-disabled" onclick="handleAddToCart('${product.product_id}')" 
+                        style="width: 100%; padding: 18px; border-radius: 18px; border: none; font-size: 16px; font-weight: 700; cursor: not-allowed; background: #e5e5e7; color: #86868b; transition: 0.3s;">
+                    აირჩიეთ ფერი და ზომა
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
     window.updateSizeOptions = function(color) {
         selectedColor = color;
         selectedSize = null; 
@@ -334,6 +399,7 @@ function openProductDetails(productId) {
         el.style.color = '#0071e3';
         checkSelection();
     };
+}
 
     function checkSelection() {
         const btn = document.getElementById('add-to-cart-btn');
