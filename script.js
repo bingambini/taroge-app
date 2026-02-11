@@ -25,8 +25,8 @@ async function loadData() {
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
         const data = await response.json();
-        state.products = data.products || [];
-        state.productDetails = data.productDetails || [];
+        state.products = data.products;
+        state.productDetails = data.productDetails;
         state.headerConfig = data.headerConfig;
         
         if (state.headerConfig) {
@@ -84,7 +84,6 @@ function renderProducts(productsToRender = state.products) {
         grid.appendChild(card);
     });
 }
-
 function translateColor(color) {
     const colors = {
         'თეთრი': '#ffffff', 'შავი': '#000000', 'წითელი': '#ff3b30', 'ლურჯი': '#007aff',
@@ -185,7 +184,6 @@ function handleAddToCart(productId, color, size) {
     if (btn) { btn.innerText = "დამატებულია! ✓"; btn.style.background = "#4cd964"; }
     setTimeout(closeProductDetail, 800);
 }
-
 function updateCartBadge() {
     const badge = document.getElementById('nav-cart-badge');
     if (badge) {
