@@ -356,7 +356,7 @@ function openProductDetails(productId) {
         checkSelection();
     };
 
- function openProductDetails(productId) {
+function openProductDetails(productId) {
     const product = state.products.find(p => String(p.product_id).trim().toLowerCase() === String(productId).trim().toLowerCase());
     if (!product) return;
 
@@ -433,7 +433,7 @@ function openProductDetails(productId) {
         checkSelection();
     };
 
-    // ჭკვიანი ღილაკის ლოგიკა (3-ეტაპიანი)
+    // ჭკვიანი ღილაკის ლოგიკა
     window.checkSelection = function() {
         const btn = document.getElementById('add-to-cart-btn');
         if (!btn) return;
@@ -442,28 +442,25 @@ function openProductDetails(productId) {
             btn.disabled = false;
             btn.style.background = '#0071e3';
             btn.style.color = 'white';
-            btn.style.opacity = '1';
             btn.style.boxShadow = '0 8px 20px rgba(0, 113, 227, 0.3)';
             btn.innerText = 'კალათაში დამატება';
             btn.onclick = () => handleAddToCart(product.product_id, selectedColor, selectedSize);
         } else if (selectedColor || selectedSize) {
             btn.disabled = true;
-            btn.style.background = '#48484a'; // მუქი ნაცრისფერი
+            btn.style.background = '#48484a';
             btn.style.color = '#ffffff';
-            btn.style.opacity = '1';
             btn.style.boxShadow = 'none';
             btn.innerText = selectedColor ? 'აირჩიეთ ზომა' : 'აირჩიეთ ფერი';
         } else {
             btn.disabled = true;
-            btn.style.background = '#f2f2f7'; // მკრთალი ფონი
-            btn.style.color = '#aeaeb2'; // მკრთალი ტექსტი
-            btn.style.opacity = '1';
+            btn.style.background = '#f2f2f7';
+            btn.style.color = '#aeaeb2';
             btn.style.boxShadow = 'none';
             btn.innerText = 'აირჩიეთ ფერი და ზომა';
         }
     };
 
-    // ჰედერის მანძილის აღდგენა
+    // ჰედერის მანძილი
     const headerConf = state.headerConfig && state.headerConfig[0] ? state.headerConfig[0] : {};
     const dynamicMargin = headerConf.margin_bottom || 20;
     const banner = document.querySelector('.hero-container');
@@ -471,12 +468,9 @@ function openProductDetails(productId) {
 
     overlay.innerHTML = `
         <div class="detail-container" style="max-height: 92vh; border-radius: 32px 32px 0 0; background: white; position: fixed; bottom: 0; width: 100%; overflow-y: auto; box-shadow: 0 -15px 35px rgba(0,0,0,0.2); font-family: -apple-system, sans-serif;">
-            
             <div style="padding: 0 24px 30px; position: relative;">
-                
                 <div style="position: relative; display: flex; justify-content: center; padding: 20px 0 10px 0;">
                     <img id="main-detail-img" src="${allPhotos[0]}" style="width: 100%; max-height: 250px; object-fit: contain; border-radius: 20px;">
-                    
                     <button onclick="closeProductDetail()" style="position: absolute; top: 15px; right: 0; background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(5px); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; color: #8e8e93; font-size: 18px; z-index: 30; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">✕</button>
                 </div>
 
@@ -492,34 +486,21 @@ function openProductDetails(productId) {
                 <div style="text-align: left;">
                     <p style="color: #bcbcbc; text-transform: uppercase; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; margin-bottom: 2px;">${product.brand}</p>
                     <h2 style="font-size: 19px; font-weight: 700; color: #1d1d1f; line-height: 1.2; margin-bottom: 4px;">${product.name_ge}</h2>
-                    
-                    <div style="margin-bottom: 16px;">
-                        <span style="font-size: 22px; font-weight: 800; color: #0071e3;">${product.final_price} ₾</span>
-                    </div>
-                    
+                    <div style="margin-bottom: 16px;"><span style="font-size: 22px; font-weight: 800; color: #0071e3;">${product.final_price} ₾</span></div>
                     <div style="margin-bottom: 18px;">
                         <p style="font-size: 12px; font-weight: 700; color: #8e8e93; margin-bottom: 8px; text-transform: uppercase;">ფერი</p>
                         <div style="display: flex; gap: 14px;">
-                            ${uniqueColors.map(c => `
-                                <div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" 
-                                     style="width: 36px; height: 36px; border-radius: 50%; background: ${translateColor(c)}; border: 1px solid #e5e5e7; cursor: pointer; transition: 0.2s;">
-                                </div>
-                            `).join('')}
+                            ${uniqueColors.map(c => `<div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" style="width: 36px; height: 36px; border-radius: 50%; background: ${translateColor(c)}; border: 1px solid #e5e5e7; cursor: pointer; transition: 0.2s;"></div>`).join('')}
                         </div>
                     </div>
-                    
                     <div style="margin-bottom: 20px;">
                         <p style="font-size: 12px; font-weight: 700; color: #8e8e93; margin-bottom: 8px; text-transform: uppercase;">ზომა</p>
                         <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;">
                             <p style="color: #c7c7cc; font-size: 13px; font-style: italic;">ჯერ აირჩიეთ ფერი...</p>
                         </div>
                     </div>
-                    
                     <div style="margin-top: 5px;">
-                        <button class="main-btn" id="add-to-cart-btn" disabled 
-                                style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #f2f2f7; color: #aeaeb2; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s ease;">
-                            აირჩიეთ ფერი და ზომა
-                        </button>
+                        <button class="main-btn" id="add-to-cart-btn" disabled style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #f2f2f7; color: #aeaeb2; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s ease;">აირჩიეთ ფერი და ზომა</button>
                     </div>
                 </div>
             </div>
