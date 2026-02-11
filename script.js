@@ -25,8 +25,8 @@ async function loadData() {
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
         const data = await response.json();
-        state.products = data.products;
-        state.productDetails = data.productDetails;
+        state.products = data.products || [];
+        state.productDetails = data.productDetails || [];
         state.headerConfig = data.headerConfig;
         
         if (state.headerConfig) {
@@ -164,7 +164,7 @@ function closeProductDetail() {
     document.getElementById('active-overlay')?.remove(); 
     document.body.style.overflow = 'auto';
 }
-// --- კალათის ლოგიკა ---
+
 function handleAddToCart(productId, color, size) {
     const productData = state.products.find(p => p.product_id === productId || p.id === productId);
     const existingItem = state.cart.find(item => item.id === productId && item.color === color && item.size === size);
@@ -195,7 +195,6 @@ function updateCartBadge() {
     }
 }
 
-// --- ნავიგაცია ---
 function handleNavChange(page, element) {
     document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
     element.classList.add('active');
@@ -226,7 +225,6 @@ function handleNavChange(page, element) {
     window.scrollTo(0, 0);
 }
 
-// --- კალათის რენდერი ---
 function renderCart() {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
@@ -285,7 +283,6 @@ function removeFromCart(index) {
     updateCartBadge(); renderCart();
 }
 
-// --- Checkout ---
 function checkout() {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
@@ -326,7 +323,6 @@ async function handleFinalOrder() {
     } catch (e) { alert("შეცდომა გაგზავნისას"); btn.disabled = false; }
 }
 
-// --- კატეგორიები და პროფილი ---
 function showCategoriesHub() {
     const main = document.getElementById('main-content');
     main.innerHTML = `
