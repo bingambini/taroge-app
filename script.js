@@ -25,17 +25,23 @@ async function loadData() {
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
         const data = await response.json();
-        state.products = data.products;
-        state.productDetails = data.productDetails;
-        state.headerConfig = data.headerConfig;
+        
+        // მონაცემების მინიჭება სკრიპტიდან წამოსული სახელების მიხედვით
+        state.products = data.products || [];
+        state.productDetails = data.productDetails || [];
+        
+        // შენს სკრიპტში ბანერის მონაცემებს ქვია "heroConfig"
+        state.headerConfig = data.heroConfig || data.headerConfig; 
         
         if (state.headerConfig) {
             applyHeroDesign(state.headerConfig);
             window.lastHeroConfig = state.headerConfig;
         }
+        
         renderProducts();
     } catch (error) {
         console.error("Error loading data:", error);
+        // აქ შეგიძლია დაამატო alert, რომ დავინახოთ თუ fetch-ი ჩავარდა
     }
 }
 
