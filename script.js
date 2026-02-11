@@ -973,30 +973,30 @@ async function loadUserOrders(userId) {
             if (order.status === "ჩაბარდა") color = "#34c759";
             if (order.status === "გაუქმდა") color = "#ff3b30";
 
-            return `
-                <div style="background: white; padding: 18px; border-radius: 24px; border: 1px solid #f2f2f7; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.01);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
-                        <div>
-                            <span style="font-size: 14px; font-weight: 800; color: #1d1d1f; display: block;">#ORD-${order.orderId.toString().slice(-8)}</span>
-                            <span style="font-size: 11px; color: #86868b;">${order.date ? order.date.split(',')[0] : ''}</span>
-                        </div>
-                        <span style="background: ${color}15; color: ${color}; padding: 6px 14px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; min-width: 80px; line-height: 1;">
-                            ${order.status}
-                        </span>
-                    </div>
+return `
+    <div style="background: white; padding: 18px; border-radius: 24px; border: 1px solid #f2f2f7; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.01);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
+            <div>
+                <span style="font-size: 14px; font-weight: 800; color: #1d1d1f; display: block;">#ORD-${order.orderId.toString().slice(-8)}</span>
+                <span style="font-size: 11px; color: #86868b;">${order.date ? order.date.split(',')[0] : ''}</span>
+            </div>
+            <span style="background: ${color}15; color: ${color}; padding: 6px 14px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; min-width: 85px; line-height: 1;">
+                ${order.status.trim()}
+            </span>
+        </div>
 
-                    <div style="background: #f9f9fb; border-radius: 16px; padding: 15px; margin-bottom: 12px; border: 1px solid #f2f2f7; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 50px;">
-                        <div style="font-size: 12px; color: #424245; line-height: 1.4; white-space: pre-line; font-weight: 500;">
-                            ${order.items.trim()}
-                        </div>
-                    </div>
+        <div style="background: #f9f9fb; border-radius: 16px; padding: 12px 15px; margin-bottom: 12px; border: 1px solid #f2f2f7; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 50px;">
+            <div style="font-size: 12px; color: #424245; line-height: 1.4; white-space: pre-line; font-weight: 500; width: 100%;">
+                ${order.items.trim()}
+            </div>
+        </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #f5f5f7;">
-                        <span style="font-size: 13px; color: #86868b;">ჯამი:</span>
-                        <span style="font-size: 16px; font-weight: 800; color: #0071e3;">${order.total} ₾</span>
-                    </div>
-                </div>
-            `;
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #f5f5f7;">
+            <span style="font-size: 13px; color: #86868b;">ჯამი:</span>
+            <span style="font-size: 16px; font-weight: 800; color: #0071e3;">${order.total} ₾</span>
+        </div>
+    </div>
+`;
         }).join('');
 
     } catch (e) {
