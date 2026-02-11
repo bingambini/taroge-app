@@ -384,10 +384,10 @@ function openProductDetails(productId) {
                 </div>
 
                 ${allPhotos.length > 1 ? `
-                <div style="display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; margin-bottom: 10px; scrollbar-width: none;">
+                <div style="display: flex; gap: 10px; justify-content: center; align-items: center; padding: 10px 0; margin-bottom: 10px; flex-wrap: wrap;">
                     ${allPhotos.map((img, idx) => `
                         <img src="${img}" class="thumb-item" onclick="changeMainImage('${img}', this)" 
-                             style="width: 55px; height: 55px; object-fit: cover; border-radius: 10px; border: 2px solid ${idx === 0 ? '#0071e3' : '#f2f2f7'}; cursor: pointer; flex-shrink: 0;">
+                             style="width: 55px; height: 55px; object-fit: cover; border-radius: 10px; border: 2px solid ${idx === 0 ? '#0071e3' : '#f2f2f7'}; cursor: pointer; flex-shrink: 0; transition: border-color 0.2s;">
                     `).join('')}
                 </div>
                 ` : ''}
@@ -405,7 +405,7 @@ function openProductDetails(productId) {
                     </div>
                     
                     <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ზომა</p>
-                    <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;">
+                    <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
                         <p style="color: #86868b; font-size: 13px;">ჯერ აირჩიეთ ფერი...</p>
                     </div>
                     
