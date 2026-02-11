@@ -734,7 +734,6 @@ function goToPayment() {
     });
 
     const finalAmount = totalSum.toFixed(2);
-    // ვინახავთ მონაცემებს დროებით ობიექტში
     state.tempOrder = { name, phone, address, totalAmount: finalAmount, paymentMethod: "" };
 
     const grid = document.getElementById('products-grid');
@@ -753,39 +752,39 @@ function goToPayment() {
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 12px;">
-                <div onclick="selectPaymentMethod('საბანკო გადარიცხვა', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                <div onclick="selectPaymentMethod('საბანკო გადარიცხვა', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
                     <div style="font-size: 24px;">🏦</div>
                     <div style="font-weight: 700;">საბანკო გადარიცხვა</div>
                 </div>
-
                 <div id="bank-details-box" style="display: none; background: #f0f7ff; padding: 18px; border-radius: 20px; border: 1px solid #0071e3; margin-top: -5px;">
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 12px; font-weight: 700; color: #1d1d1f;">მიმღები: შპს მაღაზია</span>
-                        </div>
+                        <span style="font-size: 12px; font-weight: 700;">მიმღები: შპს მაღაზია</span>
                         <div style="display: flex; gap: 8px;">
                             <div id="iban-text" style="background: white; padding: 10px; border-radius: 10px; border: 1px solid #d0e8ff; font-family: monospace; font-weight: 700; flex-grow: 1; font-size: 13px;">GE00TB0000000000000000</div>
                             <button onclick="copyIBAN()" style="background: #0071e3; color: white; border: none; padding: 0 12px; border-radius: 10px; font-size: 11px; cursor: pointer;">Copy</button>
                         </div>
-                        <p style="font-size: 11px; color: #856404; margin: 0; background: #fff9e6; padding: 8px; border-radius: 8px;">
-                            ℹ️ დანიშნულებაში მიუთითეთ თქვენი სახელი და გვარი.
-                        </p>
                     </div>
                 </div>
 
-                <div onclick="selectPaymentMethod('ბარათით გადახდა', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                <div onclick="selectPaymentMethod('ბარათით გადახდა', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
                     <div style="font-size: 24px;">💳</div>
                     <div style="font-weight: 700;">ბარათით გადახდა</div>
                 </div>
+                <div id="card-details-box" style="display: none; background: #fdf2f2; padding: 15px; border-radius: 20px; border: 1px solid #f8d7da; margin-top: -5px;">
+                    <p style="font-size: 12px; color: #721c24; margin: 0;">⚠️ ონლაინ გადახდა დროებით მიუწვდომელია.</p>
+                </div>
 
-                <div onclick="selectPaymentMethod('ბარათით კურიერთან', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                <div onclick="selectPaymentMethod('ბარათით კურიერთან', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
                     <div style="font-size: 24px;">🛵</div>
                     <div style="font-weight: 700;">კურიერთან გადახდა</div>
                 </div>
+                <div id="delivery-details-box" style="display: none; background: #f4fcf4; padding: 15px; border-radius: 20px; border: 1px solid #d4edda; margin-top: -5px;">
+                    <p style="font-size: 12px; color: #155724; margin: 0;">✅ გადაიხადეთ ნაღდი ანგარიშსწორებით ან ტერმინალით კურიერთან.</p>
+                </div>
             </div>
 
-            <button id="final-submit-btn" onclick="handleFinalOrder()" style="width: 100%; margin-top: 30px; padding: 20px; border-radius: 20px; border: none; background: #000; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
-                შეკვეთის დასრულება
+            <button id="final-submit-btn" disabled onclick="handleFinalOrder()" style="width: 100%; margin-top: 30px; padding: 20px; border-radius: 20px; border: none; background: #f2f2f7; color: #aeaeb2; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s;">
+                აირჩიე ანგარიშსწორების მეთოდი
             </button>
         </div>
     `;
@@ -848,28 +847,48 @@ async function handleFinalOrder() {
     }
 }
 
-// --- აუცილებელი ფუნქციები გადახდის მეთოდების მუშაობისთვის ---
-
 window.selectPaymentMethod = function(method, element) {
-    // 1. მოვნიშნოთ ყველა ვარიანტი როგორც "აურჩეველი"
+    const btn = document.getElementById('final-submit-btn');
+    const bankBox = document.getElementById('bank-details-box');
+    const cardBox = document.getElementById('card-details-box');
+    const deliveryBox = document.getElementById('delivery-details-box');
+
+    // თუ უკვე არჩეულზე ვაჭერთ - ავკეცოთ
+    if (state.tempOrder.paymentMethod === method) {
+        state.tempOrder.paymentMethod = "";
+        element.style.borderColor = '#f5f5f7';
+        element.style.background = 'white';
+        if(bankBox) bankBox.style.display = 'none';
+        if(cardBox) cardBox.style.display = 'none';
+        if(deliveryBox) deliveryBox.style.display = 'none';
+
+        btn.disabled = true;
+        btn.style.background = '#f2f2f7';
+        btn.style.color = '#aeaeb2';
+        btn.innerText = 'აირჩიე ანგარიშსწორების მეთოდი';
+        return;
+    }
+
+    // ახალი მეთოდის არჩევა
     document.querySelectorAll('.pay-option').forEach(opt => {
-        opt.style.borderColor = '#f2f2f7';
+        opt.style.borderColor = '#f5f5f7';
         opt.style.background = 'white';
     });
 
-    // 2. მოვნიშნოთ არჩეული ვარიანტი
     element.style.borderColor = '#0071e3';
     element.style.background = '#f0f7ff';
-    
-    // 3. შევინახოთ არჩეული მეთოდი state-ში
-    if (!state.tempOrder) state.tempOrder = {};
     state.tempOrder.paymentMethod = method;
-    
-    // 4. ბანკის რეკვიზიტების გამოჩენა/დამალვა
-    const bankBox = document.getElementById('bank-details-box');
-    if (bankBox) {
-        bankBox.style.display = (method === 'საბანკო გადარიცხვა') ? 'block' : 'none';
-    }
+
+    // დეტალების მართვა (Accordion)
+    if(bankBox) bankBox.style.display = (method === 'საბანკო გადარიცხვა') ? 'block' : 'none';
+    if(cardBox) cardBox.style.display = (method === 'ბარათით გადახდა') ? 'block' : 'none';
+    if(deliveryBox) deliveryBox.style.display = (method === 'ბარათით კურიერთან') ? 'block' : 'none';
+
+    // ღილაკის გააქტიურება
+    btn.disabled = false;
+    btn.style.background = '#000';
+    btn.style.color = 'white';
+    btn.innerText = 'შეკვეთის დასრულება';
 };
 
 window.copyIBAN = function() {
@@ -879,7 +898,6 @@ window.copyIBAN = function() {
     navigator.clipboard.writeText(ibanText).then(() => {
         showToast("IBAN დაკოპირდა! ✅");
     }).catch(() => {
-        // fallback მეთოდი თუ clipboard-ზე წვდომა არ არის
         const el = document.createElement('textarea');
         el.value = ibanText;
         document.body.appendChild(el);
