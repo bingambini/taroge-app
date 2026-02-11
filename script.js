@@ -280,56 +280,42 @@ function renderProducts(productsToRender) {
 }
 
 function openProductDetails(productId) {
-    const product = state.products.find(p => p.product_id === productId || p.id === productId);
+    const product = state.products.find(p => String(p.product_id).trim().toLowerCase() === String(productId).trim().toLowerCase());
     if (!product) return;
 
-    let selectedColor = null;
-    let selectedSize = null;
+    const allVariants = state.productDetails.filter(d => 
+        String(d.product_id).trim().toLowerCase() === String(productId).trim().toLowerCase() && 
+        parseInt(d.stock_quantity || 0) > 0
+    );
+
+    const uniqueColors = [...new Set(allVariants.map(v => v.Colors).filter(c => c))];
+    selectedColor = null;
+    selectedSize = null;
 
     const overlay = document.createElement('div');
-    overlay.id = 'active-overlay';
     overlay.className = 'detail-overlay';
-
-    const uniqueColors = [...new Set(state.products
-        .filter(p => p.name_ge === product.name_ge)
-        .map(p => p.color))];
-
-    // ფერების თარგმნის ფუნქცია
-    const translateColor = (c) => {
-        const colors = { 'თეთრი': '#FFFFFF', 'შავი': '#000000', 'წითელი': '#FF3B30', 'ლურჯი': '#007AFF', 'ნაცრისფერი': '#8E8E93' };
-        return colors[c] || '#ccc';
-    };
-
-    // მთავარი სურათის შეცვლის ფუნქცია
-    window.changeMainImage = function(url, el) {
-        const mainImg = document.getElementById('main-detail-img');
-        if (mainImg) {
-            mainImg.src = url;
-            mainImg.classList.remove('img-fade');
-            void mainImg.offsetWidth; 
-            mainImg.classList.add('img-fade');
-        }
-        document.querySelectorAll('.thumb-frame').forEach(f => f.classList.remove('selected'));
-        el.classList.add('selected');
-    };
-
+    overlay.id = 'active-overlay';
+    
     window.updateSizeOptions = function(color) {
         selectedColor = color;
-        selectedSize = null;
+        selectedSize = null; 
         
-        document.querySelectorAll('.color-dot-option').forEach(opt => {
-            opt.style.transform = opt.getAttribute('data-color') === color ? 'scale(1.2)' : 'scale(1)';
-            opt.style.borderColor = opt.getAttribute('data-color') === color ? '#0071e3' : '#e5e5e7';
+        document.querySelectorAll('.color-dot-option').forEach(node => {
+            if(node.getAttribute('data-color') === color) {
+                node.style.boxShadow = '0 0 0 2px white, 0 0 0 4px #0071e3';
+                node.style.transform = 'scale(1.1)';
+            } else {
+                node.style.boxShadow = 'none';
+                node.style.transform = 'scale(1)';
+            }
         });
 
-        const sizes = state.products
-            .filter(p => p.name_ge === product.name_ge && p.color === color)
-            .map(p => p.size);
+        const sizeContainer = document.getElementById('size-options-container');
+        const availableSizes = allVariants.filter(v => v.Colors === color).map(v => v.Sizes);
 
-        const container = document.getElementById('size-options-container');
-        container.innerHTML = sizes.map(s => `
-            <div class="size-option" onclick="window.selectSize(this, '${s}')" 
-                 style="min-width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border: 2px solid #e5e5e7; border-radius: 12px; cursor: pointer; font-weight: 700;">
+        sizeContainer.innerHTML = availableSizes.map(s => `
+            <div class="size-option" onclick="selectSize(this, '${s}')" 
+                 style="flex: 0 0 auto; padding: 12px 20px; border: 1.5px solid #e5e5e7; border-radius: 14px; cursor: pointer; font-weight: 600; min-width: 55px; text-align: center; background: white;">
                 ${s}
             </div>
         `).join('');
@@ -366,22 +352,13 @@ function openProductDetails(productId) {
     }
 
     overlay.innerHTML = `
-        <div class="detail-container" style="max-height: 90vh; border-radius: 30px 30px 0 0; background: white; position: fixed; bottom: 0; width: 100%; overflow-y: auto; z-index: 2001;">
+        <div class="detail-container" style="max-height: 90vh; border-radius: 30px 30px 0 0; background: white; position: fixed; bottom: 0; width: 100%; overflow-y: auto;">
             <div class="detail-header" style="padding: 12px 20px 0; display: flex; justify-content: flex-end;">
                 <button onclick="closeProductDetail()" style="background: #f5f5f7; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; color: #86868b; font-size: 16px;">✕</button>
             </div>
-            
-            <div class="gallery-container" style="padding: 5px 20px; text-align: center;">
-                <img id="main-detail-img" src="${product.photo_url_1}" style="max-width: 90%; max-height: 220px; object-fit: contain; border-radius: 15px;">
-                <div class="thumbnails-list" style="display: flex; gap: 8px; justify-content: center; margin-top: 10px; overflow-x: auto; padding: 5px;">
-                    <div class="thumb-frame selected" onclick="changeMainImage('${product.photo_url_1}', this)" style="width: 50px; height: 50px; border: 2px solid #0071e3; border-radius: 10px; overflow: hidden; cursor: pointer;">
-                        <img src="${product.photo_url_1}" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    ${product.photo_url_2 ? `<div class="thumb-frame" onclick="changeMainImage('${product.photo_url_2}', this)" style="width: 50px; height: 50px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.photo_url_2}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
-                    ${product.photo_url_3 ? `<div class="thumb-frame" onclick="changeMainImage('${product.photo_url_3}', this)" style="width: 50px; height: 50px; border: 2px solid #e5e5e7; border-radius: 10px; overflow: hidden; cursor: pointer;"><img src="${product.photo_url_3}" style="width: 100%; height: 100%; object-fit: cover;"></div>` : ''}
-                </div>
+            <div style="display: flex; justify-content: center; padding: 5px 20px;">
+                <img src="${product.photo_url_1}" style="max-width: 90%; max-height: 220px; object-fit: contain;">
             </div>
-
             <div style="padding: 10px 25px 30px;">
                 <p style="color: #0071e3; text-transform: uppercase; font-size: 12px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px;">${product.brand}</p>
                 <h2 style="font-size: 22px; font-weight: 700; color: #1d1d1f; line-height: 1.2; margin-bottom: 8px;">${product.name_ge}</h2>
@@ -390,24 +367,24 @@ function openProductDetails(productId) {
                 </div>
                 <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ფერი</p>
                 <div style="display: flex; gap: 14px; margin-bottom: 15px;">
-                    ${uniqueColors.map(c => `<div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" style="width: 32px; height: 32px; border-radius: 50%; background: ${translateColor(c)}; border: 2px solid #e5e5e7; cursor: pointer;"></div>`).join('')}
+                    ${uniqueColors.map(c => `<div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" style="width: 32px; height: 32px; border-radius: 50%; background: ${translateColor(c)}; border: 1px solid #e5e5e7; cursor: pointer;"></div>`).join('')}
                 </div>
                 <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ზომა</p>
                 <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;">
                     <p style="color: #86868b; font-size: 13px;">ჯერ აირჩიეთ ფერი...</p>
                 </div>
                 <div style="margin-top: 15px;">
-                    <button class="main-btn" id="add-to-cart-btn" disabled style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer;">
+                    <button class="main-btn" id="add-to-cart-btn" disabled style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; opacity: 0.5;">
                         აირჩიეთ ფერი და ზომა
                     </button>
                 </div>
             </div>
-        </div>
-    `;
+        </div>`;
 
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
 }
+
 function closeProductDetail() { 
     document.getElementById('active-overlay')?.remove(); 
     document.body.style.overflow = 'auto';
@@ -1160,3 +1137,5 @@ async function filterByBrand(brandName) {
     }
     window.scrollTo(0, 0);
 }
+
+
