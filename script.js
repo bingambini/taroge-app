@@ -387,69 +387,96 @@ function openProductDetails(productId) {
         checkSelection();
     };
 
-    window.selectSize = function(el, size) {
-        selectedSize = size;
-        document.querySelectorAll('.size-option').forEach(opt => {
-            opt.style.borderColor = '#e5e5e7';
-            opt.style.background = 'white';
-            opt.style.color = '#1d1d1f';
-        });
-        el.style.borderColor = '#0071e3';
-        el.style.background = '#f5f5f7';
-        el.style.color = '#0071e3';
-        checkSelection();
-    };
-}
+ // --- წაშლილია ზედმეტი } პირველი ხაზიდან ---
 
-    function checkSelection() {
-        const btn = document.getElementById('add-to-cart-btn');
-        if (selectedColor && selectedSize) {
-            btn.disabled = false;
-            btn.style.opacity = '1';
-            btn.style.background = '#0071e3';
-            btn.innerText = 'კალათაში დამატება';
-            btn.onclick = () => handleAddToCart(product.product_id, selectedColor, selectedSize);
-        } else {
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-            btn.style.background = '#86868b';
-            btn.innerText = 'აირჩიეთ ფერი და ზომა';
-        }
+window.selectSize = function(el, size) {
+    selectedSize = size;
+    document.querySelectorAll('.size-option').forEach(opt => {
+        opt.style.borderColor = '#e5e5e7';
+        opt.style.background = 'white';
+        opt.style.color = '#1d1d1f';
+    });
+    el.style.borderColor = '#0071e3';
+    el.style.background = '#f5f5f7';
+    el.style.color = '#0071e3';
+    checkSelection();
+};
+
+function checkSelection() {
+    const btn = document.getElementById('add-to-cart-btn');
+    if (selectedColor && selectedSize) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.background = '#0071e3';
+        btn.innerText = 'კალათაში დამატება';
+        // handleAddToCart-ის გამოძახება
+        btn.onclick = () => handleAddToCart(product.product_id, selectedColor, selectedSize);
+    } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.background = '#86868b';
+        btn.innerText = 'აირჩიეთ ფერი და ზომა';
     }
-
-    overlay.innerHTML = `
-        <div class="detail-container" style="max-height: 90vh; border-radius: 30px 30px 0 0; background: white; position: fixed; bottom: 0; width: 100%; overflow-y: auto;">
-            <div class="detail-header" style="padding: 12px 20px 0; display: flex; justify-content: flex-end;">
-                <button onclick="closeProductDetail()" style="background: #f5f5f7; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; color: #86868b; font-size: 16px;">✕</button>
-            </div>
-            <div style="display: flex; justify-content: center; padding: 5px 20px;">
-                <img src="${product.photo_url_1}" style="max-width: 90%; max-height: 220px; object-fit: contain;">
-            </div>
-            <div style="padding: 10px 25px 30px;">
-                <p style="color: #0071e3; text-transform: uppercase; font-size: 12px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px;">${product.brand}</p>
-                <h2 style="font-size: 22px; font-weight: 700; color: #1d1d1f; line-height: 1.2; margin-bottom: 8px;">${product.name_ge}</h2>
-                <div style="margin-bottom: 15px;">
-                    <span style="font-size: 26px; font-weight: 800; color: #0071e3;">${product.final_price} ₾</span>
-                </div>
-                <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ფერი</p>
-                <div style="display: flex; gap: 14px; margin-bottom: 15px;">
-                    ${uniqueColors.map(c => `<div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" style="width: 32px; height: 32px; border-radius: 50%; background: ${translateColor(c)}; border: 1px solid #e5e5e7; cursor: pointer;"></div>`).join('')}
-                </div>
-                <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ზომა</p>
-                <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;">
-                    <p style="color: #86868b; font-size: 13px;">ჯერ აირჩიეთ ფერი...</p>
-                </div>
-                <div style="margin-top: 15px;">
-                    <button class="main-btn" id="add-to-cart-btn" disabled style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; opacity: 0.5;">
-                        აირჩიეთ ფერი და ზომა
-                    </button>
-                </div>
-            </div>
-        </div>`;
-
-    document.body.appendChild(overlay);
-    document.body.style.overflow = 'hidden';
 }
+
+// გალერეის ფუნქციონალი (თუ გინდა რომ მუშაობდეს)
+window.changeMainImage = function(url, el) {
+    const mainImg = document.getElementById('main-detail-img');
+    if (mainImg) {
+        mainImg.src = url;
+        // ანიმაციის დამატება
+        mainImg.classList.remove('img-fade');
+        void mainImg.offsetWidth; // რეფლოუ ანიმაციისთვის
+        mainImg.classList.add('img-fade');
+    }
+    
+    document.querySelectorAll('.thumb-frame').forEach(f => f.classList.remove('selected'));
+    el.classList.add('selected');
+};
+
+// Overlay-ს შიგთავსი
+overlay.innerHTML = `
+    <div class="detail-container" style="max-height: 90vh; border-radius: 30px 30px 0 0; background: white; position: fixed; bottom: 0; width: 100%; overflow-y: auto;">
+        <div class="detail-header" style="padding: 12px 20px 0; display: flex; justify-content: flex-end;">
+            <button onclick="closeProductDetail()" style="background: #f5f5f7; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; color: #86868b; font-size: 16px;">✕</button>
+        </div>
+        
+        <div class="gallery-container" style="padding: 5px 20px;">
+            <img id="main-detail-img" src="${product.photo_url_1}" style="max-width: 90%; max-height: 220px; object-fit: contain;">
+            <div class="thumbnails-list">
+                <div class="thumb-frame selected" onclick="changeMainImage('${product.photo_url_1}', this)">
+                    <img src="${product.photo_url_1}">
+                </div>
+                ${product.photo_url_2 ? `<div class="thumb-frame" onclick="changeMainImage('${product.photo_url_2}', this)"><img src="${product.photo_url_2}"></div>` : ''}
+                ${product.photo_url_3 ? `<div class="thumb-frame" onclick="changeMainImage('${product.photo_url_3}', this)"><img src="${product.photo_url_3}"></div>` : ''}
+            </div>
+        </div>
+
+        <div style="padding: 10px 25px 30px;">
+            <p style="color: #0071e3; text-transform: uppercase; font-size: 12px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px;">${product.brand}</p>
+            <h2 style="font-size: 22px; font-weight: 700; color: #1d1d1f; line-height: 1.2; margin-bottom: 8px;">${product.name_ge}</h2>
+            <div style="margin-bottom: 15px;">
+                <span style="font-size: 26px; font-weight: 800; color: #0071e3;">${product.final_price} ₾</span>
+            </div>
+            <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ფერი</p>
+            <div style="display: flex; gap: 14px; margin-bottom: 15px;">
+                ${uniqueColors.map(c => `<div class="color-dot-option" data-color="${c}" onclick="updateSizeOptions('${c}')" style="width: 32px; height: 32px; border-radius: 50%; background: ${translateColor(c)}; border: 1px solid #e5e5e7; cursor: pointer;"></div>`).join('')}
+            </div>
+            <p style="font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px;">ზომა</p>
+            <div id="size-options-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;">
+                <p style="color: #86868b; font-size: 13px;">ჯერ აირჩიეთ ფერი...</p>
+            </div>
+            <div style="margin-top: 15px;">
+                <button class="main-btn" id="add-to-cart-btn" disabled style="width: 100%; padding: 18px; border-radius: 16px; border: none; background: #86868b; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; opacity: 0.5;">
+                    აირჩიეთ ფერი და ზომა
+                </button>
+            </div>
+        </div>
+    </div>`;
+
+document.body.appendChild(overlay);
+document.body.style.overflow = 'hidden';
+// აქ მთავრდება openProductDetails ფუნქცია
 
 function closeProductDetail() { 
     document.getElementById('active-overlay')?.remove(); 
