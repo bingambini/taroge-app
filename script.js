@@ -987,7 +987,7 @@ async function loadUserOrders(userId) {
 
                     <div style="background: #f9f9fb; border-radius: 16px; padding: 15px; margin-bottom: 12px; border: 1px solid #f2f2f7; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 50px;">
                         <div style="font-size: 12px; color: #424245; line-height: 1.4; white-space: pre-line; font-weight: 500;">
-                            ${order.items}
+                            ${order.items.trim()}
                         </div>
                     </div>
 
