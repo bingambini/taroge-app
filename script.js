@@ -288,6 +288,21 @@ function openProductDetails(productId) {
         parseInt(d.stock_quantity || 0) > 0
     );
 
+    // --- ახალი ლოგიკა სურათებისთვის ---
+    // ვაგროვებთ ყველა სურათს ყველა ვარიანტიდან (image2-დან image6-მდე)
+    let extraImages = [];
+    allVariants.forEach(v => {
+        if (v.image2) extraImages.push(v.image2);
+        if (v.image3) extraImages.push(v.image3);
+        if (v.image4) extraImages.push(v.image4);
+        if (v.image5) extraImages.push(v.image5);
+        if (v.image6) extraImages.push(v.image6);
+    });
+
+    // ვქმნით სურათების ერთიან სიას: მთავარი ფოტო + დამატებითები (მხოლოდ უნიკალურები)
+    const allPhotos = [...new Set([product.photo_url_1, ...extraImages])].filter(url => url && url.length > 5);
+    // ---------------------------------
+
     const uniqueColors = [...new Set(allVariants.map(v => v.Colors).filter(c => c))];
     selectedColor = null;
     selectedSize = null;
@@ -296,6 +311,14 @@ function openProductDetails(productId) {
     overlay.className = 'detail-overlay';
     overlay.id = 'active-overlay';
     
+    // სურათის შეცვლის ფუნქცია გალერეისთვის
+    window.changeMainImage = function(url, el) {
+        const mainImg = document.getElementById('main-detail-img');
+        if (mainImg) mainImg.src = url;
+        document.querySelectorAll('.thumb-item').forEach(img => img.style.borderColor = '#e5e5e7');
+        el.style.borderColor = '#0071e3';
+    };
+
     window.updateSizeOptions = function(color) {
         selectedColor = color;
         selectedSize = null; 
@@ -334,6 +357,9 @@ function openProductDetails(productId) {
         el.style.color = '#0071e3';
         checkSelection();
     };
+
+    // აქ უკვე overlay.innerHTML-ში უნდა ჩაიწეროს ახალი გალერეის სტრუქტურა
+    // (თუ გინდა, მაგ ნაწილსაც გამოგიგზავნი, რომ სრულად დაასრულო ეს ფუნქცია)
 
     function checkSelection() {
         const btn = document.getElementById('add-to-cart-btn');
