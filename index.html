@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ShoeShop - Premium Store</title>
     
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <script>
+        (function() {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            // მეორადი დაზღვევა მცირე დაგვიანებით
+            setTimeout(() => {
+                tg.expand();
+            }, 150);
+        })();
+    </script>
+    
     <style>
         #loader-wrapper {
             position: fixed;
@@ -65,8 +79,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="style.css?v=2.0">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css?v=7.0">
 </head>
 <body>
 
