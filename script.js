@@ -66,16 +66,27 @@ function hideLoader() {
 
 // --- ღონისძიება: გვერდის ჩატვირთვისას მონაცემების წამოღება ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. ვამოწმებთ ტელეგრამს და კიდევ ერთხელ ვცდით გაშლას
+    // 1. ვამოწმებთ ტელეგრამს და მაქსიმალურად "აგრესიულად" ვცდით გაშლას
     if (window.Telegram && window.Telegram.WebApp) {
         const tg = window.Telegram.WebApp;
+        
         tg.ready();
         tg.expand();
         
-        // პატარა "ხრიკი": თუ პირველმა არ იმუშავა, 200 მილიწამში კიდევ ერთხელ სცადოს
+        // პირველი დაზღვევა: 200 მილიწამში
         setTimeout(() => {
             tg.expand();
         }, 200);
+
+        // მეორე დაზღვევა: 500 მილიწამში (iPhone-ებისთვის)
+        setTimeout(() => {
+            tg.expand();
+        }, 500);
+
+        // მესამე დაზღვევა: 1000 მილიწამში (თუ ინტერნეტი ნელია)
+        setTimeout(() => {
+            tg.expand();
+        }, 1000);
     }
     
     loadData();
