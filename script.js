@@ -1074,7 +1074,7 @@ function showCategoriesHub() {
         </div>
         <div class="banner-icon" style="display: flex; justify-content: flex-end; align-items: flex-end;">
             <img src="https://i.postimg.cc/d12Hv8Dj/brendebi-Photoroom.png" 
-                 style="width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
+                 style="width: 90px; height: 90px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
         </div>
     </div>
 
@@ -1085,7 +1085,7 @@ function showCategoriesHub() {
         </div>
         <div class="banner-icon" style="display: flex; justify-content: flex-end; align-items: flex-end; margin-top: 10px;">
             <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" 
-                 style="width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
+                 style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
         </div>
     </div>
 
@@ -1095,7 +1095,7 @@ function showCategoriesHub() {
             <div class="banner-desc">ბოლო კოლექცია</div>
         </div>
         <div class="banner-icon" style="display: flex; justify-content: flex-end; align-items: flex-end; margin-top: 10px;">
-            <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" 
+            <img src="https://i.postimg.cc/zvPPPqV6/brendebi-(1)-Photoroom.png" 
                  style="width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
         </div>
     </div>
@@ -1106,7 +1106,7 @@ function showCategoriesHub() {
             <div class="banner-desc">მოერგეთ თქვენს სტილს</div>
         </div>
         <div class="banner-icon" style="display: flex; justify-content: flex-end; align-items: flex-end;">
-            <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" 
+            <img src="https://i.postimg.cc/QMym3fXS/brendebi-(2)-Photoroom.png" 
                  style="width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
         </div>
     </div>
