@@ -1052,7 +1052,6 @@ return `
     }
 }
 
-// --- CATEGORIES HUB LOGIC ---
 
 // კატეგორიების ჰაბის ჩვენება
 function showCategoriesHub() {
@@ -1063,9 +1062,9 @@ function showCategoriesHub() {
 
     mainContent.innerHTML = `
         <div class="categories-page-wrapper" style="animation: fadeIn 0.4s ease; padding-bottom: 30px;">
-            <div style="padding: 20px 16px 10px 16px;">
-                <h1 style="font-size: 18px; font-weight: 800; letter-spacing: -0.5px; margin: 0;">კატალოგი</h1>
-                <p style="color: #86868b; font-size: 14px; margin: 5px 0 0 0;">აირჩიეთ ძებნის მეთოდი</p>
+            <div style="padding: 25px 16px 15px 16px;">
+                <h1 style="font-size: 22px; font-weight: 800; letter-spacing: -0.7px; margin: 0; color: #1d1d1f;">კატალოგი</h1>
+                <p style="color: #86868b; font-size: 14px; margin: 5px 0 0 0; font-weight: 500;">აირჩიეთ ძებნის მეთოდი</p>
             </div>
             
             <div class="categories-hub">
@@ -1074,18 +1073,22 @@ function showCategoriesHub() {
                         <div class="banner-title">ბრენდები</div>
                         <div class="banner-desc">თქვენი ფავორიტი მწარმოებლები</div>
                     </div>
-                    <div class="banner-icon">🏷️</div>
+                    <div class="banner-icon">👟</div>
                 </div>
 
                 <div class="hub-banner-small banner-sale" onclick="handleHubClick('sale')">
-                    <div class="banner-title">Sale</div>
-                    <div class="banner-desc">საუკეთესო ფასები</div>
+                    <div>
+                        <div class="banner-title">Sale</div>
+                        <div class="banner-desc">საუკეთესო ფასები</div>
+                    </div>
                     <div class="banner-icon">🔥</div>
                 </div>
 
                 <div class="hub-banner-small banner-new" onclick="handleHubClick('new')">
-                    <div class="banner-title">სიახლე</div>
-                    <div class="banner-desc">ბოლო კოლექცია</div>
+                    <div>
+                        <div class="banner-title">სიახლე</div>
+                        <div class="banner-desc">ბოლო კოლექცია</div>
+                    </div>
                     <div class="banner-icon">✨</div>
                 </div>
 
