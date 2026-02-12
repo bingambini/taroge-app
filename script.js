@@ -1068,40 +1068,32 @@ function showCategoriesHub() {
             </div>
             
             <div class="categories-hub">
-                <div class="hub-banner-large banner-brands" style="position: relative;" onclick="handleHubClick('brands')">
-                    <div style="position: relative; z-index: 2;">
+                <div class="hub-banner-large banner-brands" onclick="handleHubClick('brands')">
+                    <div class="banner-content">
                         <div class="banner-title">ბრენდები</div>
                         <div class="banner-desc">თქვენი ფავორიტი მწარმოებლები</div>
                     </div>
-                    <img src="https://i.postimg.cc/d12Hv8Dj/brendebi-Photoroom.png" 
-                         style="position: absolute; right: 0; bottom: 0; width: 100px; height: 100px; object-fit: contain; object-position: right bottom; filter: drop-shadow(-2px -2px 8px rgba(0,0,0,0.1));">
                 </div>
 
-                <div class="hub-banner-small banner-sale" style="position: relative;" onclick="handleHubClick('sale')">
-                    <div style="position: relative; z-index: 2;">
+                <div class="hub-banner-small banner-sale" onclick="handleHubClick('sale')">
+                    <div class="banner-content">
                         <div class="banner-title">Sale</div>
                         <div class="banner-desc">საუკეთესო ფასები</div>
                     </div>
-                    <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" 
-                         style="position: absolute; right: 0; bottom: 0; width: 85px; height: 85px; object-fit: contain; object-position: right bottom; filter: drop-shadow(-2px -2px 8px rgba(0,0,0,0.1));">
                 </div>
 
-                <div class="hub-banner-small banner-new" style="position: relative;" onclick="handleHubClick('new')">
-                    <div style="position: relative; z-index: 2;">
+                <div class="hub-banner-small banner-new" onclick="handleHubClick('new')">
+                    <div class="banner-content">
                         <div class="banner-title">სიახლე</div>
                         <div class="banner-desc">ბოლო კოლექცია</div>
                     </div>
-                    <img src="https://i.postimg.cc/zvPPPqV6/brendebi-(1)-Photoroom.png" 
-                         style="position: absolute; right: 0; bottom: 0; width: 80px; height: 80px; object-fit: contain; object-position: right bottom; filter: drop-shadow(-2px -2px 8px rgba(0,0,0,0.1));">
                 </div>
 
-                <div class="hub-banner-large banner-style" style="position: relative;" onclick="handleHubClick('filters')">
-                    <div style="position: relative; z-index: 2;">
+                <div class="hub-banner-large banner-style" onclick="handleHubClick('filters')">
+                    <div class="banner-content">
                         <div class="banner-title">ზომა და ფერი</div>
                         <div class="banner-desc">მოერგეთ თქვენს სტილს</div>
                     </div>
-                    <img src="https://i.postimg.cc/QMym3fXS/brendebi-(2)-Photoroom.png" 
-                         style="position: absolute; right: 0; bottom: 0; width: 95px; height: 95px; object-fit: contain; object-position: right bottom; filter: drop-shadow(-2px -2px 8px rgba(0,0,0,0.1));">
                 </div>
             </div>
         </div>
