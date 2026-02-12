@@ -1066,43 +1066,52 @@ function showCategoriesHub() {
                 <h1 style="font-size: 22px; font-weight: 800; letter-spacing: -0.7px; margin: 0; color: #1d1d1f;">კატალოგი</h1>
                 <p style="color: #86868b; font-size: 14px; margin: 5px 0 0 0; font-weight: 500;">აირჩიეთ ძებნის მეთოდი</p>
             </div>
-            
-            <div class="categories-hub">
-                <div class="hub-banner-large banner-brands" onclick="handleHubClick('brands')">
-                    <div>
-                        <div class="banner-title">ბრენდები</div>
-                        <div class="banner-desc">თქვენი ფავორიტი მწარმოებლები</div>
-                    </div>
-                    <div class="banner-icon">👟</div>
-                </div>
-
-<div class="hub-banner-small banner-sale" onclick="handleHubClick('sale')">
-    <div>
-        <div class="banner-title">Sale</div>
-        <div class="banner-desc">საუკეთესო ფასები</div>
-    </div>
-    <div class="banner-icon" style="display: flex; justify-content: flex-end; align-items: flex-end; margin-top: 10px;">
-        <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" 
-             style="width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
-    </div>
-
-                <div class="hub-banner-small banner-new" onclick="handleHubClick('new')">
-                    <div>
-                        <div class="banner-title">სიახლე</div>
-                        <div class="banner-desc">ბოლო კოლექცია</div>
-                    </div>
-                    <div class="banner-icon">✨</div>
-                </div>
-
-                <div class="hub-banner-large banner-style" onclick="handleHubClick('filters')">
-                    <div>
-                        <div class="banner-title">ზომა და ფერი</div>
-                        <div class="banner-desc">მოერგეთ თქვენს სტილს</div>
-                    </div>
-                    <div class="banner-icon">🎨</div>
-                </div>
-            </div>
+    <div class="categories-hub">
+    <div class="hub-banner-large banner-brands" onclick="handleHubClick('brands')">
+        <div>
+            <div class="banner-title">ბრენდები</div>
+            <div class="banner-desc">თქვენი ფავორიტი მწარმოებლები</div>
         </div>
+        <div class="banner-icon" style="display: flex; justify-content: flex-end; align-items: flex-end;">
+            <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" 
+                 style="width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
+        </div>
+    </div>
+
+    <div class="hub-banner-small banner-sale" onclick="handleHubClick('sale')">
+        <div>
+            <div class="banner-title">Sale</div>
+            <div class="banner-desc">საუკეთესო ფასები</div>
+        </div>
+        <div class="banner-icon" style="display: flex; justify-content: flex-end; align-items: flex-end; margin-top: 10px;">
+            <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" 
+                 style="width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
+        </div>
+    </div>
+
+    <div class="hub-banner-small banner-new" onclick="handleHubClick('new')">
+        <div>
+            <div class="banner-title">სიახლე</div>
+            <div class="banner-desc">ბოლო კოლექცია</div>
+        </div>
+        <div class="banner-icon" style="display: flex; justify-content: flex-end; align-items: flex-end; margin-top: 10px;">
+            <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" 
+                 style="width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
+        </div>
+    </div>
+
+    <div class="hub-banner-large banner-style" onclick="handleHubClick('filters')">
+        <div>
+            <div class="banner-title">ზომა და ფერი</div>
+            <div class="banner-desc">მოერგეთ თქვენს სტილს</div>
+        </div>
+        <div class="banner-icon" style="display: flex; justify-content: flex-end; align-items: flex-end;">
+            <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" 
+                 style="width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
+        </div>
+    </div>
+</div>        
+
     `;
 
     updateActiveTab('categories');
