@@ -3,6 +3,16 @@ const CONFIG = {
     API_URL: 'https://script.google.com/macros/s/AKfycbxGFll9J6swlN0Rq7fUlBzKk1RoN5KDsqRgea9zcgf43BF_EByd_yaXQaWfRBytBI6PZw/exec'
 };
 
+// --- ტელეგრამის ინიციალიზაცია და გაფართოება ---
+const tg = window.Telegram.WebApp; // ტელეგრამის ობიექტის შექმნა
+
+tg.expand(); // აპლიკაციის მთელ ეკრანზე გაშლა
+
+// ზედა პანელის (სტატუს ბარის) და ფონის ფერის მორგება
+tg.setHeaderColor('#ffffff'); // ზედა ნაწილის ფერი
+tg.setBackgroundColor('#ffffff'); // ფონის ფერი
+
+// --- აპლიკაციის მდგომარეობა ---
 let state = {
     products: [],
     productDetails: [],
