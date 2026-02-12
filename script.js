@@ -66,10 +66,18 @@ function hideLoader() {
 
 // --- ღონისძიება: გვერდის ჩატვირთვისას მონაცემების წამოღება ---
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. ვამოწმებთ ტელეგრამს და კიდევ ერთხელ ვცდით გაშლას
     if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        
+        // პატარა "ხრიკი": თუ პირველმა არ იმუშავა, 200 მილიწამში კიდევ ერთხელ სცადოს
+        setTimeout(() => {
+            tg.expand();
+        }, 200);
     }
+    
     loadData();
 });
 
