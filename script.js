@@ -779,6 +779,9 @@ function goToPayment() {
     const finalAmount = totalSum.toFixed(2);
     state.tempOrder = { name, phone, address, totalAmount: finalAmount, paymentMethod: "" };
 
+    // ვიღებთ გადახდის პარამეტრებს state-დან
+    const activeGateway = (state.paymentSettings && state.paymentSettings.active_gateway) ? state.paymentSettings.active_gateway : 'off';
+
     const grid = document.getElementById('products-grid');
     grid.innerHTML = `
         <div style="grid-column: 1/-1; padding: 5px; padding-bottom: 120px;">
@@ -809,13 +812,15 @@ function goToPayment() {
                     </div>
                 </div>
 
+                ${activeGateway !== 'off' ? `
                 <div onclick="selectPaymentMethod('ბარათით გადახდა', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
                     <div style="font-size: 24px;">💳</div>
                     <div style="font-weight: 700;">ბარათით გადახდა</div>
                 </div>
-                <div id="card-details-box" style="display: none; background: #fdf2f2; padding: 15px; border-radius: 20px; border: 1px solid #f8d7da; margin-top: -5px;">
-                    <p style="font-size: 12px; color: #721c24; margin: 0;">⚠️ ონლაინ გადახდა დროებით მიუწვდომელია.</p>
+                <div id="card-details-box" style="display: none; background: #f0f7ff; padding: 15px; border-radius: 20px; border: 1px solid #0071e3; margin-top: -5px;">
+                    <p style="font-size: 12px; color: #0071e3; margin: 0;">✅ ონლაინ გადახდა აქტიურია. შეკვეთის შემდეგ გადახვალთ დაცულ გვერდზე.</p>
                 </div>
+                ` : ''}
 
                 <div onclick="selectPaymentMethod('ბარათით კურიერთან', this)" class="pay-option" style="background: white; padding: 18px; border-radius: 20px; border: 2px solid #f5f5f7; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;">
                     <div style="font-size: 24px;">🛵</div>
