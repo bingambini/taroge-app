@@ -1,20 +1,27 @@
+// 1. ტელეგრამის ობიექტის ინიციალიზაცია
+const tg = window.Telegram.WebApp;
+
+// 2. აიძულე გაფართოება რამდენჯერმე (დაზღვევისთვის)
+tg.ready();
+tg.expand();
+
+// ზოგიერთ მოწყობილობაზე სჭირდება მცირე დაგვიანება ჩატვირთვისას
+setTimeout(() => {
+    tg.expand();
+}, 200);
+
+setTimeout(() => {
+    tg.expand();
+}, 500);
+
+// 3. ზედა ზოლის ფერი (Header)
+tg.setHeaderColor('#ffffff');
+tg.setBackgroundColor('#ffffff');
+
 // --- კონფიგურაცია და მონაცემთა საცავი ---
 const CONFIG = {
     API_URL: 'https://script.google.com/macros/s/AKfycbxGFll9J6swlN0Rq7fUlBzKk1RoN5KDsqRgea9zcgf43BF_EByd_yaXQaWfRBytBI6PZw/exec'
 };
-
-// --- ტელეგრამის ინიციალიზაცია და გაფართოება ---
-const tg = window.Telegram.WebApp; // ტელეგრამის ობიექტის შექმნა
-
-// აპლიკაციის მაქსიმალურად გაშლა
-tg.expand(); 
-
-// ტელეგრამისთვის სიგნალის მიცემა, რომ აპლიკაცია მზადაა
-tg.ready();
-
-// ზედა პანელის (სტატუს ბარის) და ფონის ფერის მორგება
-tg.setHeaderColor('#ffffff'); // ზედა ნაწილის ფერი
-tg.setBackgroundColor('#ffffff'); // ფონის ფერი
 
 // --- აპლიკაციის მდგომარეობა ---
 let state = {
