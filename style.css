@@ -22,8 +22,13 @@
 body { 
     background: var(--bg-color);   /* ფონის ფერის მინიჭება */
     color: var(--text-main);       /* ტექსტის ფერის მინიჭება */
+    
+    /* მნიშვნელოვანი: ავსებს ზედა ცარიელ ადგილს (Notch/Island) სრულ ეკრანზე გაშლისას */
+    padding-top: env(safe-area-inset-top, 0px); 
+    
     /* ქვედა დაშორება: iPhone-ის უსაფრთხო ზონას + 100 პიქსელი ნავიგაციისთვის */
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); 
+    
     overflow-x: hidden;            /* გვერდზე სქროლის აკრძალვა */
     width: 100%;                   /* სიგანე სრულ ეკრანზე */
     -webkit-font-smoothing: antialiased; /* შრიფტის დახვეწილი ჩვენება */
