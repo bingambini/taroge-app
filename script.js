@@ -1081,10 +1081,10 @@ function showCategoriesHub() {
         <div class="banner-title">Sale</div>
         <div class="banner-desc">საუკეთესო ფასები</div>
     </div>
-    <div class="banner-icon">
-        <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" style="width: 40px; height: 40px; object-fit: contain;">
+    <div class="banner-icon" style="display: flex; justify-content: flex-end; align-items: flex-end; margin-top: 10px;">
+        <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" 
+             style="width: 55px; height: 55px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
     </div>
-</div>
 
                 <div class="hub-banner-small banner-new" onclick="handleHubClick('new')">
                     <div>
