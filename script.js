@@ -1043,19 +1043,16 @@ return `
         listContainer.innerHTML = `<p style="color: #ff3b30; text-align: center;">შეცდომა ჩატვირთვისას</p>`;
     }
 }
+
 // --- CATEGORIES HUB LOGIC ---
 
 // კატეგორიების ჰაბის ჩვენება
 function showCategoriesHub() {
-    // 1. ვპოულობთ მთავარ კონტეინერს ID-ით
     const mainContent = document.getElementById('main-content');
-    
     if (!mainContent) return;
 
-    // 2. ჯერ ვასუფთავებთ ყველაფერს, რომ ძველი ბანერები წაიშალოს
     mainContent.innerHTML = ''; 
 
-    // 3. ვხატავთ მხოლოდ ახალ ჰაბს
     mainContent.innerHTML = `
         <div class="categories-page-wrapper" style="animation: fadeIn 0.4s ease; padding-bottom: 30px;">
             <div style="padding: 20px 16px 10px 16px;">
@@ -1095,19 +1092,17 @@ function showCategoriesHub() {
         </div>
     `;
 
-    // ნავიგაციის ტაბის განახლება
     updateActiveTab('categories');
-    
-    // ეკრანი ავწიოთ ზემოთ
     window.scrollTo(0, 0);
 }
 
 // ბანერებზე დაჭერის დამუშავება
 function handleHubClick(type) {
-    console.log("Category selected:", type);
+    if (window.Telegram && window.Telegram.WebApp.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
     
     if (type === 'brands') {
-        // აქ შევცვალეთ: alert-ის ნაცვლად ვიძახებთ ფუნქციას
         renderBrandsList(); 
     } else if (type === 'sale') {
         alert('ფასდაკლებები მალე დაემატება');
@@ -1121,123 +1116,92 @@ function updateActiveTab(tabName) {
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => {
         item.classList.remove('active');
-        if (item.querySelector('span')?.innerText.includes('კატეგორია') && tabName === 'categories') {
+        const label = item.querySelector('span')?.innerText;
+        if (label && label.includes('კატეგორია') && tabName === 'categories') {
             item.classList.add('active');
         }
     });
 }
 
-// --- აქედან იწყება ახალი კოდი, რომელიც უნდა მიაყოლო ---
-
-// 1. ბრენდების სიის გამოტანის ფუნქცია
-async function renderBrandsList() {
+// 1. ბრენდების სიის გამოტანის ფუნქცია (ოპტიმიზირებული)
+function renderBrandsList() {
     const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML = '<div style="text-align:center; padding:50px;"><div class="shoe-animation">👟</div><p>იტვირთება...</p></div>';
     
-    try {
-        const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
-        const data = await response.json();
-        const products = data.productDetails;
+    // ვიყენებთ უკვე არსებულ მონაცემებს state-დან ინტერნეტის ლოდინის გარეშე
+    const products = state.productDetails || [];
 
-        if (!products || !Array.isArray(products)) {
-            throw new Error("მონაცემები ვერ მოიძებნა");
-        }
-
-        const uniqueBrands = [...new Set(products.map(p => p.brand))].filter(b => b && b.trim() !== "");
-        uniqueBrands.sort();
-
-        mainContent.innerHTML = `
-            <div style="padding: 20px 12px; animation: fadeIn 0.4s ease;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-                    <button onclick="showCategoriesHub()" style="background: #f0f0f2; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
-                    <h1 style="font-size: 22px; font-weight: 800; margin: 0;">ბრენდები</h1>
-                </div>
-                
-                <div class="brands-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                    ${uniqueBrands.map(brandName => {
-                        const count = products.filter(p => p.brand === brandName).length;
-                        return `
-                            <div class="brand-item" onclick="filterByBrand('${brandName}')" 
-                                 style="
-                                    background: #ffffff; 
-                                    height: 100px; 
-                                    display: flex; 
-                                    flex-direction: column; 
-                                    align-items: center; 
-                                    justify-content: center; 
-                                    border-radius: 18px; 
-                                    cursor: pointer; 
-                                    border: 1px solid #f2f2f7; 
-                                    box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
-                                    padding: 10px;
-                                    transition: transform 0.2s ease;
-                                 "
-                            >
-                                <div style="font-weight: 800; font-size: 14px; color: #1d1d1f; text-align: center; margin-bottom: 4px; letter-spacing: -0.2px;">
-                                    ${brandName}
-                                </div>
-                                
-                                <div style="font-size: 11px; color: #86868b; font-weight: 500; background: #f5f5f7; padding: 2px 8px; border-radius: 10px;">
-                                    ${count} მოდელი
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-        `;
-    } catch (error) {
-        mainContent.innerHTML = `<p style="padding: 20px; color: red; text-align: center;">შეცდომაა: ${error.message}</p>`;
+    if (products.length === 0) {
+        mainContent.innerHTML = '<div style="text-align:center; padding:50px;"><div class="shoe-animation">👟</div><p>იტვირთება...</p></div>';
+        // თუ state ცარიელია, ვცდილობთ მონაცემების თავიდან წამოღებას
+        loadData().then(() => renderBrandsList());
+        return;
     }
+
+    const uniqueBrands = [...new Set(products.map(p => p.brand))].filter(b => b && b.trim() !== "");
+    uniqueBrands.sort();
+
+    mainContent.innerHTML = `
+        <div style="padding: 20px 12px; animation: fadeIn 0.4s ease;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                <button onclick="showCategoriesHub()" style="background: #f0f0f2; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
+                <h1 style="font-size: 22px; font-weight: 800; margin: 0;">ბრენდები</h1>
+            </div>
+            
+            <div class="brands-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                ${uniqueBrands.map(brandName => {
+                    const count = products.filter(p => p.brand === brandName).length;
+                    return `
+                        <div class="brand-item" onclick="filterByBrand('${brandName}')" 
+                             style="background: #ffffff; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 18px; cursor: pointer; border: 1px solid #f2f2f7; box-shadow: 0 4px 12px rgba(0,0,0,0.03); padding: 10px; transition: transform 0.2s ease;">
+                            <div style="font-weight: 800; font-size: 14px; color: #1d1d1f; text-align: center; margin-bottom: 4px; letter-spacing: -0.2px;">
+                                ${brandName}
+                            </div>
+                            <div style="font-size: 11px; color: #86868b; font-weight: 500; background: #f5f5f7; padding: 2px 8px; border-radius: 10px;">
+                                ${count} მოდელი
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
     window.scrollTo(0, 0);
 }
 
-// 2. ფილტრაციის ფუნქცია
-async function filterByBrand(brandName) {
-    const mainContent = document.getElementById('main-content');
-    
-    mainContent.innerHTML = '<div style="text-align:center; padding:50px;"><p>იტვირთება...</p></div>';
-
-    try {
-        const response = await fetch(`${CONFIG.API_URL}?action=getAppData`);
-        const data = await response.json();
-        
-        const allProducts = data.productDetails || [];
-
-        // 1. ჯერ ვფილტრავთ ბრენდის მიხედვით
-        const brandEntries = allProducts.filter(p => 
-            p.brand && p.brand.trim().toLowerCase() === brandName.trim().toLowerCase()
-        );
-
-        // 2. ვაჯგუფებთ მოდელებს სახელით (Name), რომ დუბლიკატები ავიცილოთ
-        // და ერთად მოვაგროვოთ ყველა ფერი
-        const groupedMap = {};
-        
-        brandEntries.forEach(entry => {
-            const productName = entry.Name || entry.name_ge;
-            if (!groupedMap[productName]) {
-                groupedMap[productName] = { ...entry };
-            }
-        });
-
-        // მასივად გადაქცევა რენდერისთვის
-        const filtered = Object.values(groupedMap);
-
-        mainContent.innerHTML = `
-            <div style="padding: 20px 16px 10px 16px;">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
-                    <button onclick="renderBrandsList()" style="background: #f0f0f2; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
-                    <h1 style="font-size: 24px; font-weight: 800; margin: 0;">${brandName}</h1>
-                </div>
-            </div>
-            <div id="products-grid" class="products-grid" style="padding: 0 16px 20px 16px;"></div>
-        `;
-
-        renderProducts(filtered);
-
-    } catch (error) {
-        console.error("ფილტრაციის შეცდომა:", error);
-        mainContent.innerHTML = `<p style="padding:20px; color:red;">შეცდომა მონაცემების წაკითხვისას.</p>`;
+// 2. ფილტრაციის ფუნქცია (წამიერი ლოკალური ფილტრი)
+function filterByBrand(brandName) {
+    if (window.Telegram && window.Telegram.WebApp.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
     }
+
+    const mainContent = document.getElementById('main-content');
+    const allProducts = state.productDetails || [];
+
+    // ფილტრაცია პირდაპირ მეხსიერებიდან
+    const brandEntries = allProducts.filter(p => 
+        p.brand && p.brand.trim().toLowerCase() === brandName.trim().toLowerCase()
+    );
+
+    const groupedMap = {};
+    brandEntries.forEach(entry => {
+        const productName = entry.Name || entry.name_ge;
+        if (!groupedMap[productName]) {
+            groupedMap[productName] = { ...entry };
+        }
+    });
+
+    const filtered = Object.values(groupedMap);
+
+    mainContent.innerHTML = `
+        <div style="padding: 20px 16px 10px 16px; animation: fadeIn 0.3s ease;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+                <button onclick="renderBrandsList()" style="background: #f0f0f2; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>
+                <h1 style="font-size: 24px; font-weight: 800; margin: 0;">${brandName}</h1>
+            </div>
+        </div>
+        <div id="products-grid" class="products-grid" style="padding: 0 16px 20px 16px;"></div>
+    `;
+
+    renderProducts(filtered);
     window.scrollTo(0, 0);
 }
