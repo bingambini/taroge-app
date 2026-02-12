@@ -3,18 +3,18 @@
     --bg-color: #ffffff;           /* საიტის ძირითადი ფონის ფერი */
     --text-main: #1d1d1f;          /* მთავარი ტექსტის ფერი */
     --text-secondary: #86868b;     /* მეორეხარისხოვანი ტექსტის ფერი */
-    --accent: #0071e3;             /* აქცენტის (ლურჯი) ფერი */
-    --card-bg: #f5f5f7;            /* ბარათის ფონის ფერი */
-    --radius: 24px;                /* კუთხეების მომრგვალება */
-    --discount-red: #ff3b30;       /* ფასდაკლების წითელი ფერი */
-    --status-blue: #007aff;        /* სტატუსების ლურჯი ფერი */
+    --accent: #0071e3;              /* აქცენტის (ლურჯი) ფერი */
+    --card-bg: #f5f5f7;             /* ბარათის ფონის ფერი */
+    --radius: 24px;                 /* კუთხეების მომრგვალება */
+    --discount-red: #ff3b30;        /* ფასდაკლების წითელი ფერი */
+    --status-blue: #007aff;         /* სტატუსების ლურჯი ფერი */
 }
 
 /* 1. გლობალური პარამეტრები */
 * { 
-    margin: 0;                     /* გარე დაშორების განულება */
-    padding: 0;                    /* შიდა დაშორების განულება */
-    box-sizing: border-box;        /* ზომის გამოთვლა ჩარჩოს ჩათვლით */
+    margin: 0;                      /* გარე დაშორების განულება */
+    padding: 0;                     /* შიდა დაშორების განულება */
+    box-sizing: border-box;         /* ზომის გამოთვლა ჩარჩოს ჩათვლით */
     font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* სისტემური შრიფტები */
     -webkit-tap-highlight-color: transparent; /* მობილურზე დაჭერისას ლურჯი ფონის გაუქმება */
 }
@@ -170,34 +170,86 @@ body {
 }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-/* Categories Hub - კატეგორიების ბლოკები */
+/* --- Categories Hub - Apple Style Design --- */
+.categories-page-wrapper {
+    background-color: #ffffff;
+    min-height: 100vh;
+}
+
 .categories-hub {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
-    padding: 16px;
+    padding: 0 16px 40px 16px;
     width: 100%;
 }
-.hub-banner-large {
-    grid-column: span 2;           /* მთელ სიგანეზე გაშლა */
-    min-height: 130px;
-    border-radius: var(--radius);
+
+.hub-banner-large, .hub-banner-small {
+    border-radius: 28px;
     padding: 24px;
-    color: white;
-    background: linear-gradient(135deg, #0071e3 0%, #00c6ff 100%); /* გრადიენტი */
-    position: relative;
-    overflow: hidden;
-}
-.hub-banner-small {
-    min-height: 150px;
-    border-radius: var(--radius);
-    padding: 20px;
-    color: white;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: space-between;
     position: relative;
     overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.hub-banner-large {
+    grid-column: span 2;
+    min-height: 140px;
+}
+
+.hub-banner-small {
+    min-height: 170px;
+}
+
+/* Banner Colors & Gradients */
+.banner-brands {
+    background: linear-gradient(135deg, #0071e3 0%, #00c6ff 100%);
+    color: white;
+}
+
+.banner-sale {
+    background: #f5f5f7;
+    color: #1d1d1f;
+    border: 1px solid #e5e5ea;
+}
+
+.banner-new {
+    background: #1d1d1f;
+    color: white;
+}
+
+.banner-style {
+    background: linear-gradient(135deg, #ff9500 0%, #ffcc00 100%);
+    color: white;
+}
+
+.banner-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+}
+
+.banner-desc {
+    font-size: 13px;
+    opacity: 0.85;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.banner-icon {
+    align-self: flex-end;
+    font-size: 36px;
+}
+
+.hub-banner-large:active, .hub-banner-small:active {
+    transform: scale(0.96);
 }
 
 /* Navigation - ქვედა მენიუ */
@@ -234,9 +286,9 @@ body {
 /* Nav Badge - კალათის ნოტოფიკაციის ნიშანი */
 .nav-badge {
     position: absolute;
-    top: 12px;                     /* იკონკის თავზე განთავსება */
+    top: 12px;                      /* იკონკის თავზე განთავსება */
     right: 22%; 
-    background: #ff3b30;           /* წითელი ფერი */
+    background: #ff3b30;            /* წითელი ფერი */
     color: white;
     font-size: 10px;
     font-weight: 700;
