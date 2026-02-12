@@ -1076,13 +1076,15 @@ function showCategoriesHub() {
                     <div class="banner-icon">👟</div>
                 </div>
 
-                <div class="hub-banner-small banner-sale" onclick="handleHubClick('sale')">
-                    <div>
-                        <div class="banner-title">Sale</div>
-                        <div class="banner-desc">საუკეთესო ფასები</div>
-                    </div>
-                    <div class="banner-icon">🔥</div>
-                </div>
+<div class="hub-banner-small banner-sale" onclick="handleHubClick('sale')">
+    <div>
+        <div class="banner-title">Sale</div>
+        <div class="banner-desc">საუკეთესო ფასები</div>
+    </div>
+    <div class="banner-icon">
+        <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" style="width: 40px; height: 40px; object-fit: contain;">
+    </div>
+</div>
 
                 <div class="hub-banner-small banner-new" onclick="handleHubClick('new')">
                     <div>
