@@ -1073,7 +1073,7 @@ function showCategoriesHub() {
             <div class="banner-desc">თქვენი ფავორიტი მწარმოებლები</div>
         </div>
         <div class="banner-icon" style="display: flex; justify-content: flex-end; align-items: flex-end;">
-            <img src="https://i.postimg.cc/431Vxmfr/Screenshot-2026-02-12-at-22-04-26-Photoroom.png" 
+            <img src="https://i.postimg.cc/d12Hv8Dj/brendebi-Photoroom.png" 
                  style="width: 75px; height: 75px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
         </div>
     </div>
