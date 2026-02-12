@@ -102,6 +102,9 @@ async function loadData() {
         state.products = data.products || [];
         state.productDetails = data.productDetails || [];
         
+        // ინახავს გადახდის პარამეტრებს (ჩართულია თუ არა ბარათი და რომელი ბანკი)
+        state.paymentSettings = data.paymentSettings || { active_gateway: 'off' };
+        
         if (data.headerConfig) applyHeaderDesign(data.headerConfig);
         if (data.heroConfig) applyHeroDesign(data.heroConfig);
 
