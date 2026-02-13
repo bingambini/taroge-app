@@ -1050,7 +1050,7 @@ return `
     }
 }
 
-// კატეგორიების ჰაბის ჩვენება
+// კატეგორიების ჰაბის ჩვენება - იძულებითი სრული სიგანით
 function showCategoriesHub() {
     const mainContent = document.getElementById('main-content');
     if (!mainContent) return;
@@ -1058,35 +1058,36 @@ function showCategoriesHub() {
     mainContent.innerHTML = ''; 
 
     mainContent.innerHTML = `
-        <div class="categories-page-wrapper" style="animation: fadeIn 0.4s ease; padding-bottom: 30px;">
+        <div class="categories-page-wrapper" style="animation: fadeIn 0.4s ease; padding-bottom: 30px; width: 100%;">
             <div style="padding: 25px 16px 15px 16px;">
                 <h1 style="font-size: 22px; font-weight: 800; letter-spacing: -0.7px; margin: 0; color: #1d1d1f;">კატალოგი</h1>
                 <p style="color: #86868b; font-size: 14px; margin: 5px 0 0 0; font-weight: 500;">აირჩიეთ ძებნის მეთოდი</p>
             </div>
             
-            <div class="categories-hub" style="display: grid; gap: 12px; padding: 0 16px;">
+            <div class="categories-hub" style="display: flex; flex-direction: column; gap: 12px; padding: 0 16px; width: 100%; box-sizing: border-box;">
+                
                 <div class="hub-banner-large" onclick="handleHubClick('brands')" 
-                     style="background: #eef7ff; border: 1px solid #d8e9f9; border-radius: 24px; padding: 25px; cursor: pointer; min-height: 110px; display: flex; flex-direction: column; justify-content: center;">
+                     style="background: #eef7ff; border: 1px solid #d8e9f9; border-radius: 24px; padding: 25px; cursor: pointer; min-height: 110px; display: flex; flex-direction: column; justify-content: center; width: 100%; box-sizing: border-box;">
                     <div class="banner-title" style="color: #0071e3; font-size: 20px; font-weight: 800;">ბრენდები</div>
                     <div class="banner-desc" style="color: #0071e3; opacity: 0.7; font-size: 14px; margin-top: 4px; font-weight: 500;">თქვენი ფავორიტი მწარმოებლები</div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch;">
+                <div style="display: flex; gap: 12px; width: 100%; align-items: stretch;">
                     <div class="hub-banner-small" onclick="handleHubClick('sale')" 
-                         style="background: #fff0f0; border: 1px solid #ffe2e2; border-radius: 24px; padding: 20px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                         style="background: #fff0f0; border: 1px solid #ffe2e2; border-radius: 24px; padding: 20px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; flex: 1; min-height: 140px; box-sizing: border-box;">
                         <div class="banner-title" style="color: #ff3b30; font-size: 18px; font-weight: 800;">Sale</div>
                         <div class="banner-desc" style="color: #ff3b30; opacity: 0.7; font-size: 13px; margin-top: 4px; font-weight: 500;">საუკეთესო ფასები</div>
                     </div>
 
                     <div class="hub-banner-small" onclick="handleHubClick('new')" 
-                         style="background: #f0fff4; border: 1px solid #e2f9e9; border-radius: 24px; padding: 20px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                         style="background: #f0fff4; border: 1px solid #e2f9e9; border-radius: 24px; padding: 20px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; flex: 1; min-height: 140px; box-sizing: border-box;">
                         <div class="banner-title" style="color: #34c759; font-size: 18px; font-weight: 800;">სიახლე</div>
                         <div class="banner-desc" style="color: #34c759; opacity: 0.7; font-size: 13px; margin-top: 4px; font-weight: 500;">ბოლო კოლექცია</div>
                     </div>
                 </div>
 
                 <div class="hub-banner-large" onclick="handleHubClick('filters')" 
-                     style="background: #fff8f0; border: 1px solid #f9eada; border-radius: 24px; padding: 25px; cursor: pointer; min-height: 110px; display: flex; flex-direction: column; justify-content: center;">
+                     style="background: #fff8f0; border: 1px solid #f9eada; border-radius: 24px; padding: 25px; cursor: pointer; min-height: 110px; display: flex; flex-direction: column; justify-content: center; width: 100%; box-sizing: border-box;">
                     <div class="banner-title" style="color: #ff9500; font-size: 19px; font-weight: 800;">ზომა და ფერი</div>
                     <div class="banner-desc" style="color: #ff9500; opacity: 0.7; font-size: 14px; margin-top: 4px; font-weight: 500;">მოერგეთ თქვენს სტილს</div>
                 </div>
