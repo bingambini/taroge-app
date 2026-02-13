@@ -206,7 +206,7 @@ function applyHeroDesign(configs) {
         </div>
     `;
 
-    // სქროლის მოსმენა წერტილების განახლებისთვის
+    // სქროლის მოსმენა
     const slider = heroSection.querySelector('.hero-slider-container');
     if (slider) {
         slider.addEventListener('scroll', () => {
@@ -214,16 +214,12 @@ function applyHeroDesign(configs) {
             const index = Math.round(slider.scrollLeft / slideWidth);
             const dots = heroSection.querySelectorAll('.hero-dots div');
             dots.forEach((dot, i) => {
-                dot.style.background = i === index ? '#1d1d1f' : '#d2d2d7';
+                if(dot) dot.style.background = i === index ? '#1d1d1f' : '#d2d2d7';
             });
         });
     }
 
-    // სქროლბარის დამალვა (ინლაინ სტილით)
-    const scrollStyle = document.createElement('style');
-    scrollStyle.innerHTML = `.hero-slider-container::-webkit-scrollbar { display: none; }`;
-    document.head.appendChild(scrollStyle);
-
+    // კლიკის ფუნქცია
     window.handleHeroClickByIndex = function(index) {
         const config = activeConfigs[index];
         const searchTerm = (config.B_Subtitle || "").toLowerCase().trim();
@@ -238,25 +234,11 @@ function applyHeroDesign(configs) {
             if (grid) grid.scrollIntoView({behavior:'smooth'});
         }
     };
-}
 
-    // სქროლის მოსმენა წერტილების ფერის შესაცვლელად
-    const slider = heroSection.querySelector('.hero-slider-container');
-    if (slider) {
-        slider.addEventListener('scroll', () => {
-            const index = Math.round(slider.scrollLeft / slider.offsetWidth);
-            const dots = heroSection.querySelectorAll('.hero-dots div');
-            dots.forEach((dot, i) => {
-                dot.style.background = i === index ? '#1d1d1f' : '#d2d2d7';
-            });
-        });
-    }
-
-    const style = document.createElement('style');
-    style.innerHTML = `.hero-slider-container::-webkit-scrollbar { display: none; }`;
-    document.head.appendChild(style);
-
-    heroSection.style.display = 'block';
+    // სქროლბარის დამალვა
+    const scrollStyle = document.createElement('style');
+    scrollStyle.innerHTML = `.hero-slider-container::-webkit-scrollbar { display: none; }`;
+    document.head.appendChild(scrollStyle);
 }
 
 // --- "ახალი კოლექცია" და პროდუქტების რენდერი ---
