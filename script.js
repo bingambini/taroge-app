@@ -90,7 +90,11 @@ async function loadData() {
         state.paymentSettings = data.paymentSettings || { active_gateway: 'off' };
         
         // პრიორიტეტი 1: ჯერ ვხატავთ ზედა ნაწილს და ბანერებს
-        if (data.headerConfig) applyHeaderDesign(data.headerConfig);
+        if (data.headerConfig) {
+            // ვინახავთ კონფიგურაციას გლობალურად საკონტაქტო მენიუსთვის
+            window.lastHeaderConfig = data.headerConfig; 
+            applyHeaderDesign(data.headerConfig);
+        }
         
         const heroToUse = data.heroConfigs || data.heroConfig;
         if (heroToUse) {
