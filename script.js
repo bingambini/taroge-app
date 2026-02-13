@@ -150,35 +150,37 @@ function applyHeroDesign(configs) {
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             width: 100%;
-            gap: 0;
+            gap: 12px;
+            padding-left: 16px; 
+            padding-right: 16px;
+            box-sizing: border-box;
         ">
             ${activeConfigs.map((config, index) => `
                 <div class="hero-slide-wrapper" style="
-                    min-width: 100%;
+                    min-width: 88%; 
                     scroll-snap-align: start;
                     box-sizing: border-box;
                 ">
                     <div class="hero-wrapper" onclick="handleHeroClickByIndex(${index})" style="
                         cursor: pointer;
                         background: ${config.B_Gradient || '#eee'}; 
-                        border-radius: 24px; 
+                        border-radius: 20px; 
                         padding: 25px; 
                         position: relative; 
                         overflow: visible; 
                         margin-top: 10px; 
                         margin-bottom: 25px; 
-                        margin-left: 15px;
-                        margin-right: 15px;
                         height: ${config.B_Height || 200}px; 
                         display: flex; 
                         align-items: center;
-                        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+                        box-shadow: 0 15px 30px rgba(0,0,0,0.12);
                         transform: translateY(-5px);
+                        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
                     ">
                         <div style="position: relative; z-index: 2; width: 60%;">
-                            <h2 style="color: ${config.B_Title_Color || '#fff'}; font-size: 20px; margin-bottom: 8px;">${config.B_Title || ''}</h2>
+                            <h2 style="color: ${config.B_Title_Color || '#fff'}; font-size: 20px; margin-bottom: 8px; font-weight: 700;">${config.B_Title || ''}</h2>
                             <p style="color: #fff; opacity: 0.9; margin-bottom: 15px; font-size: 13px;">${config.B_Subtitle || ''}</p>
-                            <button style="padding: 8px 18px; border-radius: 10px; border: none; background: white; font-weight: 800; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                            <button style="padding: 8px 18px; border-radius: 10px; border: none; background: white; font-weight: 800; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); color: #1d1d1f;">
                                 ${config.B_Btn_Text || 'ყიდვა'}
                             </button>
                         </div>
@@ -195,13 +197,32 @@ function applyHeroDesign(configs) {
                     </div>
                 </div>
             `).join('')}
+            <div style="min-width: 4px;"></div>
         </div>
         <div class="hero-dots" style="display: flex; justify-content: center; gap: 8px; margin-top: -10px; margin-bottom: 20px;">
             ${activeConfigs.length > 1 ? activeConfigs.map((_, i) => `
-                <div style="width: 8px; height: 8px; border-radius: 50%; background: ${i === 0 ? '#1d1d1f' : '#d2d2d7'}; transition: background 0.3s;"></div>
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: ${i === 0 ? '#1d1d1f' : '#d2d2d7'}; transition: all 0.3s;"></div>
             `).join('') : ''}
         </div>
     `;
+
+    // სქროლის მოსმენა წერტილების განახლებისთვის
+    const slider = heroSection.querySelector('.hero-slider-container');
+    if (slider) {
+        slider.addEventListener('scroll', () => {
+            const slideWidth = slider.offsetWidth * 0.88;
+            const index = Math.round(slider.scrollLeft / slideWidth);
+            const dots = heroSection.querySelectorAll('.hero-dots div');
+            dots.forEach((dot, i) => {
+                dot.style.background = i === index ? '#1d1d1f' : '#d2d2d7';
+            });
+        });
+    }
+
+    // სქროლბარის დამალვა (ინლაინ სტილით)
+    const scrollStyle = document.createElement('style');
+    scrollStyle.innerHTML = `.hero-slider-container::-webkit-scrollbar { display: none; }`;
+    document.head.appendChild(scrollStyle);
 
     window.handleHeroClickByIndex = function(index) {
         const config = activeConfigs[index];
@@ -217,6 +238,7 @@ function applyHeroDesign(configs) {
             if (grid) grid.scrollIntoView({behavior:'smooth'});
         }
     };
+}
 
     // სქროლის მოსმენა წერტილების ფერის შესაცვლელად
     const slider = heroSection.querySelector('.hero-slider-container');
