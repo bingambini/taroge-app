@@ -1071,15 +1071,15 @@ function showCategoriesHub() {
                     <div class="banner-desc" style="color: #0071e3; opacity: 0.7; font-size: 14px; margin-top: 4px; font-weight: 500;">თქვენი ფავორიტი მწარმოებლები</div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch;">
                     <div class="hub-banner-small" onclick="handleHubClick('sale')" 
-                         style="background: #fff0f0; border: 1px solid #ffe2e2; border-radius: 24px; padding: 20px; cursor: pointer; min-height: 140px; display: flex; flex-direction: column; justify-content: center;">
+                         style="background: #fff0f0; border: 1px solid #ffe2e2; border-radius: 24px; padding: 20px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; height: 100%;">
                         <div class="banner-title" style="color: #ff3b30; font-size: 18px; font-weight: 800;">Sale</div>
                         <div class="banner-desc" style="color: #ff3b30; opacity: 0.7; font-size: 13px; margin-top: 4px; font-weight: 500;">საუკეთესო ფასები</div>
                     </div>
 
                     <div class="hub-banner-small" onclick="handleHubClick('new')" 
-                         style="background: #f0fff4; border: 1px solid #e2f9e9; border-radius: 24px; padding: 20px; cursor: pointer; min-height: 140px; display: flex; flex-direction: column; justify-content: center;">
+                         style="background: #f0fff4; border: 1px solid #e2f9e9; border-radius: 24px; padding: 20px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; height: 100%;">
                         <div class="banner-title" style="color: #34c759; font-size: 18px; font-weight: 800;">სიახლე</div>
                         <div class="banner-desc" style="color: #34c759; opacity: 0.7; font-size: 13px; margin-top: 4px; font-weight: 500;">ბოლო კოლექცია</div>
                     </div>
