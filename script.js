@@ -1112,7 +1112,18 @@ function handleHubClick(type) {
     if (type === 'brands') {
         renderBrandsList(); 
     } else if (type === 'sale') {
-        alert('ფასდაკლებები მალე დაემატება');
+        // ფილტრაცია: Old_Price > Price
+        const saleProducts = state.products.filter(item => {
+            const currentPrice = parseFloat(item.Price) || 0;
+            const oldPrice = parseFloat(item.Old_Price) || 0;
+            return oldPrice > currentPrice;
+        });
+
+        if (saleProducts.length > 0) {
+            renderProducts(saleProducts, "ფასდაკლებები 🔥");
+        } else {
+            alert('ამჟამად ფასდაკლებები არ არის');
+        }
     } else {
         alert('ეს სექცია მალე გააქტიურდება');
     }
