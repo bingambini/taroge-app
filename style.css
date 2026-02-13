@@ -40,14 +40,18 @@ body {
 .hero-section {
     display: flex;
     overflow-x: auto;
-    overflow-y: hidden;            /* ჩაკეტავს ვერტიკალურ მოძრაობას */
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    width: calc(100% + 32px);      /* აკომპენსირებს კონტეინერის padding-ს */
-    margin-left: -16px;            /* მიიტანს ეკრანის კიდეებთან */
+    
+    /* მნიშვნელოვანი ცვლილება: სიგანე და პოზიცია */
+    width: calc(100% + 32px); 
+    margin-left: -16px; 
+    padding: 0 16px;               /* ქმნის შიდა დაშორებას კიდეებთან */
     margin-bottom: 24px;
+    
     scrollbar-width: none;
-    touch-action: pan-x;           /* კრძალავს ზემოთ აწევას სქროლისას */
+    touch-action: pan-x;           /* აჩერებს ვერტიკალურ მოძრაობას */
     overscroll-behavior-x: contain;
 }
 
@@ -56,17 +60,21 @@ body {
 }
 
 .hero-banner {
-    flex: 0 0 100%;                /* თითო ბანერი 100% სიგანის */
-    width: 100%;
-    scroll-snap-align: start;
+    /* ბანერი იქნება ეკრანზე ოდნავ პატარა, რომ მომდევნო გამოჩნდეს */
+    flex: 0 0 calc(100% - 10px); 
+    width: calc(100% - 10px);
+    margin-right: 12px;            /* დაშორება ბანერებს შორის */
+    scroll-snap-align: center;     /* აცენტრებს ბანერს გაჩერებისას */
     position: relative;
-    aspect-ratio: 16 / 9;          /* ბანერის სტანდარტული პროპორცია */
+    aspect-ratio: 16 / 9;
+    border-radius: 24px;           /* შენი დიზაინის შესაბამისი მომრგვალება */
+    overflow: hidden;
 }
 
 .hero-banner img {
     width: 100%;
     height: 100%;
-    object-fit: cover;             /* სურათი შეავსებს ბანერს ლამაზად */
+    object-fit: cover;
 }
 
 /* Loader - ჩატვირთვის ეკრანი */
