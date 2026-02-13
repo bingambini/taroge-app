@@ -19,39 +19,43 @@
     -webkit-tap-highlight-color: transparent; /* მობილურზე დაჭერისას ლურჯი ფონის გაუქმება */
 }
 
-body { 
-    background: var(--bg-color);   /* ფონის ფერის მინიჭება */
-    color: var(--text-main);       /* ტექსტის ფერის მინიჭება */
-    padding-top: env(safe-area-inset-top, 0px); 
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); 
-    overflow-x: hidden;            /* გვერდზე სქროლის აკრძალვა */
-    width: 100%;                   /* სიგანე სრულ ეკრანზე */
-    -webkit-font-smoothing: antialiased; /* შრიფტის დახვეწილი ჩვენება */
-}
-
-.container { 
-    padding: 0 16px;               /* გვერდითა დაშორებები */
-    max-width: 600px;              /* მაქსიმალური სიგანე */
-    margin: 0 auto;                  /* კონტეინერის გაცენტრვა */
+/* --- აპლიკაციის ვერტიკალური მოძრაობის ჩაკეტვა --- */
+html, body { 
+    background: var(--bg-color);
+    color: var(--text-main);
     width: 100%;
+    height: 100%;
+    overflow: hidden;                /* კრძალავს მთლიანი გვერდის სქროლვას */
+    position: fixed;                 /* აფიქსირებს ეკრანს, რომ არ "იცურაოს" */
+    -webkit-font-smoothing: antialiased;
 }
 
-/* --- Hero Slider (მთავარი ბანერები) - გასწორებული ვერსია --- */
+/* მთავარი კონტეინერი, რომელიც უზრუნველყოფს შიდა სქროლვას */
+.container { 
+    padding: 0 16px;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+    height: 100vh;                   /* იკავებს ეკრანის სრულ სიმაღლეს */
+    overflow-y: auto;                /* სქროლი ნებადართულია მხოლოდ აქ */
+    -webkit-overflow-scrolling: touch;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px);
+}
+
+/* --- Hero Slider (მთავარი ბანერები) --- */
 .hero-section {
     display: flex;
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    
-    /* მნიშვნელოვანი ცვლილება: სიგანე და პოზიცია */
     width: calc(100% + 32px); 
     margin-left: -16px; 
-    padding: 0 16px;               /* ქმნის შიდა დაშორებას კიდეებთან */
+    padding: 0 16px; 
     margin-bottom: 24px;
-    
     scrollbar-width: none;
-    touch-action: pan-x;           /* აჩერებს ვერტიკალურ მოძრაობას */
+    touch-action: pan-x;            /* მხოლოდ ჰორიზონტალური მოძრაობა */
     overscroll-behavior-x: contain;
 }
 
@@ -60,14 +64,13 @@ body {
 }
 
 .hero-banner {
-    /* ბანერი იქნება ეკრანზე ოდნავ პატარა, რომ მომდევნო გამოჩნდეს */
     flex: 0 0 calc(100% - 10px); 
     width: calc(100% - 10px);
-    margin-right: 12px;            /* დაშორება ბანერებს შორის */
-    scroll-snap-align: center;     /* აცენტრებს ბანერს გაჩერებისას */
+    margin-right: 12px; 
+    scroll-snap-align: center;
     position: relative;
     aspect-ratio: 16 / 9;
-    border-radius: 24px;           /* შენი დიზაინის შესაბამისი მომრგვალება */
+    border-radius: 24px; 
     overflow: hidden;
 }
 
@@ -86,39 +89,37 @@ body {
 }
 .loader-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-/* ანიმაციები */
 .spin { animation: spin 2s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* --- Liquid Effect & Contact Modal --- */
 .liquid-wrapper {
-    filter: url('#liquid-goo'); /* კავშირი HTML-ში არსებულ SVG ფილტრთან */
+    filter: url('#liquid-goo');
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none; /* არ უშლის ხელს სხვა ელემენტებს */
+    pointer-events: none;
     z-index: 9000;
 }
 
 #contact-modal {
     position: absolute;
-    top: -100%; /* საწყისი პოზიცია ეკრანს ზემოთ */
+    top: -100%; 
     left: 0;
     width: 100%;
     height: 55%;
     background: #ffffff;
     z-index: 9001;
-    /* cubic-bezier აკეთებს სითხისებურ, დინამიურ მოძრაობას */
     transition: top 0.75s cubic-bezier(0.6, 0.05, 0.01, 0.9);
     display: flex;
     flex-direction: column;
     padding: 24px 20px 10px 20px;
     box-sizing: border-box;
-    border-radius: 0 0 60px 60px; /* დიდი მომრგვალება წვეთის ფორმისთვის */
-    pointer-events: auto; /* ააქტიურებს კლიკებს მენიუს შიგნით */
+    border-radius: 0 0 60px 60px;
+    pointer-events: auto;
 }
 
 #contact-modal.active {
-    top: 0; /* ჩამოსული პოზიცია */
+    top: 0;
 }
 
 #modal-overlay {
