@@ -131,30 +131,24 @@ function applyHeaderDesign(config) {
     if (config.Icon_Color && logoIcon) logoIcon.style.color = config.Icon_Color;
     if (config.H_Height && headerElement) headerElement.style.height = config.H_Height + 'px';
     
-    // აიქონის ჩასმის ლოგიკა (ტესტირებისთვის ფერი შეცვლილია წითელზე)
+    // აიქონის ჩასმის ლოგიკა (ტელეფონის ლამაზი აიქონი)
     if (infoContainer && !document.getElementById('info-btn')) {
         const infoBtn = document.createElement('div');
         infoBtn.id = 'info-btn';
         infoBtn.onclick = toggleContactModal;
         infoBtn.style.cursor = 'pointer';
         infoBtn.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="${config.H_Text || '#1d1d1f'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
             </svg>`;
         infoContainer.appendChild(infoBtn);
     }
     
     if (config.Shop_Logo && logoIcon) {
-        // ვასუფთავებთ logo-circle კლასის ნაგულისხმევ სტილებს
         logoIcon.style.background = "transparent";
         logoIcon.style.backgroundColor = "transparent";
         logoIcon.style.border = "none";
-
-        // ვიღებთ რადიუსს შიტიდან (რადგან 0 გიწერია, იქნება 0)
         const radius = config.Logo_Radius || "0";
-
         logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="width: ${config.Logo_Size || 40}px; height: auto; border-radius: ${radius}; object-fit: contain; display: block;">`;
     }
 }
@@ -1496,13 +1490,13 @@ function renderContactModal() {
 
     const active = contacts.filter(c => c.val && String(c.val).trim() !== '' && String(c.val) !== 'undefined');
 
-    list.innerHTML = active.map(c => `
-        <a href="${c.link}" target="_blank" style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: white; border-radius: 18px; text-decoration: none; color: #1c1c1e; border: 1px solid rgba(0,0,0,0.05); margin-bottom: 8px;">
-            <div style="font-size: 20px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #f5f5f7; border-radius: 12px; border-left: 3px solid ${c.color};">${c.icon}</div>
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 10px; color: #8e8e93; font-weight: 700; text-transform: uppercase;">${c.label}</span>
-                <span style="font-size: 14px; font-weight: 600;">${c.val}</span>
-            </div>
-        </a>
-    `).join('');
+list.innerHTML = active.map(c => `
+    <a href="${c.link}" target="_blank" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: white; border-radius: 16px; text-decoration: none; color: #1c1c1e; border: 1px solid rgba(0,0,0,0.03); margin-bottom: 4px;">
+        <div style="font-size: 18px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f5f5f7; border-radius: 10px; border-left: 3px solid ${c.color};">${c.icon}</div>
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 9px; color: #8e8e93; font-weight: 700; text-transform: uppercase;">${c.label}</span>
+            <span style="font-size: 13px; font-weight: 600;">${c.val}</span>
+        </div>
+    </a>
+`).join('');
 }
