@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData();
 });
 
-// --- ფუნქცია: მონაცემების წამოღება API-დან (განახლებული სლაიდერისთვის) ---
+// --- ფუნქცია: მონაცემების წამოღება API-დან და შენახვა state-ში ---
 async function loadData() {
     showLoader();
     try {
@@ -90,13 +90,10 @@ async function loadData() {
         state.paymentSettings = data.paymentSettings || { active_gateway: 'off' };
         
         if (data.headerConfig) applyHeaderDesign(data.headerConfig);
-
-        // --- აქ მოხდა ცვლილება: ვამოწმებთ მასივს (heroConfigs) ან ერთეულს (heroConfig) ---
-        if (data.heroConfigs) {
-            applyHeroDesign(data.heroConfigs);
-        } else if (data.heroConfig) {
-            applyHeroDesign([data.heroConfig]);
-        }
+        
+        // ვიყენებთ heroConfigs-ს (მასივს) ან heroConfig-ს
+        const heroToUse = data.heroConfigs || data.heroConfig;
+        if (heroToUse) applyHeroDesign(heroToUse);
 
         renderProducts();
     } catch (error) {
@@ -127,7 +124,7 @@ function applyHeaderDesign(config) {
     }
 }
 
-// --- ბანერის დიზაინის შესწორება (სლაიდერით) ---
+// --- ბანერის დიზაინის შესწორება (მრავალჯერადი სლაიდერი) ---
 function applyHeroDesign(configs) {
     const heroSection = document.getElementById('hero');
     if (!heroSection || !configs) return;
@@ -206,7 +203,6 @@ function applyHeroDesign(configs) {
         </div>
     `;
 
-    // სქროლის მოსმენა
     const slider = heroSection.querySelector('.hero-slider-container');
     if (slider) {
         slider.addEventListener('scroll', () => {
@@ -219,7 +215,6 @@ function applyHeroDesign(configs) {
         });
     }
 
-    // კლიკის ფუნქცია
     window.handleHeroClickByIndex = function(index) {
         const config = activeConfigs[index];
         const searchTerm = (config.B_Subtitle || "").toLowerCase().trim();
@@ -235,10 +230,11 @@ function applyHeroDesign(configs) {
         }
     };
 
-    // სქროლბარის დამალვა
     const scrollStyle = document.createElement('style');
     scrollStyle.innerHTML = `.hero-slider-container::-webkit-scrollbar { display: none; }`;
     document.head.appendChild(scrollStyle);
+    
+    heroSection.style.display = 'block';
 }
 
 // --- "ახალი კოლექცია" და პროდუქტების რენდერი ---
