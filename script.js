@@ -141,19 +141,89 @@ function applyHeaderDesign(config) {
     }
 }
 
-// --- ბანერის დიზაინის შესწორება ---
-function applyHeroDesign(config) {
+// --- ბანერის დიზაინის შესწორება (სლაიდერით) ---
+function applyHeroDesign(configs) {
     const heroSection = document.getElementById('hero');
-    if (!heroSection || !config || config.Status !== 'active') return;
+    if (!heroSection || !configs) return;
 
-    // ვინახავთ კონფიგურაციას გლობალურად, რომ ნავიგაციამ შეძლოს მისი აღდგენა
-    window.lastHeroConfig = config;
+    // ვუზრუნველყოფთ, რომ configs ყოველთვის იყოს მასივი
+    const configList = Array.isArray(configs) ? configs : [configs];
+    const activeConfigs = configList.filter(c => c.Status === 'active');
+    
+    if (activeConfigs.length === 0) {
+        heroSection.style.display = 'none';
+        return;
+    }
 
-    // ფუნქცია, რომელიც პოულობს პროდუქტს B_Subtitle-ში მოცემული სახელით
-    window.handleHeroClick = function() {
+    window.lastHeroConfig = activeConfigs;
+
+    // ვქმნით სლაიდერის კონტეინერს
+    heroSection.innerHTML = `
+        <div class="hero-slider-container" style="
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            gap: 0;
+        ">
+            ${activeConfigs.map((config, index) => `
+                <div class="hero-slide-wrapper" style="
+                    min-width: 100%;
+                    scroll-snap-align: start;
+                    box-sizing: border-box;
+                ">
+                    <div class="hero-wrapper" onclick="handleHeroClickByIndex(${index})" style="
+                        cursor: pointer;
+                        background: ${config.B_Gradient || '#eee'}; 
+                        border-radius: 24px; 
+                        padding: 25px; 
+                        position: relative; 
+                        overflow: visible; 
+                        margin-top: 10px; 
+                        margin-bottom: 25px; 
+                        margin-left: 15px;
+                        margin-right: 15px;
+                        height: ${config.B_Height || 200}px; 
+                        display: flex; 
+                        align-items: center;
+                        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+                        transform: translateY(-5px);
+                    ">
+                        <div style="position: relative; z-index: 2; width: 60%;">
+                            <h2 style="color: ${config.B_Title_Color || '#fff'}; font-size: 20px; margin-bottom: 8px;">${config.B_Title || ''}</h2>
+                            <p style="color: #fff; opacity: 0.9; margin-bottom: 15px; font-size: 13px;">${config.B_Subtitle || ''}</p>
+                            <button style="padding: 8px 18px; border-radius: 10px; border: none; background: white; font-weight: 800; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                                ${config.B_Btn_Text || 'ყიდვა'}
+                            </button>
+                        </div>
+                        ${config.B_Image ? `
+                            <img src="${config.B_Image}" style="
+                                position: absolute; 
+                                right: -10px; 
+                                top: 0px; 
+                                height: 115%; 
+                                transform: rotate(-8deg); 
+                                z-index: 3;
+                                filter: drop-shadow(0 20px 15px rgba(0,0,0,0.4));
+                            ">` : ''}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: -10px; margin-bottom: 20px;">
+            ${activeConfigs.length > 1 ? activeConfigs.map((_, i) => `
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: ${i === 0 ? '#1d1d1f' : '#d2d2d7'};"></div>
+            `).join('') : ''}
+        </div>
+    `;
+
+    // კლიკის მართვა ინდექსის მიხედვით
+    window.handleHeroClickByIndex = function(index) {
+        const config = activeConfigs[index];
         const searchTerm = (config.B_Subtitle || "").toLowerCase().trim();
         
-        // ვეძებთ state.products-ში (სახელით ან ბრენდით)
         const product = state.products.find(p => 
             p.name_ge.toLowerCase().includes(searchTerm) || 
             p.brand.toLowerCase().includes(searchTerm)
@@ -162,49 +232,16 @@ function applyHeroDesign(config) {
         if (product) {
             openProductDetails(product.product_id);
         } else {
-            // თუ ვერ იპოვა, ჩვეულებრივ ჩასქროლავს ქვემოთ
             const grid = document.getElementById('products-grid');
             if (grid) grid.scrollIntoView({behavior:'smooth'});
         }
     };
 
-    // margin-top შევამცირე 20px-დან 5px-მდე
-    heroSection.innerHTML = `
-        <div class="hero-wrapper" onclick="handleHeroClick()" style="
-            cursor: pointer;
-            background: ${config.B_Gradient || '#eee'}; 
-            border-radius: 24px; 
-            padding: 25px; 
-            position: relative; 
-            overflow: visible; 
-            margin-top: 10px; 
-            margin-bottom: 25px; 
-            margin-left: 15px;
-            margin-right: 15px;
-            height: ${config.B_Height || 200}px; 
-            display: flex; 
-            align-items: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-            transform: translateY(-5px);
-        ">
-            <div style="position: relative; z-index: 2; width: 60%;">
-                <h2 style="color: ${config.B_Title_Color || '#fff'}; font-size: 20px; margin-bottom: 8px;">${config.B_Title || ''}</h2>
-                <p style="color: #fff; opacity: 0.9; margin-bottom: 15px; font-size: 13px;">${config.B_Subtitle || ''}</p>
-                <button style="padding: 8px 18px; border-radius: 10px; border: none; background: white; font-weight: 800; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                    ${config.B_Btn_Text || 'ყიდვა'}
-                </button>
-            </div>
-            ${config.B_Image ? `
-                <img src="${config.B_Image}" style="
-                    position: absolute; 
-                    right: -10px; 
-                    top: 0px; 
-                    height: 115%; 
-                    transform: rotate(-8deg); 
-                    z-index: 3;
-                    filter: drop-shadow(0 20px 15px rgba(0,0,0,0.4));
-                ">` : ''}
-        </div>`;
+    // ვმალავთ Scrollbar-ს ვიზუალურად
+    const style = document.createElement('style');
+    style.innerHTML = `.hero-slider-container::-webkit-scrollbar { display: none; }`;
+    document.head.appendChild(style);
+
     heroSection.style.display = 'block';
 }
 
