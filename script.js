@@ -1133,13 +1133,11 @@ function handleHubClick(type) {
         }
 
     } else if (type === 'new') {
-        // --- სიახლეების ლოგიკა ---
         const newProducts = state.products.filter(product => {
             const currentId = String(product.product_id).trim().toLowerCase();
             const details = state.productDetails.find(d => 
                 String(d.product_id).trim().toLowerCase() === currentId
             );
-            // ვამოწმებთ Badge_Status სვეტს
             return details && String(details.Badge_Status).trim().toLowerCase() === 'new';
         });
 
@@ -1148,6 +1146,63 @@ function handleHubClick(type) {
         } else {
             alert('ახალი პროდუქტები ჯერ არ არის დამატებული');
         }
+
+    } else if (type === 'filter') {
+        // --- ფილტრაციის ლოგიკა (ფასი, ფერი, ზომა) ---
+        const allColors = new Set();
+        const allSizes = new Set();
+        
+        state.productDetails.forEach(d => {
+            if (d.Colors && d.Colors !== 'undefined') {
+                d.Colors.split(',').forEach(c => allColors.add(c.trim()));
+            }
+            if (d.Sizes && d.Sizes !== 'undefined') {
+                d.Sizes.split(',').forEach(s => allSizes.add(s.trim()));
+            }
+        });
+
+        const mainContent = document.getElementById('main-content');
+        mainContent.innerHTML = `
+            <div class="filter-page" style="padding: 20px 16px; animation: fadeIn 0.3s; padding-bottom: 100px;">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+                    <button onclick="showCategoriesHub()" style="background:none; border:none; padding:0; cursor:pointer;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <h1 style="font-size: 22px; font-weight: 800; margin:0; color: #1d1d1f;">ფილტრი 🔍</h1>
+                </div>
+
+                <p style="font-size: 15px; font-weight: 700; color: #1d1d1f; margin: 0 0 12px 4px;">ფასი</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch;">
+                    <div onclick="applyQuickFilter('price', 0, 50)" style="background: #f5f5f7; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer;">50₾-მდე</div>
+                    <div onclick="applyQuickFilter('price', 50, 150)" style="background: #f5f5f7; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer;">50₾ - 150₾</div>
+                    <div onclick="applyQuickFilter('price', 150, 9999)" style="background: #f5f5f7; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer;">150₾ +</div>
+                </div>
+
+                <p style="font-size: 15px; font-weight: 700; color: #1d1d1f; margin: 0 0 12px 4px;">ფერი</p>
+                <div style="display: flex; gap: 12px; margin-bottom: 25px; overflow-x: auto; padding: 5px 4px;">
+                    ${Array.from(allColors).map(color => `
+                        <div onclick="applyQuickFilter('color', '${color}')" style="width: 32px; height: 32px; border-radius: 50%; background: ${translateColor(color)}; border: 2px solid #fff; box-shadow: 0 0 0 1px #e5e5e5; flex-shrink: 0; cursor: pointer;"></div>
+                    `).join('')}
+                </div>
+
+                <p style="font-size: 15px; font-weight: 700; color: #1d1d1f; margin: 0 0 12px 4px;">ზომა</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 5px;">
+                    ${Array.from(allSizes).map(size => `
+                        <div onclick="applyQuickFilter('size', '${size}')" style="background: #fff; border: 1.5px solid #e5e5e5; padding: 8px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer;">${size}</div>
+                    `).join('')}
+                </div>
+
+                <div id="filter-results-grid" class="products-grid"></div>
+            </div>
+        `;
+        // ვაჩვენებთ ყველა პროდუქტს საწყის ეტაპზე
+        setTimeout(() => {
+            const resGrid = document.getElementById('filter-results-grid');
+            const oldId = resGrid.id;
+            resGrid.id = 'products-grid';
+            renderProducts(state.products);
+            resGrid.id = oldId;
+        }, 50);
 
     } else {
         alert('ეს სექცია მალე გააქტიურდება');
