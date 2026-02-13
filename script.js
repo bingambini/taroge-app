@@ -1101,7 +1101,6 @@ function showCategoriesHub() {
     window.scrollTo(0, 0);
 }
 
-// ბანერებზე დაჭერის დამუშავება
 function handleHubClick(type) {
     if (window.Telegram && window.Telegram.WebApp.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
@@ -1110,11 +1109,9 @@ function handleHubClick(type) {
     if (type === 'brands') {
         renderBrandsList(); 
     } else if (type === 'sale') {
-        // ფილტრაცია: ვამოწმებთ თითოეული პროდუქტის შესაბამის ფასებს Product_Details-ში
+        // 1. ფილტრაცია და სორტირება ფასის ზრდადობის მიხედვით
         const saleProducts = state.products.filter(product => {
             const currentId = String(product.product_id).trim().toLowerCase();
-            
-            // ვპოულობთ ამ პროდუქტის დეტალებს
             const details = state.productDetails.find(d => 
                 String(d.product_id).trim().toLowerCase() === currentId
             );
@@ -1125,17 +1122,42 @@ function handleHubClick(type) {
                 return oldPrice > currentPrice;
             }
             return false;
+        }).sort((a, b) => {
+            // ფასების შედარება სორტირებისთვის
+            const priceA = parseFloat(state.productDetails.find(d => String(d.product_id) === String(a.product_id))?.Price) || 0;
+            const priceB = parseFloat(state.productDetails.find(d => String(d.product_id) === String(b.product_id))?.Price) || 0;
+            return priceA - priceB;
         });
 
         if (saleProducts.length > 0) {
+            // 2. ახალი "გვერდის" მომზადება (main-content-ის გასუფთავება)
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = `
+                <div class="sale-page-wrapper" style="animation: fadeIn 0.4s ease; padding-bottom: 80px;">
+                    <div style="padding: 25px 16px 15px 16px; display: flex; align-items: center; gap: 12px;">
+                        <button onclick="showCategoriesHub()" style="background: none; border: none; padding: 0; cursor: pointer;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                        </button>
+                        <div>
+                            <h1 style="font-size: 22px; font-weight: 800; margin: 0; color: #1d1d1f;">ფასდაკლებები 🔥</h1>
+                            <p style="color: #86868b; font-size: 13px; margin: 2px 0 0 0;">საუკეთესო შეთავაზებები</p>
+                        </div>
+                    </div>
+                    <div id="sale-products-grid" class="products-grid" style="padding: 0 16px;"></div>
+                </div>
+            `;
+
+            // 3. პროდუქტების ჩაწერა ახალ კონტეინერში
+            // დროებით შევცვალოთ grid-ის ID, რომ renderProducts-მა იცოდეს სად ჩახატოს
+            const originalGrid = document.getElementById('products-grid');
+            const saleGrid = document.getElementById('sale-products-grid');
+            
+            // პატარა ჰაკი: დროებით შევუცვალოთ ID-ები, რომ renderProducts-მა იმუშაოს
+            saleGrid.id = 'products-grid'; 
             renderProducts(saleProducts);
-            
-            // სათაურის შეცვლა, რომ მომხმარებელმა იცოდეს სად არის
-            const mainTitle = document.getElementById('new-arrivals-title');
-            if (mainTitle) mainTitle.innerText = "ფასდაკლებები 🔥";
-            
-            // ავტომატურად გადავიყვანოთ მთავარ გვერდზე სადაც პროდუქტებია
-            showTab('home'); 
+            saleGrid.id = 'sale-products-grid'; // ვაბრუნებთ უკან
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
             alert('ამჟამად ფასდაკლებები არ არის');
         }
