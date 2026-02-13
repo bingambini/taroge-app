@@ -1109,13 +1109,11 @@ function handleHubClick(type) {
     if (type === 'brands') {
         renderBrandsList(); 
     } else if (type === 'sale') {
-        // 1. ფილტრაცია და სორტირება ფასდაკლების პროცენტის (sale_full) მიხედვით
         const saleProducts = state.products.filter(product => {
             const currentId = String(product.product_id).trim().toLowerCase();
             const details = state.productDetails.find(d => 
                 String(d.product_id).trim().toLowerCase() === currentId
             );
-
             if (details) {
                 const currentPrice = parseFloat(details.Price) || 0;
                 const oldPrice = parseFloat(details.Old_Price) || 0;
@@ -1123,47 +1121,66 @@ function handleHubClick(type) {
             }
             return false;
         }).sort((a, b) => {
-            // სორტირება: ვიღებთ პროცენტებს sale_full სვეტიდან და ვადარებთ კლებადობით
             const discountA = parseInt(state.productDetails.find(d => String(d.product_id).trim().toLowerCase() === String(a.product_id).trim().toLowerCase())?.sale_full) || 0;
             const discountB = parseInt(state.productDetails.find(d => String(d.product_id).trim().toLowerCase() === String(b.product_id).trim().toLowerCase())?.sale_full) || 0;
             return discountB - discountA;
         });
 
         if (saleProducts.length > 0) {
-            // 2. ახალი "გვერდის" მომზადება (main-content-ის გასუფთავება)
-            const mainContent = document.getElementById('main-content');
-            mainContent.innerHTML = `
-                <div class="sale-page-wrapper" style="animation: fadeIn 0.4s ease; padding-bottom: 80px;">
-                    <div style="padding: 25px 16px 15px 16px; display: flex; align-items: center; gap: 12px;">
-                        <button onclick="showCategoriesHub()" style="background: none; border: none; padding: 0; cursor: pointer;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                        </button>
-                        <div>
-                            <h1 style="font-size: 22px; font-weight: 800; margin: 0; color: #1d1d1f;">ფასდაკლებები 🔥</h1>
-                            <p style="color: #86868b; font-size: 13px; margin: 2px 0 0 0;">საუკეთესო შეთავაზებები</p>
-                        </div>
-                    </div>
-                    <div id="sale-products-grid" class="products-grid" style="padding: 0 16px;"></div>
-                </div>
-            `;
-
-            // 3. პროდუქტების ჩაწერა ახალ კონტეინერში
-            const saleGrid = document.getElementById('sale-products-grid');
-            
-            // დროებით შევუცვალოთ ID, რომ renderProducts-მა იმუშაოს
-            const tempId = saleGrid.id;
-            saleGrid.id = 'products-grid'; 
-            renderProducts(saleProducts);
-            saleGrid.id = tempId; 
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            renderCustomPage(saleProducts, "ფასდაკლებები 🔥", "საუკეთესო შეთავაზებები");
         } else {
             alert('ამჟამად ფასდაკლებები არ არის');
         }
+
+    } else if (type === 'new') {
+        // --- სიახლეების ლოგიკა ---
+        const newProducts = state.products.filter(product => {
+            const currentId = String(product.product_id).trim().toLowerCase();
+            const details = state.productDetails.find(d => 
+                String(d.product_id).trim().toLowerCase() === currentId
+            );
+            // ვამოწმებთ Badge_Status სვეტს
+            return details && String(details.Badge_Status).trim().toLowerCase() === 'new';
+        });
+
+        if (newProducts.length > 0) {
+            renderCustomPage(newProducts, "სიახლეები ✨", "ახალი კოლექცია");
+        } else {
+            alert('ახალი პროდუქტები ჯერ არ არის დამატებული');
+        }
+
     } else {
         alert('ეს სექცია მალე გააქტიურდება');
     }
 }
+
+// დამხმარე ფუნქცია გვერდის დასარენდერებლად (კოდი რომ არ გაორდეს)
+function renderCustomPage(products, title, subtitle) {
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = `
+        <div class="custom-page-wrapper" style="animation: fadeIn 0.4s ease; padding-bottom: 80px;">
+            <div style="padding: 25px 16px 15px 16px; display: flex; align-items: center; gap: 12px;">
+                <button onclick="showCategoriesHub()" style="background: none; border: none; padding: 0; cursor: pointer;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <div>
+                    <h1 style="font-size: 22px; font-weight: 800; margin: 0; color: #1d1d1f;">${title}</h1>
+                    <p style="color: #86868b; font-size: 13px; margin: 2px 0 0 0;">${subtitle}</p>
+                </div>
+            </div>
+            <div id="custom-products-grid" class="products-grid" style="padding: 0 16px;"></div>
+        </div>
+    `;
+
+    const customGrid = document.getElementById('custom-products-grid');
+    const tempId = customGrid.id;
+    customGrid.id = 'products-grid'; 
+    renderProducts(products);
+    customGrid.id = tempId;
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+   
 // ტაბების გააქტიურების ფუნქცია
 function updateActiveTab(tabName) {
     const navItems = document.querySelectorAll('.nav-item');
