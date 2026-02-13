@@ -1297,6 +1297,7 @@ function updateActiveTab(tabName) {
 }
 
 // 1. ბრენდების სიის გამოტანის ფუნქცია (ოპტიმიზირებული)
+// 1. ბრენდების სიის გამოტანის ფუნქცია (ოპტიმიზირებული)
 function renderBrandsList() {
     const mainContent = document.getElementById('main-content');
     
@@ -1320,17 +1321,19 @@ function renderBrandsList() {
                 <h1 style="font-size: 22px; font-weight: 800; margin: 0;">ბრენდები</h1>
             </div>
             
-            <div class="brands-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <div class="brands-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
                 ${uniqueBrands.map(brandName => {
                     const count = products.filter(p => p.brand === brandName).length;
                     return `
                         <div class="brand-item" onclick="filterByBrand('${brandName}')" 
-                             style="background: #ffffff; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 18px; cursor: pointer; border: 1px solid #f2f2f7; box-shadow: 0 4px 12px rgba(0,0,0,0.03); padding: 10px; transition: transform 0.2s ease;">
-                            <div style="font-weight: 800; font-size: 14px; color: #1d1d1f; text-align: center; margin-bottom: 4px; letter-spacing: -0.2px;">
-                                ${brandName}
+                             style="background: #ffffff; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 18px; cursor: pointer; border: 1px solid #f2f2f7; box-shadow: 0 4px 12px rgba(0,0,0,0.03); padding: 10px; transition: transform 0.2s ease; position: relative; margin-top: 5px;">
+                            
+                            <div style="position: absolute; top: -6px; right: -4px; background: #1d1d1f; color: #ffffff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                ${count}
                             </div>
-                            <div style="font-size: 11px; color: #86868b; font-weight: 500; background: #f5f5f7; padding: 2px 8px; border-radius: 10px;">
-                                ${count} მოდელი
+
+                            <div style="font-weight: 800; font-size: 14px; color: #1d1d1f; text-align: center; letter-spacing: -0.2px;">
+                                ${brandName}
                             </div>
                         </div>
                     `;
