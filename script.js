@@ -1153,11 +1153,12 @@ function handleHubClick(type) {
         const allSizes = new Set();
         
         state.productDetails.forEach(d => {
+            // ვიყენებთ String() კონვერტაციას, რომ ციფრებზე split error არ ამოაგდოს
             if (d.Colors && d.Colors !== 'undefined') {
-                d.Colors.split(',').forEach(c => allColors.add(c.trim()));
+                allColors.add(String(d.Colors).trim());
             }
             if (d.Sizes && d.Sizes !== 'undefined') {
-                d.Sizes.split(',').forEach(s => allSizes.add(s.trim()));
+                allSizes.add(String(d.Sizes).trim());
             }
         });
 
@@ -1198,10 +1199,12 @@ function handleHubClick(type) {
         // ვაჩვენებთ ყველა პროდუქტს საწყის ეტაპზე
         setTimeout(() => {
             const resGrid = document.getElementById('filter-results-grid');
-            const oldId = resGrid.id;
-            resGrid.id = 'products-grid';
-            renderProducts(state.products);
-            resGrid.id = oldId;
+            if (resGrid) {
+                const oldId = resGrid.id;
+                resGrid.id = 'products-grid';
+                renderProducts(state.products);
+                resGrid.id = oldId;
+            }
         }, 50);
 
     } else {
