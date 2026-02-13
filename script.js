@@ -5,6 +5,11 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
+// ჩაკეტეთ ვერტიკალური სვაიპი, რომ აპლიკაცია არ დაიხუროს ჩამოწევისას
+if (tg.disableVerticalSwipes) {
+    tg.disableVerticalSwipes();
+}
+
 // ზოგიერთ მოწყობილობაზე სჭირდება მცირე დაგვიანება ჩატვირთვისას
 setTimeout(() => {
     tg.expand();
@@ -71,6 +76,11 @@ document.addEventListener('DOMContentLoaded', () => {
         tg.ready();
         tg.expand();
         
+        // დამატებითი დაზღვევა DOM-ის ჩატვირთვისას
+        if (tg.disableVerticalSwipes) {
+            tg.disableVerticalSwipes();
+        }
+        
         setTimeout(() => { tg.expand(); }, 200);
         setTimeout(() => { tg.expand(); }, 500);
         setTimeout(() => { tg.expand(); }, 1000);
@@ -82,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadData() {
     showLoader();
     try {
+        // CONFIG.API_URL ახლა უკვე გლობალურად ჩანს
         const response = await fetch(CONFIG.API_URL);
         const data = await response.json();
         
@@ -97,11 +108,11 @@ async function loadData() {
         }
         
         const heroToUse = data.heroConfigs || data.heroConfig;
-        if (heroToUse) {
+        if (heroToUse && (Array.isArray(heroToUse) ? heroToUse.length > 0 : Object.keys(heroToUse).length > 0)) {
             applyHeroDesign(heroToUse);
             // აიძულე სექციის ჩვენება
             const heroSection = document.getElementById('hero');
-            if (heroSection) heroSection.style.display = 'block';
+            if (heroSection) heroSection.style.display = 'flex'; // Hero Slider-ს flex სჯობს
         }
 
         // პრიორიტეტი 2: შემდეგ ვხატავთ პროდუქტებს
@@ -112,7 +123,8 @@ async function loadData() {
 
     } catch (error) {
         console.error("მონაცემების ჩატვირთვა ვერ მოხერხდა:", error);
-        hideLoader(); // შეცდომის შემთხვევაშიც რომ არ გაიჭედოს Loader-ი
+        // შეცდომის შეტყობინება მომხმარებლისთვის (სურვილისამებრ)
+        hideLoader(); 
     }
 }
 
