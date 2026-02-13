@@ -1449,16 +1449,23 @@ function toggleContactModal() {
         return;
     }
 
-    if (modal.style.top === '0px') {
+    // ვამოწმებთ, აქვს თუ არა active კლასი (Liquid ეფექტისთვის)
+    if (modal.classList.contains('active')) {
         // დახურვა
-        modal.style.top = '-65%';
-        overlay.style.display = 'none';
+        modal.classList.remove('active');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 300);
         if (tg?.BackButton) tg.BackButton.hide();
     } else {
         // გახსნა
         renderContactModal(); // მონაცემების გენერირება
-        modal.style.top = '0px';
+        modal.classList.add('active');
         overlay.style.display = 'block';
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+        }, 10);
         
         // Telegram-ის Back Button ინტეგრაცია
         if (tg?.BackButton) {
@@ -1480,7 +1487,7 @@ function renderContactModal() {
 
     const contacts = [
         { label: 'ტელეფონი', val: config.Shop_Phone, icon: '📞', link: `tel:${config.Shop_Phone}`, color: '#34c759' },
-        { label: 'მისამართი', val: config.Shop_Address, icon: '📍', link: `https://www.google.com/maps/search/${encodeURIComponent(config.Shop_Address || '')}`, color: '#ff3b30' },
+        { label: 'მისამართი', val: config.Shop_Address, icon: '📍', link: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(config.Shop_Address || '')}`, color: '#ff3b30' },
         { label: 'Facebook', val: config.Shop_Facebook ? 'გვეწვიეთ ფეისბუქზე' : null, icon: '🔵', link: config.Shop_Facebook, color: '#1877f2' },
         { label: 'Instagram', val: config.Shop_Insta, icon: '📸', link: String(config.Shop_Insta || '').includes('http') ? config.Shop_Insta : `https://instagram.com/${String(config.Shop_Insta || '').replace('@','')}`, color: '#e1306c' },
         { label: 'TikTok', val: config.Shop_TikTok ? 'ჩვენი ვიდეოები' : null, icon: '📱', link: config.Shop_TikTok, color: '#000000' },
@@ -1490,13 +1497,13 @@ function renderContactModal() {
 
     const active = contacts.filter(c => c.val && String(c.val).trim() !== '' && String(c.val) !== 'undefined');
 
-list.innerHTML = active.map(c => `
-    <a href="${c.link}" target="_blank" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: white; border-radius: 16px; text-decoration: none; color: #1c1c1e; border: 1px solid rgba(0,0,0,0.03); margin-bottom: 4px;">
-        <div style="font-size: 18px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f5f5f7; border-radius: 10px; border-left: 3px solid ${c.color};">${c.icon}</div>
-        <div style="display: flex; flex-direction: column;">
-            <span style="font-size: 9px; color: #8e8e93; font-weight: 700; text-transform: uppercase;">${c.label}</span>
-            <span style="font-size: 13px; font-weight: 600;">${c.val}</span>
-        </div>
-    </a>
-`).join('');
+    list.innerHTML = active.map(c => `
+        <a href="${c.link}" target="_blank" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: white; border-radius: 16px; text-decoration: none; color: #1c1c1e; border: 1px solid rgba(0,0,0,0.03); margin-bottom: 4px;">
+            <div style="font-size: 18px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f5f5f7; border-radius: 10px; border-left: 3px solid ${c.color};">${c.icon}</div>
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 9px; color: #8e8e93; font-weight: 700; text-transform: uppercase;">${c.label}</span>
+                <span style="font-size: 13px; font-weight: 600;">${c.val}</span>
+            </div>
+        </a>
+    `).join('');
 }
