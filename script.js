@@ -89,17 +89,26 @@ async function loadData() {
         state.productDetails = data.productDetails || [];
         state.paymentSettings = data.paymentSettings || { active_gateway: 'off' };
         
+        // პრიორიტეტი 1: ჯერ ვხატავთ ზედა ნაწილს და ბანერებს
         if (data.headerConfig) applyHeaderDesign(data.headerConfig);
         
-        // ვიყენებთ heroConfigs-ს (მასივს) ან heroConfig-ს
         const heroToUse = data.heroConfigs || data.heroConfig;
-        if (heroToUse) applyHeroDesign(heroToUse);
+        if (heroToUse) {
+            applyHeroDesign(heroToUse);
+            // აიძულე სექციის ჩვენება
+            const heroSection = document.getElementById('hero');
+            if (heroSection) heroSection.style.display = 'block';
+        }
 
+        // პრიორიტეტი 2: შემდეგ ვხატავთ პროდუქტებს
         renderProducts();
+        
+        // როგორც კი მონაცემები დამუშავდება, ეგრევე ვმალავთ Loader-ს
+        hideLoader();
+
     } catch (error) {
         console.error("მონაცემების ჩატვირთვა ვერ მოხერხდა:", error);
-    } finally {
-        setTimeout(hideLoader, 800);
+        hideLoader(); // შეცდომის შემთხვევაშიც რომ არ გაიჭედოს Loader-ი
     }
 }
 
