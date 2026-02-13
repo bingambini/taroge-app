@@ -12,9 +12,9 @@
 
 /* 1. გლობალური პარამეტრები */
 * { 
-    margin: 0;                      /* გარე დაშორების განულება */
-    padding: 0;                      /* შიდა დაშორების განულება */
-    box-sizing: border-box;          /* ზომის გამოთვლა ჩარჩოს ჩათვლით */
+    margin: 0;                       /* გარე დაშორების განულება */
+    padding: 0;                       /* შიდა დაშორების განულება */
+    box-sizing: border-box;           /* ზომის გამოთვლა ჩარჩოს ჩათვლით */
     font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* სისტემური შრიფტები */
     -webkit-tap-highlight-color: transparent; /* მობილურზე დაჭერისას ლურჯი ფონის გაუქმება */
 }
@@ -32,8 +32,41 @@ body {
 .container { 
     padding: 0 16px;               /* გვერდითა დაშორებები */
     max-width: 600px;              /* მაქსიმალური სიგანე */
-    margin: 0 auto;                 /* კონტეინერის გაცენტრვა */
+    margin: 0 auto;                  /* კონტეინერის გაცენტრვა */
     width: 100%;
+}
+
+/* --- Hero Slider (მთავარი ბანერები) - გასწორებული ვერსია --- */
+.hero-section {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;            /* ჩაკეტავს ვერტიკალურ მოძრაობას */
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    width: calc(100% + 32px);      /* აკომპენსირებს კონტეინერის padding-ს */
+    margin-left: -16px;            /* მიიტანს ეკრანის კიდეებთან */
+    margin-bottom: 24px;
+    scrollbar-width: none;
+    touch-action: pan-x;           /* კრძალავს ზემოთ აწევას სქროლისას */
+    overscroll-behavior-x: contain;
+}
+
+.hero-section::-webkit-scrollbar {
+    display: none;
+}
+
+.hero-banner {
+    flex: 0 0 100%;                /* თითო ბანერი 100% სიგანის */
+    width: 100%;
+    scroll-snap-align: start;
+    position: relative;
+    aspect-ratio: 16 / 9;          /* ბანერის სტანდარტული პროპორცია */
+}
+
+.hero-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;             /* სურათი შეავსებს ბანერს ლამაზად */
 }
 
 /* Loader - ჩატვირთვის ეკრანი */
