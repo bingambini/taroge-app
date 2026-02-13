@@ -12,6 +12,13 @@
             const tg = window.Telegram.WebApp;
             tg.ready();
             tg.expand();
+            
+            // აუქმებს ტელეგრამის ვერტიკალურ "Sway" და "Pull-to-close" ეფექტს
+            // ეს გაყინავს ეკრანს, რომ თითის ჩამოწევისას აპლიკაცია არ დაიხუროს
+            if (tg.disableVerticalSwipes) {
+                tg.disableVerticalSwipes();
+            }
+
             setTimeout(() => {
                 tg.expand();
             }, 150);
@@ -226,6 +233,6 @@
         </div>
     </nav>
 
-    <script src="script.js?v=3.7"></script>
+    <script src="script.js?v=7.0"></script>
 </body>
 </html>
