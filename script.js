@@ -66,33 +66,19 @@ function hideLoader() {
 
 // --- ღონისძიება: გვერდის ჩატვირთვისას მონაცემების წამოღება ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. ვამოწმებთ ტელეგრამს და მაქსიმალურად "აგრესიულად" ვცდით გაშლას
     if (window.Telegram && window.Telegram.WebApp) {
         const tg = window.Telegram.WebApp;
-        
         tg.ready();
         tg.expand();
         
-        // პირველი დაზღვევა: 200 მილიწამში
-        setTimeout(() => {
-            tg.expand();
-        }, 200);
-
-        // მეორე დაზღვევა: 500 მილიწამში (iPhone-ებისთვის)
-        setTimeout(() => {
-            tg.expand();
-        }, 500);
-
-        // მესამე დაზღვევა: 1000 მილიწამში (თუ ინტერნეტი ნელია)
-        setTimeout(() => {
-            tg.expand();
-        }, 1000);
+        setTimeout(() => { tg.expand(); }, 200);
+        setTimeout(() => { tg.expand(); }, 500);
+        setTimeout(() => { tg.expand(); }, 1000);
     }
-    
     loadData();
 });
 
-// --- ფუნქცია: მონაცემების წამოღება API-დან და შენახვა state-ში ---
+// --- ფუნქცია: მონაცემების წამოღება API-დან (განახლებული სლაიდერისთვის) ---
 async function loadData() {
     showLoader();
     try {
@@ -101,12 +87,16 @@ async function loadData() {
         
         state.products = data.products || [];
         state.productDetails = data.productDetails || [];
-        
-        // ინახავს გადახდის პარამეტრებს (ჩართულია თუ არა ბარათი და რომელი ბანკი)
         state.paymentSettings = data.paymentSettings || { active_gateway: 'off' };
         
         if (data.headerConfig) applyHeaderDesign(data.headerConfig);
-        if (data.heroConfig) applyHeroDesign(data.heroConfig);
+
+        // --- აქ მოხდა ცვლილება: ვამოწმებთ მასივს (heroConfigs) ან ერთეულს (heroConfig) ---
+        if (data.heroConfigs) {
+            applyHeroDesign(data.heroConfigs);
+        } else if (data.heroConfig) {
+            applyHeroDesign([data.heroConfig]);
+        }
 
         renderProducts();
     } catch (error) {
@@ -129,14 +119,10 @@ function applyHeaderDesign(config) {
     if (config.H_Height && headerElement) headerElement.style.height = config.H_Height + 'px';
     
     if (config.Shop_Logo && logoIcon) {
-        // ვასუფთავებთ logo-circle კლასის ნაგულისხმევ სტილებს
         logoIcon.style.background = "transparent";
         logoIcon.style.backgroundColor = "transparent";
         logoIcon.style.border = "none";
-
-        // ვიღებთ რადიუსს შიტიდან (რადგან 0 გიწერია, იქნება 0)
         const radius = config.Logo_Radius || "0";
-
         logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="width: ${config.Logo_Size || 40}px; height: auto; border-radius: ${radius}; object-fit: contain; display: block;">`;
     }
 }
@@ -146,7 +132,6 @@ function applyHeroDesign(configs) {
     const heroSection = document.getElementById('hero');
     if (!heroSection || !configs) return;
 
-    // ვუზრუნველყოფთ, რომ configs ყოველთვის იყოს მასივი
     const configList = Array.isArray(configs) ? configs : [configs];
     const activeConfigs = configList.filter(c => c.Status === 'active');
     
@@ -157,7 +142,6 @@ function applyHeroDesign(configs) {
 
     window.lastHeroConfig = activeConfigs;
 
-    // ვქმნით სლაიდერის კონტეინერს
     heroSection.innerHTML = `
         <div class="hero-slider-container" style="
             display: flex;
@@ -212,23 +196,20 @@ function applyHeroDesign(configs) {
                 </div>
             `).join('')}
         </div>
-        <div style="display: flex; justify-content: center; gap: 8px; margin-top: -10px; margin-bottom: 20px;">
+        <div class="hero-dots" style="display: flex; justify-content: center; gap: 8px; margin-top: -10px; margin-bottom: 20px;">
             ${activeConfigs.length > 1 ? activeConfigs.map((_, i) => `
-                <div style="width: 8px; height: 8px; border-radius: 50%; background: ${i === 0 ? '#1d1d1f' : '#d2d2d7'};"></div>
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: ${i === 0 ? '#1d1d1f' : '#d2d2d7'}; transition: background 0.3s;"></div>
             `).join('') : ''}
         </div>
     `;
 
-    // კლიკის მართვა ინდექსის მიხედვით
     window.handleHeroClickByIndex = function(index) {
         const config = activeConfigs[index];
         const searchTerm = (config.B_Subtitle || "").toLowerCase().trim();
-        
         const product = state.products.find(p => 
             p.name_ge.toLowerCase().includes(searchTerm) || 
             p.brand.toLowerCase().includes(searchTerm)
         );
-
         if (product) {
             openProductDetails(product.product_id);
         } else {
@@ -237,7 +218,18 @@ function applyHeroDesign(configs) {
         }
     };
 
-    // ვმალავთ Scrollbar-ს ვიზუალურად
+    // სქროლის მოსმენა წერტილების ფერის შესაცვლელად
+    const slider = heroSection.querySelector('.hero-slider-container');
+    if (slider) {
+        slider.addEventListener('scroll', () => {
+            const index = Math.round(slider.scrollLeft / slider.offsetWidth);
+            const dots = heroSection.querySelectorAll('.hero-dots div');
+            dots.forEach((dot, i) => {
+                dot.style.background = i === index ? '#1d1d1f' : '#d2d2d7';
+            });
+        });
+    }
+
     const style = document.createElement('style');
     style.innerHTML = `.hero-slider-container::-webkit-scrollbar { display: none; }`;
     document.head.appendChild(style);
