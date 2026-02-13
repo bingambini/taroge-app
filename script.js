@@ -1443,65 +1443,69 @@ function filterByBrand(brandName) {
     renderProducts(filtered);
     window.scrollTo(0, 0);
 }
-// --- 1. მენიუს გამოჩენა/დამალვის ლოგიკა ---
+
+// --- 1. ფუნქცია: მენიუს გამოჩენა/დამალვა ---
 function toggleContactModal() {
     const modal = document.getElementById('contact-modal');
     const overlay = document.getElementById('modal-overlay');
-    const tg = window.Telegram.WebApp;
+    const tg = window.Telegram?.WebApp;
     
-    if (!modal || !overlay) return;
+    if (!modal || !overlay) {
+        console.error("მოდალური ფანჯრის ელემენტები ვერ მოიძებნა!");
+        return;
+    }
 
     if (modal.style.top === '0px') {
-        // ვმალავთ
+        // დახურვა
         modal.style.top = '-65%';
         overlay.style.display = 'none';
-        if (tg.BackButton) tg.BackButton.hide();
+        if (tg?.BackButton) tg.BackButton.hide();
     } else {
-        // ვაჩვენებთ
-        renderContactModal(); // ჯერ ვავსებთ მონაცემებით
+        // გახსნა
+        renderContactModal(); // მონაცემების გენერირება
         modal.style.top = '0px';
         overlay.style.display = 'block';
         
-        // Telegram-ის "უკან" ღილაკის ჩართვა
-        if (tg.BackButton) {
+        // Telegram-ის Back Button ინტეგრაცია
+        if (tg?.BackButton) {
             tg.BackButton.show();
-            tg.BackButton.offClick(); // ძველი ივენთების გასუფთავება
+            tg.BackButton.offClick(); // დუბლირების თავიდან ასაცილებლად
             tg.BackButton.onClick(() => toggleContactModal());
         }
     }
 }
 
-// --- 2. მენიუს შიგთავსის გენერირება შიტიდან წამოღებული მონაცემებით ---
+// --- 2. ფუნქცია: მონაცემების ჩაწერა ფანჯარაში ---
 function renderContactModal() {
     const list = document.getElementById('contact-list');
     const config = window.lastHeaderConfig || {};
     if (!list) return;
 
-    // კონტაქტების სია და შესაბამისი სვეტები შიტიდან
+    // კონტაქტების სია შიტის სვეტების მიხედვით
     const contacts = [
         { label: 'ტელეფონი', val: config.Shop_Phone, icon: '📞', link: `tel:${config.Shop_Phone}`, color: '#34c759' },
-        { label: 'მისამართი', val: config.Shop_Address, icon: '📍', link: `https://www.google.com/maps/search/${encodeURIComponent(config.Shop_Address || '')}`, color: '#ff3b30' },
+        { label: 'მისამართი', val: config.Shop_Address, icon: '📍', link: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(config.Shop_Address || '')}`, color: '#ff3b30' },
         { label: 'Facebook', val: config.Shop_Facebook ? 'გვეწვიეთ ფეისბუქზე' : null, icon: '🔵', link: config.Shop_Facebook, color: '#1877f2' },
         { label: 'Instagram', val: config.Shop_Insta, icon: '📸', link: config.Shop_Insta?.includes('http') ? config.Shop_Insta : `https://instagram.com/${config.Shop_Insta?.replace('@','')}`, color: '#e1306c' },
         { label: 'TikTok', val: config.Shop_TikTok ? 'ჩვენი ვიდეოები' : null, icon: '📱', link: config.Shop_TikTok?.includes('http') ? config.Shop_TikTok : `https://www.tiktok.com/${config.Shop_TikTok}`, color: '#000000' },
-        { label: 'WhatsApp', val: config.Shop_WhatsApp ? 'მოგვწერეთ WhatsApp-ზე' : null, icon: '🟢', link: `https://wa.me/${config.Shop_WhatsApp?.replace('+', '').replace(/\s/g, '')}`, color: '#25d366' },
+        { label: 'WhatsApp', val: config.Shop_WhatsApp ? 'მოგვწერეთ WhatsApp-ზე' : null, icon: '🟢', link: `https://wa.me/${String(config.Shop_WhatsApp || '').replace('+', '').replace(/\s/g, '')}`, color: '#25d366' },
         { label: 'Email', val: config.Shop_Email, icon: '✉️', link: `mailto:${config.Shop_Email}`, color: '#5856d6' }
     ];
 
-    // ვფილტრავთ მხოლოდ იმას, რაც შიტში წერია
-    const activeContacts = contacts.filter(c => c.val && String(c.val).trim() !== '' && c.val !== 'undefined');
+    // ფილტრაცია: მხოლოდ ის, რაც შიტში წერია
+    const activeContacts = contacts.filter(c => c.val && String(c.val).trim() !== '' && String(c.val) !== 'undefined');
 
     if (activeContacts.length === 0) {
-        list.innerHTML = '<p style="text-align:center; color:#8e8e93; padding:20px; font-size:14px;">ინფორმაცია არ არის მითითებული</p>';
+        list.innerHTML = '<p style="text-align:center; color:#8e8e93; padding:20px;">ინფორმაცია არ არის მითითებული</p>';
         return;
     }
 
     list.innerHTML = activeContacts.map(c => `
         <a href="${c.link}" target="_blank" style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: white; border-radius: 18px; text-decoration: none; color: #1c1c1e; border: 1px solid rgba(0,0,0,0.05); margin-bottom: 2px;">
             <div style="font-size: 20px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #f5f5f7; border-radius: 12px; border-left: 3px solid ${c.color};">${c.icon}</div>
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 10px; color: #8e8e93; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${c.label}</span>
-                <span style="font-size: 14px; font-weight: 600;">${c.val}</span>
+            <div style="display: flex; flex-direction: column; overflow: hidden;">
+                <span style="font-size: 10px; color: #8e8e93; font-weight: 700; text-transform: uppercase;">${c.label}</span>
+                <span style="font-size: 14px; font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${c.val}</span>
             </div>
             <div style="margin-left: auto; color: #d2d2d7;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
