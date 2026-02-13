@@ -1,42 +1,30 @@
-// 1. ტელეგრამის ობიექტის ინიციალიზაცია
-const tg = window.Telegram.WebApp;
+// --- 1. ტელეგრამის აპლიკაციის ინიციალიზაცია ---
+const tg = window.Telegram.WebApp; // ტელეგრამის WebApp ობიექტის ცვლადში შენახვა
 
-// 2. აიძულე გაფართოება რამდენჯერმე (დაზღვევისთვის)
-tg.ready();
-tg.expand();
+// --- 2. ეკრანის გაფართოების მართვა და ჩაკეტვა ---
+tg.ready(); // ატყობინებს ტელეგრამს, რომ აპლიკაცია მზადაა
+tg.expand(); // აფართოებს აპლიკაციას მთელ ეკრანზე
 
-// ზოგიერთ მოწყობილობაზე სჭირდება მცირე დაგვიანება ჩატვირთვისას
+// === აქ ჩაამატე ეს ხაზი ===
+tg.disableVerticalSwipes(); // აუქმებს ვერტიკალურ "Sway" და Pull-to-close ეფექტს
+// =========================
+
+// დაზღვევის მიზნით, რამდენჯერმე ვიმეორებთ გაფართოებას მცირე დაგვიანებით
 setTimeout(() => {
-    tg.expand();
+    tg.expand(); // გაფართოება 200 მილიწამში
 }, 200);
 
 setTimeout(() => {
-    tg.expand();
+    tg.expand(); // გაფართოება 500 მილიწამში
 }, 500);
 
-// 3. ზედა ზოლის ფერი (Header)
-tg.setHeaderColor('#ffffff');
-tg.setBackgroundColor('#ffffff');
+// --- 3. ინტერფეისის ფერების დაყენება ---
+tg.setHeaderColor('#ffffff'); // ზედა ზოლის (Header) ფერის შეცვლა თეთრად
+tg.setBackgroundColor('#ffffff'); // აპლიკაციის ფონის ფერის შეცვლა თეთრად
 
-// --- კონფიგურაცია და მონაცემთა საცავი ---
-const CONFIG = {
-    API_URL: 'https://script.google.com/macros/s/AKfycbxsq8ipEFXn35wez6-EBkMdjbcRV8bffwWvqEXz9TJE91sB9FLPbImL0l-PFXZL4INk/exec'
-};
-
-// --- აპლიკაციის მდგომარეობა ---
-let state = {
-    products: [],
-    productDetails: [],
-    design: {},
-    cart: []
-};
-
-// გლობალური ცვლადები შერჩევისთვის
-let selectedColor = null;
-let selectedSize = null;
-
-// --- ფუნქცია: ფერების სახელების თარგმნა CSS ფერებში ---
+// --- ფერების სახელების თარგმნა (ფუნქცია) ---
 function translateColor(color) {
+    // ქართული/ინგლისური სახელების გადაყვანა CSS-ისთვის გასაგებ ფერებში
     const colors = {
         'შავი': 'black', 'Black': 'black',
         'თეთრი': 'white', 'White': 'white',
@@ -50,92 +38,92 @@ function translateColor(color) {
         'იასამნისფერი': '#5856d6', 'Purple': '#5856d6',
         'სტაფილოსფერი': '#ff9500', 'Orange': '#ff9500'
     };
-    return colors[color] || color;
+    return colors[color] || color; // თუ სიაში არაა, აბრუნებს ორიგინალ სახელს
 }
 
-// --- ფუნქციები: ჩატვირთვის ინდიკატორის (Loader) მართვა ---
+// --- ჩატვირთვის ეკრანის მართვა (ფუნქციები) ---
 function showLoader() { 
-    const loader = document.getElementById('loader-wrapper');
-    if (loader) loader.classList.remove('loader-hidden'); 
+    const loader = document.getElementById('loader-wrapper'); // პოულობს ლოუდერის ელემენტს
+    if (loader) loader.classList.remove('loader-hidden'); // აჩენს ლოუდერს
 }
 
 function hideLoader() { 
-    const loader = document.getElementById('loader-wrapper');
-    if (loader) loader.classList.add('loader-hidden'); 
+    const loader = document.getElementById('loader-wrapper'); // პოულობს ლოუდერის ელემენტს
+    if (loader) loader.classList.add('loader-hidden'); // მალავს ლოუდერს
 }
 
-// --- ღონისძიება: გვერდის ჩატვირთვისას მონაცემების წამოღება ---
+// --- გვერდის ჩატვირთვის მთავარი ღონისძიება ---
 document.addEventListener('DOMContentLoaded', () => {
+    // ამოწმებს, არის თუ არა გახსნილი ტელეგრამში
     if (window.Telegram && window.Telegram.WebApp) {
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
         
+        // დამატებითი "დაძალება" გაფართოებაზე
         setTimeout(() => { tg.expand(); }, 200);
         setTimeout(() => { tg.expand(); }, 500);
         setTimeout(() => { tg.expand(); }, 1000);
     }
-    loadData();
+    loadData(); // იწყებს მონაცემების წამოღებას
 });
 
-// --- ფუნქცია: მონაცემების წამოღება API-დან და შენახვა state-ში ---
+// --- მონაცემების წამოღება და დამუშავება (ფუნქცია) ---
 async function loadData() {
-    showLoader();
+    showLoader(); // აჩვენებს ლოუდერს
     try {
-        const response = await fetch(CONFIG.API_URL);
-        const data = await response.json();
+        const response = await fetch(CONFIG.API_URL); // ითხოვს მონაცემებს API-დან
+        const data = await response.json(); // პასუხს აქცევს JSON ფორმატში
         
+        // მონაცემების გადანაწილება აპლიკაციის "მეხსიერებაში"
         state.products = data.products || [];
         state.productDetails = data.productDetails || [];
         state.paymentSettings = data.paymentSettings || { active_gateway: 'off' };
         
-        // პრიორიტეტი 1: ჯერ ვხატავთ ზედა ნაწილს და ბანერებს
+        // მაღაზიის თავფურცლის (Header) დიზაინის მორგება
         if (data.headerConfig) {
-            // ვინახავთ კონფიგურაციას გლობალურად საკონტაქტო მენიუსთვის
             window.lastHeaderConfig = data.headerConfig; 
             applyHeaderDesign(data.headerConfig);
         }
         
+        // სარეკლამო ბანერების (Hero) დიზაინის მორგება
         const heroToUse = data.heroConfigs || data.heroConfig;
         if (heroToUse) {
             applyHeroDesign(heroToUse);
-            // აიძულე სექციის ჩვენება
             const heroSection = document.getElementById('hero');
-            if (heroSection) heroSection.style.display = 'block';
+            if (heroSection) heroSection.style.display = 'block'; // აჩენს ბანერის სექციას
         }
 
-        // პრიორიტეტი 2: შემდეგ ვხატავთ პროდუქტებს
-        renderProducts();
-        
-        // როგორც კი მონაცემები დამუშავდება, ეგრევე ვმალავთ Loader-ს
-        hideLoader();
+        renderProducts(); // გამოაქვს პროდუქტების სია ეკრანზე
+        hideLoader(); // მალავს ლოუდერს
 
     } catch (error) {
         console.error("მონაცემების ჩატვირთვა ვერ მოხერხდა:", error);
-        hideLoader(); // შეცდომის შემთხვევაშიც რომ არ გაიჭედოს Loader-ი
+        hideLoader(); // შეცდომის შემთხვევაშიც მალავს ლოუდერს, რომ გვერდი არ გაიჭედოს
     }
 }
 
+// --- მაღაზიის ზედა ნაწილის დიზაინის მორგება (ფუნქცია) ---
 function applyHeaderDesign(config) {
-    if (!config || config.Status !== 'active') return;
+    if (!config || config.Status !== 'active') return; // თუ არაა აქტიური, არაფერს აკეთებს
+    
     const logoElement = document.getElementById('logo'); 
     const logoIcon = document.getElementById('logo-icon');
     const headerElement = document.querySelector('.header');
-    
-    // ვამატებთ კონტეინერის ძებნას აიქონისთვის
-    const infoContainer = document.getElementById('info-btn-container');
+    const infoContainer = document.getElementById('info-btn-container'); // საკონტაქტო ღილაკის ადგილი
 
-    if (config.Shop_Name && logoElement) logoElement.innerText = config.Shop_Name;
-    if (config.H_BG && headerElement) headerElement.style.background = config.H_BG;
-    if (config.H_Text && logoElement) logoElement.style.color = config.H_Text;
-    if (config.Icon_Color && logoIcon) logoIcon.style.color = config.Icon_Color;
-    if (config.H_Height && headerElement) headerElement.style.height = config.H_Height + 'px';
+    // პარამეტრების მინიჭება მონაცემების მიხედვით
+    if (config.Shop_Name && logoElement) logoElement.innerText = config.Shop_Name; // სახელი
+    if (config.H_BG && headerElement) headerElement.style.background = config.H_BG; // ფონი
+    if (config.H_Text && logoElement) logoElement.style.color = config.H_Text; // ტექსტის ფერი
+    if (config.Icon_Color && logoIcon) logoIcon.style.color = config.Icon_Color; // ხატულის ფერი
+    if (config.H_Height && headerElement) headerElement.style.height = config.H_Height + 'px'; // სიმაღლე
     
-    // აიქონის ჩასმის ლოგიკა (ტელეფონის ლამაზი აიქონი)
+    // საკონტაქტო (ტელეფონის) ღილაკის შექმნა და ჩამატება
     if (infoContainer && !document.getElementById('info-btn')) {
         const infoBtn = document.createElement('div');
         infoBtn.id = 'info-btn';
-        infoBtn.onclick = toggleContactModal;
+        infoBtn.onclick = toggleContactModal; // დაკლიკებისას აღებს მენიუს
         infoBtn.style.cursor = 'pointer';
         infoBtn.innerHTML = `
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="${config.H_Text || '#1d1d1f'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -144,94 +132,54 @@ function applyHeaderDesign(config) {
         infoContainer.appendChild(infoBtn);
     }
     
+    // ლოგოს სურათის ჩასმა, თუ მითითებულია
     if (config.Shop_Logo && logoIcon) {
         logoIcon.style.background = "transparent";
-        logoIcon.style.backgroundColor = "transparent";
         logoIcon.style.border = "none";
         const radius = config.Logo_Radius || "0";
         logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="width: ${config.Logo_Size || 40}px; height: auto; border-radius: ${radius}; object-fit: contain; display: block;">`;
     }
 }
 
-// --- ბანერის დიზაინის შესწორება (მრავალჯერადი სლაიდერი) ---
+// --- სარეკლამო სლაიდერის დიზაინი და მართვა (ფუნქცია) ---
 function applyHeroDesign(configs) {
     const heroSection = document.getElementById('hero');
     if (!heroSection || !configs) return;
 
+    // მონაცემების მასივად გადაქცევა და მხოლოდ აქტიურების გაფილტვრა
     const configList = Array.isArray(configs) ? configs : [configs];
     const activeConfigs = configList.filter(c => c.Status === 'active');
     
     if (activeConfigs.length === 0) {
-        heroSection.style.display = 'none';
+        heroSection.style.display = 'none'; // თუ აქტიური ბანერი არაა, ვმალავთ სექციას
         return;
     }
 
-    window.lastHeroConfig = activeConfigs;
-
+    // ბანერების HTML სტრუქტურის აწყობა
     heroSection.innerHTML = `
-        <div class="hero-slider-container" style="
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            width: 100%;
-            gap: 12px;
-            padding-left: 16px; 
-            padding-right: 16px;
-            box-sizing: border-box;
-        ">
+        <div class="hero-slider-container" style="...">
             ${activeConfigs.map((config, index) => `
-                <div class="hero-slide-wrapper" style="
-                    min-width: 88%; 
-                    scroll-snap-align: start;
-                    box-sizing: border-box;
-                ">
-                    <div class="hero-wrapper" onclick="handleHeroClickByIndex(${index})" style="
-                        cursor: pointer;
-                        background: ${config.B_Gradient || '#eee'}; 
-                        border-radius: 20px; 
-                        padding: 25px; 
-                        position: relative; 
-                        overflow: visible; 
-                        margin-top: 10px; 
-                        margin-bottom: 25px; 
-                        height: ${config.B_Height || 200}px; 
-                        display: flex; 
-                        align-items: center;
-                        box-shadow: 0 15px 30px rgba(0,0,0,0.12);
-                        transform: translateY(-5px);
-                        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-                    ">
+                <div class="hero-slide-wrapper" ...>
+                    <div class="hero-wrapper" onclick="handleHeroClickByIndex(${index})" ...>
                         <div style="position: relative; z-index: 2; width: 60%;">
-                            <h2 style="color: ${config.B_Title_Color || '#fff'}; font-size: 20px; margin-bottom: 8px; font-weight: 700;">${config.B_Title || ''}</h2>
-                            <p style="color: #fff; opacity: 0.9; margin-bottom: 15px; font-size: 13px;">${config.B_Subtitle || ''}</p>
-                            <button style="padding: 8px 18px; border-radius: 10px; border: none; background: white; font-weight: 800; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); color: #1d1d1f;">
-                                ${config.B_Btn_Text || 'ყიდვა'}
-                            </button>
+                            <h2 style="color: ${config.B_Title_Color || '#fff'}; ...">${config.B_Title || ''}</h2>
+                            <p style="..."> ${config.B_Subtitle || ''}</p>
+                            <button style="..."> ${config.B_Btn_Text || 'ყიდვა'} </button>
                         </div>
-                        ${config.B_Image ? `
-                            <img src="${config.B_Image}" style="
-                                position: absolute; 
-                                right: -10px; 
-                                top: 0px; 
-                                height: 115%; 
-                                transform: rotate(-8deg); 
-                                z-index: 3;
-                                filter: drop-shadow(0 20px 15px rgba(0,0,0,0.4));
-                            ">` : ''}
+                        ${config.B_Image ? `<img src="${config.B_Image}" style="...">` : ''}
                     </div>
                 </div>
             `).join('')}
             <div style="min-width: 4px;"></div>
         </div>
-        <div class="hero-dots" style="display: flex; justify-content: center; gap: 8px; margin-top: -10px; margin-bottom: 20px;">
+        <div class="hero-dots" style="...">
             ${activeConfigs.length > 1 ? activeConfigs.map((_, i) => `
                 <div style="width: 8px; height: 8px; border-radius: 50%; background: ${i === 0 ? '#1d1d1f' : '#d2d2d7'}; transition: all 0.3s;"></div>
             `).join('') : ''}
         </div>
     `;
 
+    // სქროლვისას წერტილების ფერის შეცვლის ლოგიკა
     const slider = heroSection.querySelector('.hero-slider-container');
     if (slider) {
         slider.addEventListener('scroll', () => {
@@ -244,21 +192,25 @@ function applyHeroDesign(configs) {
         });
     }
 
+    // ბანერზე დაკლიკებისას პროდუქტის მოძებნა და გახსნა
     window.handleHeroClickByIndex = function(index) {
         const config = activeConfigs[index];
         const searchTerm = (config.B_Subtitle || "").toLowerCase().trim();
+        // ეძებს პროდუქტს სახელის ან ბრენდის მიხედვით
         const product = state.products.find(p => 
             p.name_ge.toLowerCase().includes(searchTerm) || 
             p.brand.toLowerCase().includes(searchTerm)
         );
         if (product) {
-            openProductDetails(product.product_id);
+            openProductDetails(product.product_id); // ხსნის დეტალებს
         } else {
+            // თუ პროდუქტი ვერ იპოვა, ჩამოჰყავს პროდუქტების სიასთან
             const grid = document.getElementById('products-grid');
             if (grid) grid.scrollIntoView({behavior:'smooth'});
         }
     };
 
+    // სქროლბარის ვიზუალურად დამალვა
     const scrollStyle = document.createElement('style');
     scrollStyle.innerHTML = `.hero-slider-container::-webkit-scrollbar { display: none; }`;
     document.head.appendChild(scrollStyle);
