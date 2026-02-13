@@ -1,30 +1,49 @@
-// --- 1. ტელეგრამის აპლიკაციის ინიციალიზაცია ---
-const tg = window.Telegram.WebApp; // ტელეგრამის WebApp ობიექტის ცვლადში შენახვა
+// 1. ტელეგრამის ობიექტის ინიციალიზაცია
+const tg = window.Telegram.WebApp;
 
-// --- 2. ეკრანის გაფართოების მართვა და ჩაკეტვა ---
-tg.ready(); // ატყობინებს ტელეგრამს, რომ აპლიკაცია მზადაა
-tg.expand(); // აფართოებს აპლიკაციას მთელ ეკრანზე
+// 2. აიძულე გაფართოება რამდენჯერმე (დაზღვევისთვის)
+tg.ready();
+tg.expand();
 
-// === აქ ჩაამატე ეს ხაზი ===
-tg.disableVerticalSwipes(); // აუქმებს ვერტიკალურ "Sway" და Pull-to-close ეფექტს
-// =========================
+// --- აპლიკაციის ვერტიკალური მოძრაობის ჩაკეტვა ---
+// ეს ხაზი უზრუნველყოფს, რომ თითის ქვევით ჩამოწევისას ბანერი არ დაიგლიჯოს და აპლიკაცია არ დაიხუროს
+if (tg.disableVerticalSwipes) {
+    tg.disableVerticalSwipes();
+}
 
-// დაზღვევის მიზნით, რამდენჯერმე ვიმეორებთ გაფართოებას მცირე დაგვიანებით
+// ზოგიერთ მოწყობილობაზე სჭირდება მცირე დაგვიანება ჩატვირთვისას
 setTimeout(() => {
-    tg.expand(); // გაფართოება 200 მილიწამში
+    tg.expand();
 }, 200);
 
 setTimeout(() => {
-    tg.expand(); // გაფართოება 500 მილიწამში
+    tg.expand();
 }, 500);
 
-// --- 3. ინტერფეისის ფერების დაყენება ---
-tg.setHeaderColor('#ffffff'); // ზედა ზოლის (Header) ფერის შეცვლა თეთრად
-tg.setBackgroundColor('#ffffff'); // აპლიკაციის ფონის ფერის შეცვლა თეთრად
+// 3. ზედა ზოლის ფერი (Header)
+tg.setHeaderColor('#ffffff');
+tg.setBackgroundColor('#ffffff');
 
-// --- ფერების სახელების თარგმნა (ფუნქცია) ---
+// --- კონფიგურაცია და მონაცემთა საცავი ---
+// CONFIG ობიექტი უნდა იყოს აქ, რომ loadData-მ დაინახოს
+const CONFIG = {
+    API_URL: 'https://script.google.com/macros/s/AKfycbxsq8ipEFXn35wez6-EBkMdjbcRV8bffwWvqEXz9TJE91sB9FLPbImL0l-PFXZL4INk/exec'
+};
+
+// --- აპლიკაციის მდგომარეობა ---
+let state = {
+    products: [],
+    productDetails: [],
+    design: {},
+    cart: []
+};
+
+// გლობალური ცვლადები შერჩევისთვის
+let selectedColor = null;
+let selectedSize = null;
+
+// --- ფუნქცია: ფერების სახელების თარგმნა CSS ფერებში ---
 function translateColor(color) {
-    // ქართული/ინგლისური სახელების გადაყვანა CSS-ისთვის გასაგებ ფერებში
     const colors = {
         'შავი': 'black', 'Black': 'black',
         'თეთრი': 'white', 'White': 'white',
@@ -38,34 +57,35 @@ function translateColor(color) {
         'იასამნისფერი': '#5856d6', 'Purple': '#5856d6',
         'სტაფილოსფერი': '#ff9500', 'Orange': '#ff9500'
     };
-    return colors[color] || color; // თუ სიაში არაა, აბრუნებს ორიგინალ სახელს
+    return colors[color] || color;
 }
 
-// --- ჩატვირთვის ეკრანის მართვა (ფუნქციები) ---
+// --- ფუნქციები: ჩატვირთვის ინდიკატორის (Loader) მართვა ---
 function showLoader() { 
-    const loader = document.getElementById('loader-wrapper'); // პოულობს ლოუდერის ელემენტს
-    if (loader) loader.classList.remove('loader-hidden'); // აჩენს ლოუდერს
+    const loader = document.getElementById('loader-wrapper');
+    if (loader) loader.classList.remove('loader-hidden'); 
 }
 
 function hideLoader() { 
-    const loader = document.getElementById('loader-wrapper'); // პოულობს ლოუდერის ელემენტს
-    if (loader) loader.classList.add('loader-hidden'); // მალავს ლოუდერს
+    const loader = document.getElementById('loader-wrapper');
+    if (loader) loader.classList.add('loader-hidden'); 
 }
 
-// --- გვერდის ჩატვირთვის მთავარი ღონისძიება ---
+// --- ღონისძიება: გვერდის ჩატვირთვისას მონაცემების წამოღება ---
 document.addEventListener('DOMContentLoaded', () => {
-    // ამოწმებს, არის თუ არა გახსნილი ტელეგრამში
     if (window.Telegram && window.Telegram.WebApp) {
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
         
-        // დამატებითი "დაძალება" გაფართოებაზე
+        // აქაც დავამატოთ დაზღვევისთვის
+        if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+
         setTimeout(() => { tg.expand(); }, 200);
         setTimeout(() => { tg.expand(); }, 500);
         setTimeout(() => { tg.expand(); }, 1000);
     }
-    loadData(); // იწყებს მონაცემების წამოღებას
+    loadData();
 });
 
 // --- მონაცემების წამოღება და დამუშავება (ფუნქცია) ---
