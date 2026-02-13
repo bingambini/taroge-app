@@ -1110,15 +1110,32 @@ function handleHubClick(type) {
     if (type === 'brands') {
         renderBrandsList(); 
     } else if (type === 'sale') {
-        // ფილტრაცია: Old_Price > Price
-        const saleProducts = state.products.filter(item => {
-            const currentPrice = parseFloat(item.Price) || 0;
-            const oldPrice = parseFloat(item.Old_Price) || 0;
-            return oldPrice > currentPrice;
+        // ფილტრაცია: ვამოწმებთ თითოეული პროდუქტის შესაბამის ფასებს Product_Details-ში
+        const saleProducts = state.products.filter(product => {
+            const currentId = String(product.product_id).trim().toLowerCase();
+            
+            // ვპოულობთ ამ პროდუქტის დეტალებს
+            const details = state.productDetails.find(d => 
+                String(d.product_id).trim().toLowerCase() === currentId
+            );
+
+            if (details) {
+                const currentPrice = parseFloat(details.Price) || 0;
+                const oldPrice = parseFloat(details.Old_Price) || 0;
+                return oldPrice > currentPrice;
+            }
+            return false;
         });
 
         if (saleProducts.length > 0) {
-            renderProducts(saleProducts, "ფასდაკლებები 🔥");
+            renderProducts(saleProducts);
+            
+            // სათაურის შეცვლა, რომ მომხმარებელმა იცოდეს სად არის
+            const mainTitle = document.getElementById('new-arrivals-title');
+            if (mainTitle) mainTitle.innerText = "ფასდაკლებები 🔥";
+            
+            // ავტომატურად გადავიყვანოთ მთავარ გვერდზე სადაც პროდუქტებია
+            showTab('home'); 
         } else {
             alert('ამჟამად ფასდაკლებები არ არის');
         }
