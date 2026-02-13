@@ -1109,7 +1109,7 @@ function handleHubClick(type) {
     if (type === 'brands') {
         renderBrandsList(); 
     } else if (type === 'sale') {
-        // 1. ფილტრაცია და სორტირება ფასის ზრდადობის მიხედვით
+        // 1. ფილტრაცია და სორტირება ფასდაკლების პროცენტის (sale_full) მიხედვით
         const saleProducts = state.products.filter(product => {
             const currentId = String(product.product_id).trim().toLowerCase();
             const details = state.productDetails.find(d => 
@@ -1123,10 +1123,10 @@ function handleHubClick(type) {
             }
             return false;
         }).sort((a, b) => {
-            // ფასების შედარება სორტირებისთვის
-            const priceA = parseFloat(state.productDetails.find(d => String(d.product_id) === String(a.product_id))?.Price) || 0;
-            const priceB = parseFloat(state.productDetails.find(d => String(d.product_id) === String(b.product_id))?.Price) || 0;
-            return priceA - priceB;
+            // სორტირება: ვიღებთ პროცენტებს sale_full სვეტიდან და ვადარებთ კლებადობით
+            const discountA = parseInt(state.productDetails.find(d => String(d.product_id).trim().toLowerCase() === String(a.product_id).trim().toLowerCase())?.sale_full) || 0;
+            const discountB = parseInt(state.productDetails.find(d => String(d.product_id).trim().toLowerCase() === String(b.product_id).trim().toLowerCase())?.sale_full) || 0;
+            return discountB - discountA;
         });
 
         if (saleProducts.length > 0) {
@@ -1148,14 +1148,13 @@ function handleHubClick(type) {
             `;
 
             // 3. პროდუქტების ჩაწერა ახალ კონტეინერში
-            // დროებით შევცვალოთ grid-ის ID, რომ renderProducts-მა იცოდეს სად ჩახატოს
-            const originalGrid = document.getElementById('products-grid');
             const saleGrid = document.getElementById('sale-products-grid');
             
-            // პატარა ჰაკი: დროებით შევუცვალოთ ID-ები, რომ renderProducts-მა იმუშაოს
+            // დროებით შევუცვალოთ ID, რომ renderProducts-მა იმუშაოს
+            const tempId = saleGrid.id;
             saleGrid.id = 'products-grid'; 
             renderProducts(saleProducts);
-            saleGrid.id = 'sale-products-grid'; // ვაბრუნებთ უკან
+            saleGrid.id = tempId; 
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
@@ -1165,7 +1164,6 @@ function handleHubClick(type) {
         alert('ეს სექცია მალე გააქტიურდება');
     }
 }
-
 // ტაბების გააქტიურების ფუნქცია
 function updateActiveTab(tabName) {
     const navItems = document.querySelectorAll('.nav-item');
