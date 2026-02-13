@@ -272,17 +272,15 @@ function renderProducts(productsToRender) {
         const card = document.createElement('div');
         card.className = 'product-card';
         
-        // --- მაქსიმალურად "ამოწეული" ეფექტის სტილები ---
-        card.style.boxShadow = "0 15px 30px rgba(0,0,0,0.12)"; // უფრო ღრმა და გაბნეული ჩრდილი
-        card.style.borderRadius = "20px"; // ოდნავ მეტი მომრგვალება სირბილისთვის
+        card.style.boxShadow = "0 15px 30px rgba(0,0,0,0.12)";
+        card.style.borderRadius = "20px";
         card.style.background = "#ffffff";
         card.style.overflow = "hidden";
-        card.style.transform = "translateY(-5px)"; // ბარათის ფიზიკური აწევა სივრცეში
+        card.style.transform = "translateY(-5px)";
         card.style.transition = "all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)";
         
         card.onclick = () => openProductDetails(product.product_id);
         
-        // --- განახლებული დიზაინი კუთხეში მიკრული ბეიჯებით და ორმაგი ფასით ---
         card.innerHTML = `
             <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #fbfbfb; display: flex; align-items: center; justify-content: center; border-radius: 20px 20px 0 0; overflow: hidden;">
                 <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
