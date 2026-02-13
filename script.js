@@ -131,14 +131,14 @@ function applyHeaderDesign(config) {
     if (config.Icon_Color && logoIcon) logoIcon.style.color = config.Icon_Color;
     if (config.H_Height && headerElement) headerElement.style.height = config.H_Height + 'px';
     
-    // აიქონის ჩასმის ლოგიკა
+    // აიქონის ჩასმის ლოგიკა (ტესტირებისთვის ფერი შეცვლილია წითელზე)
     if (infoContainer && !document.getElementById('info-btn')) {
         const infoBtn = document.createElement('div');
         infoBtn.id = 'info-btn';
         infoBtn.onclick = toggleContactModal;
         infoBtn.style.cursor = 'pointer';
         infoBtn.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${config.H_Text || '#1d1d1f'}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="16" x2="12" y2="12"></line>
                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
