@@ -1147,7 +1147,7 @@ function handleHubClick(type) {
             alert('ახალი პროდუქტები ჯერ არ არის დამატებული');
         }
 
-    } else if (type === 'filter') {
+    } else if (type === 'filters') {
         // --- ფილტრაციის ლოგიკა (ფასი, ფერი, ზომა) ---
         const allColors = new Set();
         const allSizes = new Set();
