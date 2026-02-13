@@ -121,6 +121,9 @@ function applyHeaderDesign(config) {
     const logoElement = document.getElementById('logo'); 
     const logoIcon = document.getElementById('logo-icon');
     const headerElement = document.querySelector('.header');
+    
+    // ვამატებთ კონტეინერის ძებნას აიქონისთვის
+    const infoContainer = document.getElementById('info-btn-container');
 
     if (config.Shop_Name && logoElement) logoElement.innerText = config.Shop_Name;
     if (config.H_BG && headerElement) headerElement.style.background = config.H_BG;
@@ -128,11 +131,30 @@ function applyHeaderDesign(config) {
     if (config.Icon_Color && logoIcon) logoIcon.style.color = config.Icon_Color;
     if (config.H_Height && headerElement) headerElement.style.height = config.H_Height + 'px';
     
+    // აიქონის ჩასმის ლოგიკა
+    if (infoContainer && !document.getElementById('info-btn')) {
+        const infoBtn = document.createElement('div');
+        infoBtn.id = 'info-btn';
+        infoBtn.onclick = toggleContactModal;
+        infoBtn.style.cursor = 'pointer';
+        infoBtn.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${config.H_Text || '#1d1d1f'}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>`;
+        infoContainer.appendChild(infoBtn);
+    }
+    
     if (config.Shop_Logo && logoIcon) {
+        // ვასუფთავებთ logo-circle კლასის ნაგულისხმევ სტილებს
         logoIcon.style.background = "transparent";
         logoIcon.style.backgroundColor = "transparent";
         logoIcon.style.border = "none";
+
+        // ვიღებთ რადიუსს შიტიდან (რადგან 0 გიწერია, იქნება 0)
         const radius = config.Logo_Radius || "0";
+
         logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="width: ${config.Logo_Size || 40}px; height: auto; border-radius: ${radius}; object-fit: contain; display: block;">`;
     }
 }
