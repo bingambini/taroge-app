@@ -5,12 +5,6 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-// --- აპლიკაციის ვერტიკალური მოძრაობის ჩაკეტვა ---
-// ეს ხაზი უზრუნველყოფს, რომ თითის ქვევით ჩამოწევისას ბანერი არ დაიგლიჯოს და აპლიკაცია არ დაიხუროს
-if (tg.disableVerticalSwipes) {
-    tg.disableVerticalSwipes();
-}
-
 // ზოგიერთ მოწყობილობაზე სჭირდება მცირე დაგვიანება ჩატვირთვისას
 setTimeout(() => {
     tg.expand();
@@ -25,7 +19,6 @@ tg.setHeaderColor('#ffffff');
 tg.setBackgroundColor('#ffffff');
 
 // --- კონფიგურაცია და მონაცემთა საცავი ---
-// CONFIG ობიექტი უნდა იყოს აქ, რომ loadData-მ დაინახოს
 const CONFIG = {
     API_URL: 'https://script.google.com/macros/s/AKfycbxsq8ipEFXn35wez6-EBkMdjbcRV8bffwWvqEXz9TJE91sB9FLPbImL0l-PFXZL4INk/exec'
 };
@@ -78,9 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
         tg.ready();
         tg.expand();
         
-        // აქაც დავამატოთ დაზღვევისთვის
-        if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
-
         setTimeout(() => { tg.expand(); }, 200);
         setTimeout(() => { tg.expand(); }, 500);
         setTimeout(() => { tg.expand(); }, 1000);
@@ -88,62 +78,64 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData();
 });
 
-// --- მონაცემების წამოღება და დამუშავება (ფუნქცია) ---
+// --- ფუნქცია: მონაცემების წამოღება API-დან და შენახვა state-ში ---
 async function loadData() {
-    showLoader(); // აჩვენებს ლოუდერს
+    showLoader();
     try {
-        const response = await fetch(CONFIG.API_URL); // ითხოვს მონაცემებს API-დან
-        const data = await response.json(); // პასუხს აქცევს JSON ფორმატში
+        const response = await fetch(CONFIG.API_URL);
+        const data = await response.json();
         
-        // მონაცემების გადანაწილება აპლიკაციის "მეხსიერებაში"
         state.products = data.products || [];
         state.productDetails = data.productDetails || [];
         state.paymentSettings = data.paymentSettings || { active_gateway: 'off' };
         
-        // მაღაზიის თავფურცლის (Header) დიზაინის მორგება
+        // პრიორიტეტი 1: ჯერ ვხატავთ ზედა ნაწილს და ბანერებს
         if (data.headerConfig) {
+            // ვინახავთ კონფიგურაციას გლობალურად საკონტაქტო მენიუსთვის
             window.lastHeaderConfig = data.headerConfig; 
             applyHeaderDesign(data.headerConfig);
         }
         
-        // სარეკლამო ბანერების (Hero) დიზაინის მორგება
         const heroToUse = data.heroConfigs || data.heroConfig;
         if (heroToUse) {
             applyHeroDesign(heroToUse);
+            // აიძულე სექციის ჩვენება
             const heroSection = document.getElementById('hero');
-            if (heroSection) heroSection.style.display = 'block'; // აჩენს ბანერის სექციას
+            if (heroSection) heroSection.style.display = 'block';
         }
 
-        renderProducts(); // გამოაქვს პროდუქტების სია ეკრანზე
-        hideLoader(); // მალავს ლოუდერს
+        // პრიორიტეტი 2: შემდეგ ვხატავთ პროდუქტებს
+        renderProducts();
+        
+        // როგორც კი მონაცემები დამუშავდება, ეგრევე ვმალავთ Loader-ს
+        hideLoader();
 
     } catch (error) {
         console.error("მონაცემების ჩატვირთვა ვერ მოხერხდა:", error);
-        hideLoader(); // შეცდომის შემთხვევაშიც მალავს ლოუდერს, რომ გვერდი არ გაიჭედოს
+        hideLoader(); // შეცდომის შემთხვევაშიც რომ არ გაიჭედოს Loader-ი
     }
 }
 
-// --- მაღაზიის ზედა ნაწილის დიზაინის მორგება (ფუნქცია) ---
 function applyHeaderDesign(config) {
-    if (!config || config.Status !== 'active') return; // თუ არაა აქტიური, არაფერს აკეთებს
-    
+    if (!config || config.Status !== 'active') return;
     const logoElement = document.getElementById('logo'); 
     const logoIcon = document.getElementById('logo-icon');
     const headerElement = document.querySelector('.header');
-    const infoContainer = document.getElementById('info-btn-container'); // საკონტაქტო ღილაკის ადგილი
-
-    // პარამეტრების მინიჭება მონაცემების მიხედვით
-    if (config.Shop_Name && logoElement) logoElement.innerText = config.Shop_Name; // სახელი
-    if (config.H_BG && headerElement) headerElement.style.background = config.H_BG; // ფონი
-    if (config.H_Text && logoElement) logoElement.style.color = config.H_Text; // ტექსტის ფერი
-    if (config.Icon_Color && logoIcon) logoIcon.style.color = config.Icon_Color; // ხატულის ფერი
-    if (config.H_Height && headerElement) headerElement.style.height = config.H_Height + 'px'; // სიმაღლე
     
-    // საკონტაქტო (ტელეფონის) ღილაკის შექმნა და ჩამატება
+    // ვამატებთ კონტეინერის ძებნას აიქონისთვის
+    const infoContainer = document.getElementById('info-btn-container');
+
+    if (config.Shop_Name && logoElement) logoElement.innerText = config.Shop_Name;
+    if (config.H_BG && headerElement) headerElement.style.background = config.H_BG;
+    if (config.H_Text && logoElement) logoElement.style.color = config.H_Text;
+    if (config.Icon_Color && logoIcon) logoIcon.style.color = config.Icon_Color;
+    if (config.H_Height && headerElement) headerElement.style.height = config.H_Height + 'px';
+    
+    // აიქონის ჩასმის ლოგიკა (ტელეფონის ლამაზი აიქონი)
     if (infoContainer && !document.getElementById('info-btn')) {
         const infoBtn = document.createElement('div');
         infoBtn.id = 'info-btn';
-        infoBtn.onclick = toggleContactModal; // დაკლიკებისას აღებს მენიუს
+        infoBtn.onclick = toggleContactModal;
         infoBtn.style.cursor = 'pointer';
         infoBtn.innerHTML = `
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="${config.H_Text || '#1d1d1f'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -152,54 +144,94 @@ function applyHeaderDesign(config) {
         infoContainer.appendChild(infoBtn);
     }
     
-    // ლოგოს სურათის ჩასმა, თუ მითითებულია
     if (config.Shop_Logo && logoIcon) {
         logoIcon.style.background = "transparent";
+        logoIcon.style.backgroundColor = "transparent";
         logoIcon.style.border = "none";
         const radius = config.Logo_Radius || "0";
         logoIcon.innerHTML = `<img src="${config.Shop_Logo}" style="width: ${config.Logo_Size || 40}px; height: auto; border-radius: ${radius}; object-fit: contain; display: block;">`;
     }
 }
 
-// --- სარეკლამო სლაიდერის დიზაინი და მართვა (ფუნქცია) ---
+// --- ბანერის დიზაინის შესწორება (მრავალჯერადი სლაიდერი) ---
 function applyHeroDesign(configs) {
     const heroSection = document.getElementById('hero');
     if (!heroSection || !configs) return;
 
-    // მონაცემების მასივად გადაქცევა და მხოლოდ აქტიურების გაფილტვრა
     const configList = Array.isArray(configs) ? configs : [configs];
     const activeConfigs = configList.filter(c => c.Status === 'active');
     
     if (activeConfigs.length === 0) {
-        heroSection.style.display = 'none'; // თუ აქტიური ბანერი არაა, ვმალავთ სექციას
+        heroSection.style.display = 'none';
         return;
     }
 
-    // ბანერების HTML სტრუქტურის აწყობა
+    window.lastHeroConfig = activeConfigs;
+
     heroSection.innerHTML = `
-        <div class="hero-slider-container" style="...">
+        <div class="hero-slider-container" style="
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            gap: 12px;
+            padding-left: 16px; 
+            padding-right: 16px;
+            box-sizing: border-box;
+        ">
             ${activeConfigs.map((config, index) => `
-                <div class="hero-slide-wrapper" ...>
-                    <div class="hero-wrapper" onclick="handleHeroClickByIndex(${index})" ...>
+                <div class="hero-slide-wrapper" style="
+                    min-width: 88%; 
+                    scroll-snap-align: start;
+                    box-sizing: border-box;
+                ">
+                    <div class="hero-wrapper" onclick="handleHeroClickByIndex(${index})" style="
+                        cursor: pointer;
+                        background: ${config.B_Gradient || '#eee'}; 
+                        border-radius: 20px; 
+                        padding: 25px; 
+                        position: relative; 
+                        overflow: visible; 
+                        margin-top: 10px; 
+                        margin-bottom: 25px; 
+                        height: ${config.B_Height || 200}px; 
+                        display: flex; 
+                        align-items: center;
+                        box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+                        transform: translateY(-5px);
+                        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+                    ">
                         <div style="position: relative; z-index: 2; width: 60%;">
-                            <h2 style="color: ${config.B_Title_Color || '#fff'}; ...">${config.B_Title || ''}</h2>
-                            <p style="..."> ${config.B_Subtitle || ''}</p>
-                            <button style="..."> ${config.B_Btn_Text || 'ყიდვა'} </button>
+                            <h2 style="color: ${config.B_Title_Color || '#fff'}; font-size: 20px; margin-bottom: 8px; font-weight: 700;">${config.B_Title || ''}</h2>
+                            <p style="color: #fff; opacity: 0.9; margin-bottom: 15px; font-size: 13px;">${config.B_Subtitle || ''}</p>
+                            <button style="padding: 8px 18px; border-radius: 10px; border: none; background: white; font-weight: 800; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); color: #1d1d1f;">
+                                ${config.B_Btn_Text || 'ყიდვა'}
+                            </button>
                         </div>
-                        ${config.B_Image ? `<img src="${config.B_Image}" style="...">` : ''}
+                        ${config.B_Image ? `
+                            <img src="${config.B_Image}" style="
+                                position: absolute; 
+                                right: -10px; 
+                                top: 0px; 
+                                height: 115%; 
+                                transform: rotate(-8deg); 
+                                z-index: 3;
+                                filter: drop-shadow(0 20px 15px rgba(0,0,0,0.4));
+                            ">` : ''}
                     </div>
                 </div>
             `).join('')}
             <div style="min-width: 4px;"></div>
         </div>
-        <div class="hero-dots" style="...">
+        <div class="hero-dots" style="display: flex; justify-content: center; gap: 8px; margin-top: -10px; margin-bottom: 20px;">
             ${activeConfigs.length > 1 ? activeConfigs.map((_, i) => `
                 <div style="width: 8px; height: 8px; border-radius: 50%; background: ${i === 0 ? '#1d1d1f' : '#d2d2d7'}; transition: all 0.3s;"></div>
             `).join('') : ''}
         </div>
     `;
 
-    // სქროლვისას წერტილების ფერის შეცვლის ლოგიკა
     const slider = heroSection.querySelector('.hero-slider-container');
     if (slider) {
         slider.addEventListener('scroll', () => {
@@ -212,25 +244,21 @@ function applyHeroDesign(configs) {
         });
     }
 
-    // ბანერზე დაკლიკებისას პროდუქტის მოძებნა და გახსნა
     window.handleHeroClickByIndex = function(index) {
         const config = activeConfigs[index];
         const searchTerm = (config.B_Subtitle || "").toLowerCase().trim();
-        // ეძებს პროდუქტს სახელის ან ბრენდის მიხედვით
         const product = state.products.find(p => 
             p.name_ge.toLowerCase().includes(searchTerm) || 
             p.brand.toLowerCase().includes(searchTerm)
         );
         if (product) {
-            openProductDetails(product.product_id); // ხსნის დეტალებს
+            openProductDetails(product.product_id);
         } else {
-            // თუ პროდუქტი ვერ იპოვა, ჩამოჰყავს პროდუქტების სიასთან
             const grid = document.getElementById('products-grid');
             if (grid) grid.scrollIntoView({behavior:'smooth'});
         }
     };
 
-    // სქროლბარის ვიზუალურად დამალვა
     const scrollStyle = document.createElement('style');
     scrollStyle.innerHTML = `.hero-slider-container::-webkit-scrollbar { display: none; }`;
     document.head.appendChild(scrollStyle);
@@ -1421,23 +1449,16 @@ function toggleContactModal() {
         return;
     }
 
-    // ვამოწმებთ, აქვს თუ არა active კლასი (Liquid ეფექტისთვის)
-    if (modal.classList.contains('active')) {
+    if (modal.style.top === '0px') {
         // დახურვა
-        modal.classList.remove('active');
-        overlay.style.opacity = '0';
-        setTimeout(() => {
-            overlay.style.display = 'none';
-        }, 300);
+        modal.style.top = '-65%';
+        overlay.style.display = 'none';
         if (tg?.BackButton) tg.BackButton.hide();
     } else {
         // გახსნა
         renderContactModal(); // მონაცემების გენერირება
-        modal.classList.add('active');
+        modal.style.top = '0px';
         overlay.style.display = 'block';
-        setTimeout(() => {
-            overlay.style.opacity = '1';
-        }, 10);
         
         // Telegram-ის Back Button ინტეგრაცია
         if (tg?.BackButton) {
@@ -1459,7 +1480,7 @@ function renderContactModal() {
 
     const contacts = [
         { label: 'ტელეფონი', val: config.Shop_Phone, icon: '📞', link: `tel:${config.Shop_Phone}`, color: '#34c759' },
-        { label: 'მისამართი', val: config.Shop_Address, icon: '📍', link: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(config.Shop_Address || '')}`, color: '#ff3b30' },
+        { label: 'მისამართი', val: config.Shop_Address, icon: '📍', link: `https://www.google.com/maps/search/${encodeURIComponent(config.Shop_Address || '')}`, color: '#ff3b30' },
         { label: 'Facebook', val: config.Shop_Facebook ? 'გვეწვიეთ ფეისბუქზე' : null, icon: '🔵', link: config.Shop_Facebook, color: '#1877f2' },
         { label: 'Instagram', val: config.Shop_Insta, icon: '📸', link: String(config.Shop_Insta || '').includes('http') ? config.Shop_Insta : `https://instagram.com/${String(config.Shop_Insta || '').replace('@','')}`, color: '#e1306c' },
         { label: 'TikTok', val: config.Shop_TikTok ? 'ჩვენი ვიდეოები' : null, icon: '📱', link: config.Shop_TikTok, color: '#000000' },
@@ -1469,13 +1490,15 @@ function renderContactModal() {
 
     const active = contacts.filter(c => c.val && String(c.val).trim() !== '' && String(c.val) !== 'undefined');
 
-    list.innerHTML = active.map(c => `
-        <a href="${c.link}" target="_blank" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: white; border-radius: 16px; text-decoration: none; color: #1c1c1e; border: 1px solid rgba(0,0,0,0.03); margin-bottom: 4px;">
-            <div style="font-size: 18px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f5f5f7; border-radius: 10px; border-left: 3px solid ${c.color};">${c.icon}</div>
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 9px; color: #8e8e93; font-weight: 700; text-transform: uppercase;">${c.label}</span>
-                <span style="font-size: 13px; font-weight: 600;">${c.val}</span>
-            </div>
-        </a>
-    `).join('');
+list.innerHTML = active.map(c => `
+    <a href="${c.link}" target="_blank" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: white; border-radius: 16px; text-decoration: none; color: #1c1c1e; border: 1px solid rgba(0,0,0,0.03); margin-bottom: 4px;">
+        <div style="font-size: 18px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #f5f5f7; border-radius: 10px; border-left: 3px solid ${c.color};">${c.icon}</div>
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 9px; color: #8e8e93; font-weight: 700; text-transform: uppercase;">${c.label}</span>
+            <span style="font-size: 13px; font-weight: 600;">${c.val}</span>
+        </div>
+    </a>
+`).join('');
 }
+
+
