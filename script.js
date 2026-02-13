@@ -20,7 +20,7 @@ tg.setBackgroundColor('#ffffff');
 
 // --- კონფიგურაცია და მონაცემთა საცავი ---
 const CONFIG = {
-    API_URL: 'https://script.google.com/macros/s/AKfycbz12JmkJLDrRocfqhbhygB7LZ4NFfL3XIsK_lijBRWGdmOmFuLLlwVZqZZPqt-7XMcV7Q/exec'
+    API_URL: 'https://script.google.com/macros/s/AKfycbySbY7ig6R3xw5pbDddpSNEJELkWzkl0vk7hd5j7t1SVOzfu0mDpANWmLOaOutTf1rx/exec'
 };
 
 // --- აპლიკაციის მდგომარეობა ---
