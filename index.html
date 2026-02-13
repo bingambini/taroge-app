@@ -12,7 +12,6 @@
             const tg = window.Telegram.WebApp;
             tg.ready();
             tg.expand();
-            // მეორადი დაზღვევა მცირე დაგვიანებით
             setTimeout(() => {
                 tg.expand();
             }, 150);
@@ -77,6 +76,34 @@
             visibility: hidden;
             pointer-events: none;
         }
+
+        /* საკონტაქტო მენიუს სტილები */
+        #contact-modal {
+            position: fixed;
+            top: -65%;
+            left: 0;
+            width: 100%;
+            height: 55%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 9000;
+            transition: top 0.5s cubic-bezier(0.3, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 20px 10px 20px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-radius: 0 0 30px 30px;
+        }
+
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.15);
+            z-index: 8999;
+        }
     </style>
 
     <link rel="stylesheet" href="style.css?v=7.0">
@@ -92,6 +119,19 @@
             </div>
         </div>
     </div>
+
+    <div id="modal-overlay" onclick="toggleContactModal()"></div>
+    <div id="contact-modal">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="font-size: 20px; font-weight: 700; color: #1d1d1f; margin: 0;">კონტაქტი</h3>
+            <div onclick="toggleContactModal()" style="width: 30px; height: 30px; background: #e5e5ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                <span style="font-size: 16px; font-weight: 600; color: #1d1d1f;">✕</span>
+            </div>
+        </div>
+        <div id="contact-list" style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto;">
+            </div>
+        <div style="width: 40px; height: 4px; background: #d2d2d7; border-radius: 10px; margin: 15px auto 0;"></div>
+    </div>
     
     <header class="header">
         <div class="container header-grid">
@@ -103,7 +143,8 @@
                 <div id="logo" class="logo">გიო</div>
             </div>
 
-            <div class="header-right-empty" style="width: 40px;"></div>
+            <div class="header-right" id="info-btn-container" style="width: 40px; display: flex; justify-content: flex-end;">
+                </div>
         </div>
     </header>
 
@@ -112,8 +153,7 @@
 
         <section id="content-section" class="section">
             <h2 id="new-arrivals-title" class="section-title">ახალი კოლექცია</h2>
-            <div id="products-grid" class="products-grid">
-                </div>
+            <div id="products-grid" class="products-grid"></div>
         </section>
     </main>
 
