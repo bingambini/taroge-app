@@ -1209,6 +1209,51 @@ function handleHubClick(type) {
     }
 }
 
+// აი აქ ჩასვი:
+function applyQuickFilter(filterType, param1, param2) {
+    if (window.Telegram && window.Telegram.WebApp.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+    }
+
+    const filtered = state.products.filter(product => {
+        const currentId = String(product.product_id).trim().toLowerCase();
+        const details = state.productDetails.find(d => 
+            String(d.product_id).trim().toLowerCase() === currentId
+        );
+
+        if (!details) return false;
+
+        if (filterType === 'price') {
+            const price = parseFloat(details.Price) || 0;
+            return price >= param1 && price <= param2;
+        }
+
+        if (filterType === 'color') {
+            const colors = String(details.Colors).toLowerCase();
+            return colors.includes(param1.toLowerCase());
+        }
+
+        if (filterType === 'size') {
+            const sizes = String(details.Sizes).toLowerCase();
+            return sizes.includes(param1.toLowerCase());
+        }
+
+        return true;
+    });
+
+    const resGrid = document.getElementById('filter-results-grid');
+    if (resGrid) {
+        const tempId = resGrid.id;
+        resGrid.id = 'products-grid';
+        renderProducts(filtered);
+        resGrid.id = tempId;
+        
+        if (filtered.length === 0) {
+            resGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #86868b;">ამ ფილტრით პროდუქტები ვერ მოიძებნა</p>';
+        }
+    }
+}
+
 // დამხმარე ფუნქცია გვერდის დასარენდერებლად (კოდი რომ არ გაორდეს)
 function renderCustomPage(products, title, subtitle) {
     const mainContent = document.getElementById('main-content');
