@@ -210,16 +210,19 @@ function applyHeroDesign(configs) {
                                 ${config.B_Btn_Text || 'ყიდვა'}
                             </button>
                         </div>
-                        ${config.B_Image ? `
-                            <img src="${config.B_Image}" style="
-                                position: absolute; 
-                                right: -10px; 
-                                top: 0px; 
-                                height: 115%; 
-                                transform: rotate(-8deg); 
-                                z-index: 3;
-                                filter: drop-shadow(0 20px 15px rgba(0,0,0,0.4));
-                            ">` : ''}
+${config.B_Image ? `
+    <img src="${config.B_Image}" style="
+        position: absolute; 
+        right: -15px; /* ოდნავ გამოწევა მარჯვენა კიდიდან */
+        top: 50%;
+        transform: translateY(-50%) rotate(-10deg); /* ცენტრირება ვერტიკალურად და მცირე დახრა */
+        height: 110%; /* ბანერზე ოდნავ მაღალი, რომ ზემოთ-ქვემოთ გადავიდეს */
+        width: 50%; /* მკაცრად ბანერის ნახევარი */
+        object-fit: contain; /* სურათი არ დაიჭიმოს და ჩაეტიოს კონტეინერში */
+        z-index: 3;
+        filter: drop-shadow(-20px 20px 15px rgba(0,0,0,0.3)); /* ჩრდილი უფრო ბუნებრივია */
+        pointer-events: none; /* რომ სურათზე დაჭერამ ხელი არ შეუშალოს ბანერის კლიკს */
+    ">` : ''}
                     </div>
                 </div>
             `).join('')}
