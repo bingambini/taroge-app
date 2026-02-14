@@ -194,7 +194,7 @@ function applyHeroDesign(configs) {
                         padding: 25px; 
                         position: relative; 
                         overflow: visible; 
-                        margin-top: 10px; 
+                        margin-top: 20px; 
                         margin-bottom: 25px; 
                         height: ${config.B_Height || 200}px; 
                         display: flex; 
