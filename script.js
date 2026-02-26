@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loadData() {
-    // 1. მყისიერად ვხატავთ იმას, რაც ქეშში გვაქვს (თუ გვაქვს)
+    // 1. მყისიერად ვხატავთ იმას, რაც ქეშში გვაქვს
     const cachedEssential = localStorage.getItem('essential_data');
     if (cachedEssential) {
         const cached = JSON.parse(cachedEssential);
@@ -87,18 +87,15 @@ async function loadData() {
         if (cached.headerConfig) applyHeaderDesign(cached.headerConfig);
         if (cached.heroToUse) applyHeroDesign(cached.heroToUse);
         renderProducts();
-        // აქ Loader-ს არ ვთიშავთ, უბრალოდ "კონტენტს" ვაჩვენებთ წინასწარ
     } else {
         showLoader();
     }
 
     try {
-        // პრიორიტეტული მოთხოვნა: ვთხოვთ API-ს მხოლოდ კრიტიკულ მონაცემებს
-        // შენიშვნა: თუ API-ს ჯერ ვერ ცვლი, მაინც გამოვიყენოთ ეს სტრუქტურა
-        const response = await fetch(CONFIG.API_URL);
+        // --- ეტაპი 1: პრიორიტეტული მოთხოვნა (Essential Data) ---
+        const response = await fetch(`${CONFIG.API_URL}?action=getEssentialData`);
         const data = await response.json();
         
-        // ვინახავთ ძირითად მონაცემებს
         state.products = data.products || [];
         const heroToUse = data.heroConfigs || data.heroConfig;
         
@@ -109,7 +106,7 @@ async function loadData() {
             heroToUse: heroToUse
         }));
 
-        // პრიორიტეტი 1: ვიზუალის განახლება
+        // ვიზუალის განახლება
         if (data.headerConfig) {
             window.lastHeaderConfig = data.headerConfig; 
             applyHeaderDesign(data.headerConfig);
@@ -121,13 +118,16 @@ async function loadData() {
             if (heroSection) heroSection.style.display = 'block';
         }
 
-        // პრიორიტეტი 2: პროდუქტების დახატვა
         renderProducts();
-        hideLoader(); // მთავარი გვერდი მზად არის! მომხმარებელს შეუძლია სქროლვა
+        hideLoader(); // აპლიკაცია უკვე მზადაა გამოსაყენებლად
 
-        // --- ეტაპი 3: ფონური ჩატვირთვა (Background Fetch) ---
-        // აქ არ ვიყენებთ await-ს, რომ არ შევაჩეროთ აპლიკაცია
-        loadDetailsInBackground(data); 
+        // --- ეტაპი 2: ფონური ჩატვირთვა (Background Fetch - სრული მონაცემები) ---
+        fetch(`${CONFIG.API_URL}?action=getAppData`)
+            .then(res => res.json())
+            .then(fullData => {
+                loadDetailsInBackground(fullData);
+            })
+            .catch(err => console.warn("Background sync failed:", err));
 
     } catch (error) {
         console.error("ჩატვირთვა ვერ მოხერხდა:", error);
@@ -139,11 +139,11 @@ async function loadData() {
 function loadDetailsInBackground(allData) {
     console.log("Starting background optimization...");
     
-    // თუ API-მ უკვე მოგვაწოდა ყველაფერი, უბრალოდ გადავანაწილოთ
+    // ვინახავთ დეტალურ ინფორმაციას state-ში
     state.productDetails = allData.productDetails || [];
     state.paymentSettings = allData.paymentSettings || { active_gateway: 'off' };
+    state.orders = allData.orders || [];
     
-    // თუ აქ გაქვს შეკვეთების ისტორიის წამოღება, ჩასვი აქ
     console.log("Background data ready. ✅");
 }
 
