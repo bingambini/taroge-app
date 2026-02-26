@@ -95,7 +95,6 @@ async function loadData() {
 
     try {
         // --- ეტაპი 1: მხოლოდ კრიტიკული მონაცემების წამოღება (Action: getEssentialData) ---
-        // აქ ვამატებთ პარამეტრს, რომ სერვერმა სწრაფად გვიპასუხოს
         const essentialUrl = CONFIG.API_URL + (CONFIG.API_URL.includes('?') ? '&' : '?') + 'action=getEssentialData';
         const response = await fetch(essentialUrl);
         const data = await response.json();
@@ -133,6 +132,9 @@ async function loadData() {
             .then(fullData => {
                 // გადავცემთ მონაცემებს ფონურ დამამუშავებელს
                 loadDetailsInBackground(fullData);
+                
+                // აი ეს ხაზი დაემატა: ხელახლა ვხატავთ, რომ ფერები და ზომები გამოჩნდეს
+                renderProducts(); 
             })
             .catch(err => console.warn("Background fetch failed:", err));
 
@@ -142,12 +144,12 @@ async function loadData() {
     }
 }
 
-// ეს ფუნქცია უცვლელია, უბრალოდ დარწმუნდი რომ გაქვს
+// ეს ფუნქცია უცვლელია
 function loadDetailsInBackground(allData) {
     console.log("Starting background optimization...");
     state.productDetails = allData.productDetails || [];
     state.paymentSettings = allData.paymentSettings || { active_gateway: 'off' };
-    state.orders = allData.orders || []; // თუ orders-იც გჭირდება
+    state.orders = allData.orders || []; 
     console.log("Background data ready. ✅");
 }
 
