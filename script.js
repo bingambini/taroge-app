@@ -300,7 +300,7 @@ ${config.B_Image ? `
     heroSection.style.display = 'block';
 }
 
-// --- "ახალი კოლექცია" და პროდუქტების რენდერი ---
+// --- "ახალი კოლექცია" და პროდუქტების რენდერი (ოპტიმიზირებული Lazy Loading-ით) ---
 function renderProducts(productsToRender) {
     const grid = document.getElementById('products-grid');
     const mainTitle = document.getElementById('new-arrivals-title');
@@ -336,14 +336,13 @@ function renderProducts(productsToRender) {
             String(d.product_id).trim().toLowerCase() === currentProductId
         );
         
-        // 1. ფასის ლოგიკა (Product_Details-ის Price და Old_Price სვეტებიდან)
+        // 1. ფასის ლოგიკა
         let finalDisplayPrice = '---';
         let oldDisplayPrice = null;
         
         const variantWithPrice = productVariants.find(v => v.Price && v.Price !== 'undefined' && v.Price !== '');
         if (variantWithPrice) {
             finalDisplayPrice = variantWithPrice.Price;
-            // ვიღებთ Old_Price-ს იმავე ვარიანტიდან
             if (variantWithPrice.Old_Price && variantWithPrice.Old_Price !== 'undefined' && variantWithPrice.Old_Price !== '') {
                 oldDisplayPrice = variantWithPrice.Old_Price;
             }
@@ -351,7 +350,7 @@ function renderProducts(productsToRender) {
             finalDisplayPrice = product.final_price || '---';
         }
         
-        // 2. ფერების ჭკვიანი ლოგიკა (მაქსიმუმ 4 წრე + ინდიკატორი)
+        // 2. ფერების ლოგიკა
         const allColorsInDatabase = productVariants.map(v => v.Colors).filter(c => c && c !== 'undefined');
         const uniqueColors = [...new Set(allColorsInDatabase.map(c => c.trim()))];
         
@@ -375,7 +374,13 @@ function renderProducts(productsToRender) {
         
         card.innerHTML = `
             <div class="product-image-container" style="position: relative; width: 100%; height: 160px; background: #fbfbfb; display: flex; align-items: center; justify-content: center; border-radius: 20px 20px 0 0; overflow: hidden;">
-                <img src="${product.photo_url_1}" loading="lazy" class="product-img" style="max-width: 85%; max-height: 85%; object-fit: contain;">
+                <img src="${product.photo_url_1}" 
+                     loading="lazy" 
+                     decoding="async"
+                     class="product-img" 
+                     style="max-width: 85%; max-height: 85%; object-fit: contain; transition: opacity 0.4s ease-in-out;"
+                     onload="this.style.opacity='1'"
+                     onerror="this.src='https://placehold.co/400x400?text=No+Image'">
                 
                 <div style="position: absolute; top: 0; left: 0; display: flex; flex-direction: column; z-index: 10;">
                     ${discountVal > 0 ? `
