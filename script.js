@@ -78,42 +78,73 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData();
 });
 
-// --- ფუნქცია: მონაცემების წამოღება API-დან და შენახვა state-ში ---
 async function loadData() {
-    showLoader();
+    // 1. მყისიერად ვხატავთ იმას, რაც ქეშში გვაქვს (თუ გვაქვს)
+    const cachedEssential = localStorage.getItem('essential_data');
+    if (cachedEssential) {
+        const cached = JSON.parse(cachedEssential);
+        state.products = cached.products || [];
+        if (cached.headerConfig) applyHeaderDesign(cached.headerConfig);
+        if (cached.heroToUse) applyHeroDesign(cached.heroToUse);
+        renderProducts();
+        // აქ Loader-ს არ ვთიშავთ, უბრალოდ "კონტენტს" ვაჩვენებთ წინასწარ
+    } else {
+        showLoader();
+    }
+
     try {
+        // პრიორიტეტული მოთხოვნა: ვთხოვთ API-ს მხოლოდ კრიტიკულ მონაცემებს
+        // შენიშვნა: თუ API-ს ჯერ ვერ ცვლი, მაინც გამოვიყენოთ ეს სტრუქტურა
         const response = await fetch(CONFIG.API_URL);
         const data = await response.json();
         
+        // ვინახავთ ძირითად მონაცემებს
         state.products = data.products || [];
-        state.productDetails = data.productDetails || [];
-        state.paymentSettings = data.paymentSettings || { active_gateway: 'off' };
+        const heroToUse = data.heroConfigs || data.heroConfig;
         
-        // პრიორიტეტი 1: ჯერ ვხატავთ ზედა ნაწილს და ბანერებს
+        // ვინახავთ ქეშში შემდეგი ჩართვისთვის
+        localStorage.setItem('essential_data', JSON.stringify({
+            products: state.products,
+            headerConfig: data.headerConfig,
+            heroToUse: heroToUse
+        }));
+
+        // პრიორიტეტი 1: ვიზუალის განახლება
         if (data.headerConfig) {
-            // ვინახავთ კონფიგურაციას გლობალურად საკონტაქტო მენიუსთვის
             window.lastHeaderConfig = data.headerConfig; 
             applyHeaderDesign(data.headerConfig);
         }
         
-        const heroToUse = data.heroConfigs || data.heroConfig;
         if (heroToUse) {
             applyHeroDesign(heroToUse);
-            // აიძულე სექციის ჩვენება
             const heroSection = document.getElementById('hero');
             if (heroSection) heroSection.style.display = 'block';
         }
 
-        // პრიორიტეტი 2: შემდეგ ვხატავთ პროდუქტებს
+        // პრიორიტეტი 2: პროდუქტების დახატვა
         renderProducts();
-        
-        // როგორც კი მონაცემები დამუშავდება, ეგრევე ვმალავთ Loader-ს
-        hideLoader();
+        hideLoader(); // მთავარი გვერდი მზად არის! მომხმარებელს შეუძლია სქროლვა
+
+        // --- ეტაპი 3: ფონური ჩატვირთვა (Background Fetch) ---
+        // აქ არ ვიყენებთ await-ს, რომ არ შევაჩეროთ აპლიკაცია
+        loadDetailsInBackground(data); 
 
     } catch (error) {
-        console.error("მონაცემების ჩატვირთვა ვერ მოხერხდა:", error);
-        hideLoader(); // შეცდომის შემთხვევაშიც რომ არ გაიჭედოს Loader-ი
+        console.error("ჩატვირთვა ვერ მოხერხდა:", error);
+        hideLoader();
     }
+}
+
+// ცალკე ფუნქცია "მძიმე" მონაცემებისთვის
+function loadDetailsInBackground(allData) {
+    console.log("Starting background optimization...");
+    
+    // თუ API-მ უკვე მოგვაწოდა ყველაფერი, უბრალოდ გადავანაწილოთ
+    state.productDetails = allData.productDetails || [];
+    state.paymentSettings = allData.paymentSettings || { active_gateway: 'off' };
+    
+    // თუ აქ გაქვს შეკვეთების ისტორიის წამოღება, ჩასვი აქ
+    console.log("Background data ready. ✅");
 }
 
 function applyHeaderDesign(config) {
